@@ -1,0 +1,47 @@
+{
+  "$schema": "https://schema.agentcore.aws.dev/v1/agentcore.json",
+  "name": "fionaa",
+  "version": 1,
+  "managedBy": "CDK",
+  "tags": {
+    "agentcore:created-by": "agentcore-cli",
+    "agentcore:project-name": "fionaa"
+  },
+  "runtimes": [
+    {
+      "name": "fionaa",
+      "build": "CodeZip",
+      "entrypoint": "main.py",
+      "codeLocation": "app/fionaa/",
+      "runtimeVersion": "PYTHON_3_14",
+      "networkMode": "PUBLIC",
+      "protocol": "HTTP",
+      "authorizerType": "CUSTOM_JWT",
+      "authorizerConfiguration": {
+        "customJwtAuthorizer": {
+          "discoveryUrl": "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_QdHqgzqUA/.well-known/openid-configuration",
+          "allowedAudience": ["25rt1cmu4jbn338a8on6uphpo1"]
+        }
+      },
+      "requestHeaderAllowlist": ["Authorization"]
+    }
+  ],
+  "memories": [
+    {
+      "name": "FionaaCheckpoint",
+      "eventExpiryDuration": 30,
+      "strategies": []
+    }
+  ],
+  "knowledgeBases": [],
+  "credentials": [],
+  "evaluators": [],
+  "onlineEvalConfigs": [],
+  "agentCoreGateways": [],
+  "policyEngines": [],
+  "configBundles": [],
+  "abTests": [],
+  "harnesses": [],
+  "datasets": [],
+  "payments": []
+}

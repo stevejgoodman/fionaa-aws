@@ -1,0 +1,23 @@
+{
+  "targets": {
+    "default": {
+      "resources": {
+        "runtimes": {
+          "fionaa": {
+            "runtimeId": "fionaa_fionaa-xjO2ci9fd3",
+            "runtimeArn": "arn:aws:bedrock-agentcore:us-east-1:492646066653:runtime/fionaa_fionaa-xjO2ci9fd3",
+            "roleArn": "arn:aws:iam::492646066653:role/AgentCore-fionaa-default-ApplicationAgentFionaaRunt-CRsQ1yMJM10I"
+          }
+        },
+        "memories": {
+          "FionaaCheckpoint": {
+            "memoryId": "fionaa_FionaaCheckpoint-3GY4rX79ck",
+            "memoryArn": "arn:aws:bedrock-agentcore:us-east-1:492646066653:memory/fionaa_FionaaCheckpoint-3GY4rX79ck"
+          }
+        },
+        "stackName": "AgentCore-fionaa-default",
+        "deployHash": "3159fe051c03c1f6"
+      }
+    }
+  }
+}

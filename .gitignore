@@ -1,0 +1,30 @@
+# Secrets — never commit
+.env
+.env.local
+*.pem
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+*.egg-info/
+
+# Node / CDK
+node_modules/
+cdk.out/
+
+# Packaged deploy artifacts
+*.zip
+fionaa/agentcore/fionaa/
+
+# Jupyter
+*.ipynb
+.ipynb_checkpoints/
+
+# Editor / tooling
+.claude/
+.mypy_cache/
