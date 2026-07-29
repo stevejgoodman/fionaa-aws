@@ -1,0 +1,43 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fionaa"
+version = "0.1.0"
+description = "AgentCore Runtime Application using LangChain/LangGraph"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "aws-opentelemetry-distro",
+    "opentelemetry-instrumentation-langchain >= 0.59.0",
+    "langgraph >= 1.0.2",
+    # mcp 2.0.0 restructured mcp.shared.context (split into a separate
+    # mcp_types package), which breaks langchain-mcp-adapters 0.3.x's import
+    # of RequestContext from there. Cap below 2.0 until that's resolved
+    # upstream — see the ImportError this caused in the deployed runtime.
+    "mcp >= 1.19.0, < 2.0.0",
+    "langchain-mcp-adapters >= 0.2.0",
+    "langchain >= 1.0.3",
+    "bedrock-agentcore >= 1.8.0",
+    "botocore[crt] >= 1.35.0",
+    "langchain-aws >= 1.0.0",
+    "langgraph-checkpoint-aws>=1.2.0",
+    "httpx>=0.28.1",
+    "langchain-openai>=1.4.1",
+    "pyjwt>=2.13.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "ipykernel>=7.3.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
