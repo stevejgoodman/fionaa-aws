@@ -1,12 +1,9 @@
 """Unit tests for the graph nodes ("agent actions") in fionaa_scoped_agent.py.
 
 None of these touch AWS or Bedrock. `ApplicationStore`/`PolicyDocStore` are
-replaced with in-memory fakes; `create_agent` (used by the policy-check and
-web-search nodes) is monkeypatched to a fake agent that returns a canned
-message instead of calling a real model; and the two remaining stubs
-(_invoke_assessment_model, _call_gateway_tool) are monkeypatched per test —
-they're unimplemented today, so there's nothing real to call yet, but the
-node functions can still be exercised end-to-end.
+replaced with in-memory fakes, and `create_agent` (used by all three
+evidence-gathering nodes) is monkeypatched to a fake agent that returns a
+canned message instead of calling a real model.
 """
 
 import json
@@ -69,6 +66,14 @@ def make_fake_create_agent(response_content, calls: list):
         return FakeAgent()
 
     return fake_create_agent
+
+
+class FakeRuntime:
+    """Stands in for langgraph.runtime.Runtime[AgentContext]: node functions
+    only ever read `.context` off it, so a plain attribute holder is enough."""
+
+    def __init__(self, context) -> None:
+        self.context = context
 
 
 @pytest.fixture
@@ -149,17 +154,18 @@ def test_identity_from_request_context_requires_email_claim():
 
 def test_load_application_returns_stored_application():
     application = {"company_name": "Acme Ltd", "company_number": "12345678"}
-    state = {"store": FakeStore({"input/application.json": application})}
+    store = FakeStore({"input/application.json": application})
+    runtime = FakeRuntime(fsa.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
 
-    result = fsa.load_application(state)
+    result = fsa.load_application({}, runtime)
 
     assert result == {"application": application}
 
 
 def test_load_application_raises_when_missing():
-    state = {"store": FakeStore()}
+    runtime = FakeRuntime(fsa.AgentContext(store=FakeStore(), policy_docs=FakePolicyDocs(), tools=[]))
     with pytest.raises(FileNotFoundError):
-        fsa.load_application(state)
+        fsa.load_application({}, runtime)
 
 
 # ---------------------------------------------------------------------------
@@ -171,13 +177,14 @@ async def test_check_against_policy_persists_and_returns_result(monkeypatch):
     application = {"company_number": "12345678"}
     store = FakeStore()
     fake_tools = ["kb-target-loan-policies___Retrieve"]
-    state = {"application": application, "store": store, "tools": fake_tools}
+    state = {"application": application}
+    runtime = FakeRuntime(fsa.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=fake_tools))
     fake_result = "policy check passed"
     calls = []
 
     monkeypatch.setattr(fsa, "create_agent", make_fake_create_agent(fake_result, calls))
 
-    result = await fsa.check_against_policy(state)
+    result = await fsa.check_against_policy(state, runtime)
 
     assert result == {"policy_check": fake_result}
     assert store.data["policy_check/result.json"] == fake_result
@@ -194,13 +201,14 @@ async def test_check_companies_house_calls_gateway_and_persists(monkeypatch):
     application = {"company_number": "12345678"}
     store = FakeStore()
     fake_tools = ["CompaniesHouse___getCompanyProfile"]
-    state = {"application": application, "store": store, "tools": fake_tools}
+    state = {"application": application}
+    runtime = FakeRuntime(fsa.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=fake_tools))
     fake_result = "company is active, applicant is a registered officer"
     calls = []
 
     monkeypatch.setattr(fsa, "create_agent", make_fake_create_agent(fake_result, calls))
 
-    result = await fsa.check_companies_house(state)
+    result = await fsa.check_companies_house(state, runtime)
 
     assert result == {"companies_house": fake_result}
     assert store.data["companies_house/result.json"] == fake_result
@@ -216,46 +224,19 @@ async def test_check_companies_house_calls_gateway_and_persists(monkeypatch):
 async def test_search_web_builds_query_from_company_name(monkeypatch):
     store = FakeStore()
     fake_tools = ["websearch-target___WebSearch"]
-    state = {"application": {"company_name": "Acme Ltd"}, "store": store, "tools": fake_tools}
+    state = {"application": {"company_name": "Acme Ltd"}}
+    runtime = FakeRuntime(fsa.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=fake_tools))
     fake_result = "no adverse findings"
     calls = []
 
     monkeypatch.setattr(fsa, "create_agent", make_fake_create_agent(fake_result, calls))
 
-    result = await fsa.search_web(state)
+    result = await fsa.search_web(state, runtime)
 
     assert result == {"web_search": fake_result}
     assert store.data["web_search/result.json"] == fake_result
     assert calls[0]["tools"] == fake_tools
     assert calls[1]["message_content"] == "Company: Acme Ltd"
-
-
-# ---------------------------------------------------------------------------
-# Node: reassess
-# ---------------------------------------------------------------------------
-
-def test_reassess_persists_assessment_and_audit_trail(monkeypatch, identity):
-    store = FakeStore()
-    state = {
-        "identity": identity,
-        "store": store,
-        "application": {"company_number": "12345678"},
-        "policy_check": {"pass": True},
-        "companies_house": {"company_status": "active"},
-        "web_search": {"results": []},
-    }
-    fake_assessment = {"decision": "approve", "model_id": "test-model"}
-
-    monkeypatch.setattr(fsa, "_invoke_assessment_model", lambda **kwargs: fake_assessment)
-
-    result = fsa.reassess(state)
-
-    assert result == {"assessment": fake_assessment}
-    assert store.data["assessment/final_result.json"] == fake_assessment
-    audit = store.data["assessment/audit_trail.json"]
-    assert audit["customer_id"] == identity.customer_id
-    assert audit["application_id"] == identity.application_id
-    assert audit["decision"] == "approve"
 
 
 # ---------------------------------------------------------------------------
@@ -265,36 +246,22 @@ def test_reassess_persists_assessment_and_audit_trail(monkeypatch, identity):
 def _patch_all_integration_points(monkeypatch, agent_response="ok"):
     calls = []
     monkeypatch.setattr(fsa, "create_agent", make_fake_create_agent(agent_response, calls))
-    monkeypatch.setattr(fsa, "_invoke_assessment_model", lambda **kwargs: {"decision": "approve"})
     return calls
 
 
 @pytest.mark.asyncio
-async def test_build_graph_runs_all_nodes_and_reaches_reassess(monkeypatch, identity):
+async def test_build_graph_runs_all_nodes_in_order(monkeypatch, identity):
     application = {"company_name": "Acme Ltd", "company_number": "12345678"}
     store = FakeStore({"input/application.json": application})
     policy_docs = FakePolicyDocs({"lending/unsecured-business-v7.md": b"policy text"})
     _patch_all_integration_points(monkeypatch, agent_response="ok")
 
-    # No checkpointer here deliberately: MemorySaver (and, we'd assume,
-    # AgentCoreMemorySaver) serialize the *entire* state dict at every
-    # superstep via langgraph's default msgpack serde, which only knows how
-    # to encode a fixed set of types (dataclasses, pydantic models, etc) —
-    # not arbitrary objects like ApplicationStore/PolicyDocStore, which hold
-    # a live boto3 S3 client. Confirmed via MemorySaver: it raises
-    # `TypeError: Type is not msgpack serializable`. That's worth checking
-    # against a real AgentCoreMemorySaver run — if it hits the same
-    # limitation, `store`/`policy_docs` can't ride in checkpointed state as
-    # implemented today.
     graph = fsa.build_graph(checkpointer=None)
     config = fsa.checkpoint_config(identity)
+    agent_context = fsa.AgentContext(store=store, policy_docs=policy_docs, tools=[])
 
-    final_state = await graph.ainvoke(
-        {"identity": identity, "store": store, "policy_docs": policy_docs, "tools": []},
-        config,
-    )
+    final_state = await graph.ainvoke({}, config, context=agent_context)
 
-    assert final_state["assessment"] == {"decision": "approve"}
     assert final_state["policy_check"] == "ok"
     assert final_state["companies_house"] == "ok"
     assert final_state["web_search"] == "ok"
@@ -303,31 +270,34 @@ async def test_build_graph_runs_all_nodes_and_reaches_reassess(monkeypatch, iden
         "policy_check/result.json",
         "companies_house/result.json",
         "web_search/result.json",
-        "assessment/final_result.json",
-        "assessment/audit_trail.json",
     }
 
 
 @pytest.mark.asyncio
-async def test_checkpointed_state_cannot_hold_store_objects(monkeypatch, identity):
-    """Regression check: with a real checkpointer, `store`/`policy_docs` are
-    part of `ApplicationState` and get serialized on every superstep. They
-    aren't a serializable type as far as langgraph's default serde is
-    concerned, so checkpointed runs fail. If AgentCoreMemorySaver ever swaps
-    in a serde that also allowlists arbitrary objects, this test should
-    start failing and can be deleted."""
-    store = FakeStore({"input/application.json": {"company_number": "1", "company_name": "Acme Ltd"}})
-    policy_docs = FakePolicyDocs({"lending/unsecured-business-v7.md": b"policy text"})
+async def test_build_graph_checkpoints_successfully_with_deps_in_context(monkeypatch, identity):
+    """Regression check for the original bug: `store`/`policy_docs`/`tools`
+    used to live in `ApplicationState` and broke every checkpoint write —
+    `TypeError: Type is not msgpack serializable`, since none of the three
+    (they wrap a live boto3 client / MCP tool objects) are msgpack-encodable.
+    They're now runtime context (`AgentContext`, passed via `context=`),
+    excluded from checkpointed state entirely, so a real checkpointer should
+    complete without error and the checkpoint should hold the plain-value
+    evidence fields."""
+    application = {"company_name": "Acme Ltd", "company_number": "12345678"}
+    store = FakeStore({"input/application.json": application})
+    policy_docs = FakePolicyDocs()
     _patch_all_integration_points(monkeypatch, agent_response="ok")
 
     graph = fsa.build_graph(checkpointer=MemorySaver())
     config = fsa.checkpoint_config(identity)
+    agent_context = fsa.AgentContext(store=store, policy_docs=policy_docs, tools=[])
 
-    with pytest.raises(TypeError, match="not msgpack serializable"):
-        await graph.ainvoke(
-            {"identity": identity, "store": store, "policy_docs": policy_docs, "tools": []},
-            config,
-        )
+    final_state = await graph.ainvoke({}, config, context=agent_context)
+
+    assert final_state["web_search"] == "ok"
+    saved = await graph.aget_state(config)
+    assert saved.values["policy_check"] == "ok"
+    assert saved.values["web_search"] == "ok"
 
 
 # ---------------------------------------------------------------------------

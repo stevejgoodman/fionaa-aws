@@ -20,7 +20,7 @@
       "authorizerConfiguration": {
         "customJwtAuthorizer": {
           "discoveryUrl": "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_QdHqgzqUA/.well-known/openid-configuration",
-          "allowedAudience": ["25rt1cmu4jbn338a8on6uphpo1"]
+          "allowedAudience": ["5j871ps867576kj6vr81ivacni"]
         }
       },
       "requestHeaderAllowlist": ["Authorization"]
