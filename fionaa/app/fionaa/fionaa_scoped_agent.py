@@ -44,6 +44,7 @@ from botocore.exceptions import ClientError
 from botocore.session import get_session as get_botocore_session
 from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.graph import END, START, StateGraph
+from langgraph.runtime import Runtime
 from langgraph_checkpoint_aws import AgentCoreMemorySaver
 from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
@@ -199,8 +200,9 @@ def scoped_boto_session(identity: CustomerIdentity) -> boto3.Session:
     """A boto3 Session whose credentials are tagged with this customer_id.
 
     Uses DeferredRefreshableCredentials so long-running graphs transparently
-    re-assume the role before the 1h session expires — important because the
-    reassess node may run well after the first node acquired credentials.
+    re-assume the role before the 1h session expires — important because
+    later nodes in the chain may run well after the first node acquired
+    credentials.
     """
     sts = boto3.client("sts")
 
@@ -250,7 +252,9 @@ def build_checkpointer(session: boto3.Session) -> BaseCheckpointSaver:
     verified identity (never the payload), the same discipline as
     customer_id elsewhere, but application-enforced rather than IAM-enforced.
     Acceptable here because checkpoints are operational-recovery state, not
-    the compliance record — that's `assessment/audit_trail.json` in S3.
+    the compliance record — the evidence artifacts under each node's own
+    subpath (`policy_check/result.json`, etc.) are that record, and those
+    live in S3 under the IAM-enforced prefix.
 
     AgentCoreMemorySaver builds its own boto3 client internally (it takes
     **boto3_kwargs, not a Session), so the customer-scoped credentials have to
@@ -354,31 +358,43 @@ def _last_write_wins(_old: Any, new: Any) -> Any:
 
 
 class ApplicationState(TypedDict, total=False):
-    identity: CustomerIdentity
-    store: ApplicationStore
-    policy_docs: PolicyDocStore
-    tools: list[Any]
-
     application: dict[str, Any]
     policy_check: Annotated[dict[str, Any], _last_write_wins]
     companies_house: Annotated[dict[str, Any], _last_write_wins]
     web_search: Annotated[dict[str, Any], _last_write_wins]
-    assessment: Annotated[dict[str, Any], _last_write_wins]
+
+
+@dataclass(frozen=True)
+class AgentContext:
+    """Per-invocation dependencies threaded via LangGraph's Runtime context
+    API (`StateGraph(..., context_schema=AgentContext)`), not graph state.
+
+    `store`/`policy_docs` wrap a live boto3 S3 client and `tools` holds live
+    MCP `StructuredTool` objects — none of that is msgpack-serializable, and
+    it used to live in `ApplicationState`, which a real checkpointer
+    serializes on every superstep (`TypeError: Type is not msgpack
+    serializable`). Runtime context is passed via `graph.ainvoke(state,
+    context=...)`, kept immutable for the run, and is never part of the
+    checkpointed state — so it never reaches the checkpointer's serde at all.
+    """
+
+    store: ApplicationStore
+    policy_docs: PolicyDocStore
+    tools: list[Any]
 
 
 # ---------------------------------------------------------------------------
 # 4. Nodes — each writes its own artifact under a fixed subpath
 # ---------------------------------------------------------------------------
 
-def load_application(state: ApplicationState) -> dict[str, Any]:
-    store = state["store"]
-    application = store.get_json("input/application.json")
+def load_application(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict[str, Any]:
+    application = runtime.context.store.get_json("input/application.json")
     if application is None:
         raise FileNotFoundError("application.json not found for this application_id")
     return {"application": application}
 
 
-async def check_against_policy(state: ApplicationState) -> dict[str, Any]:
+async def check_against_policy(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict[str, Any]:
     application = state["application"]
 
     PROMPT = """You are a loan assessor.
@@ -388,7 +404,7 @@ async def check_against_policy(state: ApplicationState) -> dict[str, Any]:
 
     agent = create_agent(
         model=model,
-        tools=state["tools"],
+        tools=runtime.context.tools,
         system_prompt=PROMPT,
     )
 
@@ -399,11 +415,11 @@ async def check_against_policy(state: ApplicationState) -> dict[str, Any]:
         {"messages": [HumanMessage(content=json.dumps(application))]}
     )
     loan_result = response["messages"][-1].content
-    state["store"].put_json("policy_check/result.json", loan_result)
+    runtime.context.store.put_json("policy_check/result.json", loan_result)
     return {"policy_check": loan_result}
 
 
-async def check_companies_house(state: ApplicationState) -> dict[str, Any]:
+async def check_companies_house(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict[str, Any]:
     application = state["application"]
 
     PROMPT = """You are a company verification researcher.
@@ -417,7 +433,7 @@ async def check_companies_house(state: ApplicationState) -> dict[str, Any]:
 
     agent = create_agent(
         model=model,
-        tools=state["tools"],
+        tools=runtime.context.tools,
         system_prompt=PROMPT,
     )
 
@@ -426,11 +442,11 @@ async def check_companies_house(state: ApplicationState) -> dict[str, Any]:
     )
     companies_house_result = response["messages"][-1].content
 
-    state["store"].put_json("companies_house/result.json", companies_house_result)
+    runtime.context.store.put_json("companies_house/result.json", companies_house_result)
     return {"companies_house": companies_house_result}
 
 
-async def search_web(state: ApplicationState) -> dict[str, Any]:
+async def search_web(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict[str, Any]:
     company_name = state["application"]["company_name"]
     PROMPT = """
         You are an internet researcher.
@@ -442,7 +458,7 @@ async def search_web(state: ApplicationState) -> dict[str, Any]:
 
     agent = create_agent(
         model=model,
-        tools=state["tools"],
+        tools=runtime.context.tools,
         system_prompt=PROMPT,
     )
 
@@ -452,35 +468,12 @@ async def search_web(state: ApplicationState) -> dict[str, Any]:
 
     web_search_result = response["messages"][-1].content
 
-    state["store"].put_json("web_search/result.json", web_search_result)
+    runtime.context.store.put_json("web_search/result.json", web_search_result)
     return {"web_search": web_search_result}
 
 # policy check is agentic rag (but essentially a single tool)
 # companies house is agentic search (i suppose could involve multiple hops)
 # websearch is agentic search looking for website, person linkedin etc.
-# assessment is check it all, then loop back to a previous tool (1x)
-# if data collected is unsatisfactory
-def reassess(state: ApplicationState) -> dict[str, Any]:
-    assessment = _invoke_assessment_model(
-        application=state["application"],
-        policy_check=state["policy_check"],
-        companies_house=state["companies_house"],
-        web_search=state["web_search"],
-    )
-    store = state["store"]
-    store.put_json("assessment/final_result.json", assessment)
-    store.put_json("assessment/audit_trail.json", {
-        "customer_id": state["identity"].customer_id,
-        "application_id": state["identity"].application_id,
-        "inputs": {
-            "policy_check": "policy_check/result.json",
-            "companies_house": "companies_house/result.json",
-            "web_search": "web_search/result.json",
-        },
-        "decision": assessment.get("decision"),
-        "model_id": assessment.get("model_id"),
-    })
-    return {"assessment": assessment}
 
 
 # ---------------------------------------------------------------------------
@@ -492,13 +485,17 @@ def build_graph(checkpointer: Optional[BaseCheckpointSaver] = None):
     any) has to be built from that invocation's customer-scoped session — see
     `build_checkpointer` — so it can't be baked into a module-level singleton
     the way an uncheckpointed graph could be.
+
+    `context_schema=AgentContext` registers `store`/`policy_docs`/`tools` as
+    run-scoped runtime context rather than checkpointed state — see
+    `AgentContext`'s docstring for why that split is what makes checkpointing
+    actually work here.
     """
-    g = StateGraph(ApplicationState)
+    g = StateGraph(ApplicationState, context_schema=AgentContext)
     g.add_node("load_application", load_application)
     g.add_node("policy_check", check_against_policy)
     g.add_node("companies_house", check_companies_house)
     g.add_node("web_search", search_web)
-    g.add_node("reassess", reassess)
 
     g.add_edge(START, "load_application")
     # Evidence-gathering nodes run sequentially, each depending on the
@@ -508,13 +505,7 @@ def build_graph(checkpointer: Optional[BaseCheckpointSaver] = None):
     g.add_edge("load_application", "policy_check")
     g.add_edge("policy_check", "companies_house")
     g.add_edge("companies_house", "web_search")
-    # reassess only has one predecessor: the last node in the chain. Wiring
-    # it from all three (as a leftover from an earlier parallel-fan-out
-    # design) made it fire as soon as policy_check completed — before
-    # companies_house/web_search had even run — and then cancel them
-    # mid-flight once reassess's own (still-unimplemented) call raised.
-    g.add_edge("web_search", "reassess")
-    g.add_edge("reassess", END)
+    g.add_edge("web_search", END)
     return g.compile(checkpointer=checkpointer)
 
 
@@ -523,9 +514,4 @@ def build_graph(checkpointer: Optional[BaseCheckpointSaver] = None):
 # the checkpointer, and the graph builder.
 
 
-# ---------------------------------------------------------------------------
-# 6. Stubs — replace with your Bedrock / Gateway MCP client calls
-# ---------------------------------------------------------------------------
 
-def _invoke_assessment_model(**kwargs: Any) -> dict:
-    raise NotImplementedError
