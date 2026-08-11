@@ -24,6 +24,7 @@ from langchain.messages import HumanMessage
 from pydantic import BaseModel, Field
 from model.load import load_model
 
+from prompts import COMPANIES_HOUSE_PROMPT, POLICY_CHECK_PROMPT, WEB_SEARCH_PROMPT
 from security import CustomerIdentity
 from storage import ApplicationStore, PolicyDocStore
 
@@ -144,15 +145,10 @@ def load_application(state: ApplicationState, runtime: Runtime[AgentContext]) ->
 async def check_against_policy(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict[str, Any]:
     application = state["application"]
 
-    PROMPT = """You are a loan assessor.
-        Your job is to compare the loan application details to the requirements in the loan policy.
-        First you must find the correct loan policy document in the knowledge base.
-        You have access to the following tools: kb-target-loan-policies """
-
     agent = create_agent(
         model=model,
         tools=runtime.context.tools,
-        system_prompt=PROMPT,
+        system_prompt=POLICY_CHECK_PROMPT,
     )
 
     # MCP-backed tools only implement async invocation (no sync `func`, only
@@ -171,19 +167,10 @@ async def check_companies_house(
 ) -> Command[Literal["web_search", "reject_no_company"]]:
     application = state["application"]
 
-    PROMPT = """You are a company verification researcher.
-        Your job is to confirm the applicant's company is a genuine, active UK
-        company registered with Companies House, and that the named applicant
-        appears as an officer or person with significant control.
-        The company number may be missing or wrong and the company name may be
-        misspelled or a trading name rather than the registered name — search
-        by name first if the company number doesn't resolve.
-        You have access to the CompaniesHouse___* tools."""
-
     agent = create_agent(
         model=model,
         tools=runtime.context.tools,
-        system_prompt=PROMPT,
+        system_prompt=COMPANIES_HOUSE_PROMPT,
         response_format=CompaniesHouseResult,
     )
 
@@ -219,18 +206,11 @@ def reject_no_company(state: ApplicationState, runtime: Runtime[AgentContext]) -
 
 async def search_web(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict[str, Any]:
     company_name = state["application"]["company_name"]
-    PROMPT = """
-        You are an internet researcher.
-        Your job is to search the internet for the person below or their company.
-        Look for any websites or pages on linked-in. Note that there may be alternative spellings of the person or applicant
-        such as shortened names or nick-names, or alternative names for the company, such as trading-as or minor grammatical differences.
-        You have access to the tool websearch-target___WebSearch
-        """
 
     agent = create_agent(
         model=model,
         tools=runtime.context.tools,
-        system_prompt=PROMPT,
+        system_prompt=WEB_SEARCH_PROMPT,
     )
 
     response = await agent.ainvoke(
