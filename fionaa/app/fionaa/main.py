@@ -1,18 +1,10 @@
 from opentelemetry.instrumentation.langchain import LangchainInstrumentor
 from bedrock_agentcore.runtime import BedrockAgentCoreApp
 
-from fionaa_scoped_agent import (
-    APPLICATIONS_BUCKET,
-    AgentContext,
-    ApplicationStore,
-    PolicyDocStore,
-    build_checkpointer,
-    build_graph,
-    checkpoint_config,
-    identity_from_request_context,
-    load_gateway_tools,
-    scoped_boto_session,
-)
+from gateway import load_gateway_tools
+from graph import AgentContext, build_checkpointer, build_graph, checkpoint_config
+from security import identity_from_request_context, scoped_boto_session
+from storage import APPLICATIONS_BUCKET, ApplicationStore, PolicyDocStore
 
 LangchainInstrumentor().instrument()
 
@@ -33,7 +25,7 @@ async def invoke(payload, context):
     (`AgentContext`, passed via `context=` below) instead of graph state, so
     `AgentCoreMemorySaver` only ever has to serialize the plain-dict/string
     evidence fields in `ApplicationState` — see `AgentContext`'s docstring in
-    fionaa_scoped_agent.py.
+    graph.py.
     """
     log.info("Invoking Agent.....")
 
