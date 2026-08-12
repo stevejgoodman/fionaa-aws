@@ -37,6 +37,20 @@ class FakeMessage:
         self.content = content
 
 
+class FakeTool:
+    """Stands in for a live MCP `StructuredTool`: `graph.tools_for` only
+    ever reads `.name` off tools to filter by prefix."""
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+    def __eq__(self, other):
+        return isinstance(other, FakeTool) and self.name == other.name
+
+    def __repr__(self):
+        return f"FakeTool({self.name!r})"
+
+
 def make_fake_create_agent(response_content, calls: list):
     """Stands in for langchain.agents.create_agent: records the
     (tools, system_prompt) it was built with and the message content it was

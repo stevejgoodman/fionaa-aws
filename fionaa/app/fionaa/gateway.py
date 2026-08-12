@@ -2,8 +2,7 @@
 
 The Gateway is an MCP target exposing Companies House, web search, the
 loan-policy knowledge base, etc. (see GatewayClaimsGatewayUrlOutput in the
-stack outputs). Cognito client-credentials flow, same values
-stevetesting.ipynb uses to mint a bearer token by hand.
+stack outputs). Cognito client-credentials flow to mint a bearer token by hand.
 """
 
 from __future__ import annotations
@@ -35,7 +34,7 @@ def _gateway_client_secret() -> str:
 
     Never put this in a plain env var — AgentCore Runtime env vars are
     visible via get-agent-runtime, and this is a real credential, not
-    config (see CLAUDE.md's secrets rule).
+    config.
     """
     client = boto3.client("secretsmanager")
     return client.get_secret_value(SecretId=GATEWAY_CLIENT_SECRET_ARN)["SecretString"]
@@ -46,8 +45,7 @@ def _gateway_token() -> str:
 
     Minted fresh per graph build (see `load_gateway_tools`, called from
     main.py once per invocation) rather than cached at module load — the
-    Cognito access token is short-lived, same reasoning as why the
-    checkpointer isn't a module-level singleton (see `graph.build_checkpointer`).
+    Cognito access token is short-lived.
     """
     creds = base64.b64encode(f"{GATEWAY_CLIENT_ID}:{_gateway_client_secret()}".encode()).decode()
     data = urllib.parse.urlencode({

@@ -1,3 +1,4 @@
+
 """FIONAA — LangGraph state, runtime context, nodes, and graph wiring.
 
 Each node writes its own evidence artifact under a fixed subpath via the
@@ -90,13 +91,13 @@ def _last_write_wins(_old: Any, new: Any) -> Any:
 
 
 class CompaniesHouseResult(BaseModel):
-    """Forced structured output for `check_companies_house` — routing on free
-    LLM text is brittle, so the agent's final turn is constrained to this
-    schema and `found` becomes the actual branch condition."""
+    """Forced structured output for `check_companies_house` —
+    agent's final turn is constrained to this
+    schema and `found` becomes a branch condition in the graph."""
 
     found: bool = Field(
         description="True if the applicant's company was confirmed as a "
-        "genuine, active UK company with the named applicant as an officer "
+        "genuine UK company with the named applicant as an officer "
         "or PSC. False if no such company could be confirmed."
     )
     confidence: str = Field(description="high, medium, or low")
@@ -104,6 +105,7 @@ class CompaniesHouseResult(BaseModel):
 
 
 class ApplicationState(TypedDict, total=False):
+    """Checkpointed state captures application inputs and decision outputs"""
     application: dict[str, Any]
     policy_check: Annotated[dict[str, Any], _last_write_wins]
     companies_house: Annotated[dict[str, Any], _last_write_wins]
@@ -117,18 +119,23 @@ class AgentContext:
     """Per-invocation dependencies threaded via LangGraph's Runtime context
     API (`StateGraph(..., context_schema=AgentContext)`), not graph state.
 
-    `store`/`policy_docs` wrap a live boto3 S3 client and `tools` holds live
-    MCP `StructuredTool` objects — none of that is msgpack-serializable, and
-    it used to live in `ApplicationState`, which a real checkpointer
-    serializes on every superstep (`TypeError: Type is not msgpack
-    serializable`). Runtime context is passed via `graph.ainvoke(state,
+    `store`/`policy_docs` wrap  boto3 S3 client and `tools` holds live
+    MCP `StructuredTool` objects — neither is msgpack-serializable, 
+    so can't live in  `ApplicationState`, which is checkpointered
+    Runtime context is passed via `graph.ainvoke(state,
     context=...)`, kept immutable for the run, and is never part of the
-    checkpointed state — so it never reaches the checkpointer's serde at all.
+    checkpointed state.
     """
 
     store: ApplicationStore
     policy_docs: PolicyDocStore
     tools: list[Any]
+
+
+def tools_for(all_tools, *names_or_prefixes):
+    """Helper function to subset the tools by name so that each agent only recieves
+    a subset of the gateways tools that are relevant"""
+    return [t for t in all_tools if any(t.name.startswith(p) for p in names_or_prefixes)]
 
 
 # ---------------------------------------------------------------------------
@@ -147,7 +154,7 @@ async def check_against_policy(state: ApplicationState, runtime: Runtime[AgentCo
 
     agent = create_agent(
         model=model,
-        tools=runtime.context.tools,
+        tools=tools_for(runtime.context.tools, "kb-target-loan-policies"),
         system_prompt=POLICY_CHECK_PROMPT,
     )
 
@@ -169,7 +176,7 @@ async def check_companies_house(
 
     agent = create_agent(
         model=model,
-        tools=runtime.context.tools,
+        tools=tools_for(runtime.context.tools, "CompaniesHouse___"),
         system_prompt=COMPANIES_HOUSE_PROMPT,
         response_format=CompaniesHouseResult,
     )
@@ -180,6 +187,7 @@ async def check_companies_house(
     result: CompaniesHouseResult = response["structured_response"]
     companies_house_result = result.model_dump()
 
+    # save result back to application store
     runtime.context.store.put_json("companies_house/result.json", companies_house_result)
 
     return Command(
@@ -209,7 +217,7 @@ async def search_web(state: ApplicationState, runtime: Runtime[AgentContext]) ->
 
     agent = create_agent(
         model=model,
-        tools=runtime.context.tools,
+        tools=tools_for(runtime.context.tools, "websearch-target___WebSearch"),
         system_prompt=WEB_SEARCH_PROMPT,
     )
 
