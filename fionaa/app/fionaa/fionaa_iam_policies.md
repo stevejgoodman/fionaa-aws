@@ -173,7 +173,7 @@ given — same shared Memory resource for every customer, no per-tenant IAM
 boundary the way `${aws:PrincipalTag/customer_id}` gives the S3/DynamoDB
 resources. Isolation for checkpoint data rests entirely on the application
 always deriving `actor_id` from the verified identity (`checkpoint_config` in
-`fionaa_scoped_agent.py`), never from the payload — the same discipline as
+`graph.py`), never from the payload — the same discipline as
 `customer_id` elsewhere, but **enforced in code, not by IAM**. If that node
 code has a bug, it can call `CreateEvent`/`ListEvents` with any `actor_id` it
 likes and the permissions policy below won't stop it.

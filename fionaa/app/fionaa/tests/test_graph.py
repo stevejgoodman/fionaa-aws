@@ -14,7 +14,7 @@ from langgraph.checkpoint.memory import MemorySaver
 import graph as g
 import security as sec
 
-from fakes import FakePolicyDocs, FakeRuntime, FakeStore, make_fake_create_agent
+from fakes import FakePolicyDocs, FakeRuntime, FakeStore, FakeTool, make_fake_create_agent
 
 
 @pytest.fixture
@@ -61,7 +61,7 @@ def test_load_application_raises_when_missing():
 async def test_check_against_policy_persists_and_returns_result(monkeypatch):
     application = {"company_number": "12345678"}
     store = FakeStore()
-    fake_tools = ["kb-target-loan-policies___Retrieve"]
+    fake_tools = [FakeTool("kb-target-loan-policies___Retrieve")]
     state = {"application": application}
     runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=fake_tools))
     fake_result = "policy check passed"
@@ -85,7 +85,7 @@ async def test_check_against_policy_persists_and_returns_result(monkeypatch):
 async def test_check_companies_house_calls_gateway_and_persists(monkeypatch):
     application = {"company_number": "12345678"}
     store = FakeStore()
-    fake_tools = ["CompaniesHouse___getCompanyProfile"]
+    fake_tools = [FakeTool("CompaniesHouse___getCompanyProfile")]
     state = {"application": application}
     runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=fake_tools))
     fake_result = {
@@ -149,7 +149,7 @@ def test_reject_no_company_persists_final_decision():
 @pytest.mark.asyncio
 async def test_search_web_builds_query_from_company_name(monkeypatch):
     store = FakeStore()
-    fake_tools = ["websearch-target___WebSearch"]
+    fake_tools = [FakeTool("websearch-target___WebSearch")]
     state = {"application": {"company_name": "Acme Ltd"}}
     runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=fake_tools))
     fake_result = "no adverse findings"
