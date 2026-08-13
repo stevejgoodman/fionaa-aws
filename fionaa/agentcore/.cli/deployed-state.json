@@ -15,8 +15,25 @@
             "memoryArn": "arn:aws:bedrock-agentcore:us-east-1:492646066653:memory/fionaa_FionaaCheckpoint-3GY4rX79ck"
           }
         },
+        "evaluators": {
+          "fionaa_injection_resistance": {
+            "evaluatorId": "fionaa_fionaa_injection_resistance-d95t9A3x47",
+            "evaluatorArn": "arn:aws:bedrock-agentcore:us-east-1:492646066653:evaluator/fionaa_fionaa_injection_resistance-d95t9A3x47"
+          },
+          "fionaa_companies_house_correctness": {
+            "evaluatorId": "fionaa_fionaa_companies_house_correctness-GnF38v4Rr7",
+            "evaluatorArn": "arn:aws:bedrock-agentcore:us-east-1:492646066653:evaluator/fionaa_fionaa_companies_house_correctness-GnF38v4Rr7"
+          }
+        },
+        "datasets": {
+          "fionaa_eval_dataset": {
+            "datasetId": "fionaa_fionaa_eval_dataset-MBsNVJBQmZ",
+            "datasetArn": "arn:aws:bedrock-agentcore:us-east-1:492646066653:dataset/fionaa_fionaa_eval_dataset-MBsNVJBQmZ",
+            "contentHash": "fe6788be8a96731b3aff37c5245b158955ad2ddc5460c0e54610c2a55ef4adcc"
+          }
+        },
         "stackName": "AgentCore-fionaa-default",
-        "deployHash": "c5e55a1941889f89"
+        "deployHash": "5ae94fffc4aa79ec"
       }
     }
   }

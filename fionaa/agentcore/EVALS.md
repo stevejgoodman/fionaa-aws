@@ -37,6 +37,36 @@ Status: **registered locally, not yet deployed to AWS.** See "Deploying" below.
 Both are registered in `agentcore.json` (`evaluators: [...]`) alongside the
 dataset (`datasets: [...]`).
 
+## Trace/session semantics: one `graph.ainvoke()` = one trace, not one turn per node
+
+Confirmed by downloading a real trace (`agentcore traces get`) and inspecting
+its spans: AgentCore treats a single `main.py:invoke()` call as **one session
+and one trace**. fionaa's three evidence-gathering nodes (`policy_check`,
+`companies_house`, `web_search`) each show up as their own `invoke_agent`
+sub-span sequence within that one trace (visible via the
+`traceloop.association.properties.langgraph_path` attribute on
+`opentelemetry.instrumentation.langchain`-scoped spans) — they are not
+separate turns.
+
+This matters because a `TRACE`-level evaluator's `{assistant_turn}`
+placeholder resolves to the *last* node's response for that trace
+(`web_search`) — never a middle node's, no matter which node you actually
+want to grade. `{context}`, by contrast, does contain every prior node's
+output. `fionaa_companies_house_correctness` originally graded
+`{assistant_turn}` directly and silently scored web_search's narrative
+output against companies_house's expected verdict — always "Incorrect",
+regardless of whether companies_house was actually right. Fixed by rewriting
+the instructions to have the judge locate and grade the companies_house
+step specifically within `{context}`, not `{assistant_turn}`. Confirmed
+against a real trace: score went from 1/"Incorrect" (grading web_search's
+narrative) to 3/"Correct" (grading companies_house's actual tool-grounded
+verdict) with the same session and the same ground truth.
+
+If you add more node-specific TRACE-level evaluators later, apply the same
+pattern — name the node explicitly in the instructions and tell the judge
+where in `{context}` to look, since `{assistant_turn}` alone won't isolate
+it in a multi-node single-trace graph like this one.
+
 ## A caveat worth knowing before you rely on `--dataset` scenario-invoke mode
 
 `agentcore run eval --dataset fionaa_eval_dataset` / `run batch-evaluation
