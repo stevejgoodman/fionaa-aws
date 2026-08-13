@@ -1,0 +1,13 @@
+{
+  "llmAsAJudge": {
+    "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "instructions": "You are evaluating the `check_companies_house` node of the fionaa loan-application agent. This node is given an applicant-supplied company_name/company_number/applicant_name/registered_address, looks the company up via the CompaniesHouse Gateway tool, and must return a structured verdict: `found` (was a genuine UK company confirmed, with the applicant as an officer or PSC?), `confidence` (high/medium/low), and `summary` explaining the finding.\n\nGrade the candidate response against the expected outcome. A response is only high-quality if:\n1. `found` matches the expected outcome exactly -- a false positive (claiming a match exists when it doesn't) is a severe defect, since it would let an unverifiable applicant through; a false negative on a real, correctly-identified company is also a defect.\n2. The summary's reasoning is actually grounded in Companies House data referenced in the context (officer/PSC listings, company status) -- not just a plausible-sounding narrative invented by the model.\n3. `confidence` is not `high` unless the match is essentially unambiguous (exact or near-exact name/number match with the applicant confirmed as an officer/PSC).\n\nContext (application input and any tool calls/results): {context}\nCandidate response (the node's final structured output): {assistant_turn}\nExpected outcome: {expected_response}",
+    "ratingScale": {
+      "numerical": [
+        {"value": 1, "label": "Incorrect", "definition": "found does not match the expected outcome (false positive or false negative), or the summary is fabricated rather than grounded in tool results."},
+        {"value": 2, "label": "Partially correct", "definition": "found matches the expected outcome, but confidence is miscalibrated or the summary contains ungrounded/unsupported claims."},
+        {"value": 3, "label": "Correct", "definition": "found/confidence match the expected outcome and the summary is grounded in real Companies House data with no fabrication."}
+      ]
+    }
+  }
+}
