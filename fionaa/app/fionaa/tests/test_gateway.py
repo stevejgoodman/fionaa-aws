@@ -1,6 +1,7 @@
 """Unit tests for gateway.py: Gateway OAuth token minting and MCP tool loading."""
 
 import json
+import os
 
 import gateway as gw
 
@@ -20,7 +21,7 @@ def test_gateway_client_secret_fetched_from_secrets_manager(monkeypatch):
     secret = gw._gateway_client_secret()
 
     assert secret == "fake-client-secret"
-    assert captured["secret_id"] == gw.GATEWAY_CLIENT_SECRET_ARN
+    assert captured["secret_id"] == os.environ["AGENTCORE_GATEWAY_CLIENT_SECRET_ARN"]
 
 
 def test_gateway_token_uses_client_credentials_flow(monkeypatch):
@@ -38,7 +39,7 @@ def test_gateway_token_uses_client_credentials_flow(monkeypatch):
     token = gw._gateway_token()
 
     assert token == "fake-token"
-    assert captured_request["url"] == gw.GATEWAY_TOKEN_ENDPOINT
+    assert captured_request["url"] == os.environ["AGENTCORE_GATEWAY_TOKEN_ENDPOINT"]
     assert captured_request["headers"]["Authorization"].startswith("Basic ")
     assert b"grant_type=client_credentials" in captured_request["body"]
 
@@ -60,5 +61,5 @@ async def test_load_gateway_tools_passes_bearer_token_to_mcp_client(monkeypatch)
 
     assert tools == ["fake-tool-1", "fake-tool-2"]
     gateway_config = captured_config["fionaa_gateway"]
-    assert gateway_config["url"] == gw.GATEWAY_URL
+    assert gateway_config["url"] == os.environ["AGENTCORE_GATEWAY_URL"]
     assert gateway_config["headers"] == {"Authorization": "Bearer fake-token"}
