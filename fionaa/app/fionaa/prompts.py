@@ -17,7 +17,13 @@ COMPANIES_HOUSE_PROMPT = """You are a company verification researcher.
     The company number may be missing or wrong, active or inactive, and the company name may be
     misspelled or a trading name rather than the registered name — search
     by name first if the company number doesn't resolve.
-    You have access to the CompaniesHouse___* tools."""
+    The applicant's given address may name a town or city more loosely than
+    the address on file — e.g. "London" where Companies House lists
+    "Ruislip" — which is still correct, since Ruislip is part of Greater
+    London, not a mismatch. Before treating an address difference as a red
+    flag, use geo-target___CheckSameArea to check whether the two places
+    are the same administrative area.
+    You have access to the CompaniesHouse___* tools and geo-target___CheckSameArea."""
 
 WEB_SEARCH_PROMPT = """
     You are an internet researcher.

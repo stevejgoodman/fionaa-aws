@@ -77,8 +77,10 @@ FUZZY_REAL_APPLICATIONS = [
             # right number and applicant, but address given as "London"
             # rather than "Ruislip" — Ruislip is part of Greater London, so
             # this is the same place phrased more loosely, not a wrong
-            # address. Known to currently fail — see conversation notes,
-            # matching logic needs to tolerate this.
+            # address. Requires the geo-target___CheckSameArea Gateway tool
+            # (see agentcore/lambda/geo_area_match/) to be attached and the
+            # COMPANIES_HOUSE_PROMPT update in prompts.py — without both,
+            # this still fails.
             "company_name": "GoodAI Consulting",
             "company_number": "17161121",
             "applicant_name": "Steve Goodman",
