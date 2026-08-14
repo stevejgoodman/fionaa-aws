@@ -1,8 +1,8 @@
-"""FIONAA — the only module that touches S3.
+""" only module that touches S3.
 
-Every key is built from the verified `CustomerIdentity`, never from caller
+Every key is built from the verified `CustomerIdentity`, not from caller
 input. IAM (the FionaaDataAccessRole session-tag condition — see
-fionaa_scoped_agent.py) is the real boundary; this module just makes it hard
+README.md) is the true boundary; this module just makes it hard
 to write a call that violates it.
 """
 
@@ -26,8 +26,7 @@ POLICY_DOCS_BUCKET = os.environ["FIONAA_POLICY_DOCS_BUCKET"]
 
 
 class ApplicationStore:
-    """All keys are built from the identity, never from caller input. IAM is the
-    real boundary; this class just makes it hard to write a violating call."""
+    """All keys are built from the identity, never from caller input."""
 
     def __init__(self, identity: CustomerIdentity, session: boto3.Session) -> None:
         self._identity = identity

@@ -1,6 +1,6 @@
 """FIONAA — identity resolution and IAM credential scoping.
 
-Fine layer of the security model described in fionaa_scoped_agent.py: every
+Fine layer of the security model described in README.md: every
 read/write against customer data goes through short-lived credentials
 obtained by assuming FionaaDataAccessRole with a session tag
 customer_id=<sha256 of the verified email claim>. That role's policy scopes
