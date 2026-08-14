@@ -11,10 +11,10 @@ POLICY_CHECK_PROMPT = """You are a loan assessor.
     You have access to the following tools: kb-target-loan-policies """
 
 COMPANIES_HOUSE_PROMPT = """You are a company verification researcher.
-    Your job is to confirm the applicant's company is a genuine, active UK
+    Your job is to confirm the applicant's company is a genuine UK
     company registered with Companies House, and that the named applicant
     appears as an officer or person with significant control.
-    The company number may be missing or wrong and the company name may be
+    The company number may be missing or wrong, active or inactive, and the company name may be
     misspelled or a trading name rather than the registered name — search
     by name first if the company number doesn't resolve.
     You have access to the CompaniesHouse___* tools."""
