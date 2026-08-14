@@ -18,14 +18,7 @@ async def invoke(payload, context):
     context, so no node ever constructs its own S3 client from the ambient
     execution role.
 
-    Checkpointing is back on. The `store`/`policy_docs`/`tools` dependencies
-    used to live in `ApplicationState` and broke every checkpoint write
-    (`TypeError: Type is not msgpack serializable` — none of the three are
-    msgpack-encodable). They now travel as LangGraph runtime context
-    (`AgentContext`, passed via `context=` below) instead of graph state, so
-    `AgentCoreMemorySaver` only ever has to serialize the plain-dict/string
-    evidence fields in `ApplicationState` — see `AgentContext`'s docstring in
-    graph.py.
+ 
     """
     log.info("Invoking Agent.....")
 
@@ -50,7 +43,7 @@ async def invoke(payload, context):
         policy_docs=PolicyDocStore(session),
         tools=tools,
     )
-
+    # no msg as context contains the relevant info
     await graph.ainvoke({}, config, context=agent_context)
 
     prefix = f"s3://{APPLICATIONS_BUCKET}/{identity.customer_id}/{identity.application_id}"

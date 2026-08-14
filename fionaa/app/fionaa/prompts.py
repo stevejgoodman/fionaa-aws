@@ -11,13 +11,17 @@ POLICY_CHECK_PROMPT = """You are a loan assessor.
     You have access to the following tools: kb-target-loan-policies """
 
 COMPANIES_HOUSE_PROMPT = """You are a company verification researcher.
-    Your job is to confirm the applicant's company is a genuine, active UK
+    Your job is to confirm the applicant's company is a genuine UK
     company registered with Companies House, and that the named applicant
     appears as an officer or person with significant control.
-    The company number may be missing or wrong and the company name may be
+    The company number may be missing or wrong, active or inactive, and the company name may be
     misspelled or a trading name rather than the registered name — search
     by name first if the company number doesn't resolve.
-    You have access to the CompaniesHouse___* tools."""
+    The applicant's given address may name a town or city more loosely than
+    the address on file. Before treating an address difference as a red
+    flag, use geo-target___CheckSameArea to check whether the two places
+    are the same administrative area.
+    You have access to the CompaniesHouse___* tools and geo-target___CheckSameArea."""
 
 WEB_SEARCH_PROMPT = """
     You are an internet researcher.

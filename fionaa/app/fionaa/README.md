@@ -36,3 +36,35 @@ In a new terminal, you can invoke that server with:
 After providing credentials, `agentcore deploy` will deploy your project into Amazon Bedrock AgentCore.
 
 Use `agentcore invoke` to invoke your deployed agent.
+
+# Security model
+
+FIONAA is a LangGraph agent with IAM-enforced per-customer S3 isolation.
+
+**Coarse layer**: the AgentCore Runtime execution role can do exactly one thing
+against customer data — `sts:AssumeRole` onto `FionaaDataAccessRole`. It has
+NO direct `s3:GetObject`/`PutObject` on the data bucket.
+
+**Fine layer**: every read/write goes through short-lived credentials obtained
+by assuming `FionaaDataAccessRole` with a session tag
+`customer_id=<sha256 of the verified email claim>`. That role's policy scopes
+S3 to `arn:aws:s3:::fionaa-applications/${aws:PrincipalTag/customer_id}/*` so
+a bug in node code cannot reach another customer's prefix — the call fails
+with `AccessDenied` at the IAM layer.
+
+**Identity scheme**: `customer_id` is a hash of the customer's email address
+(never the raw email, so the S3 key/session tag carries no PII);
+`application_id` is a randomly generated opaque ID minted when the
+application is created upstream of this agent. Neither needs a separate
+ID-mapping table.
+
+See `fionaa_iam_policies.md` for the matching trust/permission policies.
+
+## Module layout
+
+- `security.py` — identity resolution from the verified JWT and scoped STS credentials.
+- `storage.py` — the only code that touches S3 (`ApplicationStore`, `PolicyDocStore`).
+- `gateway.py` — AgentCore Gateway OAuth + MCP tool loading.
+- `graph.py` — LangGraph state, runtime context, nodes, checkpointing, and graph wiring.
+- `prompts.py` — node system prompts.
+- `main.py` — the AgentCore Runtime entrypoint (see `agentcore.json`); imports directly from the modules above.

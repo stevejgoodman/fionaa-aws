@@ -8,12 +8,14 @@ import {
   type CustomJWTAuthorizerConfig,
   type HarnessDeploymentConfig,
 } from '@aws/agentcore-cdk';
-import { CfnOutput, Stack, type StackProps } from 'aws-cdk-lib';
+import { CfnOutput, Duration, Stack, type StackProps } from 'aws-cdk-lib';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as kms from 'aws-cdk-lib/aws-kms';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
+import * as path from 'path';
 
 /**
  * Harness deployment config: role-scoped fields (for IAM role + container build)
@@ -264,6 +266,47 @@ export class AgentCoreStack extends Stack {
       fionaaEnv.runtime.addEnvironmentVariable('AGENTCORE_GATEWAY_OAUTH_SCOPES', 'agentcore/invoke');
       fionaaEnv.runtime.addEnvironmentVariable('AGENTCORE_GATEWAY_CLIENT_ID', 'qcqj6bgve5u8c2bg1qkiobsps');
       fionaaEnv.runtime.addEnvironmentVariable('AGENTCORE_GATEWAY_CLIENT_SECRET_ARN', gatewaySecret.secretArn);
+
+      // AgentCore Gateway Lambda target: "is this the same area?" tool, backing
+      // the check_companies_house node's address-equivalence check (Ruislip vs
+      // Greater London, etc — see
+      // app/fionaa/tests/test_live_companies_house.py, case
+      // id="goodai-consulting-london-vs-ruislip"). This Lambda is ours to
+      // deploy via CDK, but claimsagent-claimsgateway itself is owned by a
+      // different, out-of-repo stack — attaching this function as an MCP
+      // Gateway Target, and granting that Gateway's execution role
+      // lambda:InvokeFunction on it, is a manual step. See
+      // lambda/geo_area_match/README.md for the exact commands.
+      const geoAreaMatchFn = new lambda.Function(this, 'GeoAreaMatchFunction', {
+        functionName: 'fionaa-geo-area-match',
+        description:
+          'AgentCore Gateway target: resolves whether two place names are the same administrative area (e.g. Ruislip vs Greater London)',
+        runtime: lambda.Runtime.PYTHON_3_12,
+        handler: 'handler.lambda_handler',
+        // __dirname differs between `ts-node` (lib/) and the compiled `dist/lib/`
+        // this app actually runs from (see cdk.json's `app` entrypoint), so anchor
+        // on process.cwd() instead — bin/cdk.ts's own config-root resolution
+        // already relies on the CLI setting cwd to agentcore/cdk/.
+        code: lambda.Code.fromAsset(path.resolve(process.cwd(), '../lambda/geo_area_match')),
+        timeout: Duration.seconds(10),
+        memorySize: 128,
+      });
+
+      geoAreaMatchFn.addToRolePolicy(
+        new iam.PolicyStatement({
+          sid: 'LocationPlacesSearch',
+          actions: ['geo-places:SearchText'],
+          // geo-places (the newer Amazon Location Service Places API) has no
+          // resource-level ARNs to scope this to.
+          resources: ['*'],
+        })
+      );
+
+      new CfnOutput(this, 'GeoAreaMatchFunctionArn', {
+        description:
+          'Lambda ARN to register as an MCP Gateway Target on claimsagent-claimsgateway (manual step, see lambda/geo_area_match/README.md)',
+        value: geoAreaMatchFn.functionArn,
+      });
     }
 
     // Create payment infrastructure via CFN constructs
