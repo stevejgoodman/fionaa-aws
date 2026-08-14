@@ -283,7 +283,11 @@ export class AgentCoreStack extends Stack {
           'AgentCore Gateway target: resolves whether two place names are the same administrative area (e.g. Ruislip vs Greater London)',
         runtime: lambda.Runtime.PYTHON_3_12,
         handler: 'handler.lambda_handler',
-        code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda/geo_area_match')),
+        // __dirname differs between `ts-node` (lib/) and the compiled `dist/lib/`
+        // this app actually runs from (see cdk.json's `app` entrypoint), so anchor
+        // on process.cwd() instead — bin/cdk.ts's own config-root resolution
+        // already relies on the CLI setting cwd to agentcore/cdk/.
+        code: lambda.Code.fromAsset(path.resolve(process.cwd(), '../lambda/geo_area_match')),
         timeout: Duration.seconds(10),
         memorySize: 128,
       });
