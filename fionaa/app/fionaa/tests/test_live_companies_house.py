@@ -7,17 +7,7 @@ live_helpers.py); the node's own S3 write isn't what's under test here.
 
 Opt-in and skipped by default: run with
     pytest --run-live tests/test_live_companies_house.py
-after populating fionaa/agentcore/.env.local with real Gateway config and
-having AWS credentials able to read the Gateway's client secret (e.g.
-`AWS_PROFILE=AIOps`, or whatever profile `agentcore deploy` used).
-
-Test data note: "Goodman's Consulting Limited" / company number 08139267 is
-a real, active UK company already used as the smoke-test fixture in
-stevetesting.ipynb — safe to keep reusing here. The "not actively trading"
-case is left as a documented placeholder (see below) since it needs a real
-dissolved/dormant company + a real officer name on file for it, which isn't
-something to fabricate — fill it in with a genuine record before relying on
-that test.
+after populating fionaa/agentcore/.env.local with real Gateway config
 """
 
 import pytest
@@ -42,12 +32,12 @@ async def _run(application: dict):
 REAL_ACTIVE_APPLICATIONS = [
     pytest.param(
         {
-            "company_name": "Goodman's Consulting Limited",
-            "company_number": "08139267",
+            "company_name": "GoodAI Consulting",
+            "company_number": "17161121",
             "applicant_name": "Steve Goodman",
-            "registered_address": "Manor Road, Ruislip, Middlesex, England",
+            "registered_address": "Manor Road, Ruislip",
         },
-        id="goodmans-consulting-exact",
+        id="goodai-consulting-exact",
     ),
 ]
 
@@ -70,21 +60,31 @@ async def test_finds_real_company_with_correct_details(application):
 FUZZY_REAL_APPLICATIONS = [
     pytest.param(
         {
-            # missing apostrophe, "Ltd" instead of "Limited"
-            "company_name": "Goodmans Consulting Ltd",
-            "applicant_name": "S Goodman",
-            "registered_address": "Manor Rd, Ruislip",
+            # casing/spacing variant of "GoodAI", no company number, minor
+            # applicant name shortening ("Steve" -> "Stephen"), minor
+            # street-name typo (Drive vs Road). Company/address noise is
+            # tolerated fine; known to currently fail on the applicant name
+            # ("Stephen Goodman" vs the officer on file, "Steve Goodman") —
+            # matching logic needs to tolerate this too.
+            "company_name": "Good ai Consulting",
+            "applicant_name": "Stephen Goodman",
+            "registered_address": "Manor Drive Ruislip",
         },
-        id="goodmans-consulting-misspelled-no-number",
+        id="goodai-consulting-casing-no-number",
     ),
     pytest.param(
         {
-            # right number, name reordered/truncated
-            "company_name": "Goodman Consulting",
-            "company_number": "08139267",
-            "applicant_name": "Steven Goodman",
+            # right number and applicant, but address given as "London"
+            # rather than "Ruislip" — Ruislip is part of Greater London, so
+            # this is the same place phrased more loosely, not a wrong
+            # address. Known to currently fail — see conversation notes,
+            # matching logic needs to tolerate this.
+            "company_name": "GoodAI Consulting",
+            "company_number": "17161121",
+            "applicant_name": "Steve Goodman",
+            "registered_address": "Manor Road London",
         },
-        id="goodmans-consulting-truncated-name",
+        id="goodai-consulting-london-vs-ruislip",
     ),
 ]
 
@@ -104,22 +104,21 @@ async def test_finds_real_company_despite_minor_input_mistakes(application):
 # 3. Real company, but not actively trading — should still be `found`, with
 #    the summary/confidence reflecting that it isn't active.
 #
-# TODO: replace with a genuine dissolved/dormant/liquidated UK company (and,
-# if you want the officer-match part of COMPANIES_HOUSE_PROMPT to actually
-# exercise, a real officer name from its Companies House filing history).
-# Left unpopulated rather than guessed, since asserting behaviour against a
-# fabricated "real" company would just be testing a fiction.
+# Goodman's Consulting Limited (08139267) — dissolved 28 December 2017, per
+# Companies House. Was originally used in REAL_ACTIVE_APPLICATIONS/
+# FUZZY_REAL_APPLICATIONS above under the assumption it was still active;
+# moved here once a live run surfaced the dissolution. Officer name below is
+# real, taken from that filing history (director appointed 12 July 2012).
 # ---------------------------------------------------------------------------
 
 NOT_ACTIVE_REAL_APPLICATIONS = [
     pytest.param(
         {
-            "company_name": "REPLACE_ME — real dissolved/dormant company name",
-            "company_number": "REPLACE_ME",
-            "applicant_name": "REPLACE_ME — a real officer on file",
+            "company_name": "Goodman's Consulting Limited",
+            "company_number": "08139267",
+            "applicant_name": "Steven Goodman",
         },
-        id="not-actively-trading-placeholder",
-        marks=pytest.mark.skip(reason="fill in a real dissolved/dormant company (see module docstring) before enabling"),
+        id="goodmans-consulting-dissolved",
     ),
 ]
 

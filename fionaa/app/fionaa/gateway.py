@@ -18,15 +18,11 @@ from typing import Any
 import boto3
 from langchain_mcp_adapters.client import MultiServerMCPClient
 
-GATEWAY_URL = os.environ["AGENTCORE_GATEWAY_URL"]
-GATEWAY_TOKEN_ENDPOINT = os.environ["AGENTCORE_GATEWAY_TOKEN_ENDPOINT"]
-GATEWAY_OAUTH_SCOPES = os.environ["AGENTCORE_GATEWAY_OAUTH_SCOPES"]
-GATEWAY_CLIENT_ID = os.environ["AGENTCORE_GATEWAY_CLIENT_ID"]
-# The client secret itself is never an env var — only its Secrets Manager ARN
-# is. Fetched at call time in _gateway_token() via the runtime's own
-# execution-role credentials (this isn't customer data, so it doesn't go
-# through scoped_boto_session).
-GATEWAY_CLIENT_SECRET_ARN = os.environ["AGENTCORE_GATEWAY_CLIENT_SECRET_ARN"]
+# These are read from os.environ at call time (inside the functions below),
+# not at module import time — gateway.py gets imported during test collection
+# (see tests/live_helpers.py), before tests/.env.local has been loaded, so a
+# module-level `os.environ[...]` read here would permanently bind to
+# conftest.py's placeholder values regardless of what runs later.
 
 
 def _gateway_client_secret() -> str:
@@ -37,7 +33,8 @@ def _gateway_client_secret() -> str:
     config.
     """
     client = boto3.client("secretsmanager")
-    return client.get_secret_value(SecretId=GATEWAY_CLIENT_SECRET_ARN)["SecretString"]
+    secret_arn = os.environ["AGENTCORE_GATEWAY_CLIENT_SECRET_ARN"]
+    return client.get_secret_value(SecretId=secret_arn)["SecretString"]
 
 
 def _gateway_token() -> str:
@@ -47,13 +44,14 @@ def _gateway_token() -> str:
     main.py once per invocation) rather than cached at module load — the
     Cognito access token is short-lived.
     """
-    creds = base64.b64encode(f"{GATEWAY_CLIENT_ID}:{_gateway_client_secret()}".encode()).decode()
+    client_id = os.environ["AGENTCORE_GATEWAY_CLIENT_ID"]
+    creds = base64.b64encode(f"{client_id}:{_gateway_client_secret()}".encode()).decode()
     data = urllib.parse.urlencode({
         "grant_type": "client_credentials",
-        "scope": GATEWAY_OAUTH_SCOPES.replace(",", " "),
+        "scope": os.environ["AGENTCORE_GATEWAY_OAUTH_SCOPES"].replace(",", " "),
     }).encode()
     req = urllib.request.Request(
-        GATEWAY_TOKEN_ENDPOINT,
+        os.environ["AGENTCORE_GATEWAY_TOKEN_ENDPOINT"],
         data=data,
         headers={
             "Content-Type": "application/x-www-form-urlencoded",
@@ -74,7 +72,7 @@ async def load_gateway_tools() -> list[Any]:
     token = await asyncio.to_thread(_gateway_token)
     client = MultiServerMCPClient({
         "fionaa_gateway": {
-            "url": GATEWAY_URL,
+            "url": os.environ["AGENTCORE_GATEWAY_URL"],
             "transport": "streamable_http",
             "headers": {"Authorization": f"Bearer {token}"},
         }
