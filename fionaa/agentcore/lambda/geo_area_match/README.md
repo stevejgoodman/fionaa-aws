@@ -1,5 +1,25 @@
 # geo-area-match Lambda — Gateway Target attach (manual step)
 
+## Status: done (2026-08-14)
+
+Live on `claimsagent-claimsgateway-glrrsnaalt`:
+- Lambda: `arn:aws:lambda:us-east-1:492646066653:function:fionaa-geo-area-match`
+- Gateway Target: `geo-target` (target id `OI7N6S2RTT`), status `READY`
+- Invoke permission: a standalone inline policy `FionaaGeoAreaMatchInvoke` on
+  the Gateway's role (`AgentCore-ClaimsAgent-dev-McpGatewayClaimsGatewayRo-i5L1x8ePo9L9`),
+  added separately from that stack's own CDK-managed
+  `McpGatewayClaimsGatewayRoleDefaultPolicy...` — kept as its own named
+  policy so a redeploy of the ClaimsAgent stack doesn't silently drop it
+  (that stack's CDK only manages the policy names it created).
+- Verified: `pytest --run-live tests/test_live_companies_house.py -k london-vs-ruislip` passes.
+
+**The matching rule actually shipped is distance-based, not hierarchy**, despite the
+plan below — live testing against `geo-places` showed Ruislip's `SubRegion`
+comes back as "Middlesex" (a historic/postal county), never "London" or
+"Greater London", so hierarchy containment never matched the case this tool
+exists for. See the docstring in `handler.py` for the full reasoning and the
+35km threshold used.
+
 ## Why this is manual
 
 This Lambda deploys from fionaa's own CDK stack (`GeoAreaMatchFunction` in
