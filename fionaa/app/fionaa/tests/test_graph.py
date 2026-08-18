@@ -9,12 +9,13 @@ model.
 import json
 
 import pytest
+from langchain.messages import ToolMessage
 from langgraph.checkpoint.memory import MemorySaver
 
 import graph as g
 import security as sec
 
-from fakes import FakePolicyDocs, FakeRuntime, FakeStore, FakeTool, make_fake_create_agent
+from fakes import FakeMessage, FakePolicyDocs, FakeRuntime, FakeStore, FakeTool, make_fake_create_agent
 
 
 @pytest.fixture
@@ -59,11 +60,13 @@ def test_load_application_raises_when_missing():
 
 @pytest.mark.asyncio
 async def test_check_against_policy_persists_and_returns_result(monkeypatch):
-    application = {"company_number": "12345678"}
+    application = {"company_number": "12345678", "loan_type": "unsecured-business-loans"}
     store = FakeStore()
-    fake_tools = [FakeTool("kb-target-loan-policies___Retrieve")]
     state = {"application": application}
-    runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=fake_tools))
+    # No MCP tools in runtime.context.tools: policy text is loaded directly by
+    # loan_type (policy_loader.py), not searched for. unsecured-business-loans
+    # also declares no check tools, so the agent gets none of those either.
+    runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
     fake_result = "policy check passed"
     calls = []
 
@@ -72,9 +75,66 @@ async def test_check_against_policy_persists_and_returns_result(monkeypatch):
     result = await g.check_against_policy(state, runtime)
 
     assert result == {"policy_check": fake_result}
-    assert store.data["policy_check/result.json"] == fake_result
-    assert calls[0]["tools"] == fake_tools
-    assert calls[1]["message_content"] == json.dumps(application)
+    assert store.data["policy_check/result.json"] == {"result": fake_result, "tool_calls": []}
+    assert calls[0]["tools"] == []
+    expected_content = (
+        f"POLICY:\n{g.load_policy_text(g.LoanType.unsecured_business_loans)}\n\n"
+        f"APPLICATION:\n{json.dumps(application)}"
+    )
+    assert calls[1]["message_content"] == expected_content
+
+
+@pytest.mark.asyncio
+async def test_check_against_policy_scopes_check_tools_by_loan_type(monkeypatch):
+    """Which calculation tools the agent receives is declared in policy.md
+    (`<!-- checks: ... -->`), read via policy_loader.load_check_tool_names —
+    not hardcoded per node."""
+    application = {"loan_type": "invoice-factoring", "invoices_owed": 148000}
+    store = FakeStore()
+    state = {"application": application}
+    runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
+    calls = []
+
+    monkeypatch.setattr(g, "create_agent", make_fake_create_agent("passed", calls))
+
+    await g.check_against_policy(state, runtime)
+
+    assert [t.name for t in calls[0]["tools"]] == ["compute_invoice_factoring_advance"]
+
+
+@pytest.mark.asyncio
+async def test_check_against_policy_persists_tool_calls_as_evidence(monkeypatch):
+    """Tool calls the agent makes are harvested off the response (ToolMessage
+    entries), not written by the tools themselves — check_tools.py stays
+    plain functions with no runtime/store access."""
+    application = {"loan_type": "invoice-factoring", "invoices_owed": 148000}
+    store = FakeStore()
+    state = {"application": application}
+    runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
+
+    class FakeAgentWithToolCall:
+        async def ainvoke(self, input):
+            return {
+                "messages": [
+                    input["messages"][0],
+                    ToolMessage(
+                        content="118400",
+                        name="compute_invoice_factoring_advance",
+                        tool_call_id="call-1",
+                    ),
+                    FakeMessage("eligible"),
+                ]
+            }
+
+    monkeypatch.setattr(g, "create_agent", lambda **kwargs: FakeAgentWithToolCall())
+
+    result = await g.check_against_policy(state, runtime)
+
+    assert result == {"policy_check": "eligible"}
+    assert store.data["policy_check/result.json"] == {
+        "result": "eligible",
+        "tool_calls": [{"tool": "compute_invoice_factoring_advance", "result": "118400"}],
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -85,7 +145,14 @@ async def test_check_against_policy_persists_and_returns_result(monkeypatch):
 async def test_check_companies_house_calls_gateway_and_persists(monkeypatch):
     application = {"company_number": "12345678"}
     store = FakeStore()
-    fake_tools = [FakeTool("CompaniesHouse___getCompanyProfile")]
+    # Includes geo-target___CheckSameArea alongside the CompaniesHouse tools —
+    # COMPANIES_HOUSE_PROMPT instructs the agent to use it to reconcile a
+    # loosely-worded applicant address against the Companies House registered
+    # address, so both prefixes must come through tools_for.
+    fake_tools = [
+        FakeTool("CompaniesHouse___getCompanyProfile"),
+        FakeTool("geo-target___CheckSameArea"),
+    ]
     state = {"application": application}
     runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=fake_tools))
     fake_result = {
@@ -177,7 +244,11 @@ def _patch_all_integration_points(monkeypatch, agent_response="ok"):
 
 @pytest.mark.asyncio
 async def test_build_graph_runs_all_nodes_in_order(monkeypatch, identity):
-    application = {"company_name": "Acme Ltd", "company_number": "12345678"}
+    application = {
+        "company_name": "Acme Ltd",
+        "company_number": "12345678",
+        "loan_type": "unsecured-business-loans",
+    }
     store = FakeStore({"input/application.json": application})
     policy_docs = FakePolicyDocs({"lending/unsecured-business-v7.md": b"policy text"})
     _patch_all_integration_points(monkeypatch, agent_response="ok")
@@ -212,7 +283,11 @@ async def test_build_graph_checkpoints_successfully_with_deps_in_context(monkeyp
     excluded from checkpointed state entirely, so a real checkpointer should
     complete without error and the checkpoint should hold the plain-value
     evidence fields."""
-    application = {"company_name": "Acme Ltd", "company_number": "12345678"}
+    application = {
+        "company_name": "Acme Ltd",
+        "company_number": "12345678",
+        "loan_type": "unsecured-business-loans",
+    }
     store = FakeStore({"input/application.json": application})
     policy_docs = FakePolicyDocs()
     _patch_all_integration_points(monkeypatch, agent_response="ok")

@@ -21,11 +21,14 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 from langgraph_checkpoint_aws import AgentCoreMemorySaver
 from langchain.agents import create_agent
-from langchain.messages import HumanMessage
+from langchain.messages import HumanMessage, ToolMessage
 from pydantic import BaseModel, Field
 from model.load import load_model
 
+from check_tools import CHECK_TOOLS_POOL
+from policy_loader import load_check_tool_names, load_policy_text
 from prompts import COMPANIES_HOUSE_PROMPT, POLICY_CHECK_PROMPT, WEB_SEARCH_PROMPT
+from schemas import LoanType
 from security import CustomerIdentity
 from storage import ApplicationStore, PolicyDocStore
 
@@ -151,21 +154,51 @@ def load_application(state: ApplicationState, runtime: Runtime[AgentContext]) ->
 
 async def check_against_policy(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict[str, Any]:
     application = state["application"]
+    loan_type = LoanType(application["loan_type"])
 
+    # loan_type is already known from the application — no KB search needed
+    # to find "the correct loan policy document"; load it directly by key.
+    # See policy_loader.py.
+    policy_text = load_policy_text(loan_type)
+
+    # Which deterministic calculation tools this agent sees is declared in
+    # the policy text itself (a `<!-- checks: ... -->` comment, stripped
+    # before load_policy_text returns) — scoped per loan type the same way
+    # `tools_for` scopes MCP tools for the other agentic nodes, just against
+    # the local CHECK_TOOLS_POOL instead of runtime.context.tools. Most loan
+    # types declare none, in which case this is `[]` and the agent assesses
+    # purely from the policy text, same as before.
+    tool_names = load_check_tool_names(loan_type)
     agent = create_agent(
         model=model,
-        tools=tools_for(runtime.context.tools, "kb-target-loan-policies"),
+        tools=tools_for(CHECK_TOOLS_POOL, *tool_names),
         system_prompt=POLICY_CHECK_PROMPT,
     )
 
-    # MCP-backed tools only implement async invocation (no sync `func`, only
-    # a `coroutine`) — agent.invoke() raises NotImplementedError as soon as
-    # the model calls one, so this has to be ainvoke().
     response = await agent.ainvoke(
-        {"messages": [HumanMessage(content=json.dumps(application))]}
+        {
+            "messages": [
+                HumanMessage(
+                    content=f"POLICY:\n{policy_text}\n\nAPPLICATION:\n{json.dumps(application)}"
+                )
+            ]
+        }
     )
-    loan_result = response["messages"][-1].content
-    runtime.context.store.put_json("policy_check/result.json", loan_result)
+    messages = response["messages"]
+    loan_result = messages[-1].content
+
+    # Tool calls the agent made along the way are evidence too — captured
+    # here (from the response) rather than by the tools themselves, so the
+    # tools in check_tools.py can stay plain, runtime-free functions.
+    tool_calls = [
+        {"tool": m.name, "result": m.content}
+        for m in messages
+        if isinstance(m, ToolMessage)
+    ]
+
+    runtime.context.store.put_json(
+        "policy_check/result.json", {"result": loan_result, "tool_calls": tool_calls}
+    )
     return {"policy_check": loan_result}
 
 
@@ -176,7 +209,16 @@ async def check_companies_house(
 
     agent = create_agent(
         model=model,
-        tools=tools_for(runtime.context.tools, "CompaniesHouse___"),
+        # geo-target___CheckSameArea is included alongside the CompaniesHouse
+        # tools because COMPANIES_HOUSE_PROMPT explicitly instructs the agent
+        # to use it (reconciling a loosely-specified applicant address
+        # against the Companies House registered office address before
+        # treating the difference as a red flag) — it's part of this node's
+        # own verification, not a separate location check. A confirmed match
+        # here already establishes "registered in the UK" (see
+        # policies/general.md): Companies House is a UK-only register, so
+        # there is nothing left for a separate UK-based check to establish.
+        tools=tools_for(runtime.context.tools, "CompaniesHouse___", "geo-target___CheckSameArea"),
         system_prompt=COMPANIES_HOUSE_PROMPT,
         response_format=CompaniesHouseResult,
     )
@@ -230,7 +272,12 @@ async def search_web(state: ApplicationState, runtime: Runtime[AgentContext]) ->
     runtime.context.store.put_json("web_search/result.json", web_search_result)
     return {"web_search": web_search_result}
 
-# policy check is agentic rag (but essentially a single tool)
+# policy check doesn't do agentic RAG — loan_type is known up front, so the
+# policy text is loaded directly (policy_loader.py), not searched for. It is
+# still agentic in a narrower sense: the agent may call deterministic
+# calculation tools scoped from CHECK_TOOLS_POOL (which ones per loan type
+# is declared in policy.md, see load_check_tool_names) rather than being
+# handed a pre-computed number, but never infers a figure from prose itself.
 # companies house is agentic search (i suppose could involve multiple hops)
 # websearch is agentic search looking for website, person linkedin etc.
 
