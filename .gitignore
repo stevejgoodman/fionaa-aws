@@ -21,6 +21,10 @@ cdk.out/
 *.zip
 fionaa/agentcore/fionaa/
 
+# Local test application data (contains sample PII)
+fionaa/app/fionaa/applicaion_forms.py
+fionaa/app/fionaa/application_forms.json
+
 # Jupyter
 *.ipynb
 .ipynb_checkpoints/
