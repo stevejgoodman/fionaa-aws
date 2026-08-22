@@ -74,7 +74,13 @@ jobs:
 
       - name: Install dependencies
         working-directory: fionaa/app/fionaa
-        run: uv sync --group dev
+        run: |
+          uv sync --group dev
+          echo "--- .venv/bin (searching for deepeval) ---"
+          ls -la .venv/bin | grep -i deepeval || echo "NOT FOUND"
+          echo "--- pwd / venv path ---"
+          pwd
+          uv run --no-sync python -c "import shutil; print('which deepeval:', shutil.which('deepeval'))"
 
       # One file at a time, not a matrix/parallel step -- deepeval_evals/README.md's
       # "Known gaps" section documents why: concurrent processes sharing the
