@@ -57,9 +57,31 @@ def compute_invoice_discounting_advance(invoices_owed: int) -> int:
     return round(invoices_owed * DISCOUNTING_ADVANCE_RATE_DEFAULT)
 
 
+# ---------------------------------------------------------------------------
+# Loan repayment — affordability calculation
+# ---------------------------------------------------------------------------
+#
+# Deliberately the simplest possible model (straight-line, no interest/APR
+# amortisation) — see FINANCIAL_ASSESSMENT_PROMPT, which calls this out as a
+# working assumption rather than a full repayment schedule. Kept here as a
+# single tool covering both secured and unsecured loans rather than split
+# per loan type, since the formula itself doesn't vary between them.
+
+@tool
+def compute_monthly_repayment(amount_borrowed: int, term_months: int) -> float:
+    """Monthly repayment for a secured or unsecured business loan: amount
+    borrowed divided by term in months (a straight-line estimate, not a full
+    amortisation schedule). Call this with the application's `loan_amount`
+    and `loan_term` rather than estimating the repayment yourself."""
+    if term_months <= 0:
+        raise ValueError("term_months must be positive")
+    return round(amount_borrowed / term_months, 2)
+
+
 # All tools in the pool, keyed by name — this is what `graph.tools_for` is
 # subset against using the names each policy.md declares.
 CHECK_TOOLS_POOL = [
     compute_invoice_factoring_advance,
     compute_invoice_discounting_advance,
+    compute_monthly_repayment,
 ]

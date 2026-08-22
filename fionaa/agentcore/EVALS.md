@@ -5,22 +5,35 @@ Status: **registered locally, not yet deployed to AWS.** See "Deploying" below.
 ## What's here
 
 - `agentcore/datasets/fionaa_eval_dataset.jsonl` — `AGENTCORE_EVALUATION_PREDEFINED_V1`
-  dataset, registered in `agentcore.json`. 7 scenarios covering the three
+  dataset, registered in `agentcore.json`. 9 scenarios covering the three
   evidence-gathering nodes in `graph.py`:
   - Companies House verification (`check_companies_house`) — a real active
     company (Goodman's Consulting Ltd, 08139267, reused from
     `tests/test_live_companies_house.py`) in exact and fuzzy/noisy-input
     form, plus two fictitious-company cases that must resolve to
     `found=false`.
-  - Policy check (`check_against_policy`) — one standard unsecured-business
-    loan scenario, asserting the response cites a specific policy clause
-    rather than a bare accept/reject.
+  - Policy check (`check_against_policy`) — three scenarios: a standard
+    unsecured-business loan (asserting the response cites a specific policy
+    clause rather than a bare accept/reject), an invoice-factoring case that
+    exercises `calculate_invoice_amount`'s deterministic advance calc, and a
+    secured-loan case that guards against `policy_loader.py` loading the
+    wrong loan type's policy file.
   - Web search (`search_web`) — one scenario asserting no fabricated adverse
     findings.
 
   Each `turns[].input` is the JSON-encoded `application` dict, matching what
   `graph.py` actually sends as message content to each node
   (`json.dumps(application)` / `f"Company: {company_name}"`).
+
+  **Policy check no longer calls a tool.** `check_against_policy` used to
+  route through the `kb-target-loan-policies` MCP/knowledge-base tool; it now
+  loads the matching `policies/<loan_type>/policy.md` directly by `loan_type`
+  (see `policy_loader.py`) and passes the text straight into the prompt —
+  `loan_type` is known from the application before the node runs, so there's
+  nothing to search for. The three policy-check scenarios above have no
+  `expected_trajectory` for this reason (nothing to assert — no tool span is
+  produced), unlike the Companies House and web-search scenarios which still
+  call real tools and keep theirs.
 
 - `agentcore/evaluators/companies_house_correctness.json` — custom
   LLM-as-a-Judge evaluator (`fionaa_companies_house_correctness`, `TRACE`

@@ -27,7 +27,12 @@ from model.load import load_model
 
 from check_tools import CHECK_TOOLS_POOL
 from policy_loader import load_check_tool_names, load_policy_text
-from prompts import COMPANIES_HOUSE_PROMPT, POLICY_CHECK_PROMPT, WEB_SEARCH_PROMPT
+from prompts import (
+    COMPANIES_HOUSE_PROMPT,
+    FINANCIAL_ASSESSMENT_PROMPT,
+    POLICY_CHECK_PROMPT,
+    WEB_SEARCH_PROMPT,
+)
 from schemas import LoanType
 from security import CustomerIdentity
 from storage import ApplicationStore, PolicyDocStore
@@ -104,7 +109,12 @@ class CompaniesHouseResult(BaseModel):
         "or PSC. False if no such company could be confirmed."
     )
     confidence: str = Field(description="high, medium, or low")
-    summary: str = Field(description="Brief explanation of the finding, including any partial matches considered.")
+    summary: str = Field(
+        description="Explanation of the finding, including any partial matches considered. "
+        "When a company was found, must include the registered office address and the "
+        "director/PSC names — search_web uses these to disambiguate the company online, "
+        "not just the summary verdict."
+    )
 
 
 class ApplicationState(TypedDict, total=False):
@@ -113,6 +123,7 @@ class ApplicationState(TypedDict, total=False):
     policy_check: Annotated[dict[str, Any], _last_write_wins]
     companies_house: Annotated[dict[str, Any], _last_write_wins]
     companies_house_found: Annotated[bool, _last_write_wins]
+    financial_assessment: Annotated[dict[str, Any], _last_write_wins]
     web_search: Annotated[dict[str, Any], _last_write_wins]
     final_decision: Annotated[dict[str, Any], _last_write_wins]
 
@@ -204,7 +215,7 @@ async def check_against_policy(state: ApplicationState, runtime: Runtime[AgentCo
 
 async def check_companies_house(
     state: ApplicationState, runtime: Runtime[AgentContext]
-) -> Command[Literal["web_search", "reject_no_company"]]:
+) -> Command[Literal["financial_assessment", "reject_no_company"]]:
     application = state["application"]
 
     agent = create_agent(
@@ -234,7 +245,7 @@ async def check_companies_house(
 
     return Command(
         update={"companies_house": companies_house_result, "companies_house_found": result.found},
-        goto="web_search" if result.found else "reject_no_company",
+        goto="financial_assessment" if result.found else "reject_no_company",
     )
 
 
@@ -254,8 +265,53 @@ def reject_no_company(state: ApplicationState, runtime: Runtime[AgentContext]) -
     return {"final_decision": final_decision}
 
 
+async def check_financial_assessment(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict[str, Any]:
+    """Runs after companies_house (only reached on the `found` branch) so it
+    has both the application form and an independent Companies House lookup
+    to cross-check, plus compute_monthly_repayment from CHECK_TOOLS_POOL for
+    a deterministic affordability figure — see FINANCIAL_ASSESSMENT_PROMPT
+    for why this is scoped to those two sources rather than bank statements,
+    which aren't wired into this graph's state yet."""
+    application = state["application"]
+    companies_house = state.get("companies_house")
+    policy_check = state.get("policy_check")
+
+    agent = create_agent(
+        model=model,
+        tools=tools_for(CHECK_TOOLS_POOL, "compute_monthly_repayment"),
+        system_prompt=FINANCIAL_ASSESSMENT_PROMPT,
+    )
+
+    response = await agent.ainvoke(
+        {
+            "messages": [
+                HumanMessage(
+                    content=f"APPLICATION:\n{json.dumps(application)}\n\n"
+                    f"COMPANIES HOUSE FINDINGS:\n{json.dumps(companies_house)}\n\n"
+                    f"POLICY CHECK RESULT:\n{json.dumps(policy_check)}"
+                )
+            ]
+        }
+    )
+    messages = response["messages"]
+    financial_assessment_result = messages[-1].content
+
+    tool_calls = [
+        {"tool": m.name, "result": m.content}
+        for m in messages
+        if isinstance(m, ToolMessage)
+    ]
+
+    runtime.context.store.put_json(
+        "financial_assessment/result.json",
+        {"result": financial_assessment_result, "tool_calls": tool_calls},
+    )
+    return {"financial_assessment": financial_assessment_result}
+
+
 async def search_web(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict[str, Any]:
     company_name = state["application"]["company_name"]
+    companies_house = state.get("companies_house")
 
     agent = create_agent(
         model=model,
@@ -264,7 +320,14 @@ async def search_web(state: ApplicationState, runtime: Runtime[AgentContext]) ->
     )
 
     response = await agent.ainvoke(
-        {"messages": [HumanMessage(content=f"Company: {company_name}")]}
+        {
+            "messages": [
+                HumanMessage(
+                    content=f"Company: {company_name}\n\n"
+                    f"COMPANIES HOUSE FINDINGS:\n{json.dumps(companies_house)}"
+                )
+            ]
+        }
     )
 
     web_search_result = response["messages"][-1].content
@@ -302,6 +365,7 @@ def build_graph(checkpointer: Optional[BaseCheckpointSaver] = None):
     g.add_node("policy_check", check_against_policy)
     g.add_node("companies_house", check_companies_house)
     g.add_node("reject_no_company", reject_no_company)
+    g.add_node("financial_assessment", check_financial_assessment)
     g.add_node("web_search", search_web)
 
     g.add_edge(START, "load_application")
@@ -313,8 +377,12 @@ def build_graph(checkpointer: Optional[BaseCheckpointSaver] = None):
     # policy_check/result.json.
     g.add_edge("policy_check", "companies_house")
     # companies_house routes dynamically via the Command it returns —
-    # "web_search" if the company was confirmed, "reject_no_company"
-    # otherwise — so no static edge to either is declared here.
+    # "financial_assessment" if the company was confirmed, "reject_no_company"
+    # otherwise — so no static edge to either is declared here. Only the
+    # "found" branch reaches financial_assessment: it cross-checks the
+    # application against the companies_house findings, so it needs that
+    # node to have already run.
+    g.add_edge("financial_assessment", "web_search")
     g.add_edge("reject_no_company", END)
     g.add_edge("web_search", END)
     return g.compile(checkpointer=checkpointer)
