@@ -126,38 +126,52 @@ directly. See `../EVALS.md` for the full reasoning.
     policy) and `policy-check-secured-loan-uses-secured-policy-not-unsecured`
     (doesn't explicitly restate the 12-72 month term requirement). Same
     underlying gap as before, just less severe.
-  - **Companies-house dataset drift**: `companies-house-fuzzy-input-tolerant`
-    scores 0.0/0.0 on correctness/assertions -- not a new agent defect. The
-    fixture company (`GOODMAN'S CONSULTING LIMITED`, 08139267) is dissolved
-    in the live Companies House register with a real registered address in
-    Preston, Lancashire, not the fixture's "Manor Rd, Ruislip". Sonnet
-    correctly refuses to match a dissolved company at the wrong address
-    (`found=false`); Haiku previously landed on the "expected" `found=true`
-    answer, but for the wrong reasons -- the stricter model surfaced the
-    dataset drift rather than papering over it. Needs either a fixture
-    refresh (a still-active company) or an `expected_response` update to
-    reflect the dissolution.
-  - **Assertions written against the wrong `actual_output` shape**: two
-    companies-house scenarios (`companies-house-active-exact-match` at
-    0.8/1.0, `companies-house-fuzzy-input-reordered-name` at 0.3/1.0) get
-    marked down because their dataset assertions reference a nested
-    `companies_house.found` field, but `_run_companies_house` (see
-    `test_companies_house.py`) sets `actual_output` to the already-unwrapped
-    `found`/`confidence`/`summary` dict -- there is no outer
-    `companies_house` key to check. The judge is scoring a structural
-    mismatch between the dataset and the harness, not a real agent
-    shortcoming. Needs the affected assertions reworded to match the actual
-    (flat) output shape.
+  - **Fixed**: `companies-house-fuzzy-input-tolerant`'s dataset drift. It
+    previously scored 0.0/0.0 on correctness/assertions because its fixture
+    company (`GOODMAN'S CONSULTING LIMITED`, 08139267) is dissolved in the
+    live Companies House register with a real registered address in
+    Preston, Lancashire, not the fixture's claimed "Manor Rd, Ruislip".
+    Sonnet correctly refused to match a dissolved company at the wrong
+    address (`found=false`); Haiku previously landed on the "expected"
+    `found=true` answer, but for the wrong reasons -- the stricter model
+    surfaced the drift rather than papering over it. Fixed by repointing
+    the fixture at the same active company (`GOODAI CONSULTING LTD`,
+    17161121, verified live at find-and-update.company-information.service.gov.uk)
+    the other two Companies House fuzzy-match scenarios already use, with
+    the noise applied via a spacing/suffix variation ("Good AI Consulting
+    Limited" vs the registered "GoodAI Consulting Ltd") rather than a typo
+    -- an earlier attempt using a corrupted spelling ("Godai Consultin
+    Ltd") broke real matching outright (Companies House's own search
+    couldn't resolve it, `correctness_metric` dropped to 0.0) -- worth
+    remembering before making dataset fuzziness more aggressive.
+  - **Fixed**: assertions written against the wrong `actual_output` shape.
+    Every companies-house scenario's dataset assertions referenced a nested
+    `companies_house.found`/`companies_house.confidence` field, but
+    `_run_companies_house` (see `test_companies_house.py`) sets
+    `actual_output` to the already-unwrapped `found`/`confidence`/`summary`
+    dict -- there is no outer `companies_house` key to check. Reworded all
+    of them to the flat field names the harness actually produces.
   - `test_companies_house.py`'s `actual_output` only serializes the
     structured `found`/`confidence`/`summary` result, not the
     `Command(goto=...)` routing decision `check_companies_house` also
     makes -- so an assertion like "must route to reject_no_company rather
     than inventing a match" can't actually be verified from `actual_output`
-    alone. This is what's still marking down
-    `companies-house-fictitious-company-and-address` at 0.7/1.0 (confirmed:
-    the judge correctly flagged the routing decision as unverifiable rather
-    than false-passing it). Fix would be including the routing target in
-    `actual_output` alongside the structured result.
+    alone. Still open (needs including the routing target in `actual_output`
+    alongside the structured result) -- confirmed the judge correctly flags
+    this as unverifiable rather than false-passing it, but the exact score
+    it produces on `companies-house-fictitious-company-and-address` swings
+    run to run (seen 1.0, 0.7, and 0.3 across identical reruns).
+  - **New structural finding**: `assertions_metric`'s `threshold=1.0`
+    combined with GEval's continuous, non-deterministic judge scoring means
+    even a scenario with verifiably-correct `actual_output` and unambiguous
+    assertion wording can flip pass/fail run to run on identical input --
+    confirmed directly on `companies-house-fuzzy-input-tolerant` (1.0, then
+    0.4, then 1.0 across three reruns with no wording change in between).
+    Dataset/wording fixes reduce how often this bites but can't eliminate
+    it at `threshold=1.0`; this is worth a decision before CI wiring
+    (e.g. lowering `assertions_metric`'s threshold slightly to absorb
+    single-run judge noise, or accepting/retrying occasional flakes) rather
+    than something further dataset cleanup can fully solve.
 
 ## Running
 
