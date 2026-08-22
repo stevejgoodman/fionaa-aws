@@ -40,6 +40,13 @@ dev = [
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
     "ipykernel>=7.3.0",
+    # Node-level evals under fionaa/agentcore/deepeval_evals/ -- see that
+    # directory's README for how it relates to run_node_evals.py.
+    "deepeval>=4.1.8",
+    # Required by deepeval's AmazonBedrockModel (metrics.py's GEval judge) --
+    # not otherwise a fionaa dependency; ChatBedrockConverse uses botocore,
+    # not aiobotocore.
+    "aiobotocore>=2.15.0",
 ]
 
 [tool.pytest.ini_options]

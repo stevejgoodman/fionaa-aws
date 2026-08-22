@@ -2,7 +2,7 @@ from langchain_aws import ChatBedrockConverse
 
 # Uses global inference profile for Claude Sonnet 4.5
 # https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles-support.html
-MODEL_ID = "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+MODEL_ID = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
 
 
 def load_model() -> ChatBedrockConverse:

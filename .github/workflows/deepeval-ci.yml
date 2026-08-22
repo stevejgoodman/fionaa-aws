@@ -1,0 +1,110 @@
+name: deepeval-ci
+
+# PR-time run of fionaa/agentcore/deepeval_evals/ against real Bedrock and
+# the real AgentCore Gateway -- "Path 1" in deepeval_evals/README.md's CI
+# plan. Deliberately advisory (continue-on-error), not a merge gate: even
+# after loosening assertions_metric's threshold to 0.7, this is an
+# LLM-judge-scored eval, not a deterministic test suite, and shouldn't block
+# a PR the way a real test failure would. Revisit once it's run stably for
+# a while -- see deepeval_evals/README.md.
+#
+# test_financial_assessment.py is deliberately excluded: it collects zero
+# test cases until financial-assessment-* dataset scenarios exist (pytest
+# exits 5, "no tests ran", on an empty parametrize -- add it back once that
+# dataset gap is closed).
+#
+# AWS access is via GitHub's OIDC federation into the fionaa-deepeval-ci
+# role (see ../../ci-infra/), scoped to bedrock:InvokeModel/Converse on the
+# Sonnet 4.5 inference profile and secretsmanager:GetSecretValue on the one
+# Gateway OAuth client secret -- no static AWS keys anywhere in this repo.
+
+on:
+  pull_request:
+    paths:
+      - "fionaa/app/fionaa/**.py"
+      - "fionaa/app/fionaa/policies/**"
+      - "fionaa/app/fionaa/pyproject.toml"
+      - "fionaa/app/fionaa/uv.lock"
+      - "fionaa/agentcore/deepeval_evals/**"
+      - "fionaa/agentcore/datasets/fionaa_eval_dataset.jsonl"
+      - ".github/workflows/deepeval-ci.yml"
+  workflow_dispatch: {}
+
+permissions:
+  id-token: write # required for OIDC -> AssumeRoleWithWebIdentity
+  contents: read
+
+concurrency:
+  group: deepeval-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deepeval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v10.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_CI_ROLE_ARN }}
+          aws-region: us-east-1
+
+      # gateway.py/live_helpers.py read Gateway OAuth config from this exact
+      # file path (fionaa/agentcore/.env.local, gitignored) -- see
+      # tests/live_helpers.py's _ENV_LOCAL. Only non-secret config lands
+      # here; AGENTCORE_GATEWAY_CLIENT_SECRET_ARN is a Secrets Manager ARN
+      # reference, not the secret value -- gateway.py resolves the actual
+      # value at runtime via the assumed role's scoped GetSecretValue grant.
+      - name: Write Gateway OAuth config
+        working-directory: fionaa/agentcore
+        run: |
+          cat > .env.local <<EOF
+          AGENTCORE_GATEWAY_URL="${{ vars.AGENTCORE_GATEWAY_URL }}"
+          AGENTCORE_GATEWAY_TOKEN_ENDPOINT="${{ vars.AGENTCORE_GATEWAY_TOKEN_ENDPOINT }}"
+          AGENTCORE_GATEWAY_OAUTH_SCOPES="${{ vars.AGENTCORE_GATEWAY_OAUTH_SCOPES }}"
+          AGENTCORE_GATEWAY_CLIENT_ID="${{ vars.AGENTCORE_GATEWAY_CLIENT_ID }}"
+          AGENTCORE_GATEWAY_CLIENT_SECRET_ARN="${{ vars.AGENTCORE_GATEWAY_CLIENT_SECRET_ARN }}"
+          EOF
+
+      - name: Install dependencies
+        working-directory: fionaa/app/fionaa
+        run: uv sync --group dev
+
+      # One file at a time, not a matrix/parallel step -- deepeval_evals/README.md's
+      # "Known gaps" section documents why: concurrent processes sharing the
+      # same account-level Bedrock quota reproduces the throttling this
+      # harness was previously hitting even with conftest.py's widened
+      # per-process retry budget.
+      - name: Run deepeval_evals (advisory -- see deepeval_evals/README.md)
+        id: deepeval
+        working-directory: fionaa/agentcore
+        continue-on-error: true
+        run: |
+          set +e
+          overall=0
+          for f in test_companies_house.py test_policy_check.py test_web_search.py; do
+            echo "## \`$f\`" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            # Not `uv run --project ../app/fionaa` -- that performs its own
+            # implicit re-sync using uv's default group set, which strips
+            # dev-only deps (deepeval itself included) that the "Install
+            # dependencies" step above explicitly synced with --group dev.
+            # Invoking that venv's binary directly is deterministic instead.
+            ../app/fionaa/.venv/bin/deepeval test run "deepeval_evals/$f" 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+            rc=${PIPESTATUS[0]}
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            if [ "$rc" -ne 0 ]; then overall=1; fi
+          done
+          exit $overall
+        shell: bash
+
+      - name: Flag non-blocking eval failures
+        if: steps.deepeval.outcome == 'failure'
+        run: |
+          echo "::warning::deepeval_evals scored below threshold on at least one scenario -- see the job summary. Non-blocking for now, see deepeval_evals/README.md."
