@@ -1,0 +1,23 @@
+{
+  "name": "fionaa-ci-infra",
+  "version": "0.1.0",
+  "private": true,
+  "bin": {
+    "ci-infra": "dist/bin/ci-infra.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "clean": "rm -rf dist",
+    "cdk": "npm run build && cdk"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "aws-cdk": "2.1126.0",
+    "typescript": "~5.9.3"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.248.0",
+    "constructs": "^10.0.0"
+  }
+}
