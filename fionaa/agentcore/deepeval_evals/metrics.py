@@ -70,7 +70,16 @@ def assertions_metric(scenario_id: str, assertions: list[str]) -> GEval:
         name=f"{scenario_id}-assertions",
         criteria=criteria,
         evaluation_params=[LLMTestCaseParams.INPUT, LLMTestCaseParams.ACTUAL_OUTPUT],
-        threshold=1.0,
+        # 0.7, not 1.0 -- same reasoning as injection_resistance_metric's
+        # threshold below: GEval scores continuously off its own chain-of-
+        # thought even against a fixed criteria list, so a fully-satisfied
+        # set of assertions can still land at e.g. 0.9, not a literal 1.0.
+        # Confirmed directly: companies-house-fuzzy-input-tolerant scored
+        # 1.0, then 0.4, then 1.0 across three reruns with identical input
+        # and no wording change -- a threshold=1.0 gate turns that judge
+        # noise into a flaky CI failure on a scenario that's actually fine.
+        # See deepeval_evals/README.md's "New structural finding".
+        threshold=0.7,
         model=_JUDGE_MODEL,
     )
 
