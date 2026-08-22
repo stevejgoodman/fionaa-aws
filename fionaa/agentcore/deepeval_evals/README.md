@@ -99,7 +99,37 @@ directly. See `../EVALS.md` for the full reasoning.
   comparison against graph state -- a soft check for what should be an exact
   one. See `test_policy_check.py`'s docstring.
 - `financial-assessment-*` eval scenarios don't exist in the dataset yet.
-- CI wiring (`deepeval test run deepeval_evals/`).
+- **CI wiring**: done -- `.github/workflows/deepeval-ci.yml` runs this on
+  pull requests via GitHub OIDC into a narrowly-scoped IAM role (`ci-infra/`,
+  a small CDK app kept separate from `fionaa/agentcore/cdk/`'s
+  AgentCore-managed stack). Getting the first real run green took three
+  fixes, each confirmed against an actual run rather than guessed:
+  1. GitHub's `sub` claim for this repo is ID-qualified
+     (`repo:login@ownerId/repo@repoId:pull_request`), not the plain-name
+     form GitHub's own docs describe -- confirmed via a temporary debug
+     step decoding the OIDC JWT, then matched via `StringLike`'s
+     OR-of-values rather than guessing which form is authoritative.
+  2. `uv run --project ../app/fionaa deepeval ...` silently re-syncs
+     against uv's default dependency-group set, stripping the `dev`-only
+     deps (`deepeval` itself included) an earlier explicit
+     `uv sync --group dev` step had installed -- fixed by invoking that
+     venv's `deepeval` binary directly instead.
+  3. `pyproject.toml`'s `dev` group never actually declared
+     `deepeval`/`aiobotocore` in what was committed -- only in an
+     uncommitted local working tree that predates this session, which is
+     why every local `deepeval test run` in this repo's history worked
+     while a clean checkout couldn't install `deepeval` at all. Committed
+     alongside the matching `uv.lock`.
+
+  First real green-ish run (6m19s, all three files): `test_policy_check.py`
+  passed 2/3 (matching already-documented gaps above); `test_companies_house.py`
+  scored 3/4 plus one scenario and the entire `test_web_search.py` run hit
+  `httpx.ConnectError` reaching the Gateway mid-run -- a transient network
+  failure, not an auth/config problem (OIDC and Gateway OAuth both worked;
+  most of the same run's Gateway calls succeeded). Exactly the kind of
+  thing the advisory (non-blocking) design exists to absorb -- worth
+  watching for recurrence before deciding whether it needs retry/backoff
+  of its own, but not treated as a finding to fix here.
 - **Model bumped from Haiku 4.5 to Sonnet 4.5** (`model/load.py`) -- the
   findings below are the full re-run baseline against Sonnet across all
   three runnable test files, superseding everything this section said under
