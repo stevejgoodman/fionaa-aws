@@ -167,7 +167,7 @@ async def test_check_companies_house_calls_gateway_and_persists(monkeypatch):
     result = await g.check_companies_house(state, runtime)
 
     assert result.update == {"companies_house": fake_result, "companies_house_found": True}
-    assert result.goto == "web_search"
+    assert result.goto == "financial_assessment"
     assert store.data["companies_house/result.json"] == fake_result
     assert calls[0]["tools"] == fake_tools
     assert calls[1]["message_content"] == json.dumps(application)
@@ -210,6 +210,70 @@ def test_reject_no_company_persists_final_decision():
 
 
 # ---------------------------------------------------------------------------
+# Node: check_financial_assessment
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_check_financial_assessment_persists_and_returns_result(monkeypatch):
+    application = {"company_number": "12345678", "loan_amount": 10000, "loan_term": 24}
+    companies_house = {"found": True, "confidence": "high", "summary": "company is active"}
+    policy_check = "ELIGIBLE: meets all requirements"
+    store = FakeStore()
+    state = {"application": application, "companies_house": companies_house, "policy_check": policy_check}
+    runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
+    fake_result = "consistent"
+    calls = []
+
+    monkeypatch.setattr(g, "create_agent", make_fake_create_agent(fake_result, calls))
+
+    result = await g.check_financial_assessment(state, runtime)
+
+    assert result == {"financial_assessment": fake_result}
+    assert store.data["financial_assessment/result.json"] == {"result": fake_result, "tool_calls": []}
+    # Only the deterministic repayment tool is scoped in — no MCP tools here.
+    assert [t.name for t in calls[0]["tools"]] == ["compute_monthly_repayment"]
+    expected_content = (
+        f"APPLICATION:\n{json.dumps(application)}\n\n"
+        f"COMPANIES HOUSE FINDINGS:\n{json.dumps(companies_house)}\n\n"
+        f"POLICY CHECK RESULT:\n{json.dumps(policy_check)}"
+    )
+    assert calls[1]["message_content"] == expected_content
+
+
+@pytest.mark.asyncio
+async def test_check_financial_assessment_persists_tool_calls_as_evidence(monkeypatch):
+    application = {"loan_amount": 10000, "loan_term": 24}
+    companies_house = {"found": True, "confidence": "high", "summary": "company is active"}
+    store = FakeStore()
+    state = {"application": application, "companies_house": companies_house}
+    runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
+
+    class FakeAgentWithToolCall:
+        async def ainvoke(self, input):
+            return {
+                "messages": [
+                    input["messages"][0],
+                    ToolMessage(
+                        content="416.67",
+                        name="compute_monthly_repayment",
+                        tool_call_id="call-1",
+                    ),
+                    FakeMessage("consistent, affordable"),
+                ]
+            }
+
+    monkeypatch.setattr(g, "create_agent", lambda **kwargs: FakeAgentWithToolCall())
+
+    result = await g.check_financial_assessment(state, runtime)
+
+    assert result == {"financial_assessment": "consistent, affordable"}
+    assert store.data["financial_assessment/result.json"] == {
+        "result": "consistent, affordable",
+        "tool_calls": [{"tool": "compute_monthly_repayment", "result": "416.67"}],
+    }
+
+
+# ---------------------------------------------------------------------------
 # Node: search_web
 # ---------------------------------------------------------------------------
 
@@ -217,7 +281,12 @@ def test_reject_no_company_persists_final_decision():
 async def test_search_web_builds_query_from_company_name(monkeypatch):
     store = FakeStore()
     fake_tools = [FakeTool("websearch-target___WebSearch")]
-    state = {"application": {"company_name": "Acme Ltd"}}
+    companies_house = {
+        "found": True,
+        "confidence": "high",
+        "summary": "Registered office: 1 High St, London. Director: Jane Smith.",
+    }
+    state = {"application": {"company_name": "Acme Ltd"}, "companies_house": companies_house}
     runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=fake_tools))
     fake_result = "no adverse findings"
     calls = []
@@ -229,7 +298,11 @@ async def test_search_web_builds_query_from_company_name(monkeypatch):
     assert result == {"web_search": fake_result}
     assert store.data["web_search/result.json"] == fake_result
     assert calls[0]["tools"] == fake_tools
-    assert calls[1]["message_content"] == "Company: Acme Ltd"
+    expected_content = (
+        f"Company: Acme Ltd\n\n"
+        f"COMPANIES HOUSE FINDINGS:\n{json.dumps(companies_house)}"
+    )
+    assert calls[1]["message_content"] == expected_content
 
 
 # ---------------------------------------------------------------------------
@@ -264,11 +337,13 @@ async def test_build_graph_runs_all_nodes_in_order(monkeypatch, identity):
     # plain "ok" response into a generic passing CompaniesHouseResult.
     assert final_state["companies_house"]["found"] is True
     assert final_state["companies_house_found"] is True
+    assert final_state["financial_assessment"] == "ok"
     assert final_state["web_search"] == "ok"
     assert set(store.data) == {
         "input/application.json",
         "policy_check/result.json",
         "companies_house/result.json",
+        "financial_assessment/result.json",
         "web_search/result.json",
     }
 
@@ -301,4 +376,5 @@ async def test_build_graph_checkpoints_successfully_with_deps_in_context(monkeyp
     assert final_state["web_search"] == "ok"
     saved = await graph.aget_state(config)
     assert saved.values["policy_check"] == "ok"
+    assert saved.values["financial_assessment"] == "ok"
     assert saved.values["web_search"] == "ok"
