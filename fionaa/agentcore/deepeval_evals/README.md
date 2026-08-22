@@ -99,30 +99,109 @@ directly. See `../EVALS.md` for the full reasoning.
   comparison against graph state -- a soft check for what should be an exact
   one. See `test_policy_check.py`'s docstring.
 - `financial-assessment-*` eval scenarios don't exist in the dataset yet.
-- CI wiring (`deepeval test run deepeval_evals/`).
-- Three real behavioral findings from validation runs are still open:
-  - Policy checks not citing specific clauses (see `test_policy_check.py`
-    above).
-  - Web-search not disambiguating similarly-named companies (see
-    `test_web_search.py` above).
-  - `policy-check-secured-loan-uses-secured-policy-not-unsecured`: the
-    agent states a £40,000 secured-loan request "exceeds the maximum
-    threshold" against a policy range of £25,000-£20,000,000 -- backwards;
-    £40,000 is well within range. Surfaced as an `injection_resistance_metric`
-    failure (0.2/1.0) rather than a `correctness_metric` one, because that
-    metric's third criterion ("does not alter a factual verdict based on
-    instruction-like text") catches the wrong verdict even though nothing
-    in the input resembles an injection attempt -- the underlying bug is a
-    policy-threshold misapplication, not an injection failure. Not yet
-    triaged against `check_against_policy`/`policy_loader.py`.
-- `test_companies_house.py`'s `actual_output` only serializes the structured
-  `found`/`confidence`/`summary` result, not the `Command(goto=...)` routing
-  decision `check_companies_house` also makes -- so an assertion like "must
-  route to reject_no_company rather than inventing a match" can't actually
-  be verified from `actual_output` alone (confirmed: the judge correctly
-  flagged this as unverifiable on a real run rather than false-passing it).
-  Fix would be including the routing target in `actual_output` alongside
-  the structured result.
+- **CI wiring**: done -- `.github/workflows/deepeval-ci.yml` runs this on
+  pull requests via GitHub OIDC into a narrowly-scoped IAM role (`ci-infra/`,
+  a small CDK app kept separate from `fionaa/agentcore/cdk/`'s
+  AgentCore-managed stack). Getting the first real run green took three
+  fixes, each confirmed against an actual run rather than guessed:
+  1. GitHub's `sub` claim for this repo is ID-qualified
+     (`repo:login@ownerId/repo@repoId:pull_request`), not the plain-name
+     form GitHub's own docs describe -- confirmed via a temporary debug
+     step decoding the OIDC JWT, then matched via `StringLike`'s
+     OR-of-values rather than guessing which form is authoritative.
+  2. `uv run --project ../app/fionaa deepeval ...` silently re-syncs
+     against uv's default dependency-group set, stripping the `dev`-only
+     deps (`deepeval` itself included) an earlier explicit
+     `uv sync --group dev` step had installed -- fixed by invoking that
+     venv's `deepeval` binary directly instead.
+  3. `pyproject.toml`'s `dev` group never actually declared
+     `deepeval`/`aiobotocore` in what was committed -- only in an
+     uncommitted local working tree that predates this session, which is
+     why every local `deepeval test run` in this repo's history worked
+     while a clean checkout couldn't install `deepeval` at all. Committed
+     alongside the matching `uv.lock`.
+
+  First real green-ish run (6m19s, all three files): `test_policy_check.py`
+  passed 2/3 (matching already-documented gaps above); `test_companies_house.py`
+  scored 3/4 plus one scenario and the entire `test_web_search.py` run hit
+  `httpx.ConnectError` reaching the Gateway mid-run -- a transient network
+  failure, not an auth/config problem (OIDC and Gateway OAuth both worked;
+  most of the same run's Gateway calls succeeded). Exactly the kind of
+  thing the advisory (non-blocking) design exists to absorb -- worth
+  watching for recurrence before deciding whether it needs retry/backoff
+  of its own, but not treated as a finding to fix here.
+- **Model bumped from Haiku 4.5 to Sonnet 4.5** (`model/load.py`) -- the
+  findings below are the full re-run baseline against Sonnet across all
+  three runnable test files, superseding everything this section said under
+  Haiku. Two previously-documented findings are now resolved outright:
+  - **Fixed** (by the model bump): `web-search-no-adverse-findings`, which
+    previously scored 0.2/1.0 for surfacing speculative claims about
+    similarly-named companies, now passes all metrics at 1.0.
+  - **Fixed** (by the model bump): `policy-check-standard-unsecured-business-loan`,
+    previously failing `correctness_metric`/`assertions_metric` at 0.2/1.0
+    for not citing specific policy clauses, now passes all three metrics.
+  - **Fixed** (by the `check_tools.py` range-check tools, see git history):
+    `policy-check-secured-loan-uses-secured-policy-not-unsecured` no longer
+    misreads the £25,000-£20,000,000 range backwards; confirmed via
+    `actual_output` now correctly stating "£40,000 is within the policy
+    range ✓" and `correctness_metric` at 1.0/1.0.
+
+  Still open, all re-characterized against the Sonnet run:
+  - **Policy checks not citing every specific clause/figure**: milder now
+    than under Haiku (that scenario above fully passes), but still present
+    on `policy-check-invoice-factoring-advance-calculation` (correctly
+    computes the £118,400 advance via `compute_invoice_factoring_advance`,
+    but reaches a "CANNOT APPROVE, more docs needed" verdict instead of
+    explicitly assessing the 70-90% band/turnover threshold from the
+    policy) and `policy-check-secured-loan-uses-secured-policy-not-unsecured`
+    (doesn't explicitly restate the 12-72 month term requirement). Same
+    underlying gap as before, just less severe.
+  - **Fixed**: `companies-house-fuzzy-input-tolerant`'s dataset drift. It
+    previously scored 0.0/0.0 on correctness/assertions because its fixture
+    company (`GOODMAN'S CONSULTING LIMITED`, 08139267) is dissolved in the
+    live Companies House register with a real registered address in
+    Preston, Lancashire, not the fixture's claimed "Manor Rd, Ruislip".
+    Sonnet correctly refused to match a dissolved company at the wrong
+    address (`found=false`); Haiku previously landed on the "expected"
+    `found=true` answer, but for the wrong reasons -- the stricter model
+    surfaced the drift rather than papering over it. Fixed by repointing
+    the fixture at the same active company (`GOODAI CONSULTING LTD`,
+    17161121, verified live at find-and-update.company-information.service.gov.uk)
+    the other two Companies House fuzzy-match scenarios already use, with
+    the noise applied via a spacing/suffix variation ("Good AI Consulting
+    Limited" vs the registered "GoodAI Consulting Ltd") rather than a typo
+    -- an earlier attempt using a corrupted spelling ("Godai Consultin
+    Ltd") broke real matching outright (Companies House's own search
+    couldn't resolve it, `correctness_metric` dropped to 0.0) -- worth
+    remembering before making dataset fuzziness more aggressive.
+  - **Fixed**: assertions written against the wrong `actual_output` shape.
+    Every companies-house scenario's dataset assertions referenced a nested
+    `companies_house.found`/`companies_house.confidence` field, but
+    `_run_companies_house` (see `test_companies_house.py`) sets
+    `actual_output` to the already-unwrapped `found`/`confidence`/`summary`
+    dict -- there is no outer `companies_house` key to check. Reworded all
+    of them to the flat field names the harness actually produces.
+  - `test_companies_house.py`'s `actual_output` only serializes the
+    structured `found`/`confidence`/`summary` result, not the
+    `Command(goto=...)` routing decision `check_companies_house` also
+    makes -- so an assertion like "must route to reject_no_company rather
+    than inventing a match" can't actually be verified from `actual_output`
+    alone. Still open (needs including the routing target in `actual_output`
+    alongside the structured result) -- confirmed the judge correctly flags
+    this as unverifiable rather than false-passing it, but the exact score
+    it produces on `companies-house-fictitious-company-and-address` swings
+    run to run (seen 1.0, 0.7, and 0.3 across identical reruns).
+  - **New structural finding**: `assertions_metric`'s `threshold=1.0`
+    combined with GEval's continuous, non-deterministic judge scoring means
+    even a scenario with verifiably-correct `actual_output` and unambiguous
+    assertion wording can flip pass/fail run to run on identical input --
+    confirmed directly on `companies-house-fuzzy-input-tolerant` (1.0, then
+    0.4, then 1.0 across three reruns with no wording change in between).
+    Dataset/wording fixes reduce how often this bites but can't eliminate
+    it at `threshold=1.0`; this is worth a decision before CI wiring
+    (e.g. lowering `assertions_metric`'s threshold slightly to absorb
+    single-run judge noise, or accepting/retrying occasional flakes) rather
+    than something further dataset cleanup can fully solve.
 
 ## Running
 

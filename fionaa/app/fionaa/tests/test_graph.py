@@ -65,7 +65,8 @@ async def test_check_against_policy_persists_and_returns_result(monkeypatch):
     state = {"application": application}
     # No MCP tools in runtime.context.tools: policy text is loaded directly by
     # loan_type (policy_loader.py), not searched for. unsecured-business-loans
-    # also declares no check tools, so the agent gets none of those either.
+    # declares one check tool (check_unsecured_business_loan_amount_in_range,
+    # see check_tools.py/policy.md) -- the agent gets that one and no others.
     runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
     fake_result = "policy check passed"
     calls = []
@@ -76,7 +77,7 @@ async def test_check_against_policy_persists_and_returns_result(monkeypatch):
 
     assert result == {"policy_check": fake_result}
     assert store.data["policy_check/result.json"] == {"result": fake_result, "tool_calls": []}
-    assert calls[0]["tools"] == []
+    assert [t.name for t in calls[0]["tools"]] == ["check_unsecured_business_loan_amount_in_range"]
     expected_content = (
         f"POLICY:\n{g.load_policy_text(g.LoanType.unsecured_business_loans)}\n\n"
         f"APPLICATION:\n{json.dumps(application)}"
