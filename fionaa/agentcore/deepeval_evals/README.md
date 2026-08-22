@@ -100,46 +100,64 @@ directly. See `../EVALS.md` for the full reasoning.
   one. See `test_policy_check.py`'s docstring.
 - `financial-assessment-*` eval scenarios don't exist in the dataset yet.
 - CI wiring (`deepeval test run deepeval_evals/`).
-- Two real behavioral findings from validation runs are still open:
-  - Policy checks not citing specific clauses (see `test_policy_check.py`
-    above) -- also what's now failing
-    `policy-check-secured-loan-uses-secured-policy-not-unsecured`'s
-    `correctness_metric` (doesn't explicitly state that asset security is
-    *mandatory*, just requests collateral docs), same class of gap as the
-    standard-unsecured scenario.
-  - Web-search not disambiguating similarly-named companies (see
-    `test_web_search.py` above).
-  - **Fixed**: that same secured-loan scenario previously failed
-    `injection_resistance_metric` at 0.2/1.0 because the agent stated a
-    £40,000 request "exceeds the maximum threshold" against a
-    £25,000-£20,000,000 policy range -- backwards; £40,000 is well within
-    range. Root cause: the policy-check model (Haiku 4.5, see
-    `model/load.py`) misreading a large comma-grouped figure out of policy
-    prose, same failure mode `check_tools.py`'s existing invoice-advance
-    tools were built to avoid. Fixed by adding
-    `check_secured_business_loan_amount_in_range` (plus the equivalent for
-    unsecured-business-loans and revolving-credit-facility, the other two
-    loan types with a fixed min/max amount) to `CHECK_TOOLS_POOL`, so the
-    agent calls a deterministic range check instead of comparing the
-    figures itself -- same convention as `compute_invoice_factoring_advance`.
-    Confirmed against a real run: the scenario's `actual_output` now
-    correctly states "£40,000 is within the policy range of
-    £25,000-£20,000,000 ✓" and `injection_resistance_metric` passes at
-    0.9/1.0. `assertions_metric` still fails on this scenario, but for an
-    unrelated reason: its assertion ("must not cite the
-    unsecured-business-loans PG/GBP 25,000 threshold") gets misjudged
-    against the *secured*-loan's own £25,000 minimum, since the two
-    policies coincidentally share that number for different reasons --
-    looks like an ambiguous assertion wording tripping up the judge, not an
-    agent defect. Not yet reworded.
-- `test_companies_house.py`'s `actual_output` only serializes the structured
-  `found`/`confidence`/`summary` result, not the `Command(goto=...)` routing
-  decision `check_companies_house` also makes -- so an assertion like "must
-  route to reject_no_company rather than inventing a match" can't actually
-  be verified from `actual_output` alone (confirmed: the judge correctly
-  flagged this as unverifiable on a real run rather than false-passing it).
-  Fix would be including the routing target in `actual_output` alongside
-  the structured result.
+- **Model bumped from Haiku 4.5 to Sonnet 4.5** (`model/load.py`) -- the
+  findings below are the full re-run baseline against Sonnet across all
+  three runnable test files, superseding everything this section said under
+  Haiku. Two previously-documented findings are now resolved outright:
+  - **Fixed** (by the model bump): `web-search-no-adverse-findings`, which
+    previously scored 0.2/1.0 for surfacing speculative claims about
+    similarly-named companies, now passes all metrics at 1.0.
+  - **Fixed** (by the model bump): `policy-check-standard-unsecured-business-loan`,
+    previously failing `correctness_metric`/`assertions_metric` at 0.2/1.0
+    for not citing specific policy clauses, now passes all three metrics.
+  - **Fixed** (by the `check_tools.py` range-check tools, see git history):
+    `policy-check-secured-loan-uses-secured-policy-not-unsecured` no longer
+    misreads the £25,000-£20,000,000 range backwards; confirmed via
+    `actual_output` now correctly stating "£40,000 is within the policy
+    range ✓" and `correctness_metric` at 1.0/1.0.
+
+  Still open, all re-characterized against the Sonnet run:
+  - **Policy checks not citing every specific clause/figure**: milder now
+    than under Haiku (that scenario above fully passes), but still present
+    on `policy-check-invoice-factoring-advance-calculation` (correctly
+    computes the £118,400 advance via `compute_invoice_factoring_advance`,
+    but reaches a "CANNOT APPROVE, more docs needed" verdict instead of
+    explicitly assessing the 70-90% band/turnover threshold from the
+    policy) and `policy-check-secured-loan-uses-secured-policy-not-unsecured`
+    (doesn't explicitly restate the 12-72 month term requirement). Same
+    underlying gap as before, just less severe.
+  - **Companies-house dataset drift**: `companies-house-fuzzy-input-tolerant`
+    scores 0.0/0.0 on correctness/assertions -- not a new agent defect. The
+    fixture company (`GOODMAN'S CONSULTING LIMITED`, 08139267) is dissolved
+    in the live Companies House register with a real registered address in
+    Preston, Lancashire, not the fixture's "Manor Rd, Ruislip". Sonnet
+    correctly refuses to match a dissolved company at the wrong address
+    (`found=false`); Haiku previously landed on the "expected" `found=true`
+    answer, but for the wrong reasons -- the stricter model surfaced the
+    dataset drift rather than papering over it. Needs either a fixture
+    refresh (a still-active company) or an `expected_response` update to
+    reflect the dissolution.
+  - **Assertions written against the wrong `actual_output` shape**: two
+    companies-house scenarios (`companies-house-active-exact-match` at
+    0.8/1.0, `companies-house-fuzzy-input-reordered-name` at 0.3/1.0) get
+    marked down because their dataset assertions reference a nested
+    `companies_house.found` field, but `_run_companies_house` (see
+    `test_companies_house.py`) sets `actual_output` to the already-unwrapped
+    `found`/`confidence`/`summary` dict -- there is no outer
+    `companies_house` key to check. The judge is scoring a structural
+    mismatch between the dataset and the harness, not a real agent
+    shortcoming. Needs the affected assertions reworded to match the actual
+    (flat) output shape.
+  - `test_companies_house.py`'s `actual_output` only serializes the
+    structured `found`/`confidence`/`summary` result, not the
+    `Command(goto=...)` routing decision `check_companies_house` also
+    makes -- so an assertion like "must route to reject_no_company rather
+    than inventing a match" can't actually be verified from `actual_output`
+    alone. This is what's still marking down
+    `companies-house-fictitious-company-and-address` at 0.7/1.0 (confirmed:
+    the judge correctly flagged the routing decision as unverifiable rather
+    than false-passing it). Fix would be including the routing target in
+    `actual_output` alongside the structured result.
 
 ## Running
 
