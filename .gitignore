@@ -32,3 +32,6 @@ fionaa/app/fionaa/application_forms.json
 # Editor / tooling
 .claude/
 .mypy_cache/
+
+# DeepEval run cache/output
+fionaa/agentcore/.deepeval/
