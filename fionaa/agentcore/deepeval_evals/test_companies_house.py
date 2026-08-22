@@ -109,4 +109,6 @@ async def test_companies_house_scenario(golden):
     if expected_tools:
         metrics.append(ToolPrefixCorrectness())
 
-    assert_test(test_case, metrics)
+    # run_async=False: serialize this scenario's own metrics (up to 4 judge
+    # calls) instead of firing them concurrently -- see conftest.py.
+    assert_test(test_case, metrics, run_async=False)
