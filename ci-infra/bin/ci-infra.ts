@@ -10,6 +10,11 @@ const region = 'us-east-1'; // matches metrics.py's _JUDGE_MODEL region and mode
 new GitHubOidcStack(app, 'FionaaGitHubOidcCi', {
   env: { account, region },
   githubRepo: 'stevejgoodman/fionaa-aws',
+  // From: gh api repos/stevejgoodman/fionaa-aws --jq '{owner_login: .owner.login, owner_id: .owner.id, repo_name: .name, repo_id: .id}'
+  githubOwnerLogin: 'stevejgoodman',
+  githubOwnerId: 7223202,
+  githubRepoName: 'fionaa-aws',
+  githubRepoId: 1307842866,
   // Same cross-region inference profile model/load.py's MODEL_ID and
   // metrics.py's _JUDGE_MODEL both resolve to -- see fionaa/app/fionaa/model/load.py.
   bedrockInferenceProfileArn: `arn:aws:bedrock:${region}:${account}:inference-profile/us.anthropic.claude-sonnet-4-5-20250929-v1:0`,

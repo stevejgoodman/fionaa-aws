@@ -3,8 +3,17 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 
 export interface GitHubOidcStackProps extends StackProps {
-  /** e.g. "stevejgoodman/fionaa-aws" */
+  /** e.g. "stevejgoodman/fionaa-aws" -- used for the plain-name sub form. */
   readonly githubRepo: string;
+  /**
+   * ID-qualified sub-claim components (see the trust condition below for
+   * why both forms are matched). Fetch via:
+   *   gh api repos/OWNER/REPO --jq '{owner_login: .owner.login, owner_id: .owner.id, repo_name: .name, repo_id: .id}'
+   */
+  readonly githubOwnerLogin: string;
+  readonly githubOwnerId: number;
+  readonly githubRepoName: string;
+  readonly githubRepoId: number;
   /** ARN of the AmazonBedrockModel judge / graph.py model's cross-region inference profile. */
   readonly bedrockInferenceProfileArn: string;
   /** Underlying foundation-model ARN(s) the inference profile can route to (region-wildcarded). */
@@ -45,18 +54,27 @@ export class GitHubOidcStack extends Stack {
       clientIds: ['sts.amazonaws.com'],
     });
 
-    // Trust scoped to pull_request runs on this exact repo only -- GitHub's
-    // `sub` claim for a PR-triggered run is literally "repo:OWNER/REPO:pull_request"
-    // (see https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect#understanding-the-oidc-token).
-    // Widen this (e.g. add "repo:OWNER/REPO:ref:refs/heads/master") only
-    // when a post-merge/nightly job (Path 2) is actually wired -- see
-    // deepeval_evals/README.md.
+    // Trust scoped to pull_request runs on this exact repo only. GitHub's
+    // docs describe the `sub` claim for a PR-triggered run as literally
+    // "repo:OWNER/REPO:pull_request" -- but a real run against this repo
+    // (2026-08-22) actually issued
+    // "repo:stevejgoodman@7223202/fionaa-aws@1307842866:pull_request", an
+    // ID-qualified format (login@ownerId/repo@repoId), not the plain-name
+    // one the docs show. Matching both forms via StringLike's OR-of-values
+    // rather than guessing which one is current -- confirmed empirically
+    // via a temporary debug step (actions/github-script decoding
+    // core.getIDToken()'s JWT payload) after the plain-name-only version of
+    // this condition produced "Not authorized to perform
+    // sts:AssumeRoleWithWebIdentity" on every run.
     const principal = new iam.WebIdentityPrincipal(provider.openIdConnectProviderArn, {
       StringEquals: {
         'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com',
       },
       StringLike: {
-        'token.actions.githubusercontent.com:sub': `repo:${props.githubRepo}:pull_request`,
+        'token.actions.githubusercontent.com:sub': [
+          `repo:${props.githubRepo}:pull_request`,
+          `repo:${props.githubOwnerLogin}@${props.githubOwnerId}/${props.githubRepoName}@${props.githubRepoId}:pull_request`,
+        ],
       },
     });
 
