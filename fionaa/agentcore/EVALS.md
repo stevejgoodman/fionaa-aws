@@ -148,3 +148,131 @@ changed.
 
 After deploying, `agentcore status --type dataset` and `agentcore status
 --type evaluator` show the created resources.
+
+## Path 2 plan: post-deploy batch-evaluation gate
+
+Path 1 (`deepeval_evals/`) calls node functions directly, bypassing the
+deployed runtime — fast and PR-time, but it never proves the actual deployed
+artifact behaves correctly. Path 2 invokes the real Runtime and gates on
+`batch-evaluation` scores against real sessions — the higher-fidelity check
+that validates what's about to take production traffic. Not started yet;
+this section is the plan, written before any of it exists.
+
+### Constraints that shape the design (confirmed against current code)
+
+- **`FionaaDataAccessRole`'s trust policy only trusts the Runtime's execution
+  role** (`fionaa_iam_policies.md` §2) — a CI role cannot assume it to stage
+  data the way the app itself would. Don't widen that trust policy for CI;
+  it's a customer-isolation security boundary, not a place to bolt on
+  unrelated access. Instead, per gotcha #10 in `agentcore_deploy_gotchas`:
+  give the CI role its own narrow grant (`s3:PutObject` on a reserved
+  disposable prefix + `kms:GenerateDataKey`/`kms:Encrypt` on the applications
+  KMS key) and write `input/application.json` directly with the CI role's
+  own credentials, setting the *same* `SSEKMSEncryptionContext` the app
+  would (`storage.py`'s `put_json` shows the exact shape). The KMS key's
+  default policy grants the account root full access, so this round-trips
+  fine for the real app's later scoped read.
+- **`customer_id` is `sha256(email claim)` from a verified JWT**
+  (`security.py`), never caller-supplied — staging and invoking must agree
+  on one fixed disposable identity. Need one throwaway Cognito user
+  provisioned once (not per CI run) with a fixed, obviously-synthetic email
+  (e.g. `eval-harness@fionaa-ci.invalid`), so `customer_id` is deterministic
+  and known ahead of time for staging. `application_id` should be freshly
+  randomly generated per scenario per run to avoid collisions across
+  concurrent/historical CI runs.
+- **Getting a real JWT means `cognito-idp:AdminInitiateAuth`
+  (`ADMIN_USER_PASSWORD_AUTH`) against that throwaway user, grabbing
+  `AuthenticationResult.IdToken`** (not `AccessToken` — gotcha #12) — the CI
+  role needs that action scoped to the one user pool/user, nothing broader.
+- **`agentcore invoke`/`run eval --dataset` can't drive fionaa's actual
+  payload shape** (gotcha #8, and this doc's caveat above) — invocation has
+  to POST directly to the Runtime's `/invocations` endpoint with
+  `Authorization: Bearer <id_token>` and a
+  `X-Amzn-Bedrock-AgentCore-Runtime-Session-Id` header (≥33 chars,
+  deterministic per scenario e.g. `eval-<scenario_id>-<run_id>` so sessions
+  are traceable back to scenarios afterward).
+- **`agentcore deploy`'s non-deterministic repackaging** (this doc's
+  "Heads up" above) means every CI run would look like a deploy happened
+  even when `app/fionaa` didn't change. Root-cause it if possible (likely
+  zip mtime/ordering nondeterminism in the CLI's packaging step — worth a
+  short investigation, but may be a toolchain limitation outside this repo's
+  control). Regardless of root cause, mitigate the same way
+  `deepeval-ci.yml` already scopes its trigger: only run the deploy+gate
+  pipeline on pushes that touch `app/fionaa/**`, `agentcore/agentcore.json`,
+  `agentcore/evaluators/**`, or `agentcore/datasets/**` — don't deploy (and
+  don't burn a batch-evaluation run) on unrelated pushes to `master`.
+
+### Work items, roughly in order
+
+1. **Investigate the `agentcore deploy` packaging non-determinism** far
+   enough to either fix it or confirm it's a toolchain limitation to work
+   around via path-filtered triggers (above). Time-boxed — don't let this
+   block everything else if it turns out to be outside this repo's control.
+2. **One-time manual setup (not CDK, not repeatable infra):** create the
+   throwaway Cognito user for the disposable eval identity in the existing
+   user pool. Document the email/customer_id pair (customer_id is derived,
+   not chosen) somewhere durable — this doc or a memory, not just left in
+   someone's shell history.
+3. **New CDK stack in `ci-infra/`** (own file/stack, same pattern as
+   `github-oidc-stack.ts`, not bolted onto `fionaa/agentcore/cdk/`):
+   - Trust: GitHub OIDC, scoped to `push`/`workflow_dispatch` on `master`
+     (broader than Path 1's `pull_request`-only trust — reuse the existing
+     OIDC provider, don't recreate it).
+   - `bedrock-agentcore:InvokeAgentRuntime` scoped to the fionaa runtime ARN.
+   - `s3:PutObject` scoped to `fionaa-applications/<eval-harness-customer-id>/*`
+     + `kms:GenerateDataKey`/`kms:Encrypt` on the applications KMS key.
+   - `cognito-idp:AdminInitiateAuth` scoped to the one throwaway user/pool.
+   - `bedrock-agentcore:*BatchEvaluation*` (and whatever read/list actions
+     `agentcore run batch-evaluation` needs — check its actual API calls
+     rather than guessing the action list).
+   - Deliberately no broader S3/data access than that — same "narrow scope"
+     principle as `github-oidc-stack.ts`.
+4. **Staging + invoke script** (Python, lives under `agentcore/`): for each
+   dataset scenario, `put_object` its `application` dict as
+   `input/application.json` under the disposable prefix with a fresh
+   `application_id`, `AdminInitiateAuth` for the ID token, POST to
+   `/invocations` with that token + a deterministic session-id header,
+   collect `{scenario_id: session_id}`.
+5. **Ground-truth mapping file**: build the
+   `session_id -> expected_response/assertions` JSON `batch-evaluation`
+   wants, straight from the dataset's existing per-scenario fields — no new
+   ground truth to author, same content Path 1 already reuses.
+6. **Run `agentcore run batch-evaluation`** against the resulting sessions
+   with `--evaluator fionaa_companies_house_correctness
+   fionaa_injection_resistance` first (the two already deployed), verify
+   scores manually end-to-end at least once directly against AWS before
+   wiring anything into CI — per the standing rule of never trusting a
+   fix/pipeline without a real run against real Bedrock/Gateway.
+7. **Add AgentCore-native evaluators** worth including:
+   `ThirdParty.DeepEval.*`/`AutoEval.*` — `ToolUse`, `TaskCompletion`, and
+   especially `PIILeakage` (applications carry `applicant_name`/
+   `registered_address`). These are AWS's own reimplementation, distinct
+   from the pip `deepeval` package Path 1 uses — see
+   `deepeval_evals/README.md`'s opening section for that distinction. Watch
+   for the `{assistant_turn}` gotcha documented above (resolves to the last
+   node's response, `web_search`, not necessarily the node being graded) on
+   any new `TRACE`-level evaluator — apply the same `{context}`-scoped
+   instruction pattern already used for
+   `fionaa_companies_house_correctness`.
+8. **CI workflow**: new `.github/workflows/` file (own file, different
+   triggers/permissions from `deepeval-ci.yml` — push-to-master or
+   post-merge, not `pull_request`), path-filtered per the mitigation above.
+   Steps: assume the new role → `agentcore deploy -y` → stage + invoke →
+   batch-evaluate → parse scores → **fail the job on bad scores**. Unlike
+   Path 1 (deliberately advisory,`continue-on-error`), this gates, since it
+   validates what's about to take production traffic — don't default it to
+   advisory.
+9. **Cleanup/retention**: disposable scenario data lands in the *real*
+   applications bucket under the reserved prefix. Add an S3 lifecycle rule
+   scoped to that prefix (or an explicit delete step post-eval) so CI runs
+   don't accumulate test data in production storage indefinitely.
+
+### Existing AWS resources to reuse
+
+- Runtime: `fionaa_fionaa-xjO2ci9fd3`
+- Memory: `fionaa_FionaaCheckpoint-3GY4rX79ck`
+- Evaluators already deployed: `fionaa_injection_resistance`,
+  `fionaa_companies_house_correctness`
+- Dataset: `fionaa_fionaa_eval_dataset-MBsNVJBQmZ`
+
+(see `.cli/deployed-state.json` for current ARNs/IDs)
