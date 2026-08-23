@@ -223,11 +223,26 @@ this section is the plan, written before any of it exists.
    latest upstream version, confirmed the CLI's own skip-check doesn't apply
    to `runtimes`-type projects. Mitigation is the path-filtered trigger
    above — no further action needed here before moving on.
-2. **One-time manual setup (not CDK, not repeatable infra):** create the
-   throwaway Cognito user for the disposable eval identity in the existing
-   user pool. Document the email/customer_id pair (customer_id is derived,
-   not chosen) somewhere durable — this doc or a memory, not just left in
-   someone's shell history.
+2. ~~One-time manual setup: create the throwaway Cognito user~~ — **done**.
+   Created `fionaa-eval-ci@example.com` in the existing pool
+   (`us-east-1_QdHqgzqUA`, app client `14dnsnarjq6povfqeisdtvs07a`
+   /`fionaa-test-client`, which already has `ALLOW_ADMIN_USER_PASSWORD_AUTH`)
+   with a permanent password, `email_verified=true`. Derived
+   `customer_id = sha256("fionaa-eval-ci@example.com")` =
+   `17deb75df387eafcea144caa24f896e85216c2622721c6c33c6c1b8cd73eae18` — this
+   is the fixed S3 prefix (`fionaa-applications/17deb75.../*`) Path 2's
+   staging step writes under and the CI role's IAM grant (work item 3) needs
+   to scope to. The password itself lives in Secrets Manager
+   (`fionaa/eval-harness-cognito-credentials`, ARN:
+   `arn:aws:secretsmanager:us-east-1:492646066653:secret:fionaa/eval-harness-cognito-credentials-8NACSV`,
+   `{"username": ..., "password": ...}` shape) — not written here or
+   anywhere in the repo. Verified end-to-end: `AdminInitiateAuth` with
+   `ADMIN_USER_PASSWORD_AUTH` returns an `IdToken` whose `email`/`aud` claims
+   match, confirming the derived `customer_id` above. The CI role (work item
+   3) needs `cognito-idp:AdminInitiateAuth` scoped to this one user/pool
+   *and* `secretsmanager:GetSecretValue` on the credentials secret above (the
+   same pattern `github-oidc-stack.ts` already uses for the Gateway OAuth
+   secret).
 3. **New CDK stack in `ci-infra/`** (own file/stack, same pattern as
    `github-oidc-stack.ts`, not bolted onto `fionaa/agentcore/cdk/`):
    - Trust: GitHub OIDC, scoped to `push`/`workflow_dispatch` on `master`
