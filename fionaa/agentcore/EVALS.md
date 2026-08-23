@@ -191,23 +191,38 @@ this section is the plan, written before any of it exists.
   `X-Amzn-Bedrock-AgentCore-Runtime-Session-Id` header (≥33 chars,
   deterministic per scenario e.g. `eval-<scenario_id>-<run_id>` so sessions
   are traceable back to scenarios afterward).
-- **`agentcore deploy`'s non-deterministic repackaging** (this doc's
-  "Heads up" above) means every CI run would look like a deploy happened
-  even when `app/fionaa` didn't change. Root-cause it if possible (likely
-  zip mtime/ordering nondeterminism in the CLI's packaging step — worth a
-  short investigation, but may be a toolchain limitation outside this repo's
-  control). Regardless of root cause, mitigate the same way
-  `deepeval-ci.yml` already scopes its trigger: only run the deploy+gate
-  pipeline on pushes that touch `app/fionaa/**`, `agentcore/agentcore.json`,
-  `agentcore/evaluators/**`, or `agentcore/datasets/**` — don't deploy (and
-  don't burn a batch-evaluation run) on unrelated pushes to `master`.
+- **`agentcore deploy`'s non-deterministic repackaging is root-caused and
+  confirmed unfixable from this repo.** Decompiled the installed CLI
+  (`@aws/agentcore` 0.24.1, the npm package behind the `agentcore` binary):
+  its packaging step walks the source tree building zip entries as
+  `[fileContents, {level: 6}]` — no `mtime` field — and its bundled
+  `fflate`-derived zip writer falls back to `Date.now()` whenever an entry's
+  `mtime` is unset. So every `agentcore deploy` bakes the current wall-clock
+  time into every zip entry's header, changing the packaged artifact's bytes
+  (and its S3 key/hash) on every run regardless of whether `app/fionaa`
+  actually changed. Confirmed still present in the latest published version
+  (0.27.1, fetched via `npm pack` for comparison) — not fixed upstream, not
+  something an upgrade solves. The CLI does have a content-hash-based skip
+  check (`computeProjectDeployHash`/`isDeploySkippable`), but it explicitly
+  returns "not skippable" whenever the project defines any `runtimes` (which
+  is fionaa's deployment type — it's scoped to the newer `harnesses` project
+  type instead) and is wired only into the interactive `agentcore dev`
+  auto-deploy decision, not the `deploy` command. **Verdict: genuine upstream
+  bug, outside this repo's control, not worth further investigation.**
+  Mitigate the same way `deepeval-ci.yml` already scopes its trigger: only
+  run the deploy+gate pipeline on pushes that touch `app/fionaa/**`,
+  `agentcore/agentcore.json`, `agentcore/evaluators/**`, or
+  `agentcore/datasets/**` — don't deploy (and don't burn a batch-evaluation
+  run) on unrelated pushes to `master`.
 
 ### Work items, roughly in order
 
-1. **Investigate the `agentcore deploy` packaging non-determinism** far
-   enough to either fix it or confirm it's a toolchain limitation to work
-   around via path-filtered triggers (above). Time-boxed — don't let this
-   block everything else if it turns out to be outside this repo's control.
+1. ~~Investigate the `agentcore deploy` packaging non-determinism~~ — **done**,
+   see above: confirmed root cause (zip entry `mtime` defaults to
+   `Date.now()` in the CLI's bundled zip writer), confirmed unfixed in the
+   latest upstream version, confirmed the CLI's own skip-check doesn't apply
+   to `runtimes`-type projects. Mitigation is the path-filtered trigger
+   above — no further action needed here before moving on.
 2. **One-time manual setup (not CDK, not repeatable infra):** create the
    throwaway Cognito user for the disposable eval identity in the existing
    user pool. Document the email/customer_id pair (customer_id is derived,
