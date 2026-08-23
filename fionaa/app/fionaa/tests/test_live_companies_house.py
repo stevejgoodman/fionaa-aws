@@ -47,7 +47,7 @@ async def test_finds_real_company_with_correct_details(application):
     result = await _run(application)
 
     assert result.update["companies_house_found"] is True
-    assert result.goto == "web_search"
+    assert result.goto == "financial_assessment"
     assert result.update["companies_house"]["confidence"] in {"high", "medium"}
 
 
@@ -62,10 +62,10 @@ FUZZY_REAL_APPLICATIONS = [
         {
             # casing/spacing variant of "GoodAI", no company number, minor
             # applicant name shortening ("Steve" -> "Stephen"), minor
-            # street-name typo (Drive vs Road). Company/address noise is
-            # tolerated fine; known to currently fail on the applicant name
-            # ("Stephen Goodman" vs the officer on file, "Steve Goodman") —
-            # matching logic needs to tolerate this too.
+            # street-name variant (Drive vs Road). All tolerated: name
+            # fuzzy-matches the officer/PSC on file, and the address
+            # resolves via geo-target___CheckSameArea to ~0.8km apart in
+            # the same area — not a wrong address, just loosely phrased.
             "company_name": "Good ai Consulting",
             "applicant_name": "Stephen Goodman",
             "registered_address": "Manor Drive Ruislip",
@@ -99,7 +99,7 @@ async def test_finds_real_company_despite_minor_input_mistakes(application):
         f"expected the agent to tolerate the input noise and still find the "
         f"company; got: {result.update['companies_house']}"
     )
-    assert result.goto == "web_search"
+    assert result.goto == "financial_assessment"
 
 
 # ---------------------------------------------------------------------------

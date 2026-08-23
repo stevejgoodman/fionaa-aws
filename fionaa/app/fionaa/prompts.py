@@ -51,15 +51,6 @@ WEB_SEARCH_PROMPT = """
 
 
 
-__all__ = [
-    "ELIGIBILITY_PROMPT",
-    "FINANCIAL_ASSESSMENT_PROMPT",
-    "COMPANIES_HOUSE_PROMPT",
-    "INTERNET_SEARCH_PROMPT",
-    "RESEARCH_PROMPT",
-]
-
-
 import datetime
 TODAYS_DATE = datetime.date.today().isoformat()
 
@@ -193,7 +184,9 @@ Record the following for the matched company:
 ## STEP 3 — Consistency checks
 Cross-reference Companies House data against the user details provided:
 - Length of time in business matches the application
-- Company status confirms it is a going concern
+- Note whether the company is a going concern (active) or not (dissolved, insolvent, in
+  administration) — this is a flag for Step 4, not a reason by itself to say the company
+  wasn't found. See "found vs. active" below.
 - Director / PSC names and roles match those on the application form
 - Address discrepancies (flag but do not disqualify)
 
@@ -214,8 +207,16 @@ completed and every flag category in Step 4 has been explicitly checked.
 Consider:
 The company number may be missing or wrong, active or inactive, and the company name may be misspelled or a trading name rather than the registered name.
 Searchby name first if the company number doesn't resolve.
-The applicant's given address may name a town or city more loosely than the address on file. 
+The applicant's given address may name a town or city more loosely than the address on file.
 Before treating an address difference as a red flag, use geo-target___CheckSameArea to check whether the two places are the same administrative area.
+
+**found vs. active — do not conflate these.** `found` means the company and the named
+applicant (as officer or PSC) were both identified with confidence in Companies House — it is
+an identity check, not a trading-status check. A dissolved, insolvent, or otherwise inactive
+company whose identity and officer/PSC match is still `found=True`; record the inactive status
+as a flag in the summary (and reflect it in `confidence` if it undermines the assessment), but
+do not set `found=False` on that basis alone. Only set `found=False` when the company or the
+applicant's link to it could not be confirmed at all.
 
 You have access to the CompaniesHouse___* tool
 </Task>
