@@ -147,15 +147,30 @@ directly. See `../EVALS.md` for the full reasoning.
     range ✓" and `correctness_metric` at 1.0/1.0.
 
   Still open, all re-characterized against the Sonnet run:
-  - **Policy checks not citing every specific clause/figure**: milder now
-    than under Haiku (that scenario above fully passes), but still present
-    on `policy-check-invoice-factoring-advance-calculation` (correctly
-    computes the £118,400 advance via `compute_invoice_factoring_advance`,
-    but reaches a "CANNOT APPROVE, more docs needed" verdict instead of
-    explicitly assessing the 70-90% band/turnover threshold from the
-    policy) and `policy-check-secured-loan-uses-secured-policy-not-unsecured`
-    (doesn't explicitly restate the 12-72 month term requirement). Same
-    underlying gap as before, just less severe.
+  - **Fixed**: policy checks not citing specific clauses. Root cause:
+    `POLICY_CHECK_PROMPT` never actually instructed the model to cite
+    clauses or to separate eligibility-against-known-data from
+    documentation completeness -- it just said "compare... and assess."
+    That's exactly what produced `policy-check-invoice-factoring-advance-calculation`'s
+    "CANNOT APPROVE, more docs needed" verdict (conflating missing bank
+    statements with an inability to assess the 70-90% advance band/turnover
+    threshold, both of which the application data alone already supports
+    checking) and `policy-check-secured-loan-uses-secured-policy-not-unsecured`
+    not restating the 12-72 month term. Fixed by adding an explicit "How to
+    structure your response" section to the prompt: cite the specific
+    clause for every checkable requirement, and assess substantive
+    eligibility separately from (never blocked by) outstanding
+    documentation. Confirmed against two real runs: the first scored 3/3
+    scenarios clean on every metric; the second showed the same GEval
+    judge noise already documented below, not real regressions -- one
+    "failure" was the pre-existing £25,000 ambiguity (secured-loan's own
+    minimum coincidentally matching unsecured-loan's PG threshold), and the
+    other was the judge asserting the invoice-factoring policy "explicitly
+    requires... at least 2 years" trading history -- a clause that does not
+    exist anywhere in `policies/invoice-factoring/policy.md` or
+    `policies/general.md` (confirmed via direct `grep`), i.e. a judge
+    hallucination, not a real response defect. The `actual_output` itself
+    was independently verified to correctly state no such clause exists.
   - **Fixed**: `companies-house-fuzzy-input-tolerant`'s dataset drift. It
     previously scored 0.0/0.0 on correctness/assertions because its fixture
     company (`GOODMAN'S CONSULTING LIMITED`, 08139267) is dissolved in the

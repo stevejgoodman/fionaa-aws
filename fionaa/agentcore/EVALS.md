@@ -15,7 +15,7 @@ Status: **registered locally, not yet deployed to AWS.** See "Deploying" below.
   - Policy check (`check_against_policy`) — three scenarios: a standard
     unsecured-business loan (asserting the response cites a specific policy
     clause rather than a bare accept/reject), an invoice-factoring case that
-    exercises `calculate_invoice_amount`'s deterministic advance calc, and a
+    exercises `compute_invoice_factoring_advance`'s deterministic advance calc, and a
     secured-loan case that guards against `policy_loader.py` loading the
     wrong loan type's policy file.
   - Web search (`search_web`) — one scenario asserting no fabricated adverse
@@ -25,15 +25,22 @@ Status: **registered locally, not yet deployed to AWS.** See "Deploying" below.
   `graph.py` actually sends as message content to each node
   (`json.dumps(application)` / `f"Company: {company_name}"`).
 
-  **Policy check no longer calls a tool.** `check_against_policy` used to
-  route through the `kb-target-loan-policies` MCP/knowledge-base tool; it now
-  loads the matching `policies/<loan_type>/policy.md` directly by `loan_type`
-  (see `policy_loader.py`) and passes the text straight into the prompt —
+  **Policy check no longer searches a knowledge base, but it can still call
+  deterministic tools.** `check_against_policy` used to route through the
+  `kb-target-loan-policies` MCP/knowledge-base tool; it now loads the
+  matching `policies/<loan_type>/policy.md` directly by `loan_type` (see
+  `policy_loader.py`) and passes the text straight into the prompt —
   `loan_type` is known from the application before the node runs, so there's
-  nothing to search for. The three policy-check scenarios above have no
-  `expected_trajectory` for this reason (nothing to assert — no tool span is
-  produced), unlike the Companies House and web-search scenarios which still
-  call real tools and keep theirs.
+  nothing to search for. Separately, each `policy.md`/`general.md` can
+  declare a `<!-- checks: ... --> ` comment naming which tools from the
+  shared pool (`check_tools.CHECK_TOOLS_POOL`) apply to that loan type (e.g.
+  `compute_invoice_factoring_advance`); `policy_loader.load_check_tool_names`
+  reads that declaration and `check_against_policy` hands the model just that
+  scoped subset. So the invoice-factoring scenario below does exercise a real
+  tool call (`compute_invoice_factoring_advance`), and the unsecured/secured-loan
+  scenarios have no `expected_trajectory` only because those loan types'
+  policy.md files don't declare any checks — not because policy check can
+  never call a tool.
 
 - `agentcore/evaluators/companies_house_correctness.json` — custom
   LLM-as-a-Judge evaluator (`fionaa_companies_house_correctness`, `TRACE`
@@ -103,12 +110,15 @@ Two ways to actually use this dataset given that:
    against the resulting sessions. The dataset's `expected_response`/
    `assertions` per scenario are exactly what belongs in that ground-truth
    file.
-2. **Node-level harness** (more direct, needs a small script): call
-   `graph.check_companies_house`/`check_against_policy`/`search_web`
-   directly with a `FakeRuntime`/real tools per scenario (same shape as
-   `tests/test_graph.py`), collect the response, and score it with
-   `agentcore run eval --evaluator-arn <arn> ...` in standalone mode, or via
-   the `bedrock_agentcore.evaluation` SDK's `evaluate()` call directly.
+2. **Node-level harness** (more direct): `deepeval_evals/` does this -- calls
+   `graph.check_companies_house`/`check_against_policy`/`search_web`/
+   `check_financial_assessment` directly with a `FakeRuntime`/real tools per
+   scenario (same shape as `tests/test_graph.py`), and scores the response
+   with DeepEval's own `GEval`/custom metrics (built from this dataset's
+   `assertions`/`expected_response`/`expected_trajectory`, plus
+   `injection_resistance.json`'s rubric ported as a metric too) rather than
+   the AgentCore Evaluate API's TRACE-level scoring, which only works
+   against a real deployed-runtime session. See `deepeval_evals/README.md`.
 
 Either way, the dataset and evaluator *content* (ground truth + rubrics) is
 the reusable part — this note is about the plumbing to invoke fionaa with
