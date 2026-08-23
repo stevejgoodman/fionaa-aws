@@ -243,20 +243,46 @@ this section is the plan, written before any of it exists.
    *and* `secretsmanager:GetSecretValue` on the credentials secret above (the
    same pattern `github-oidc-stack.ts` already uses for the Gateway OAuth
    secret).
-3. **New CDK stack in `ci-infra/`** (own file/stack, same pattern as
-   `github-oidc-stack.ts`, not bolted onto `fionaa/agentcore/cdk/`):
-   - Trust: GitHub OIDC, scoped to `push`/`workflow_dispatch` on `master`
-     (broader than Path 1's `pull_request`-only trust — reuse the existing
-     OIDC provider, don't recreate it).
-   - `bedrock-agentcore:InvokeAgentRuntime` scoped to the fionaa runtime ARN.
-   - `s3:PutObject` scoped to `fionaa-applications/<eval-harness-customer-id>/*`
-     + `kms:GenerateDataKey`/`kms:Encrypt` on the applications KMS key.
-   - `cognito-idp:AdminInitiateAuth` scoped to the one throwaway user/pool.
-   - `bedrock-agentcore:*BatchEvaluation*` (and whatever read/list actions
-     `agentcore run batch-evaluation` needs — check its actual API calls
-     rather than guessing the action list).
-   - Deliberately no broader S3/data access than that — same "narrow scope"
-     principle as `github-oidc-stack.ts`.
+3. ~~New CDK stack in `ci-infra/`~~ — **done**. `ci-infra/lib/path2-batch-eval-stack.ts`
+   (`Path2BatchEvalStack`, same pattern as `github-oidc-stack.ts`, own file,
+   not bolted onto `fionaa/agentcore/cdk/`), deployed as stack
+   `FionaaEvalsPath2Ci` → role `arn:aws:iam::492646066653:role/fionaa-evals-path2-ci`.
+   - Trust: GitHub OIDC (imports the existing provider by its deterministic
+     ARN rather than recreating it), scoped to `push`/`workflow_dispatch` on
+     `master` via the ref-triggered `sub` claim — matching both the plain
+     and ID-qualified forms the same way `github-oidc-stack.ts` does for
+     `pull_request`, since the ID-qualified form was the one actually issued
+     there. **Not yet empirically confirmed for this ref-triggered case** —
+     verify the same way (temporary debug step decoding the real token) the
+     first time work item 8's workflow runs, and fix the condition if the
+     real claim differs.
+   - `s3:PutObject` scoped to `fionaa-6655-assets/<eval-customer-id>/*` +
+     `kms:GenerateDataKey` (not `Encrypt` — matches what S3 SSE-KMS actually
+     calls, same action `FionaaDataAccessRole`'s own grant uses) on the
+     applications KMS key, condition-scoped to the one disposable
+     `customer_id`'s `EncryptionContext`.
+   - `cognito-idp:AdminInitiateAuth` scoped to the user pool ARN (finest
+     grain Cognito supports for this action — no per-user scoping) +
+     `secretsmanager:GetSecretValue` on the credentials secret.
+   - `bedrock-agentcore:StartBatchEvaluation`/`GetBatchEvaluation`/
+     `ListBatchEvaluations` (no resource type — confirmed against AWS's own
+     service-authorization reference, not guessed) + `StopBatchEvaluation`
+     scoped to `batch-evaluate/*` + `bedrock-agentcore-control:GetEvaluator`
+     (scoped to the known evaluator ARNs)/`ListEvaluators` to resolve
+     `--evaluator <name>` (confirmed this is a *control*-plane action,
+     distinct service prefix from the batch-evaluation actions above, even
+     though both use `bedrock-agentcore:`-namespaced resource ARNs).
+   - **Deliberately excludes `bedrock-agentcore:InvokeAgentRuntime`**
+     (dropped from the original sketch above once confirmed unnecessary):
+     fionaa's Runtime uses a `CUSTOM_JWT` authorizer, so invocation is a
+     plain HTTPS POST with `Authorization: Bearer <id_token>` — no
+     SigV4/IAM check applies to that call at all.
+   - **Deliberately excludes anything `agentcore deploy` itself needs**
+     (CloudFormation/IAM/broader Bedrock AgentCore create-update actions) —
+     that's a much larger permission surface, left as an explicit decision
+     for work item 8, not folded into this narrowly-scoped role.
+   - Synth/diff verified clean before deploying (see CDK output) — the diff
+     showed only the two new IAM resources, nothing to any existing stack.
 4. **Staging + invoke script** (Python, lives under `agentcore/`): for each
    dataset scenario, `put_object` its `application` dict as
    `input/application.json` under the disposable prefix with a fresh
