@@ -283,12 +283,64 @@ this section is the plan, written before any of it exists.
      for work item 8, not folded into this narrowly-scoped role.
    - Synth/diff verified clean before deploying (see CDK output) — the diff
      showed only the two new IAM resources, nothing to any existing stack.
-4. **Staging + invoke script** (Python, lives under `agentcore/`): for each
-   dataset scenario, `put_object` its `application` dict as
+4. ~~Staging + invoke script~~ — **done**. `agentcore/eval_path2_stage_and_invoke.py`:
+   for each dataset scenario, `put_object`s its `application` dict as
    `input/application.json` under the disposable prefix with a fresh
-   `application_id`, `AdminInitiateAuth` for the ID token, POST to
-   `/invocations` with that token + a deterministic session-id header,
-   collect `{scenario_id: session_id}`.
+   `application_id` (same `SSEKMSEncryptionContext` shape as `storage.py`),
+   `AdminInitiateAuth`s for the ID token, POSTs to `/invocations` with that
+   token + a deterministic session-id header, collects
+   `{scenario_id: {session_id, application_id, status_code, response}}` to a
+   JSON file (`.cli/path2-session-map.json`, gitignored — a run artifact,
+   not committed state).
+
+   **Discovered along the way: the original dataset's scenarios don't
+   compose into valid whole-graph runs.** Most were authored for Path 1's
+   isolated node calls — `companies-house-*` scenarios have no `loan_type`
+   (which `policy_check`, running *before* `companies_house` in the graph,
+   needs), and `policy-check-*` scenarios use fictitious company data that
+   real Companies House will never find, so every one would dead-end at
+   `reject_no_company` before `financial_assessment`/`web_search` ever run.
+   Added three new `fullapp-*` dataset entries (own prefix, invisible to
+   Path 1's per-node `load_goldens(prefix=...)` filters — verified
+   unaffected: still 5/3/1/0 for companies-house-/policy-check-/web-search-/
+   financial-assessment-) that are genuinely complete applications: a real
+   active company, the real dissolved company, and a fictitious one —
+   exercising the success path, the found-but-inactive path, and the
+   early-reject path respectively.
+
+   **Real bugs this surfaced, found only by actually running it (not by
+   trusting a 200 status code):**
+   - First run: both the "active" and "dissolved" fixtures came back
+     `found=false`. Root cause was in the *fixtures*, not the agent — a
+     fabricated `years_trading` value contradicted each company's real,
+     verifiable incorporation/dissolution date (GoodAI Consulting was
+     incorporated ~April 2026, under a month old; Goodman's Consulting
+     Limited dissolved in 2017), and the agent correctly flagged the
+     contradiction as disqualifying. Fixed by dropping `years_trading` from
+     both fixtures, matching how the original (already-verified)
+     `test_live_companies_house.py` cases are built.
+   - After that fix, the "active" fixture passes end-to-end
+     (`found=true`, reaches `web_search`). **The "dissolved" fixture still
+     comes back `found=false`, reproducibly (2/2 runs)** — this time a real
+     product gap, not a fixture bug. `test_live_companies_house.py`'s
+     `test_finds_real_company_but_flags_not_active` (Path 1, isolated node
+     call) verified `found=true` for this exact company earlier this
+     session, passing only bare `company_name`/`company_number`/
+     `applicant_name` fields. But `check_companies_house` always receives
+     the *entire* `application` dict as its message content
+     (`graph.py`: `HumanMessage(content=json.dumps(application))`), and in
+     a real production invocation that always includes `loan_type`/
+     `requested_amount`/`loan_purpose` too. With that fuller context
+     visible, the model's `found` field flips to `false` while its own
+     summary text still says "found and verified" — it's answering "is this
+     loan fundable" (correctly: no) rather than "is this company/applicant
+     identified" (also correctly answerable yes), and conflating the two
+     into one field. `COMPANIES_HOUSE_PROMPT`'s found-vs-active fix (earlier
+     this session) was verified only under Path 1's narrower conditions and
+     doesn't hold once real loan context is present — exactly the kind of
+     gap Path 2 exists to catch that Path 1 structurally cannot. **Not yet
+     fixed** — flagged for a follow-up prompt change, tracked separately
+     from finishing the Path 2 plumbing itself.
 5. **Ground-truth mapping file**: build the
    `session_id -> expected_response/assertions` JSON `batch-evaluation`
    wants, straight from the dataset's existing per-scenario fields — no new
