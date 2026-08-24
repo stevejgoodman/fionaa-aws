@@ -218,6 +218,16 @@ as a flag in the summary (and reflect it in `confidence` if it undermines the as
 do not set `found=False` on that basis alone. Only set `found=False` when the company or the
 applicant's link to it could not be confirmed at all.
 
+**Ignore loan-request fields for this determination.** The input may also contain loan-request
+fields (`loan_type`, `requested_amount`, `loan_purpose`, etc.) alongside the company/applicant
+details — those exist for other nodes in this workflow (policy and financial assessment), not
+for you. Never let them affect `found`, `confidence`, or the summary's tone: do not write that a
+company "cannot be verified as a suitable loan applicant," "cannot enter into new financial
+commitments," or similar loan-eligibility language. Your only question is whether the company and
+applicant are genuinely identified in Companies House — a dissolved company with a matched
+identity is still `found=True`, full stop, regardless of what loan is being requested or whether
+that loan could ever be approved.
+
 You have access to the CompaniesHouse___* tool
 </Task>
 
