@@ -338,9 +338,13 @@ this section is the plan, written before any of it exists.
      into one field. `COMPANIES_HOUSE_PROMPT`'s found-vs-active fix (earlier
      this session) was verified only under Path 1's narrower conditions and
      doesn't hold once real loan context is present — exactly the kind of
-     gap Path 2 exists to catch that Path 1 structurally cannot. **Not yet
-     fixed** — flagged for a follow-up prompt change, tracked separately
-     from finishing the Path 2 plumbing itself.
+     gap Path 2 exists to catch that Path 1 structurally cannot.
+     **Fixed** (PR #6, merged + deployed): added an explicit instruction to
+     ignore loan-request fields for the `found` determination. Verified live
+     at the node level (2/2 runs) and, after `agentcore deploy`, re-verified
+     against the real deployed Runtime through this script's own full HTTP
+     invoke path — `found=true`, `web_search` now runs, all three `fullapp-*`
+     fixtures complete the whole graph end-to-end.
 5. **Ground-truth mapping file**: build the
    `session_id -> expected_response/assertions` JSON `batch-evaluation`
    wants, straight from the dataset's existing per-scenario fields — no new
