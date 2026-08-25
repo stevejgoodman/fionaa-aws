@@ -407,17 +407,49 @@ this section is the plan, written before any of it exists.
    This is the first real, end-to-end proof the whole Path 2 pipeline
    works: staged data → real Runtime invocation → real sessions →
    real batch-evaluation scores, against the actual deployed artifact.
-7. **Add AgentCore-native evaluators** worth including:
-   `ThirdParty.DeepEval.*`/`AutoEval.*` — `ToolUse`, `TaskCompletion`, and
-   especially `PIILeakage` (applications carry `applicant_name`/
-   `registered_address`). These are AWS's own reimplementation, distinct
-   from the pip `deepeval` package Path 1 uses — see
-   `deepeval_evals/README.md`'s opening section for that distinction. Watch
-   for the `{assistant_turn}` gotcha documented above (resolves to the last
-   node's response, `web_search`, not necessarily the node being graded) on
-   any new `TRACE`-level evaluator — apply the same `{context}`-scoped
-   instruction pattern already used for
-   `fionaa_companies_house_correctness`.
+7. ~~Add AgentCore-native evaluators~~ — **done**.
+   `ThirdParty.DeepEval.PIILeakage`/`ToolUse`/`TaskCompletion` — no
+   `CreateEvaluator` step needed at all, confirmed against AWS's own
+   "Third-party evaluators" doc: a *managed* third-party evaluator is
+   referenced directly by its `ThirdParty.<Provider>.<Metric>` ID exactly
+   like a `Builtin.*` one, anywhere a built-in evaluator ID goes (batch
+   evaluation included). Ran all three against the same 3 sessions
+   alongside the two custom evaluators
+   (`path2_manual_verify_2_thirdparty-1d15633ccc`, saved to
+   `.cli/path2-batch-eval-result-thirdparty.json`). These are AWS's own
+   reimplementation, distinct from the pip `deepeval` package Path 1 uses —
+   see `deepeval_evals/README.md`'s opening section for that distinction.
+   The `{assistant_turn}` gotcha above doesn't apply here — that's a
+   caveat for *our own* custom `TRACE`-level evaluators, whose instructions
+   we author; AWS's managed evaluators own their own internal grading
+   logic.
+
+   **Real findings from the run, not fixed yet — separate follow-ups:**
+   - `PIILeakage` scored **0.00 (best) across all 3 sessions** — correctly
+     treats the applicant PII a loan application legitimately has to
+     collect (names, addresses, ID references) as non-problematic in this
+     regulated KYC/AML context, rather than flagging its mere presence.
+     Worth noting: one session's own explanation hedges oddly ("this
+     paradoxical result suggests a critical failure or override in the
+     scoring mechanism") while still landing on the same 0.00 verdict —
+     AWS's own docs are explicit that they "don't make claims about
+     [DeepEval/AutoEval] quality," unlike built-ins. Worth an
+     `evals-skills:validate-evaluator` pass before trusting this one's
+     verdicts blindly, not blocking anything today.
+   - `ToolUse` averaged **0.83** and flagged a real inefficiency on both
+     sessions that reached `web_search`: **9 redundant, overlapping
+     `websearch-target___WebSearch` calls per session** with no new
+     information gained — a genuine cost/latency finding about
+     `search_web`'s tool-calling behavior, not a correctness bug.
+   - `TaskCompletion` averaged **0.77** and flagged a real design gap: the
+     graph **never writes a final loan decision when the company is
+     found** — `reject_no_company` synthesizes a `decision/result.json`
+     artifact, but the success path (`financial_assessment` →
+     `web_search` → `END`) has no equivalent outcome-synthesis step, so a
+     "found" application runs all the way through evidence-gathering and
+     then just... stops, with no approve/reject verdict anywhere. Visible
+     in work item 4's own S3 listing: only the `reject_no_company` runs
+     ever wrote a `decision/` key.
 8. **CI workflow**: new `.github/workflows/` file (own file, different
    triggers/permissions from `deepeval-ci.yml` — push-to-master or
    post-merge, not `pull_request`), path-filtered per the mitigation above.
