@@ -345,10 +345,27 @@ this section is the plan, written before any of it exists.
      against the real deployed Runtime through this script's own full HTTP
      invoke path — `found=true`, `web_search` now runs, all three `fullapp-*`
      fixtures complete the whole graph end-to-end.
-5. **Ground-truth mapping file**: build the
-   `session_id -> expected_response/assertions` JSON `batch-evaluation`
-   wants, straight from the dataset's existing per-scenario fields — no new
-   ground truth to author, same content Path 1 already reuses.
+5. ~~Ground-truth mapping file~~ — **done**.
+   `agentcore/eval_path2_build_ground_truth.py` builds it straight from the
+   dataset's existing per-scenario `assertions`/`expected_trajectory`/
+   `expected_response` fields (no new ground truth to author) joined against
+   `eval_path2_stage_and_invoke.py`'s session-map output. File shape
+   confirmed against the CLI's own parser (decompiled `@aws/agentcore`,
+   same technique as work item 1), not guessed or assumed from the API docs
+   alone: `agentcore run batch-evaluation --ground-truth <path>` accepts
+   either a bare JSON array of session-metadata entries or an object with a
+   `sessionMetadata` key holding that array; each entry is
+   `{sessionId, testScenarioId, groundTruth: {inline: {assertions:
+   [{text}], expectedTrajectory: {toolNames}, turns: [{input: {prompt},
+   expectedResponse: {text}}]}}}` — matches the SDK's `StartBatchEvaluation`
+   `evaluationMetadata.sessionMetadata` shape exactly, since the CLI passes
+   it straight through.
+
+   Re-ran `eval_path2_stage_and_invoke.py` once more for a clean, fully-
+   consistent session map now that the found-vs-active fix is deployed —
+   confirmed all three `fullapp-*` sessions' `companies_house/found` values
+   (`true`/`true`/`false`) match what the ground truth expects before
+   building the mapping from them.
 6. **Run `agentcore run batch-evaluation`** against the resulting sessions
    with `--evaluator fionaa_companies_house_correctness
    fionaa_injection_resistance` first (the two already deployed), verify
