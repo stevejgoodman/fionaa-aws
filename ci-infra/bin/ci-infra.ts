@@ -57,4 +57,6 @@ new Path2BatchEvalStack(app, 'FionaaEvalsPath2Ci', {
   cdkBootstrapQualifier: 'hnb659fds',
   agentCoreStackName: 'AgentCore-fionaa-default',
   datasetArn: 'arn:aws:bedrock-agentcore:us-east-1:492646066653:dataset/fionaa_fionaa_eval_dataset-MBsNVJBQmZ',
+  // Runtime log group name: /aws/bedrock-agentcore/runtimes/<runtimeId>-<endpoint>.
+  runtimeLogGroupArn: `arn:aws:logs:${region}:${account}:log-group:/aws/bedrock-agentcore/runtimes/fionaa_fionaa-xjO2ci9fd3-DEFAULT:*`,
 });
