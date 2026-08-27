@@ -134,17 +134,18 @@ jobs:
           m = json.load(open('agentcore/.cli/path2-session-map.json'))
           print(' '.join(r['session_id'] for r in m.values()))
           ")
-          # No `set -e` here, and stdout+stderr both teed to the same file
-          # (not a bare `>` redirect), deliberately: a real CI run failed
-          # this step in ~3s with ZERO visible output on either stream even
-          # after removing `set -e` (2026-08-27) -- too fast to be a real
-          # batch-evaluation attempt (which takes 60s+), so this is an
-          # early failure (likely a missing IAM permission on this specific
-          # call, following the exact pattern of every prior fix in this
-          # file) whose message a plain `>` redirect may be dropping via
-          # Node's known stdout-truncation-on-fast-exit behavior when
-          # piped rather than teed. `tee` avoids that class of loss and
-          # keeps stdout+stderr together so nothing is lost either way.
+          # Deliberately NOT using `--wait`: a real CI run proved it's
+          # broken -- confirmed via boto3 that the AWS-side job actually
+          # completed (once, even FAILED) in ~60-70s both times, but
+          # `agentcore run batch-evaluation --wait` still hung for 29+
+          # minutes regardless and got killed by the job timeout. This is
+          # a real bug in the CLI's own wait-loop, not fixable from here.
+          #
+          # Workaround, verified locally first: start without --wait (returns
+          # immediately with an id and PENDING status), then poll
+          # `agentcore view batch-evaluation <id> --json` ourselves --
+          # confirmed this correctly detects COMPLETED/COMPLETED_WITH_ERRORS
+          # within the expected ~60-70s, unlike --wait.
           #
           # Batch evaluation names: letters/digits/underscore only, max 48
           # chars -- hyphens (used elsewhere for AgentCore resource names)
@@ -156,9 +157,35 @@ jobs:
             --session-ids $SESSION_IDS \
             --ground-truth agentcore/.cli/path2-ground-truth.json \
             -n "path2_ci_${GITHUB_RUN_ID}" \
-            --wait --json 2>&1 | tee agentcore/.cli/path2-batch-eval-result.json
+            --json 2>&1 | tee agentcore/.cli/path2-batch-eval-start.json
           rc=${PIPESTATUS[0]}
-          exit $rc
+          if [ "$rc" -ne 0 ]; then exit $rc; fi
+
+          BATCH_EVAL_ID=$(app/fionaa/.venv/bin/python3 -c "
+          import json
+          print(json.load(open('agentcore/.cli/path2-batch-eval-start.json'))['id'])
+          ")
+          echo "Started batch evaluation: $BATCH_EVAL_ID -- polling for completion..."
+
+          for i in $(seq 1 60); do
+            agentcore view batch-evaluation "$BATCH_EVAL_ID" --json 2>&1 | tee agentcore/.cli/path2-batch-eval-result.json
+            rc=${PIPESTATUS[0]}
+            if [ "$rc" -ne 0 ]; then exit $rc; fi
+            STATUS=$(app/fionaa/.venv/bin/python3 -c "
+          import json
+          print(json.load(open('agentcore/.cli/path2-batch-eval-result.json')).get('status'))
+          ")
+            echo "[$i/60] status: $STATUS"
+            case "$STATUS" in
+              COMPLETED|COMPLETED_WITH_ERRORS|FAILED|STOPPED) break ;;
+            esac
+            sleep 10
+          done
+
+          case "$STATUS" in
+            COMPLETED|COMPLETED_WITH_ERRORS) exit 0 ;;
+            *) echo "batch evaluation did not complete successfully: status=$STATUS" >&2; exit 1 ;;
+          esac
         shell: bash
 
       - name: Check gate (fails the job on bad scores)
