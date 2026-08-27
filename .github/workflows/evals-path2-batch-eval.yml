@@ -54,7 +54,15 @@ concurrency:
 jobs:
   batch-eval:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # A real CI run's batch-evaluation job FAILED (missing Bedrock
+    # permission for our custom evaluators, fixed) in ~1 minute on the AWS
+    # side, but `agentcore run batch-evaluation --wait` didn't return for
+    # 29+ minutes regardless -- looks like the CLI's wait-loop may not
+    # treat FAILED as terminal the same way it does COMPLETED. Bumped from
+    # 30 to give headroom if that recurs; if it hangs again even after the
+    # permission fix, that's a real CLI bug worth reporting upstream, not
+    # something to raise the timeout around indefinitely.
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 

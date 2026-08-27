@@ -30,6 +30,10 @@ export interface Path2BatchEvalStackProps extends StackProps {
   readonly evaluatorArns: string[];
   /** fionaa_eval_dataset ARN -- agentcore deploy's post-deploy status check reads this directly. */
   readonly datasetArn: string;
+  /** ARN of the judge model our two custom evaluators run on (Claude Haiku 4.5 inference profile). */
+  readonly judgeModelInferenceProfileArn: string;
+  /** Underlying foundation-model ARN(s) that inference profile can route to (region-wildcarded). */
+  readonly judgeModelFoundationModelArns: string[];
   /** Runtime's CloudWatch log group ARN -- StartBatchEvaluation queries this via logs:StartQuery/GetQueryResults. */
   readonly runtimeLogGroupArn: string;
   /**
@@ -329,6 +333,26 @@ export class Path2BatchEvalStack extends Stack {
         sid: 'WriteBatchEvaluationOutputLogs',
         actions: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents', 'logs:PutRetentionPolicy'],
         resources: ['*'],
+      }),
+    );
+
+    // Root cause of a full evaluation run failing (2026-08-27, status
+    // FAILED, "All 3 sessions failed"): our two CUSTOM LLM-as-a-judge
+    // evaluators (fionaa_companies_house_correctness, fionaa_injection_resistance)
+    // actually invoke a Bedrock model (Claude Haiku 4.5) via FAS using
+    // THIS role's permissions -- confirmed from the batch-evaluation's own
+    // output log stream: "AccessDeniedException ... not authorized to
+    // perform: bedrock:InvokeModel". The managed Builtin/ThirdParty
+    // evaluators don't need this (they run on AWS's own model capacity,
+    // per the third-party-evaluators doc), which is why only these two
+    // failed while the other three succeeded. Same grant pattern
+    // GitHubOidcStack already uses for Path 1's judge model, just a
+    // different one (Haiku 4.5, not Sonnet 4.5).
+    this.ciRole.addToPolicy(
+      new iam.PolicyStatement({
+        sid: 'InvokeCustomEvaluatorJudgeModel',
+        actions: ['bedrock:InvokeModel', 'bedrock:InvokeModelWithResponseStream', 'bedrock:Converse', 'bedrock:ConverseStream'],
+        resources: [props.judgeModelInferenceProfileArn, ...props.judgeModelFoundationModelArns],
       }),
     );
 
