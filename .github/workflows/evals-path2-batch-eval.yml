@@ -121,12 +121,20 @@ jobs:
       - name: Run batch-evaluation
         working-directory: fionaa
         run: |
-          set -e
           SESSION_IDS=$(app/fionaa/.venv/bin/python3 -c "
           import json
           m = json.load(open('agentcore/.cli/path2-session-map.json'))
           print(' '.join(r['session_id'] for r in m.values()))
           ")
+          # No `set -e` here, deliberately: the CLI writes its error as JSON
+          # to *stdout* on a hard failure (confirmed on a real CI run,
+          # 2026-08-27 -- exit 1, zero stderr output, less than a second
+          # elapsed, meaning it failed at argument validation, not an
+          # actual batch-evaluation attempt) -- `set -e` would abort before
+          # the `cat` below ever shows it. Capture the real exit code,
+          # print the result unconditionally, then fail the step based on
+          # that saved code.
+          #
           # Batch evaluation names: letters/digits/underscore only, max 48
           # chars -- hyphens (used elsewhere for AgentCore resource names)
           # aren't allowed here.
@@ -138,7 +146,9 @@ jobs:
             --ground-truth agentcore/.cli/path2-ground-truth.json \
             -n "path2_ci_${GITHUB_RUN_ID}" \
             --wait --json > agentcore/.cli/path2-batch-eval-result.json
+          rc=$?
           cat agentcore/.cli/path2-batch-eval-result.json
+          exit $rc
 
       - name: Check gate (fails the job on bad scores)
         working-directory: fionaa/agentcore
