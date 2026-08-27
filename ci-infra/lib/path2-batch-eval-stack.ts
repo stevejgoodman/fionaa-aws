@@ -310,6 +310,25 @@ export class Path2BatchEvalStack extends Stack {
       }),
     );
 
+    // Next error (still 2026-08-27): "FAS credentials do not have
+    // permission to create CloudWatch log groups. Ensure logs:CreateLogGroup
+    // is in the FAS policy." -- StartBatchEvaluation writes its own
+    // per-session-detail results to a service-managed output log
+    // group/stream (see EVALS.md's "how metrics are captured" note),
+    // created via Forward Access Sessions using THIS role's permissions.
+    // The output log group name isn't known ahead of time (assigned at
+    // job creation, like the batch-evaluate resource ID itself), so this
+    // can't be scoped to one specific ARN the way StartQuery was --
+    // granted broadly, but limited to exactly the three actions needed to
+    // create and write a log group/stream, nothing else.
+    this.ciRole.addToPolicy(
+      new iam.PolicyStatement({
+        sid: 'WriteBatchEvaluationOutputLogs',
+        actions: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents'],
+        resources: ['*'],
+      }),
+    );
+
     new CfnOutput(this, 'Path2CiRoleArn', {
       value: this.ciRole.roleArn,
       description: 'Set as the AWS_EVALS_PATH2_CI_ROLE_ARN repo variable for the Path 2 GitHub Actions workflow (work item 8).',
