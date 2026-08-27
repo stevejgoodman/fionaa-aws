@@ -30,6 +30,8 @@ export interface Path2BatchEvalStackProps extends StackProps {
   readonly evaluatorArns: string[];
   /** fionaa_eval_dataset ARN -- agentcore deploy's post-deploy status check reads this directly. */
   readonly datasetArn: string;
+  /** Runtime's CloudWatch log group ARN -- StartBatchEvaluation queries this via logs:StartQuery/GetQueryResults. */
+  readonly runtimeLogGroupArn: string;
   /**
    * CDK bootstrap qualifier (the "hnb659fds"-style suffix on
    * cdk-<qualifier>-deploy-role-<account>-<region>, etc.) -- lets this role
@@ -280,6 +282,30 @@ export class Path2BatchEvalStack extends Stack {
       new iam.PolicyStatement({
         sid: 'VerifyRuntimeLogGroupForBatchEvaluation',
         actions: ['logs:DescribeLogGroups'],
+        resources: ['*'],
+      }),
+    );
+
+    // Next error after that fix (still 2026-08-27): "The evaluation
+    // execution role is missing required CloudWatch Logs query permissions
+    // (logs:StartQuery, logs:GetQueryResults)" -- StartBatchEvaluation runs
+    // a CloudWatch Logs Insights query against the runtime's log group to
+    // pull sessions/spans, and (unlike DescribeLogGroups) StartQuery does
+    // support resource-level scoping to a specific log group ARN.
+    // GetQueryResults is keyed by query ID, not log group, so it can't be
+    // scoped the same way -- granted broadly, but it's a narrow,
+    // read-only action.
+    this.ciRole.addToPolicy(
+      new iam.PolicyStatement({
+        sid: 'QueryRuntimeLogGroupForBatchEvaluation',
+        actions: ['logs:StartQuery'],
+        resources: [props.runtimeLogGroupArn],
+      }),
+    );
+    this.ciRole.addToPolicy(
+      new iam.PolicyStatement({
+        sid: 'ReadBatchEvaluationQueryResults',
+        actions: ['logs:GetQueryResults'],
         resources: ['*'],
       }),
     );
