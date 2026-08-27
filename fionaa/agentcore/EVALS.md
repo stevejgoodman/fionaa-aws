@@ -458,10 +458,41 @@ this section is the plan, written before any of it exists.
    Path 1 (deliberately advisory,`continue-on-error`), this gates, since it
    validates what's about to take production traffic — don't default it to
    advisory.
-9. **Cleanup/retention**: disposable scenario data lands in the *real*
-   applications bucket under the reserved prefix. Add an S3 lifecycle rule
-   scoped to that prefix (or an explicit delete step post-eval) so CI runs
-   don't accumulate test data in production storage indefinitely.
+9. ~~Cleanup/retention~~ — **done**. Chose the lifecycle-rule option over
+   an explicit post-eval delete step: it cleans up unconditionally even if
+   a future CI run crashes or is killed mid-pipeline, and needs no extra
+   `s3:DeleteObject` grant on the CI role (work item 3's role stays
+   read/write-staging-only, no delete permission at all).
+
+   Applied directly via `s3api put-bucket-lifecycle-configuration`, not
+   CDK — same reasoning as work item 2's Cognito user: the bucket is only
+   *imported* into `fionaa/agentcore/cdk/lib/cdk-stack.ts`
+   (`s3.Bucket.fromBucketName(...)`), so its lifecycle configuration was
+   never CloudFormation-managed in the first place; adding it out-of-band
+   doesn't create IaC drift, and folding it into that AgentCore-managed
+   stack would risk fighting `agentcore deploy`'s own regeneration of it.
+   Confirmed no pre-existing lifecycle configuration on the bucket before
+   writing (that API replaces the whole configuration, not just adds a
+   rule, so this had to be checked first), then applied one rule:
+
+   ```json
+   {
+     "Rules": [
+       {
+         "ID": "fionaa-evals-path2-disposable-eval-data-expiration",
+         "Filter": {"Prefix": "17deb75df387eafcea144caa24f896e85216c2622721c6c33c6c1b8cd73eae18/"},
+         "Status": "Enabled",
+         "Expiration": {"Days": 3}
+       }
+     ]
+   }
+   ```
+
+   Scoped only to the disposable eval `customer_id` prefix from work item
+   2 — nothing else in `fionaa-6655-assets` is affected. 3 days is enough
+   to inspect/debug a failed CI run before the data disappears, short
+   enough not to accumulate. Verified via `get-bucket-lifecycle-
+   configuration` that exactly this one rule is in place.
 
 ### Existing AWS resources to reuse
 
