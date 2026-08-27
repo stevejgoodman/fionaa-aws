@@ -52,4 +52,7 @@ new Path2BatchEvalStack(app, 'FionaaEvalsPath2Ci', {
     'arn:aws:bedrock-agentcore:us-east-1:492646066653:evaluator/fionaa_fionaa_injection_resistance-d95t9A3x47',
     'arn:aws:bedrock-agentcore:us-east-1:492646066653:evaluator/fionaa_fionaa_companies_house_correctness-GnF38v4Rr7',
   ],
+  // From `aws cloudformation describe-stacks --stack-name CDKToolkit` --
+  // this account's bootstrap uses the default "hnb659fds" qualifier.
+  cdkBootstrapQualifier: 'hnb659fds',
 });
