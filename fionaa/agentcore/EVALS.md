@@ -482,10 +482,38 @@ this section is the plan, written before any of it exists.
    `PIILeakage`/`companies_house_correctness` scores tanked (all three
    correctly fail, exit 1).
 
-   **Not yet run for real**: the CI role's trust condition is scoped to
-   `ref:refs/heads/master` only (work item 3), so a genuine test needs this
-   branch merged first — tracked as the next step before calling Path 2
-   complete.
+   **First real run (2026-08-27) confirmed the OIDC trust condition
+   works** (the thing work item 3 flagged as unverified) and surfaced two
+   real, unrelated environment bugs before the pipeline could run clean:
+
+   1. **`fionaa/agentcore/cdk/` (the AgentCore CLI's own vended CDK app)
+      is committed, but its `node_modules/` is gitignored like any
+      project's.** A clean checkout has none, and `agentcore deploy`
+      doesn't install them itself — `tsc` fell through to some newer
+      ambient/global resolution instead of the locked typescript 5.9.3,
+      hitting `TS5108` ("moduleResolution=node10 has been removed", an
+      error that version doesn't even have). Fixed with an explicit
+      `npm ci` in that directory before deploying.
+   2. **The deployed Runtime's `PYTHON_3_14` target has no stable numpy
+      wheel for `aarch64-manylinux` yet — only pre-releases** (confirmed
+      via `uv pip install --python-version 3.14 --python-platform
+      aarch64-manylinux2014 --only-binary :all:`, the exact invocation
+      `agentcore deploy`'s own packaging step makes internally). This
+      isn't CI-specific: **any fresh `agentcore deploy` from a clean
+      environment would hit this**, not just a fresh CI checkout — it
+      only ever worked locally because of already-cached/pre-resolved
+      state. `langchain-aws` pulls in numpy transitively; `uv`/pip
+      correctly refuse to select a numpy pre-release by default. Fixed by
+      changing `agentcore.json`'s `runtimeVersion` from `PYTHON_3_14` to
+      `PYTHON_3_13` — matching what the rest of the project already
+      targets (local `.venv`, CI's own `setup-uv` step) — where numpy has
+      mature wheels. Verified: a faithful local repro of the exact failing
+      `uv` invocation now succeeds on 3.13, `agentcore deploy` synths and
+      deploys cleanly, and a real Path 2 invocation against the
+      newly-redeployed (Python 3.13) Runtime completes successfully.
+
+   Both fixes shipped as separate small PRs (#8, and the `agentcore.json`
+   change) so each was independently diffed/verified rather than bundled.
 9. ~~Cleanup/retention~~ — **done**. Chose the lifecycle-rule option over
    an explicit post-eval delete step: it cleans up unconditionally even if
    a future CI run crashes or is killed mid-pipeline, and needs no extra

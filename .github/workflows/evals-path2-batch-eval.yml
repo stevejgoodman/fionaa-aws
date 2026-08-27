@@ -88,21 +88,15 @@ jobs:
       # ("Please run this command from your project root directory").
       #
       # fionaa/agentcore/cdk/ (the AgentCore CLI's own vended CDK app) is
-      # committed, but its node_modules/ is gitignored like any other
-      # project's -- a real CI run (2026-08-27, first attempt) proved
-      # `agentcore deploy` does NOT install it itself: it failed building
-      # that app with TS5108 ("moduleResolution=node10 has been removed"),
-      # an error TypeScript only throws on 7.0 -- yet the committed
-      # tsconfig.json/package-lock.json pin typescript 5.9.3, which doesn't
-      # have this error at all. A machine that already has cdk/node_modules
-      # installed (from any prior local `agentcore` command) never hits
-      # this, because tsc then resolves the locked 5.9.3 correctly; a truly
-      # clean checkout with no node_modules falls through to some newer
-      # ambient/global tsc instead. Confirmed by the next real CI run: this
-      # step alone got the TS5108 failure to disappear (Build CDK project
-      # now succeeds), surfacing a second, separate failure at the
-      # Synthesize CloudFormation step instead -- still under
-      # investigation, see the temporary log-dump step below.
+      # committed, but its node_modules/ is gitignored like any project's.
+      # A clean checkout has none, and `agentcore deploy` doesn't install
+      # them itself -- without this step, `tsc` falls through to some
+      # newer ambient/global resolution instead of the locked typescript
+      # 5.9.3, hitting TS5108 ("moduleResolution=node10 has been removed",
+      # an error that version doesn't even have). `npm ci` here (exact,
+      # lockfile-pinned) fixes it -- confirmed by two real CI runs
+      # (2026-08-27): failed without this step, succeeded through the
+      # build with it present.
       - name: Install CDK app dependencies
         working-directory: fionaa/agentcore/cdk
         run: npm ci
@@ -110,30 +104,6 @@ jobs:
       - name: Deploy fionaa
         working-directory: fionaa
         run: agentcore deploy -y -v
-
-      # Temporary diagnostic: `agentcore deploy` swallows the real
-      # subprocess error ("CDK synth failed: ... Subprocess exited with
-      # error 1", no stdout/stderr) and its own log file only repeats that
-      # one-line summary too (confirmed on a real failed run, 2026-08-27).
-      # bin/cdk.ts's own top-level catch does `console.error('AgentCore CDK
-      # synthesis failed:', error.message)` -- that message exists, it's
-      # just not surfaced by the wrapping CLI -- so invoke the exact same
-      # compiled app directly to see it. Remove once the underlying synth
-      # failure (still under investigation as of 2026-08-27) is understood
-      # and fixed.
-      - name: Run the CDK app directly on failure (surfaces the real error)
-        if: failure()
-        working-directory: fionaa/agentcore/cdk
-        run: node dist/bin/cdk.js || true
-
-      - name: Dump deploy log on failure
-        if: failure()
-        working-directory: fionaa/agentcore
-        run: |
-          for f in .cli/logs/deploy/*.log; do
-            echo "=== $f ==="
-            cat "$f"
-          done
 
       - name: Stage applications + invoke the real Runtime
         working-directory: fionaa/agentcore
