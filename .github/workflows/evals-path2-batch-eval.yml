@@ -1,0 +1,136 @@
+name: evals-path2-batch-eval
+
+# Post-deploy batch-evaluation gate against the REAL deployed fionaa
+# Runtime -- "Path 2" in fionaa/agentcore/EVALS.md's plan, work item 8.
+# Unlike deepeval-ci.yml (Path 1, deliberately advisory/continue-on-error),
+# this GATES: it validates the actual artifact that's about to keep taking
+# production traffic, via eval_path2_check_gate.py, so a bad score fails
+# the job rather than just posting a warning annotation.
+#
+# AWS access is via GitHub's OIDC federation into the fionaa-evals-path2-ci
+# role (see ../../ci-infra/lib/path2-batch-eval-stack.ts), scoped to:
+# staging disposable eval data under one fixed customer_id prefix,
+# authenticating as one disposable Cognito user, running batch-evaluation,
+# and assuming the CDK bootstrap's own deploy/file-publishing/lookup roles
+# to run `agentcore deploy` -- no static AWS keys anywhere in this repo,
+# and no broad hand-written CloudFormation/IAM permission set duplicating
+# what the bootstrap roles already grant.
+#
+# Path-filtered the same way deepeval-ci.yml is, for a related reason:
+# `agentcore deploy`'s packaging is non-deterministic (EVALS.md's Path 2
+# plan, work item 1 -- confirmed a zip-entry-mtime bug in the CLI itself,
+# not fixable here), so it always reports a diff regardless of whether
+# app/fionaa actually changed. The path filter is what keeps this workflow
+# from deploying + burning a real batch-evaluation run on pushes that don't
+# touch anything deploy-relevant.
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "fionaa/app/fionaa/**.py"
+      - "fionaa/app/fionaa/policies/**"
+      - "fionaa/app/fionaa/pyproject.toml"
+      - "fionaa/app/fionaa/uv.lock"
+      - "fionaa/agentcore/agentcore.json"
+      - "fionaa/agentcore/evaluators/**"
+      - "fionaa/agentcore/datasets/fionaa_eval_dataset.jsonl"
+      - "fionaa/agentcore/eval_path2_*.py"
+      - ".github/workflows/evals-path2-batch-eval.yml"
+  workflow_dispatch: {}
+
+permissions:
+  id-token: write # required for OIDC -> AssumeRoleWithWebIdentity
+  contents: read
+
+concurrency:
+  # Queue rather than cancel -- an in-progress `agentcore deploy` or batch
+  # evaluation shouldn't be killed mid-flight by a second push; unlike
+  # deepeval-ci.yml's PR-time job, there's real AWS state (a CloudFormation
+  # stack update, a running batch-evaluation job) to not leave dangling.
+  group: evals-path2-batch-eval-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  batch-eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v10.0.0
+        with:
+          python-version: "3.13"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Pinned to the version this whole plan was built and manually
+      # verified against (see EVALS.md work item 1) -- upgrading doesn't
+      # fix the packaging non-determinism bug, so there's no upside to
+      # floating, only drift risk.
+      - name: Install agentcore CLI
+        run: npm install -g @aws/agentcore@0.24.1
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_EVALS_PATH2_CI_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Install Python dependencies
+        working-directory: fionaa/app/fionaa
+        run: uv sync
+
+      # `agentcore deploy`/`agentcore run` must run from the project root
+      # (fionaa/), not fionaa/agentcore/ -- the CLI errors out otherwise
+      # ("Please run this command from your project root directory").
+      - name: Deploy fionaa
+        working-directory: fionaa
+        run: agentcore deploy -y
+
+      - name: Stage applications + invoke the real Runtime
+        working-directory: fionaa/agentcore
+        run: |
+          ../app/fionaa/.venv/bin/python3 eval_path2_stage_and_invoke.py \
+            --output .cli/path2-session-map.json
+
+      - name: Build ground-truth mapping
+        working-directory: fionaa/agentcore
+        run: |
+          ../app/fionaa/.venv/bin/python3 eval_path2_build_ground_truth.py \
+            --session-map .cli/path2-session-map.json \
+            --output .cli/path2-ground-truth.json
+
+      - name: Run batch-evaluation
+        working-directory: fionaa
+        run: |
+          set -e
+          SESSION_IDS=$(../app/fionaa/.venv/bin/python3 -c "
+          import json
+          m = json.load(open('agentcore/.cli/path2-session-map.json'))
+          print(' '.join(r['session_id'] for r in m.values()))
+          ")
+          # Batch evaluation names: letters/digits/underscore only, max 48
+          # chars -- hyphens (used elsewhere for AgentCore resource names)
+          # aren't allowed here.
+          agentcore run batch-evaluation \
+            --runtime fionaa \
+            --evaluator fionaa_companies_house_correctness fionaa_injection_resistance \
+                        ThirdParty.DeepEval.PIILeakage ThirdParty.DeepEval.ToolUse ThirdParty.DeepEval.TaskCompletion \
+            --session-ids $SESSION_IDS \
+            --ground-truth agentcore/.cli/path2-ground-truth.json \
+            -n "path2_ci_${GITHUB_RUN_ID}" \
+            --wait --json > agentcore/.cli/path2-batch-eval-result.json
+          cat agentcore/.cli/path2-batch-eval-result.json
+
+      - name: Check gate (fails the job on bad scores)
+        working-directory: fionaa/agentcore
+        run: |
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          ../app/fionaa/.venv/bin/python3 eval_path2_check_gate.py .cli/path2-batch-eval-result.json | tee -a "$GITHUB_STEP_SUMMARY"
+          rc=${PIPESTATUS[0]}
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          exit $rc
+        shell: bash
