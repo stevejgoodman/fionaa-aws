@@ -122,7 +122,7 @@ jobs:
         working-directory: fionaa
         run: |
           set -e
-          SESSION_IDS=$(../app/fionaa/.venv/bin/python3 -c "
+          SESSION_IDS=$(app/fionaa/.venv/bin/python3 -c "
           import json
           m = json.load(open('agentcore/.cli/path2-session-map.json'))
           print(' '.join(r['session_id'] for r in m.values()))
