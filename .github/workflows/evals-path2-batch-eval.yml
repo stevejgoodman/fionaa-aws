@@ -152,7 +152,6 @@ jobs:
           rc=${PIPESTATUS[0]}
           exit $rc
         shell: bash
-          exit $rc
 
       - name: Check gate (fails the job on bad scores)
         working-directory: fionaa/agentcore
