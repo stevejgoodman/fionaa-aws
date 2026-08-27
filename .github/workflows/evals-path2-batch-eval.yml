@@ -97,11 +97,12 @@ jobs:
       # have this error at all. A machine that already has cdk/node_modules
       # installed (from any prior local `agentcore` command) never hits
       # this, because tsc then resolves the locked 5.9.3 correctly; a truly
-      # clean checkout with no node_modules apparently falls through to
-      # some newer ambient/global tsc instead. `npm ci` here (exact,
-      # lockfile-pinned) before deploying is the fix this hypothesis
-      # predicts -- verify it actually resolves the failure on the next
-      # real CI run before trusting this comment over the evidence.
+      # clean checkout with no node_modules falls through to some newer
+      # ambient/global tsc instead. Confirmed by the next real CI run: this
+      # step alone got the TS5108 failure to disappear (Build CDK project
+      # now succeeds), surfacing a second, separate failure at the
+      # Synthesize CloudFormation step instead -- still under
+      # investigation, see the temporary log-dump step below.
       - name: Install CDK app dependencies
         working-directory: fionaa/agentcore/cdk
         run: npm ci
@@ -109,6 +110,22 @@ jobs:
       - name: Deploy fionaa
         working-directory: fionaa
         run: agentcore deploy -y
+
+      # Temporary diagnostic: `agentcore deploy` swallows the real
+      # subprocess error ("CDK synth failed: ... Subprocess exited with
+      # error 1", no stdout/stderr) and only writes it to a local log file.
+      # Dump that file so a failed run's actual error is visible in the Actions
+      # log instead of just the CLI's own unhelpful summary line. Remove
+      # once the underlying synth failure (still under investigation as of
+      # 2026-08-27) is understood and fixed.
+      - name: Dump deploy log on failure
+        if: failure()
+        working-directory: fionaa/agentcore
+        run: |
+          for f in .cli/logs/deploy/*.log; do
+            echo "=== $f ==="
+            cat "$f"
+          done
 
       - name: Stage applications + invoke the real Runtime
         working-directory: fionaa/agentcore
