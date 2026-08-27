@@ -150,38 +150,41 @@ jobs:
           # Batch evaluation names: letters/digits/underscore only, max 48
           # chars -- hyphens (used elsewhere for AgentCore resource names)
           # aren't allowed here.
-          # Plain `>` redirection here, not `tee` -- a real CI run proved
-          # `| tee file` can race: the log clearly showed a complete JSON
-          # response, but the very next command's read of that same file
-          # got nothing (JSONDecodeError on an empty file), on this
-          # runner's filesystem specifically. `>` is the shell's own fd
-          # redirection (no separate process, no such race) and is what
-          # every other step in this workflow already uses successfully.
-          agentcore run batch-evaluation \
+          # Command substitution here, not file redirection -- two real CI
+          # runs proved BOTH `| tee file` and plain `> file` can leave the
+          # very next command reading that same file back empty
+          # (JSONDecodeError on zero bytes), despite the log clearly
+          # showing the CLI had just printed complete JSON moments
+          # earlier, on this runner's filesystem specifically. Command
+          # substitution ($(...)) is bash's own well-defined mechanism for
+          # capturing a command's stdout into a variable -- no file I/O,
+          # no separate reader process, no such race is possible by
+          # construction.
+          START_OUTPUT=$(agentcore run batch-evaluation \
             --runtime fionaa \
             --evaluator fionaa_companies_house_correctness fionaa_injection_resistance \
                         ThirdParty.DeepEval.PIILeakage ThirdParty.DeepEval.ToolUse ThirdParty.DeepEval.TaskCompletion \
             --session-ids $SESSION_IDS \
             --ground-truth agentcore/.cli/path2-ground-truth.json \
             -n "path2_ci_${GITHUB_RUN_ID}" \
-            --json > agentcore/.cli/path2-batch-eval-start.json 2>&1
+            --json 2>&1)
           rc=$?
-          cat agentcore/.cli/path2-batch-eval-start.json
+          echo "$START_OUTPUT"
           if [ "$rc" -ne 0 ]; then exit $rc; fi
 
-          BATCH_EVAL_ID=$(app/fionaa/.venv/bin/python3 -c "
-          import json
-          print(json.load(open('agentcore/.cli/path2-batch-eval-start.json'))['id'])
+          BATCH_EVAL_ID=$(echo "$START_OUTPUT" | app/fionaa/.venv/bin/python3 -c "
+          import json, sys
+          print(json.load(sys.stdin)['id'])
           ")
           echo "Started batch evaluation: $BATCH_EVAL_ID -- polling for completion..."
 
           for i in $(seq 1 60); do
-            agentcore view batch-evaluation "$BATCH_EVAL_ID" --json > agentcore/.cli/path2-batch-eval-result.json 2>&1
+            VIEW_OUTPUT=$(agentcore view batch-evaluation "$BATCH_EVAL_ID" --json 2>&1)
             rc=$?
-            if [ "$rc" -ne 0 ]; then cat agentcore/.cli/path2-batch-eval-result.json; exit $rc; fi
-            STATUS=$(app/fionaa/.venv/bin/python3 -c "
-          import json
-          print(json.load(open('agentcore/.cli/path2-batch-eval-result.json')).get('status'))
+            if [ "$rc" -ne 0 ]; then echo "$VIEW_OUTPUT"; exit $rc; fi
+            STATUS=$(echo "$VIEW_OUTPUT" | app/fionaa/.venv/bin/python3 -c "
+          import json, sys
+          print(json.load(sys.stdin).get('status'))
           ")
             echo "[$i/60] status: $STATUS"
             case "$STATUS" in
@@ -189,7 +192,7 @@ jobs:
             esac
             sleep 10
           done
-          cat agentcore/.cli/path2-batch-eval-result.json
+          echo "$VIEW_OUTPUT" | tee agentcore/.cli/path2-batch-eval-result.json
 
           case "$STATUS" in
             COMPLETED|COMPLETED_WITH_ERRORS) exit 0 ;;
