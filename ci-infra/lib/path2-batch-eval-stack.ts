@@ -30,8 +30,6 @@ export interface Path2BatchEvalStackProps extends StackProps {
   readonly evaluatorArns: string[];
   /** fionaa_eval_dataset ARN -- agentcore deploy's post-deploy status check reads this directly. */
   readonly datasetArn: string;
-  /** Runtime's CloudWatch log group ARN -- StartBatchEvaluation verifies this exists before starting. */
-  readonly runtimeLogGroupArn: string;
   /**
    * CDK bootstrap qualifier (the "hnb659fds"-style suffix on
    * cdk-<qualifier>-deploy-role-<account>-<region>, etc.) -- lets this role
@@ -271,12 +269,18 @@ export class Path2BatchEvalStack extends Stack {
     // to have logs:DescribeLogGroups -- "BatchEvaluation API error (400):
     // Cannot verify log group '.../fionaa_fionaa-xjO2ci9fd3-DEFAULT'.
     // Please ensure the execution role has logs:DescribeLogGroups
-    // permission." Scoped to just the one runtime's log group.
+    // permission." First attempt scoped this to the one runtime's log
+    // group ARN and had no effect (same error after deploying) -- AWS's
+    // own CloudWatch Logs IAM docs confirm DescribeLogGroups is a
+    // list-style API (like S3's ListBucket) that doesn't support
+    // resource-level ARN scoping; `Resource: "*"` is what it actually
+    // needs. Still narrow in what it grants: list-only, no log content
+    // access (no logs:GetLogEvents/FilterLogEvents).
     this.ciRole.addToPolicy(
       new iam.PolicyStatement({
         sid: 'VerifyRuntimeLogGroupForBatchEvaluation',
         actions: ['logs:DescribeLogGroups'],
-        resources: [props.runtimeLogGroupArn],
+        resources: ['*'],
       }),
     );
 
