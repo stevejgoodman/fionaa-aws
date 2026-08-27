@@ -86,6 +86,26 @@ jobs:
       # `agentcore deploy`/`agentcore run` must run from the project root
       # (fionaa/), not fionaa/agentcore/ -- the CLI errors out otherwise
       # ("Please run this command from your project root directory").
+      #
+      # fionaa/agentcore/cdk/ (the AgentCore CLI's own vended CDK app) is
+      # committed, but its node_modules/ is gitignored like any other
+      # project's -- a real CI run (2026-08-27, first attempt) proved
+      # `agentcore deploy` does NOT install it itself: it failed building
+      # that app with TS5108 ("moduleResolution=node10 has been removed"),
+      # an error TypeScript only throws on 7.0 -- yet the committed
+      # tsconfig.json/package-lock.json pin typescript 5.9.3, which doesn't
+      # have this error at all. A machine that already has cdk/node_modules
+      # installed (from any prior local `agentcore` command) never hits
+      # this, because tsc then resolves the locked 5.9.3 correctly; a truly
+      # clean checkout with no node_modules apparently falls through to
+      # some newer ambient/global tsc instead. `npm ci` here (exact,
+      # lockfile-pinned) before deploying is the fix this hypothesis
+      # predicts -- verify it actually resolves the failure on the next
+      # real CI run before trusting this comment over the evidence.
+      - name: Install CDK app dependencies
+        working-directory: fionaa/agentcore/cdk
+        run: npm ci
+
       - name: Deploy fionaa
         working-directory: fionaa
         run: agentcore deploy -y
