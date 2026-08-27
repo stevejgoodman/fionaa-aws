@@ -28,6 +28,8 @@ export interface Path2BatchEvalStackProps extends StackProps {
   readonly evalCredentialsSecretArn: string;
   /** Evaluator ARNs this role may GetEvaluator on (fionaa_injection_resistance, fionaa_companies_house_correctness, ...). */
   readonly evaluatorArns: string[];
+  /** fionaa_eval_dataset ARN -- agentcore deploy's post-deploy status check reads this directly. */
+  readonly datasetArn: string;
   /**
    * CDK bootstrap qualifier (the "hnb659fds"-style suffix on
    * cdk-<qualifier>-deploy-role-<account>-<region>, etc.) -- lets this role
@@ -246,6 +248,18 @@ export class Path2BatchEvalStack extends Stack {
           'cloudformation:ListStackResources',
         ],
         resources: [`arn:aws:cloudformation:${this.region}:${this.account}:stack/${props.agentCoreStackName}/*`],
+      }),
+    );
+
+    // A real CI run (2026-08-27) proved `agentcore deploy` also does a
+    // post-deploy read-back of the dataset resource (to report/verify its
+    // status) -- unrelated to running batch-evaluation itself, and fails
+    // this deploy step (non-zero exit + warning) without it.
+    this.ciRole.addToPolicy(
+      new iam.PolicyStatement({
+        sid: 'ReadDatasetStatusPostDeploy',
+        actions: ['bedrock-agentcore:GetDataset'],
+        resources: [props.datasetArn],
       }),
     );
 

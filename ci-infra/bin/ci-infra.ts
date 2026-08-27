@@ -56,4 +56,5 @@ new Path2BatchEvalStack(app, 'FionaaEvalsPath2Ci', {
   // this account's bootstrap uses the default "hnb659fds" qualifier.
   cdkBootstrapQualifier: 'hnb659fds',
   agentCoreStackName: 'AgentCore-fionaa-default',
+  datasetArn: 'arn:aws:bedrock-agentcore:us-east-1:492646066653:dataset/fionaa_fionaa_eval_dataset-MBsNVJBQmZ',
 });
