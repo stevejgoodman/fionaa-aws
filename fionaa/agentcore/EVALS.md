@@ -450,7 +450,7 @@ this section is the plan, written before any of it exists.
      then just... stops, with no approve/reject verdict anywhere. Visible
      in work item 4's own S3 listing: only the `reject_no_company` runs
      ever wrote a `decision/` key.
-8. ~~CI workflow~~ — **implemented, not yet run for real**.
+8. ~~CI workflow~~ — **done, verified with two consecutive real green runs**.
    `.github/workflows/evals-path2-batch-eval.yml`: push-to-master +
    `workflow_dispatch`, path-filtered like `deepeval-ci.yml`. Steps:
    assume `fionaa-evals-path2-ci` → `agentcore deploy -y` → stage + invoke
@@ -483,8 +483,12 @@ this section is the plan, written before any of it exists.
    correctly fail, exit 1).
 
    **First real run (2026-08-27) confirmed the OIDC trust condition
-   works** (the thing work item 3 flagged as unverified) and surfaced two
-   real, unrelated environment bugs before the pipeline could run clean:
+   works** (the thing work item 3 flagged as unverified) and — over the
+   course of that same day — surfaced eleven more real, previously-unknown
+   bugs one at a time before two consecutive fully green runs confirmed
+   the whole pipeline actually works end to end. Each was fixed as its own
+   small PR, diffed/verified individually rather than batched, in this
+   order:
 
    1. **`fionaa/agentcore/cdk/` (the AgentCore CLI's own vended CDK app)
       is committed, but its `node_modules/` is gitignored like any
@@ -511,9 +515,99 @@ this section is the plan, written before any of it exists.
       `uv` invocation now succeeds on 3.13, `agentcore deploy` synths and
       deploys cleanly, and a real Path 2 invocation against the
       newly-redeployed (Python 3.13) Runtime completes successfully.
+   3. **`cloudformation:DescribeStacks` AccessDenied** — `agentcore
+      deploy`'s "Check stack status" step calls CloudFormation directly as
+      the CI role, not through the assumed bootstrap `deploy-role` (which
+      only covers the actual mutating changeset calls). Granted a narrow
+      read-only set (`DescribeStacks`/`DescribeStackEvents`/
+      `DescribeStackResources`/`GetTemplate`/`ListStackResources`) scoped
+      to just the one `AgentCore-fionaa-default` stack.
+   4. **`bedrock-agentcore:GetDataset` AccessDenied** — a separate
+      post-deploy status read-back of the dataset resource, unrelated to
+      running batch-evaluation itself. Granted, scoped to the one dataset
+      ARN.
+   5. **`logs:DescribeLogGroups` AccessDenied**, then **scoped-ARN grant
+      had no effect** — `StartBatchEvaluation` verifies the target log
+      group exists before starting, requiring the *caller* (not just the
+      service's own execution context) to have this permission. The first
+      attempt scoped it to the runtime's specific log group ARN and
+      didn't work; AWS's own CloudWatch Logs IAM docs confirm
+      `DescribeLogGroups` is a list-style API (like S3's `ListBucket`)
+      that doesn't support resource-level ARN scoping at all — switched to
+      `Resource: "*"`, which fixed it.
+   6. **`logs:StartQuery`/`GetQueryResults` AccessDenied** —
+      `StartBatchEvaluation` runs a CloudWatch Logs Insights query against
+      the runtime's log group to pull sessions/spans. `StartQuery` *does*
+      support resource-level scoping (unlike `DescribeLogGroups`) — scoped
+      to the one log group; `GetQueryResults` is keyed by query ID, not
+      log group, so granted broadly.
+   7. **`logs:CreateLogGroup`/`CreateLogStream`/`PutLogEvents` AccessDenied
+      (via FAS)** — `StartBatchEvaluation` writes its own per-session
+      output to a service-managed log group/stream, created via Forward
+      Access Sessions using *this role's* permissions. The output log
+      group name isn't known ahead of time (assigned at job creation), so
+      this couldn't be scoped to one ARN — granted broadly but limited to
+      exactly these three actions.
+   8. **`logs:PutRetentionPolicy` AccessDenied** — same FAS pattern,
+      revealed one call at a time by the service's own preflight checks
+      after fixing #7.
+   9. **`bedrock:InvokeModel` AccessDenied for the custom evaluators'
+      judge model** — the real root cause of the first fully-attempted
+      batch evaluation coming back `FAILED` ("all 3 sessions failed").
+      Root-caused by reading the job's own CloudWatch output log stream
+      directly via boto3 (`agentcore batch-evaluations history`/`agentcore
+      view batch-evaluation` are both **local-state-only** — they can't
+      see a job an ephemeral, already-destroyed CI runner started; had to
+      query `ListBatchEvaluations`/`GetBatchEvaluation` and the output log
+      group directly). fionaa's two *custom* LLM-as-a-judge evaluators
+      (`fionaa_companies_house_correctness`, `fionaa_injection_resistance`)
+      actually invoke Claude Haiku 4.5 via FAS using this role's
+      permissions — the managed `Builtin`/`ThirdParty` evaluators don't
+      need this (they run on AWS's own model capacity), which is exactly
+      why those three succeeded with real scores while only these two
+      failed. Granted, scoped to that model — same pattern
+      `GitHubOidcStack` already uses for Path 1's (different) judge model.
+   10. **`agentcore run batch-evaluation --wait` hangs indefinitely,
+       independent of the real outcome** — confirmed via boto3 (not
+       guessed) that the AWS-side job actually completed in ~60-70s on two
+       separate real runs (once `FAILED`, once `COMPLETED` after fixing
+       #9), while `--wait` itself hung 29+ minutes both times and got
+       killed by the job timeout. A genuine bug in the CLI's own
+       wait-loop, not fixable from this repo. Worked around by starting
+       the job *without* `--wait` (returns immediately with an id and
+       `PENDING` status) and polling `agentcore view batch-evaluation <id>
+       --json` ourselves every 10s — verified locally first that this
+       correctly detects `COMPLETED`/`COMPLETED_WITH_ERRORS` within the
+       expected window.
+   11. **The actual root cause of three consecutive "JSONDecodeError:
+       Expecting value" failures that looked like a filesystem race** —
+       every attempt to fix this (`| tee file`, plain `> file`, even bash
+       command substitution) hit the identical error, which was
+       misdiagnosed each time as a race between writing and immediately
+       reading the same output. The real cause: every attempt used `2>&1`,
+       merging Node's own `NodeVersionSupportWarning` deprecation text
+       (printed to stderr) in front of the CLI's `--json` payload on
+       stdout. `json.load` was correctly failing to parse *that warning
+       text* at position 0 — not a race, not an empty file. Fixed by
+       dropping `2>&1` entirely (stderr still prints to the log
+       unredirected, for visibility; stdout — pure JSON — is captured
+       cleanly). This is the one bug in this list actually introduced by
+       this session's own scripting, not discovered in AWS/the CLI.
+   12. **Gate script silently vacuous-passed `injection_resistance`** — the
+       first fully green run's `agentcore view batch-evaluation` output
+       had zero per-session entries for it in the `results` array (unlike
+       `--wait`'s output, which #10 moved off of), even though the
+       evaluator genuinely ran with 0 failures. The gate treated the empty
+       list as "nothing to check, pass" — which would have *also* silently
+       passed a real failure with the same empty-results shape. Hardened
+       to fall back to the aggregate summary's `totalFailed` count when no
+       per-session labels are present, verified against a synthetic case
+       proving the old code would have missed a real failure.
 
-   Both fixes shipped as separate small PRs (#8, and the `agentcore.json`
-   change) so each was independently diffed/verified rather than bundled.
+   **Two consecutive fully green CI runs** (2026-08-27) confirm the whole
+   Path 2 pipeline works end to end for real: OIDC → deploy → stage →
+   invoke → ground truth → batch-evaluation → gate, all 5 evaluators, gate
+   passing on real scores.
 9. ~~Cleanup/retention~~ — **done**. Chose the lifecycle-rule option over
    an explicit post-eval delete step: it cleans up unconditionally even if
    a future CI run crashes or is killed mid-pipeline, and needs no extra
