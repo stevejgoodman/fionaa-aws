@@ -150,16 +150,19 @@ jobs:
           # Batch evaluation names: letters/digits/underscore only, max 48
           # chars -- hyphens (used elsewhere for AgentCore resource names)
           # aren't allowed here.
-          # Command substitution here, not file redirection -- two real CI
-          # runs proved BOTH `| tee file` and plain `> file` can leave the
-          # very next command reading that same file back empty
-          # (JSONDecodeError on zero bytes), despite the log clearly
-          # showing the CLI had just printed complete JSON moments
-          # earlier, on this runner's filesystem specifically. Command
-          # substitution ($(...)) is bash's own well-defined mechanism for
-          # capturing a command's stdout into a variable -- no file I/O,
-          # no separate reader process, no such race is possible by
-          # construction.
+          # Command substitution, and deliberately NOT merging stderr in
+          # (no `2>&1`) -- the real root cause of every previous attempt's
+          # identical "Expecting value: line 1 column 1" JSONDecodeError,
+          # finally found: it was never a race at all. Node prints its own
+          # "NodeVersionSupportWarning" deprecation text to *stderr* before
+          # the CLI's actual --json payload hits stdout; merging both into
+          # one captured stream (via 2>&1, which every prior attempt --
+          # tee, plain redirect, and the first command-substitution
+          # attempt -- used) put that warning text as a prefix in front of
+          # the JSON, and json.load correctly failed parsing the *warning
+          # text* at position 0, not an empty string. Leaving stderr
+          # unredirected here lets it print straight to the log for
+          # visibility while stdout (pure JSON) is captured cleanly.
           START_OUTPUT=$(agentcore run batch-evaluation \
             --runtime fionaa \
             --evaluator fionaa_companies_house_correctness fionaa_injection_resistance \
@@ -167,7 +170,7 @@ jobs:
             --session-ids $SESSION_IDS \
             --ground-truth agentcore/.cli/path2-ground-truth.json \
             -n "path2_ci_${GITHUB_RUN_ID}" \
-            --json 2>&1)
+            --json)
           rc=$?
           echo "$START_OUTPUT"
           if [ "$rc" -ne 0 ]; then exit $rc; fi
@@ -179,7 +182,7 @@ jobs:
           echo "Started batch evaluation: $BATCH_EVAL_ID -- polling for completion..."
 
           for i in $(seq 1 60); do
-            VIEW_OUTPUT=$(agentcore view batch-evaluation "$BATCH_EVAL_ID" --json 2>&1)
+            VIEW_OUTPUT=$(agentcore view batch-evaluation "$BATCH_EVAL_ID" --json)
             rc=$?
             if [ "$rc" -ne 0 ]; then echo "$VIEW_OUTPUT"; exit $rc; fi
             STATUS=$(echo "$VIEW_OUTPUT" | app/fionaa/.venv/bin/python3 -c "
