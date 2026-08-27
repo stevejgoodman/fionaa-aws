@@ -109,15 +109,23 @@ jobs:
 
       - name: Deploy fionaa
         working-directory: fionaa
-        run: agentcore deploy -y
+        run: agentcore deploy -y -v
 
       # Temporary diagnostic: `agentcore deploy` swallows the real
       # subprocess error ("CDK synth failed: ... Subprocess exited with
-      # error 1", no stdout/stderr) and only writes it to a local log file.
-      # Dump that file so a failed run's actual error is visible in the Actions
-      # log instead of just the CLI's own unhelpful summary line. Remove
-      # once the underlying synth failure (still under investigation as of
-      # 2026-08-27) is understood and fixed.
+      # error 1", no stdout/stderr) and its own log file only repeats that
+      # one-line summary too (confirmed on a real failed run, 2026-08-27).
+      # bin/cdk.ts's own top-level catch does `console.error('AgentCore CDK
+      # synthesis failed:', error.message)` -- that message exists, it's
+      # just not surfaced by the wrapping CLI -- so invoke the exact same
+      # compiled app directly to see it. Remove once the underlying synth
+      # failure (still under investigation as of 2026-08-27) is understood
+      # and fixed.
+      - name: Run the CDK app directly on failure (surfaces the real error)
+        if: failure()
+        working-directory: fionaa/agentcore/cdk
+        run: node dist/bin/cdk.js || true
+
       - name: Dump deploy log on failure
         if: failure()
         working-directory: fionaa/agentcore
