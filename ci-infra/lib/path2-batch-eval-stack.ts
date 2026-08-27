@@ -36,6 +36,8 @@ export interface Path2BatchEvalStackProps extends StackProps {
    * Bedrock AgentCore create-update access `agentcore deploy` needs.
    */
   readonly cdkBootstrapQualifier: string;
+  /** The AgentCore-managed stack name (AgentCore-<project>-<target>, see bin/cdk.ts's toStackName). */
+  readonly agentCoreStackName: string;
 }
 
 /**
@@ -224,6 +226,26 @@ export class Path2BatchEvalStack extends Stack {
           bootstrapRoleArn('file-publishing-role'),
           bootstrapRoleArn('lookup-role'),
         ],
+      }),
+    );
+
+    // A real CI run (2026-08-27) proved `agentcore deploy`'s own status-
+    // check step ("Check stack status") calls CloudFormation directly as
+    // this role -- not through the assumed deploy-role -- so it needs
+    // read-only access to the one stack it manages, independent of the
+    // bootstrap-role assumption above (which covers the actual mutating
+    // deploy calls). Scoped to just this stack, read-only actions only.
+    this.ciRole.addToPolicy(
+      new iam.PolicyStatement({
+        sid: 'ReadAgentCoreStackStatus',
+        actions: [
+          'cloudformation:DescribeStacks',
+          'cloudformation:DescribeStackEvents',
+          'cloudformation:DescribeStackResources',
+          'cloudformation:GetTemplate',
+          'cloudformation:ListStackResources',
+        ],
+        resources: [`arn:aws:cloudformation:${this.region}:${this.account}:stack/${props.agentCoreStackName}/*`],
       }),
     );
 
