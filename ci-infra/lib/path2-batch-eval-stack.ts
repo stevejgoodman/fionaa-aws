@@ -310,21 +310,24 @@ export class Path2BatchEvalStack extends Stack {
       }),
     );
 
-    // Next error (still 2026-08-27): "FAS credentials do not have
+    // Next two errors (still 2026-08-27, revealed one at a time by the
+    // service's own preflight checks): "FAS credentials do not have
     // permission to create CloudWatch log groups. Ensure logs:CreateLogGroup
-    // is in the FAS policy." -- StartBatchEvaluation writes its own
+    // is in the FAS policy." then, after fixing that, the same pattern for
+    // logs:PutRetentionPolicy. StartBatchEvaluation writes its own
     // per-session-detail results to a service-managed output log
     // group/stream (see EVALS.md's "how metrics are captured" note),
-    // created via Forward Access Sessions using THIS role's permissions.
-    // The output log group name isn't known ahead of time (assigned at
-    // job creation, like the batch-evaluate resource ID itself), so this
-    // can't be scoped to one specific ARN the way StartQuery was --
-    // granted broadly, but limited to exactly the three actions needed to
-    // create and write a log group/stream, nothing else.
+    // created (and its retention set) via Forward Access Sessions using
+    // THIS role's permissions. The output log group name isn't known
+    // ahead of time (assigned at job creation, like the batch-evaluate
+    // resource ID itself), so this can't be scoped to one specific ARN
+    // the way StartQuery was -- granted broadly, but limited to exactly
+    // the actions needed to create/configure/write a log group, nothing
+    // else.
     this.ciRole.addToPolicy(
       new iam.PolicyStatement({
         sid: 'WriteBatchEvaluationOutputLogs',
-        actions: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents'],
+        actions: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents', 'logs:PutRetentionPolicy'],
         resources: ['*'],
       }),
     );
