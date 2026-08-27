@@ -55,4 +55,5 @@ new Path2BatchEvalStack(app, 'FionaaEvalsPath2Ci', {
   // From `aws cloudformation describe-stacks --stack-name CDKToolkit` --
   // this account's bootstrap uses the default "hnb659fds" qualifier.
   cdkBootstrapQualifier: 'hnb659fds',
+  agentCoreStackName: 'AgentCore-fionaa-default',
 });
