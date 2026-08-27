@@ -126,14 +126,17 @@ jobs:
           m = json.load(open('agentcore/.cli/path2-session-map.json'))
           print(' '.join(r['session_id'] for r in m.values()))
           ")
-          # No `set -e` here, deliberately: the CLI writes its error as JSON
-          # to *stdout* on a hard failure (confirmed on a real CI run,
-          # 2026-08-27 -- exit 1, zero stderr output, less than a second
-          # elapsed, meaning it failed at argument validation, not an
-          # actual batch-evaluation attempt) -- `set -e` would abort before
-          # the `cat` below ever shows it. Capture the real exit code,
-          # print the result unconditionally, then fail the step based on
-          # that saved code.
+          # No `set -e` here, and stdout+stderr both teed to the same file
+          # (not a bare `>` redirect), deliberately: a real CI run failed
+          # this step in ~3s with ZERO visible output on either stream even
+          # after removing `set -e` (2026-08-27) -- too fast to be a real
+          # batch-evaluation attempt (which takes 60s+), so this is an
+          # early failure (likely a missing IAM permission on this specific
+          # call, following the exact pattern of every prior fix in this
+          # file) whose message a plain `>` redirect may be dropping via
+          # Node's known stdout-truncation-on-fast-exit behavior when
+          # piped rather than teed. `tee` avoids that class of loss and
+          # keeps stdout+stderr together so nothing is lost either way.
           #
           # Batch evaluation names: letters/digits/underscore only, max 48
           # chars -- hyphens (used elsewhere for AgentCore resource names)
@@ -145,9 +148,10 @@ jobs:
             --session-ids $SESSION_IDS \
             --ground-truth agentcore/.cli/path2-ground-truth.json \
             -n "path2_ci_${GITHUB_RUN_ID}" \
-            --wait --json > agentcore/.cli/path2-batch-eval-result.json
-          rc=$?
-          cat agentcore/.cli/path2-batch-eval-result.json
+            --wait --json 2>&1 | tee agentcore/.cli/path2-batch-eval-result.json
+          rc=${PIPESTATUS[0]}
+          exit $rc
+        shell: bash
           exit $rc
 
       - name: Check gate (fails the job on bad scores)
