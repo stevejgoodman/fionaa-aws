@@ -30,6 +30,8 @@ export interface Path2BatchEvalStackProps extends StackProps {
   readonly evaluatorArns: string[];
   /** fionaa_eval_dataset ARN -- agentcore deploy's post-deploy status check reads this directly. */
   readonly datasetArn: string;
+  /** Runtime's CloudWatch log group ARN -- StartBatchEvaluation verifies this exists before starting. */
+  readonly runtimeLogGroupArn: string;
   /**
    * CDK bootstrap qualifier (the "hnb659fds"-style suffix on
    * cdk-<qualifier>-deploy-role-<account>-<region>, etc.) -- lets this role
@@ -260,6 +262,21 @@ export class Path2BatchEvalStack extends Stack {
         sid: 'ReadDatasetStatusPostDeploy',
         actions: ['bedrock-agentcore:GetDataset'],
         resources: [props.datasetArn],
+      }),
+    );
+
+    // A real CI run (2026-08-27) proved StartBatchEvaluation itself
+    // verifies the target log group exists before starting the job,
+    // requiring the CALLER (not just the service's own execution context)
+    // to have logs:DescribeLogGroups -- "BatchEvaluation API error (400):
+    // Cannot verify log group '.../fionaa_fionaa-xjO2ci9fd3-DEFAULT'.
+    // Please ensure the execution role has logs:DescribeLogGroups
+    // permission." Scoped to just the one runtime's log group.
+    this.ciRole.addToPolicy(
+      new iam.PolicyStatement({
+        sid: 'VerifyRuntimeLogGroupForBatchEvaluation',
+        actions: ['logs:DescribeLogGroups'],
+        resources: [props.runtimeLogGroupArn],
       }),
     );
 
