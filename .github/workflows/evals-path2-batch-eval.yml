@@ -150,6 +150,13 @@ jobs:
           # Batch evaluation names: letters/digits/underscore only, max 48
           # chars -- hyphens (used elsewhere for AgentCore resource names)
           # aren't allowed here.
+          # Plain `>` redirection here, not `tee` -- a real CI run proved
+          # `| tee file` can race: the log clearly showed a complete JSON
+          # response, but the very next command's read of that same file
+          # got nothing (JSONDecodeError on an empty file), on this
+          # runner's filesystem specifically. `>` is the shell's own fd
+          # redirection (no separate process, no such race) and is what
+          # every other step in this workflow already uses successfully.
           agentcore run batch-evaluation \
             --runtime fionaa \
             --evaluator fionaa_companies_house_correctness fionaa_injection_resistance \
@@ -157,8 +164,9 @@ jobs:
             --session-ids $SESSION_IDS \
             --ground-truth agentcore/.cli/path2-ground-truth.json \
             -n "path2_ci_${GITHUB_RUN_ID}" \
-            --json 2>&1 | tee agentcore/.cli/path2-batch-eval-start.json
-          rc=${PIPESTATUS[0]}
+            --json > agentcore/.cli/path2-batch-eval-start.json 2>&1
+          rc=$?
+          cat agentcore/.cli/path2-batch-eval-start.json
           if [ "$rc" -ne 0 ]; then exit $rc; fi
 
           BATCH_EVAL_ID=$(app/fionaa/.venv/bin/python3 -c "
@@ -168,9 +176,9 @@ jobs:
           echo "Started batch evaluation: $BATCH_EVAL_ID -- polling for completion..."
 
           for i in $(seq 1 60); do
-            agentcore view batch-evaluation "$BATCH_EVAL_ID" --json 2>&1 | tee agentcore/.cli/path2-batch-eval-result.json
-            rc=${PIPESTATUS[0]}
-            if [ "$rc" -ne 0 ]; then exit $rc; fi
+            agentcore view batch-evaluation "$BATCH_EVAL_ID" --json > agentcore/.cli/path2-batch-eval-result.json 2>&1
+            rc=$?
+            if [ "$rc" -ne 0 ]; then cat agentcore/.cli/path2-batch-eval-result.json; exit $rc; fi
             STATUS=$(app/fionaa/.venv/bin/python3 -c "
           import json
           print(json.load(open('agentcore/.cli/path2-batch-eval-result.json')).get('status'))
@@ -181,6 +189,7 @@ jobs:
             esac
             sleep 10
           done
+          cat agentcore/.cli/path2-batch-eval-result.json
 
           case "$STATUS" in
             COMPLETED|COMPLETED_WITH_ERRORS) exit 0 ;;
