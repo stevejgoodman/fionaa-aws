@@ -28,6 +28,14 @@ export interface Path2BatchEvalStackProps extends StackProps {
   readonly evalCredentialsSecretArn: string;
   /** Evaluator ARNs this role may GetEvaluator on (fionaa_injection_resistance, fionaa_companies_house_correctness, ...). */
   readonly evaluatorArns: string[];
+  /**
+   * CDK bootstrap qualifier (the "hnb659fds"-style suffix on
+   * cdk-<qualifier>-deploy-role-<account>-<region>, etc.) -- lets this role
+   * run `agentcore deploy` by assuming the bootstrap's own scoped roles
+   * rather than this stack reimplementing everything CloudFormation/IAM/
+   * Bedrock AgentCore create-update access `agentcore deploy` needs.
+   */
+  readonly cdkBootstrapQualifier: string;
 }
 
 /**
@@ -50,11 +58,14 @@ export interface Path2BatchEvalStackProps extends StackProps {
  * agentcore_deploy_gotchas #8/#12. There is no IAM permission check on that
  * invocation path at all; only the JWT matters.
  *
- * Also deliberately does NOT grant anything needed for `agentcore deploy`
- * itself (CloudFormation/IAM/broader Bedrock AgentCore create/update
- * actions) -- that is a much larger permission surface and a separate
- * design decision, to be scoped explicitly when the CI workflow (work item
- * 8) is built, not folded into this narrowly-scoped batch-eval role.
+ * `agentcore deploy` support (work item 8) is granted narrowly too: rather
+ * than reimplementing the large CloudFormation/IAM/Bedrock AgentCore
+ * create-update permission set `agentcore deploy` needs, this role is only
+ * allowed to assume the CDK bootstrap's own already-scoped deploy/file-
+ * publishing/lookup roles (the same ones the `cdk`/`agentcore` CLI assumes
+ * for any deploy, interactive or not) -- those roles' trust policies
+ * already trust the whole account, so this is additive on our side only,
+ * no bootstrap-stack change required.
  */
 export class Path2BatchEvalStack extends Stack {
   readonly ciRole: iam.Role;
@@ -190,6 +201,29 @@ export class Path2BatchEvalStack extends Stack {
         sid: 'ListEvaluators',
         actions: ['bedrock-agentcore-control:ListEvaluators'],
         resources: ['*'],
+      }),
+    );
+
+    // Let this role run `agentcore deploy` (work item 8) by assuming the
+    // CDK bootstrap's own roles instead of duplicating what CloudFormation/
+    // IAM/Bedrock AgentCore create-update access it needs. deploy-role is
+    // what actually calls CreateChangeSet/ExecuteChangeSet and PassRoles
+    // the cfn-exec-role; file-publishing-role uploads the code artifact/
+    // template to the bootstrap assets bucket; lookup-role covers any
+    // context lookups the CDK app might do (none known today, included for
+    // parity with a normal full deploy permission set rather than
+    // discovering a gap mid-CI-run).
+    const bootstrapRoleArn = (name: string) =>
+      `arn:aws:iam::${this.account}:role/cdk-${props.cdkBootstrapQualifier}-${name}-${this.account}-${this.region}`;
+    this.ciRole.addToPolicy(
+      new iam.PolicyStatement({
+        sid: 'AssumeCdkBootstrapRolesForDeploy',
+        actions: ['sts:AssumeRole'],
+        resources: [
+          bootstrapRoleArn('deploy-role'),
+          bootstrapRoleArn('file-publishing-role'),
+          bootstrapRoleArn('lookup-role'),
+        ],
       }),
     );
 
