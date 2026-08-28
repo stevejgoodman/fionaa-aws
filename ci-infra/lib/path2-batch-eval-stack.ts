@@ -269,6 +269,23 @@ export class Path2BatchEvalStack extends Stack {
       }),
     );
 
+    // A real CI run (2026-08-28, PR #30 -- the first PR to actually change
+    // fionaa_eval_dataset.jsonl's *content*, not just touch the path filter)
+    // proved GetDataset above isn't enough: `agentcore deploy` also pushes
+    // the updated dataset examples post-deploy ("agentcore dataset push"
+    // under the hood), which needs its own write action. Without it, deploy
+    // itself still succeeds (CloudFormation update completes) but the CLI
+    // reports "Push failed during update phase" as a post-deploy warning and
+    // exits 2 anyway -- same class of failure as ReadDatasetStatusPostDeploy
+    // above, just for the write path instead of the read path.
+    this.ciRole.addToPolicy(
+      new iam.PolicyStatement({
+        sid: 'UpdateDatasetExamplesPostDeploy',
+        actions: ['bedrock-agentcore:UpdateDatasetExamples'],
+        resources: [props.datasetArn],
+      }),
+    );
+
     // A real CI run (2026-08-27) proved StartBatchEvaluation itself
     // verifies the target log group exists before starting the job,
     // requiring the CALLER (not just the service's own execution context)
