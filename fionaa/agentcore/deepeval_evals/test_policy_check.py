@@ -85,6 +85,15 @@ async def test_policy_check_scenario(golden):
     application = json.loads(golden.input)
     actual_output, tool_calls = await _run_policy_check(application)
 
+    # Same policy text check_against_policy itself loaded and handed the
+    # agent (graph.py:173) -- reloading it here (a cheap, deterministic file
+    # read, no LLM call) gives assertions_metric's judge the actual policy
+    # document to check citations against, instead of judging blind on
+    # whether cited-looking text sounds plausible. Without this, the judge
+    # either assumes good faith or fails the assertion purely for lack of
+    # visible evidence -- see metrics.py's assertions_metric docstring.
+    policy_text = g.load_policy_text(g.LoanType(application["loan_type"]))
+
     meta = golden.additional_metadata
     scenario_id = meta["scenario_id"]
     expected_tools = [ToolCall(name=t) for t in meta["expected_trajectory"]]
@@ -93,6 +102,7 @@ async def test_policy_check_scenario(golden):
         input=golden.input,
         actual_output=actual_output,
         expected_output=golden.expected_output,
+        context=[policy_text],
         tools_called=tool_calls,
         expected_tools=expected_tools,
     )
@@ -101,7 +111,7 @@ async def test_policy_check_scenario(golden):
     if golden.expected_output:
         metrics.append(correctness_metric(scenario_id))
     if meta["assertions"]:
-        metrics.append(assertions_metric(scenario_id, meta["assertions"]))
+        metrics.append(assertions_metric(scenario_id, meta["assertions"], context=[policy_text]))
     if expected_tools:
         metrics.append(ToolPrefixCorrectness())
 
