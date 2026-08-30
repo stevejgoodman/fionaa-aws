@@ -8,7 +8,7 @@ Loan Term: 3 – 60 months
 Documents Required:
 
 - Director ID and proof of address
-- Recent business bank statements
+- 3 Recent (latest must be in last 3 months) business bank statements
 - Accounts/management information
 - VAT returns (if registered)
 - Details of existing borrowing if any

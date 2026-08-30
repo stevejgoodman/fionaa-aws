@@ -5,11 +5,19 @@ from schemas import LoanType
 
 
 def test_load_check_tool_names_for_invoice_factoring():
-    assert pl.load_check_tool_names(LoanType.invoice_factoring) == ["compute_invoice_factoring_advance"]
+    # general.md's check_bank_statements_recent_and_sufficient always comes
+    # first -- load_check_tool_names iterates (general, specific) in that order.
+    assert pl.load_check_tool_names(LoanType.invoice_factoring) == [
+        "check_bank_statements_recent_and_sufficient",
+        "compute_invoice_factoring_advance",
+    ]
 
 
 def test_load_check_tool_names_for_invoice_discounting():
-    assert pl.load_check_tool_names(LoanType.invoice_discounting) == ["compute_invoice_discounting_advance"]
+    assert pl.load_check_tool_names(LoanType.invoice_discounting) == [
+        "check_bank_statements_recent_and_sufficient",
+        "compute_invoice_discounting_advance",
+    ]
 
 
 def test_load_check_tool_names_returns_amount_range_check_per_fixed_range_type():
@@ -21,7 +29,10 @@ def test_load_check_tool_names_returns_amount_range_check_per_fixed_range_type()
         (LoanType.secured_business_loans, "check_secured_business_loan_amount_in_range"),
         (LoanType.revolving_credit_facility, "check_revolving_credit_facility_amount_in_range"),
     ):
-        assert pl.load_check_tool_names(loan_type) == [expected_tool]
+        assert pl.load_check_tool_names(loan_type) == [
+            "check_bank_statements_recent_and_sufficient",
+            expected_tool,
+        ]
 
 
 def test_load_policy_text_strips_checks_comment():

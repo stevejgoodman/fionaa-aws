@@ -11,8 +11,10 @@ from __future__ import annotations
 import json
 import logging
 import os
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Annotated, Any, Literal, Optional, TypedDict
+from datetime import date
+from typing import Any, Literal, Optional
 
 import boto3
 from langgraph.checkpoint.base import BaseCheckpointSaver
@@ -22,20 +24,31 @@ from langgraph.types import Command
 from langgraph_checkpoint_aws import AgentCoreMemorySaver
 from langchain.agents import create_agent
 from langchain.messages import HumanMessage, ToolMessage
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ValidationError
 from model.load import load_model
 
 from check_tools import CHECK_TOOLS_POOL
 from policy_loader import load_check_tool_names, load_policy_text
 from prompts import (
     COMPANIES_HOUSE_PROMPT,
+    DECISION_SYNTHESIS_PROMPT,
     FINANCIAL_ASSESSMENT_PROMPT,
     POLICY_CHECK_PROMPT,
     WEB_SEARCH_PROMPT,
 )
-from schemas import LoanType
+
+from schemas import (
+    LoanType,
+    ApplicationState,
+    AgentContext,
+    AnnualAccountsSchema,
+    BankStatementSchema,
+    CompaniesHouseResult,
+    FinalDecisionResult,
+)
+
 from security import CustomerIdentity
-from storage import ApplicationStore, PolicyDocStore
+from storage import ApplicationStore
 
 log = logging.getLogger("fionaa")
 
@@ -93,57 +106,10 @@ def checkpoint_config(identity: CustomerIdentity) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # Graph state
 # ---------------------------------------------------------------------------
-
-def _last_write_wins(_old: Any, new: Any) -> Any:
-    return new
-
-
-class CompaniesHouseResult(BaseModel):
-    """Forced structured output for `check_companies_house` —
-    agent's final turn is constrained to this
-    schema and `found` becomes a branch condition in the graph."""
-
-    found: bool = Field(
-        description="True if the applicant's company was confirmed as a "
-        "genuine UK company with the named applicant as an officer "
-        "or PSC. False if no such company could be confirmed."
-    )
-    confidence: str = Field(description="high, medium, or low")
-    summary: str = Field(
-        description="Explanation of the finding, including any partial matches considered. "
-        "When a company was found, must include the registered office address and the "
-        "director/PSC names — search_web uses these to disambiguate the company online, "
-        "not just the summary verdict."
-    )
-
-
-class ApplicationState(TypedDict, total=False):
-    """Checkpointed state captures application inputs and decision outputs"""
-    application: dict[str, Any]
-    policy_check: Annotated[dict[str, Any], _last_write_wins]
-    companies_house: Annotated[dict[str, Any], _last_write_wins]
-    companies_house_found: Annotated[bool, _last_write_wins]
-    financial_assessment: Annotated[dict[str, Any], _last_write_wins]
-    web_search: Annotated[dict[str, Any], _last_write_wins]
-    final_decision: Annotated[dict[str, Any], _last_write_wins]
-
-
-@dataclass(frozen=True)
-class AgentContext:
-    """Per-invocation dependencies threaded via LangGraph's Runtime context
-    API (`StateGraph(..., context_schema=AgentContext)`), not graph state.
-
-    `store`/`policy_docs` wrap  boto3 S3 client and `tools` holds live
-    MCP `StructuredTool` objects — neither is msgpack-serializable, 
-    so can't live in  `ApplicationState`, which is checkpointered
-    Runtime context is passed via `graph.ainvoke(state,
-    context=...)`, kept immutable for the run, and is never part of the
-    checkpointed state.
-    """
-
-    store: ApplicationStore
-    policy_docs: PolicyDocStore
-    tools: list[Any]
+# ApplicationState/AgentContext/_last_write_wins, the document schemas
+# (AnnualAccountsSchema/BankStatementSchema), and the two forced
+# structured-output schemas below (CompaniesHouseResult/FinalDecisionResult)
+# all live in schemas.py now -- graph.py only wires nodes/edges.
 
 
 def tools_for(all_tools, *names_or_prefixes):
@@ -156,16 +122,74 @@ def tools_for(all_tools, *names_or_prefixes):
 # Nodes — each writes its own artifact under a fixed subpath
 # ---------------------------------------------------------------------------
 
+@dataclass(frozen=True)
+class DocumentSpec:
+    """Declares one document type load_application loads from the store.
+
+    `applies_to` decides whether this document type is expected for a given
+    application -- defaults to always True (annual_accounts/bank_statements
+    are mandatory for every loan type today). A future document type that's
+    only relevant to certain loan types (e.g. a security valuation for
+    secured-business-loans) can gate on `application` here without
+    load_application itself growing loan_type branching -- just add another
+    DocumentSpec to DOCUMENT_SPECS below."""
+
+    state_key: str
+    key_prefix: str
+    schema: type[BaseModel]
+    applies_to: Callable[[dict[str, Any]], bool] = lambda application: True
+
+
+DOCUMENT_SPECS = [
+    DocumentSpec("annual_accounts", "input/annual_accounts", AnnualAccountsSchema),
+    DocumentSpec("bank_statements", "input/bank_statement", BankStatementSchema),
+]
+
+
+def _load_validated_documents(
+    store: ApplicationStore, key_prefix: str, schema: type[BaseModel]
+) -> list[dict[str, Any]]:
+    """Loads every JSON document under `key_prefix` (same input/ location as
+    application.json), validating each against `schema`. There's no
+    manifest of how many documents exist per type -- store.list_keys
+    discovers them by prefix match (annual_accounts*/bank_statement*), since
+    multiple documents per type are expected (several years of accounts,
+    several months of statements). A malformed document fails loudly
+    (ValueError) rather than being silently dropped -- these feed
+    FINANCIAL_ASSESSMENT_PROMPT's numbers, so a bad document should stop the
+    run, not quietly disappear from the assessment."""
+    docs = []
+    for key in sorted(store.list_keys(key_prefix)):
+        payload = store.get_json(key)
+        if payload is None:
+            continue
+        try:
+            validated = schema.model_validate(payload)
+        except ValidationError as exc:
+            raise ValueError(f"{key} failed {schema.__name__} validation") from exc
+        docs.append(validated.model_dump(mode="json"))
+    return docs
+
+
 def load_application(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict[str, Any]:
-    application = runtime.context.store.get_json("input/application.json")
+    store = runtime.context.store
+    application = store.get_json("input/application.json")
     if application is None:
         raise FileNotFoundError("application.json not found for this application_id")
-    return {"application": application}
+
+    documents = {
+        spec.state_key: _load_validated_documents(store, spec.key_prefix, spec.schema)
+        for spec in DOCUMENT_SPECS
+        if spec.applies_to(application)
+    }
+
+    return {"application": application, **documents}
 
 
 async def check_against_policy(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict[str, Any]:
     application = state["application"]
     loan_type = LoanType(application["loan_type"])
+    bank_statements = state.get("bank_statements", [])
 
     # loan_type is already known from the application — no KB search needed
     # to find "the correct loan policy document"; load it directly by key.
@@ -176,9 +200,9 @@ async def check_against_policy(state: ApplicationState, runtime: Runtime[AgentCo
     # the policy text itself (a `<!-- checks: ... -->` comment, stripped
     # before load_policy_text returns) — scoped per loan type the same way
     # `tools_for` scopes MCP tools for the other agentic nodes, just against
-    # the local CHECK_TOOLS_POOL instead of runtime.context.tools. Most loan
-    # types declare none, in which case this is `[]` and the agent assesses
-    # purely from the policy text, same as before.
+    # the local CHECK_TOOLS_POOL instead of runtime.context.tools.
+    # general.md declares check_bank_statements_recent_and_sufficient, so
+    # every loan type gets it regardless of that type's own policy.md.
     tool_names = load_check_tool_names(loan_type)
     agent = create_agent(
         model=model,
@@ -186,11 +210,18 @@ async def check_against_policy(state: ApplicationState, runtime: Runtime[AgentCo
         system_prompt=POLICY_CHECK_PROMPT,
     )
 
+    # Computed fresh per invocation, not at module import time -- see
+    # prompts.py's unused module-level TODAYS_DATE, which is frozen at
+    # first import and would silently go stale in a long-lived process.
+    today = date.today().isoformat()
+
     response = await agent.ainvoke(
         {
             "messages": [
                 HumanMessage(
-                    content=f"POLICY:\n{policy_text}\n\nAPPLICATION:\n{json.dumps(application)}"
+                    content=f"POLICY:\n{policy_text}\n\nAPPLICATION:\n{json.dumps(application)}\n\n"
+                    f"BANK STATEMENT END DATES:\n{json.dumps([s['end_date'] for s in bank_statements])}\n\n"
+                    f"TODAY'S DATE: {today}"
                 )
             ]
         }
@@ -269,12 +300,18 @@ async def check_financial_assessment(state: ApplicationState, runtime: Runtime[A
     """Runs after companies_house (only reached on the `found` branch) so it
     has both the application form and an independent Companies House lookup
     to cross-check, plus compute_monthly_repayment from CHECK_TOOLS_POOL for
-    a deterministic affordability figure — see FINANCIAL_ASSESSMENT_PROMPT
-    for why this is scoped to those two sources rather than bank statements,
-    which aren't wired into this graph's state yet."""
+    a deterministic affordability figure. Also reads annual_accounts/
+    bank_statements (loaded by load_application) as further cross-source
+    evidence for the consistency/affordability checks -- see
+    FINANCIAL_ASSESSMENT_PROMPT. Whether the bank statements are
+    sufficiently numerous/recent per general policy is check_against_policy's
+    job, not this node's -- it's given whatever documents load_application
+    found, however many/recent that turns out to be."""
     application = state["application"]
     companies_house = state.get("companies_house")
     policy_check = state.get("policy_check")
+    annual_accounts = state.get("annual_accounts", [])
+    bank_statements = state.get("bank_statements", [])
 
     agent = create_agent(
         model=model,
@@ -288,7 +325,9 @@ async def check_financial_assessment(state: ApplicationState, runtime: Runtime[A
                 HumanMessage(
                     content=f"APPLICATION:\n{json.dumps(application)}\n\n"
                     f"COMPANIES HOUSE FINDINGS:\n{json.dumps(companies_house)}\n\n"
-                    f"POLICY CHECK RESULT:\n{json.dumps(policy_check)}"
+                    f"POLICY CHECK RESULT:\n{json.dumps(policy_check)}\n\n"
+                    f"ANNUAL ACCOUNTS:\n{json.dumps(annual_accounts)}\n\n"
+                    f"BANK STATEMENTS:\n{json.dumps(bank_statements)}"
                 )
             ]
         }
@@ -335,6 +374,57 @@ async def search_web(state: ApplicationState, runtime: Runtime[AgentContext]) ->
     runtime.context.store.put_json("web_search/result.json", web_search_result)
     return {"web_search": web_search_result}
 
+
+async def synthesize_decision(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict[str, Any]:
+    """Last node on the success path, after web_search. Without this node the
+    graph terminated at END having gathered policy_check/companies_house/
+    financial_assessment/web_search as separate evidence artifacts but never
+    rolled them up into an outcome — only reject_no_company ever wrote a
+    final_decision. This node closes that gap by weighing all four earlier
+    findings (already in state; nothing is re-fetched or re-assessed here)
+    into a single approved/rejected/referred verdict."""
+    application = state["application"]
+    policy_check = state.get("policy_check")
+    companies_house = state.get("companies_house")
+    financial_assessment = state.get("financial_assessment")
+    web_search = state.get("web_search")
+
+    agent = create_agent(
+        model=model,
+        tools=[],
+        system_prompt=DECISION_SYNTHESIS_PROMPT,
+        response_format=FinalDecisionResult,
+    )
+
+    response = await agent.ainvoke(
+        {
+            "messages": [
+                HumanMessage(
+                    content=f"APPLICATION:\n{json.dumps(application)}\n\n"
+                    f"POLICY CHECK RESULT:\n{json.dumps(policy_check)}\n\n"
+                    f"COMPANIES HOUSE FINDINGS:\n{json.dumps(companies_house)}\n\n"
+                    f"FINANCIAL ASSESSMENT:\n{json.dumps(financial_assessment)}\n\n"
+                    f"WEB SEARCH FINDINGS:\n{json.dumps(web_search)}"
+                )
+            ]
+        }
+    )
+    result: FinalDecisionResult = response["structured_response"]
+
+    # Mirrors reject_no_company's shape: the decision plus the upstream
+    # findings that produced it, so a reviewer doesn't have to reconstruct
+    # the reasoning from separate per-node artifacts.
+    final_decision = {
+        **result.model_dump(),
+        "policy_check": policy_check,
+        "companies_house": companies_house,
+        "financial_assessment": financial_assessment,
+        "web_search": web_search,
+    }
+    runtime.context.store.put_json("decision/result.json", final_decision)
+    return {"final_decision": final_decision}
+
+
 # policy check doesn't do agentic RAG — loan_type is known up front, so the
 # policy text is loaded directly (policy_loader.py), not searched for. It is
 # still agentic in a narrower sense: the agent may call deterministic
@@ -367,6 +457,7 @@ def build_graph(checkpointer: Optional[BaseCheckpointSaver] = None):
     g.add_node("reject_no_company", reject_no_company)
     g.add_node("financial_assessment", check_financial_assessment)
     g.add_node("web_search", search_web)
+    g.add_node("synthesize_decision", synthesize_decision)
 
     g.add_edge(START, "load_application")
     g.add_edge("load_application", "policy_check")
@@ -383,6 +474,12 @@ def build_graph(checkpointer: Optional[BaseCheckpointSaver] = None):
     # application against the companies_house findings, so it needs that
     # node to have already run.
     g.add_edge("financial_assessment", "web_search")
+    # web_search used to go straight to END, leaving policy_check/
+    # companies_house/financial_assessment/web_search as separate evidence
+    # artifacts with no rolled-up outcome on the success path — only
+    # reject_no_company ever wrote a final_decision. synthesize_decision
+    # closes that gap.
+    g.add_edge("web_search", "synthesize_decision")
     g.add_edge("reject_no_company", END)
-    g.add_edge("web_search", END)
+    g.add_edge("synthesize_decision", END)
     return g.compile(checkpointer=checkpointer)
