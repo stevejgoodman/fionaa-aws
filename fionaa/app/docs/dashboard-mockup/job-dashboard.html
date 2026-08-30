@@ -1,0 +1,587 @@
+<title>The Docket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+  :root{
+    --ink:#f3f1ea;
+    --paper:#ffffff;
+    --paper-raised:#fbfaf6;
+    --line:#d8d3c4;
+    --text:#211d16;
+    --text-dim:#6b6455;
+    --text-faint:#9c957f;
+    --brass:#9c7830;
+    --brass-ink:#7a5e22;
+    --sage:#3c7d5c;
+    --sage-bg:#e4efe6;
+    --rust:#a5432b;
+    --rust-bg:#f4e5df;
+    --slate:#3c5f8a;
+    --slate-bg:#e3e9f1;
+    --plum:#6f5488;
+    --plum-bg:#eae3ef;
+    --shadow: 0 1px 2px rgba(33,29,22,0.06), 0 8px 24px -12px rgba(33,29,22,0.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#10141a;
+      --paper:#1a2129;
+      --paper-raised:#202834;
+      --line:#333f4d;
+      --text:#eae6da;
+      --text-dim:#a3ada9;
+      --text-faint:#6d7783;
+      --brass:#c9a24b;
+      --brass-ink:#e0bc6c;
+      --sage:#5fa37d;
+      --sage-bg:#1c3327;
+      --rust:#c1553b;
+      --rust-bg:#392420;
+      --slate:#6d8cb5;
+      --slate-bg:#1e2c3d;
+      --plum:#9c7fb0;
+      --plum-bg:#2b2436;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px -14px rgba(0,0,0,0.55);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#10141a;
+    --paper:#1a2129;
+    --paper-raised:#202834;
+    --line:#333f4d;
+    --text:#eae6da;
+    --text-dim:#a3ada9;
+    --text-faint:#6d7783;
+    --brass:#c9a24b;
+    --brass-ink:#e0bc6c;
+    --sage:#5fa37d;
+    --sage-bg:#1c3327;
+    --rust:#c1553b;
+    --rust-bg:#392420;
+    --slate:#6d8cb5;
+    --slate-bg:#1e2c3d;
+    --plum:#9c7fb0;
+    --plum-bg:#2b2436;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px -14px rgba(0,0,0,0.55);
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--ink);
+    color:var(--text);
+    font-family:"IBM Plex Sans", system-ui, sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; }
+  }
+
+  .wrap{ max-width:1180px; margin:0 auto; padding:32px 24px 96px; }
+
+  h1,h2,h3{ font-family:"Fraunces", Georgia, serif; text-wrap:balance; margin:0; }
+
+  .mono{ font-family:"IBM Plex Mono", ui-monospace, monospace; font-variant-numeric:tabular-nums; }
+  .label{ font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-faint); font-weight:600; }
+
+  /* ---------- Header / case file ---------- */
+  .docket-header{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    gap:24px; flex-wrap:wrap;
+    padding-bottom:24px; margin-bottom:28px;
+    border-bottom:1px solid var(--line);
+  }
+  .docket-id{ display:flex; align-items:baseline; gap:10px; margin-bottom:6px; }
+  .docket-id .label{ margin:0; }
+  .docket-id .mono{ font-size:12px; color:var(--text-dim); }
+  h1.company{ font-size:32px; font-weight:600; font-optical-sizing:auto; }
+  .meta-row{ display:flex; gap:20px; flex-wrap:wrap; margin-top:10px; }
+  .meta-item{ font-size:13px; color:var(--text-dim); }
+  .meta-item b{ color:var(--text); font-weight:500; }
+
+  .status-pill{
+    display:inline-flex; align-items:center; gap:7px;
+    padding:6px 12px; border-radius:100px;
+    font-size:12px; font-weight:600; letter-spacing:0.02em;
+    border:1px solid var(--line);
+    background:var(--paper-raised);
+    white-space:nowrap;
+  }
+  .status-pill .dot{ width:7px; height:7px; border-radius:50%; background:var(--text-faint); }
+  .status-pill.running .dot{ background:var(--slate); animation:pulse 1.4s ease-in-out infinite; }
+  .status-pill.done .dot{ background:var(--sage); }
+  .status-pill.idle .dot{ background:var(--text-faint); }
+  @keyframes pulse{ 0%,100%{ opacity:1; transform:scale(1);} 50%{ opacity:0.45; transform:scale(1.3);} }
+
+  .controls{ display:flex; flex-direction:column; align-items:flex-end; gap:10px; }
+  .btn-row{ display:flex; gap:8px; }
+  button{
+    font-family:"IBM Plex Sans", sans-serif;
+    font-size:13px; font-weight:600;
+    padding:9px 16px;
+    border-radius:6px;
+    border:1px solid var(--line);
+    background:var(--paper-raised);
+    color:var(--text);
+    cursor:pointer;
+    transition:background 0.15s, border-color 0.15s, transform 0.1s;
+  }
+  button:hover{ border-color:var(--brass); }
+  button:active{ transform:translateY(1px); }
+  button:focus-visible{ outline:2px solid var(--brass); outline-offset:2px; }
+  button.primary{ background:var(--brass); border-color:var(--brass); color:#100c02; }
+  button.primary:hover{ filter:brightness(1.08); }
+  button:disabled{ opacity:0.45; cursor:not-allowed; }
+
+  .path-toggle{ display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dim); }
+  .path-toggle select{
+    font-family:"IBM Plex Mono", monospace; font-size:12px;
+    background:var(--paper-raised); color:var(--text);
+    border:1px solid var(--line); border-radius:5px; padding:5px 8px;
+  }
+
+  /* ---------- Pipeline rail ---------- */
+  .rail-section{ margin-bottom:36px; }
+  .rail-scroll{ overflow-x:auto; padding-bottom:8px; }
+  .rail{
+    display:flex; align-items:stretch; gap:0;
+    min-width:max-content;
+    position:relative;
+  }
+  .stage{
+    display:flex; flex-direction:column; align-items:center;
+    width:158px; flex-shrink:0; position:relative;
+    padding-top:6px;
+  }
+  .stage-connector{
+    position:absolute; top:24px; left:-79px; width:158px; height:2px;
+    background:var(--line); z-index:0;
+  }
+  .stage:first-child .stage-connector{ display:none; }
+  .stage-connector.filled{ background:var(--sage); }
+  .stage-connector.branch-taken{ background:var(--slate); }
+  .stage-connector.branch-not-taken{ background:repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 11px); }
+
+  .stage-node{
+    width:46px; height:46px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--paper); border:2px solid var(--line);
+    font-family:"IBM Plex Mono", monospace; font-weight:600; font-size:14px;
+    color:var(--text-faint);
+    z-index:1; position:relative;
+    transition:border-color 0.3s, color 0.3s, background 0.3s, box-shadow 0.3s;
+  }
+  .stage-node.running{ border-color:var(--slate); color:var(--slate); box-shadow:0 0 0 4px var(--slate-bg); animation:ringpulse 1.3s ease-in-out infinite; }
+  .stage-node.done{ border-color:var(--sage); background:var(--sage-bg); color:var(--sage); }
+  .stage-node.rejected{ border-color:var(--rust); background:var(--rust-bg); color:var(--rust); }
+  .stage-node.skipped{ border-color:var(--line); color:var(--text-faint); opacity:0.4; }
+  @keyframes ringpulse{ 0%,100%{ box-shadow:0 0 0 4px var(--slate-bg);} 50%{ box-shadow:0 0 0 8px transparent;} }
+
+  .stage-label{ margin-top:10px; font-size:12.5px; font-weight:600; text-align:center; }
+  .stage-sub{ font-size:11px; color:var(--text-faint); text-align:center; margin-top:2px; }
+  .stage-dur{ font-size:10.5px; color:var(--text-faint); margin-top:3px; font-family:"IBM Plex Mono",monospace; }
+
+  .stage-card-btn{
+    margin-top:8px; background:none; border:none; padding:2px 8px;
+    font-size:11px; color:var(--text-faint); cursor:pointer; font-weight:500;
+    border-radius:4px;
+  }
+  .stage-card-btn:hover{ color:var(--brass); background:var(--paper-raised); }
+  .stage.disabled .stage-card-btn{ visibility:hidden; }
+
+  /* ---------- Detail drawer ---------- */
+  .detail{
+    background:var(--paper); border:1px solid var(--line); border-radius:10px;
+    box-shadow:var(--shadow);
+    padding:22px 26px; margin-bottom:28px;
+    animation:reveal 0.25s ease;
+  }
+  @keyframes reveal{ from{ opacity:0; transform:translateY(-6px);} to{ opacity:1; transform:translateY(0);} }
+  .detail-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:16px; gap:12px; flex-wrap:wrap; }
+  .detail-head h2{ font-size:20px; font-weight:600; }
+  .detail-close{ background:none; border:none; color:var(--text-faint); font-size:13px; padding:4px 8px; }
+  .detail-cols{ display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  @media (max-width:760px){ .detail-cols{ grid-template-columns:1fr; } }
+  .detail-col h3{ font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-faint); font-weight:600; margin-bottom:10px; }
+  .kv{ display:flex; justify-content:space-between; gap:12px; padding:7px 0; border-bottom:1px solid var(--line); font-size:13px; }
+  .kv:last-child{ border-bottom:none; }
+  .kv .k{ color:var(--text-dim); }
+  .kv .v{ font-family:"IBM Plex Mono", monospace; text-align:right; }
+
+  .checklist{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+  .checklist li{ display:flex; align-items:flex-start; gap:9px; font-size:13px; }
+  .check-icon{ width:16px; height:16px; border-radius:50%; flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; }
+  .check-icon.pass{ background:var(--sage-bg); color:var(--sage); }
+  .check-icon.warn{ background:var(--plum-bg); color:var(--plum); }
+
+  .prose{ font-size:13.5px; color:var(--text-dim); line-height:1.65; }
+  .toolcall{
+    font-family:"IBM Plex Mono", monospace; font-size:11.5px;
+    background:var(--paper-raised); border:1px solid var(--line); border-radius:6px;
+    padding:8px 10px; margin-top:6px; overflow-x:auto; white-space:pre;
+    color:var(--text-dim);
+  }
+
+  .source-card{ display:flex; flex-direction:column; gap:2px; padding:9px 0; border-bottom:1px solid var(--line); font-size:13px; }
+  .source-card:last-child{ border-bottom:none; }
+  .source-card .src-title{ font-weight:500; }
+  .source-card .src-url{ font-family:"IBM Plex Mono", monospace; font-size:11px; color:var(--text-faint); }
+
+  /* ---------- Verdict stamp ---------- */
+  .verdict-wrap{ display:flex; justify-content:center; margin-top:40px; }
+  .verdict{
+    width:100%; max-width:640px;
+    background:var(--paper); border:1px solid var(--line); border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:36px 40px; text-align:center;
+    opacity:0; transform:scale(0.9) rotate(-2deg);
+    transition:opacity 0.5s ease, transform 0.5s cubic-bezier(.2,1.4,.4,1);
+  }
+  .verdict.show{ opacity:1; transform:scale(1) rotate(-1deg); }
+  .verdict-seal{
+    display:inline-flex; align-items:center; gap:10px;
+    font-family:"Fraunces", serif; font-weight:700; font-size:30px;
+    padding:10px 28px; border-radius:8px; border:3px solid currentColor;
+    letter-spacing:0.03em;
+  }
+  .verdict-seal.approved{ color:var(--sage); }
+  .verdict-seal.rejected{ color:var(--rust); }
+  .verdict-seal.referred{ color:var(--plum); }
+  .verdict-meta{ margin-top:18px; font-size:13px; color:var(--text-dim); }
+  .verdict-reason{ margin-top:20px; text-align:left; font-size:13.5px; color:var(--text-dim); line-height:1.65; padding-top:18px; border-top:1px solid var(--line); }
+  .verdict-reason b{ color:var(--text); font-weight:600; }
+
+  .empty-note{ text-align:center; color:var(--text-faint); font-size:13px; padding:60px 0; }
+
+  ::-webkit-scrollbar{ height:8px; }
+  ::-webkit-scrollbar-thumb{ background:var(--line); border-radius:4px; }
+</style>
+
+<div class="wrap">
+
+  <div class="docket-header">
+    <div>
+      <div class="docket-id">
+        <span class="label">Case</span>
+        <span class="mono" id="app-id">APP-2026-08114</span>
+      </div>
+      <h1 class="company">Alderfen Joinery Ltd</h1>
+      <div class="meta-row">
+        <div class="meta-item">Loan type: <b>Secured business loan</b></div>
+        <div class="meta-item">Requested: <b class="mono">£85,000</b></div>
+        <div class="meta-item">Thread: <span class="mono">thread_9f21c…</span></div>
+      </div>
+    </div>
+    <div class="controls">
+      <span class="status-pill idle" id="status-pill"><span class="dot"></span><span id="status-text">Idle</span></span>
+      <div class="btn-row">
+        <div class="path-toggle">
+          <span>Outcome</span>
+          <select id="path-select">
+            <option value="approved">Company found → approved</option>
+            <option value="referred">Company found → referred</option>
+            <option value="rejected">No Companies House match</option>
+          </select>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="primary" id="run-btn">Run application</button>
+        <button id="reset-btn">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="rail-section">
+    <div class="rail-scroll">
+      <div class="rail" id="rail"></div>
+    </div>
+  </div>
+
+  <div id="detail-slot"></div>
+
+  <div class="verdict-wrap" id="verdict-wrap" style="display:none;">
+    <div class="verdict" id="verdict"></div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+
+  // ---------------------------------------------------------------------
+  // Stage definitions — mirrors graph.py's node order and semantics
+  // ---------------------------------------------------------------------
+  const STAGES = [
+    { id:"load_application",   short:"01", label:"Load application",     sub:"application.json + documents" },
+    { id:"policy_check",       short:"02", label:"Policy check",         sub:"secured_business_loan.md" },
+    { id:"companies_house",    short:"03", label:"Companies House",      sub:"registry cross-check", branch:true },
+    { id:"reject_no_company",  short:"×",  label:"Reject — no match",    sub:"terminal", onlyIf:"rejected" },
+    { id:"financial_assessment", short:"04", label:"Financial assessment", sub:"accounts + statements", onlyIf:["approved","referred"] },
+    { id:"web_search",         short:"05", label:"Web search",           sub:"presence & reputation", onlyIf:["approved","referred"] },
+    { id:"synthesize_decision", short:"06", label:"Synthesize decision", sub:"final verdict", onlyIf:["approved","referred"] },
+  ];
+
+  const DURATIONS = { load_application:900, policy_check:2600, companies_house:2100, reject_no_company:600,
+                       financial_assessment:3200, web_search:2400, synthesize_decision:1800 };
+
+  // ---------------------------------------------------------------------
+  // Mock evidence per outcome path — stands in for each node's
+  // store.put_json artifact (policy_check/result.json, etc.)
+  // ---------------------------------------------------------------------
+  function buildData(path){
+    const base = {
+      load_application: {
+        kind:"kv",
+        rows:[["Application", "application.json"], ["Annual accounts", "2 documents"], ["Bank statements", "6 months"], ["Loan type", "secured_business_loan"]],
+      },
+      policy_check: {
+        kind:"checklist",
+        items:[
+          ["pass","Trading history ≥ 24 months (37 months)"],
+          ["pass","Bank statements recent & sufficient (6 of 6 required)"],
+          ["pass","Requested amount within policy ceiling (£85,000 ≤ £150,000)"],
+          [path==="referred" ? "warn":"pass", path==="referred" ? "Debt service coverage below preferred threshold (1.18× vs 1.25×)" : "Debt service coverage within threshold (1.41×)"],
+        ],
+        toolcalls:[["check_bank_statements_recent_and_sufficient","{\"sufficient\": true, \"months\": 6}"],["compute_monthly_repayment","{\"monthly_repayment\": 1614.32}"]],
+      },
+      companies_house: path==="rejected" ? {
+        kind:"kv",
+        rows:[["found", "false"], ["queried_name", "Alderfen Joinery Ltd"], ["closest_match", "none within registry"], ["address_match", "n/a"]],
+      } : {
+        kind:"kv",
+        rows:[["found", "true"], ["company_number", "09215774"], ["status", "active"], ["incorporated", "2014-03-11"], ["registered_office_match", "confirmed"]],
+      },
+      reject_no_company: {
+        kind:"prose",
+        text:"No entity matching “Alderfen Joinery Ltd” was found on the Companies House register. Per policy, UK company registration is a precondition for every loan type — the run terminates here rather than proceeding to a financial assessment against unverifiable trading history.",
+      },
+      financial_assessment: {
+        kind:"kv",
+        rows:[["Turnover (latest FY)", "£412,900"], ["Net profit margin", "9.8%"], ["Monthly repayment (computed)", "£1,614.32"], ["DSCR", path==="referred" ? "1.18×" : "1.41×"]],
+        toolcalls:[["compute_monthly_repayment","{\"principal\": 85000, \"term_months\": 60, \"rate\": 0.079}"]],
+      },
+      web_search: {
+        kind:"sources",
+        items:[
+          ["Company website — alderfenjoinery.co.uk", "Active trade site, portfolio last updated 3 months ago"],
+          ["Google Business Profile", "4.8★ across 61 reviews, no adverse mentions"],
+          ["Director LinkedIn — M. Ashworth", "Consistent tenure claim, matches Companies House officer record"],
+        ],
+      },
+      synthesize_decision: {
+        kind:"verdict",
+        outcome: path,
+        reasoning: path==="approved"
+          ? "Policy checks clear on every dimension, Companies House confirms an active, address-matched registration, DSCR sits comfortably above the 1.25× threshold, and web presence corroborates the application with no adverse findings."
+          : path==="referred"
+          ? "Policy and registry checks clear, but the debt service coverage ratio (1.18×) sits below the preferred 1.25× threshold. Web presence is otherwise clean. Recommend human underwriter review before disbursal."
+          : "No Companies House match — decision was already settled at the registry check.",
+      },
+    };
+    return base;
+  }
+
+  // ---------------------------------------------------------------------
+  // State
+  // ---------------------------------------------------------------------
+  let running = false;
+  let timer = null;
+  let currentPath = "approved";
+  let stageStatus = {};   // id -> pending|running|done|skipped|rejected
+  let stageDur = {};
+  let openDetail = null;
+  let stepIndex = 0;
+
+  const rail = document.getElementById("rail");
+  const detailSlot = document.getElementById("detail-slot");
+  const verdictWrap = document.getElementById("verdict-wrap");
+  const verdictEl = document.getElementById("verdict");
+  const statusPill = document.getElementById("status-pill");
+  const statusText = document.getElementById("status-text");
+  const runBtn = document.getElementById("run-btn");
+  const resetBtn = document.getElementById("reset-btn");
+  const pathSelect = document.getElementById("path-select");
+
+  function activeStages(path){
+    return STAGES.filter(s => {
+      if (!s.onlyIf) return true;
+      if (Array.isArray(s.onlyIf)) return s.onlyIf.includes(path);
+      return s.onlyIf === path;
+    });
+  }
+
+  function resetState(){
+    running = false;
+    clearTimeout(timer);
+    stepIndex = 0;
+    stageStatus = {};
+    stageDur = {};
+    openDetail = null;
+    STAGES.forEach(s => stageStatus[s.id] = "pending");
+    verdictWrap.style.display = "none";
+    verdictEl.classList.remove("show");
+    detailSlot.innerHTML = "";
+    statusPill.className = "status-pill idle";
+    statusText.textContent = "Idle";
+    runBtn.disabled = false;
+    runBtn.textContent = "Run application";
+    pathSelect.disabled = false;
+    render();
+  }
+
+  function iconFor(stage, status){
+    if (status === "done") return "✓";
+    if (status === "rejected") return "✕";
+    if (status === "running") return "";
+    return stage.short;
+  }
+
+  function render(){
+    const path = currentPath;
+    const stages = activeStages(path);
+    rail.innerHTML = "";
+    stages.forEach((s, i) => {
+      const status = stageStatus[s.id] || "pending";
+      const wrapDiv = document.createElement("div");
+      wrapDiv.className = "stage" + (status === "pending" ? " disabled" : "");
+
+      let connectorClass = "stage-connector";
+      if (i > 0){
+        const prev = stages[i-1];
+        const prevStatus = stageStatus[prev.id];
+        if (s.id === "reject_no_company" || prev.id === "companies_house"){
+          if (path === "rejected" && s.id === "reject_no_company") connectorClass += " branch-taken";
+          else if (path !== "rejected" && s.id === "financial_assessment") connectorClass += " branch-taken";
+          else connectorClass += " branch-not-taken";
+        } else if (prevStatus === "done"){
+          connectorClass += " filled";
+        }
+      }
+
+      wrapDiv.innerHTML = `
+        <div class="${connectorClass}"></div>
+        <div class="stage-node ${status}">${iconFor(s, status)}</div>
+        <div class="stage-label">${s.label}</div>
+        <div class="stage-sub">${s.sub}</div>
+        <div class="stage-dur">${stageDur[s.id] ? (stageDur[s.id]/1000).toFixed(1)+"s" : " "}</div>
+        <button class="stage-card-btn" data-stage="${s.id}" ${status==="pending" ? "disabled":""}>View I/O</button>
+      `;
+      rail.appendChild(wrapDiv);
+    });
+
+    rail.querySelectorAll(".stage-card-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-stage");
+        openDetail = openDetail === id ? null : id;
+        renderDetail();
+      });
+    });
+    renderDetail();
+  }
+
+  function renderDetail(){
+    if (!openDetail || stageStatus[openDetail] === "pending"){
+      detailSlot.innerHTML = "";
+      return;
+    }
+    const stage = STAGES.find(s => s.id === openDetail);
+    const data = buildData(currentPath)[openDetail];
+    let body = "";
+
+    if (data.kind === "kv"){
+      body = `<div class="detail-cols"><div class="detail-col" style="grid-column:1/-1">
+        ${data.rows.map(([k,v]) => `<div class="kv"><span class="k">${k}</span><span class="v">${v}</span></div>`).join("")}
+      </div></div>`;
+    } else if (data.kind === "checklist"){
+      body = `<div class="detail-cols">
+        <div class="detail-col">
+          <h3>Checks</h3>
+          <ul class="checklist">${data.items.map(([st,txt]) => `<li><span class="check-icon ${st}">${st==="pass"?"✓":"!"}</span>${txt}</li>`).join("")}</ul>
+        </div>
+        <div class="detail-col">
+          <h3>Tool calls</h3>
+          ${(data.toolcalls||[]).map(([t,r]) => `<div class="toolcall">${t}(...)\n→ ${r}</div>`).join("")}
+        </div>
+      </div>`;
+    } else if (data.kind === "prose"){
+      body = `<div class="prose">${data.text}</div>`;
+    } else if (data.kind === "sources"){
+      body = `<div class="detail-col" style="max-width:640px">${data.items.map(([t,d]) => `<div class="source-card"><span class="src-title">${t}</span><span class="src-url">${d}</span></div>`).join("")}</div>`;
+    } else if (data.kind === "verdict"){
+      body = `<div class="prose">${data.reasoning}</div>`;
+    }
+
+    detailSlot.innerHTML = `<div class="detail">
+      <div class="detail-head">
+        <h2>${stage.label}</h2>
+        <button class="detail-close" id="detail-close">Close ✕</button>
+      </div>
+      ${body}
+    </div>`;
+    document.getElementById("detail-close").addEventListener("click", () => { openDetail = null; renderDetail(); });
+  }
+
+  function showVerdict(path){
+    const data = buildData(path).synthesize_decision;
+    const label = path === "approved" ? "Approved" : path === "referred" ? "Referred" : "Rejected";
+    const cls = path === "approved" ? "approved" : path === "referred" ? "referred" : "rejected";
+    verdictEl.innerHTML = `
+      <div class="verdict-seal ${cls}">${label}</div>
+      <div class="verdict-meta">Alderfen Joinery Ltd &nbsp;·&nbsp; £85,000 secured business loan &nbsp;·&nbsp; <span class="mono">APP-2026-08114</span></div>
+      <div class="verdict-reason"><b>Reasoning</b><br>${data.reasoning}</div>
+    `;
+    verdictWrap.style.display = "flex";
+    requestAnimationFrame(() => requestAnimationFrame(() => verdictEl.classList.add("show")));
+  }
+
+  function step(){
+    const path = currentPath;
+    const stages = activeStages(path);
+    if (stepIndex >= stages.length){
+      running = false;
+      statusPill.className = "status-pill done";
+      statusText.textContent = "Complete";
+      runBtn.disabled = false;
+      runBtn.textContent = "Run again";
+      showVerdict(path);
+      return;
+    }
+    const s = stages[stepIndex];
+    stageStatus[s.id] = "running";
+    openDetail = s.id;
+    render();
+    const dur = DURATIONS[s.id] || 1500;
+    const start = dur; // fixed mock duration, no wall-clock dependency
+    timer = setTimeout(() => {
+      stageStatus[s.id] = s.id === "reject_no_company" ? "rejected" : "done";
+      stageDur[s.id] = start;
+      render();
+      stepIndex += 1;
+      timer = setTimeout(step, 260);
+    }, dur);
+  }
+
+  runBtn.addEventListener("click", () => {
+    if (running) return;
+    resetState();
+    running = true;
+    currentPath = pathSelect.value;
+    pathSelect.disabled = true;
+    runBtn.disabled = true;
+    runBtn.textContent = "Running…";
+    statusPill.className = "status-pill running";
+    statusText.textContent = "In progress";
+    step();
+  });
+
+  resetBtn.addEventListener("click", resetState);
+  pathSelect.addEventListener("change", () => { currentPath = pathSelect.value; if (!running) resetState(); });
+
+  currentPath = pathSelect.value;
+  resetState();
+
+})();
+</script>
