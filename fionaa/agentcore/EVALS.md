@@ -449,7 +449,9 @@ this section is the plan, written before any of it exists.
      "found" application runs all the way through evidence-gathering and
      then just... stops, with no approve/reject verdict anywhere. Visible
      in work item 4's own S3 listing: only the `reject_no_company` runs
-     ever wrote a `decision/` key.
+     ever wrote a `decision/` key. **Closed** — see "Follow-up (post-Path-2):
+     financial documents + closing the TaskCompletion gap" below
+     (`synthesize_decision` node).
 8. ~~CI workflow~~ — **done, verified with two consecutive real green runs**.
    `.github/workflows/evals-path2-batch-eval.yml`: push-to-master +
    `workflow_dispatch`, path-filtered like `deepeval-ci.yml`. Steps:
@@ -643,6 +645,183 @@ this section is the plan, written before any of it exists.
    to inspect/debug a failed CI run before the data disappears, short
    enough not to accumulate. Verified via `get-bucket-lifecycle-
    configuration` that exactly this one rule is in place.
+
+### Follow-up (post-Path-2): financial documents + closing the TaskCompletion gap
+
+Not part of the original 9-item plan above — done afterward, prompted by
+work item 7's `TaskCompletion` finding ("the graph never writes a final
+loan decision when the company is found") and a live question about
+`financial_assessment` while looking at `graph.py`. Same rigor as the plan
+above: verified against real Bedrock and, at the end, a real deployed
+Runtime — not asserted from reading the code.
+
+1. **`synthesize_decision` node** (`graph.py`) closes item 7's
+   `TaskCompletion` gap directly: forced structured output
+   (`FinalDecisionResult` — `approved`/`rejected`/`referred` + `reason` +
+   `rationale`, in `schemas.py`) that weighs `policy_check`/
+   `companies_house`/`financial_assessment`/`web_search` into an actual
+   verdict, mirroring `reject_no_company`'s `decision/result.json` shape on
+   the success path (`web_search` → `synthesize_decision` → `END`, replacing
+   `web_search` → `END`). Verified against real Bedrock with a clean-vs-
+   dissolved-company pair before touching anything else: clean scenario
+   → `approved` with a rationale citing all four assessments; dissolved
+   scenario → `rejected`, correctly refusing to treat "identity confirmed"
+   as "creditworthy".
+
+2. **Fixed a mid-refactor break in `schemas.py`** discovered before any of
+   the below could be built: `ApplicationState`/`AgentContext` had been
+   moved there but were missing `TypedDict`/`Annotated`/`dataclass`/
+   `ApplicationStore`/`PolicyDocStore` imports — `import schemas` raised
+   `NameError` immediately. Fixed the imports, moved `_last_write_wins`
+   there too, deduped `graph.py`'s now-stale imports. `CompaniesHouseResult`/
+   `FinalDecisionResult` (graph.py's forced structured-output schemas) were
+   also moved into `schemas.py` alongside the document schemas below, on
+   request, once the module was stable.
+
+3. **Document loading, generalized for future loan-type-conditional
+   documents.** `load_application` now drives off a declarative
+   `DOCUMENT_SPECS` list (`graph.py`) —
+   `DocumentSpec(state_key, key_prefix, schema, applies_to=...)` — rather
+   than two hardcoded calls. `annual_accounts`/`bank_statements` are
+   unconditional today (`applies_to` defaults to always-`True`), but a
+   future loan-type-specific document (e.g. a security valuation for
+   `secured-business-loans`) is just one more list entry, no branching
+   added to `load_application` itself. Each document type is discovered by
+   S3 key prefix (`storage.py`'s new `ApplicationStore.list_keys` — there's
+   no manifest of how many documents exist per type) and validated against
+   `AnnualAccountsSchema`/`BankStatementSchema` before entering state — a
+   malformed document raises `ValueError` naming the bad key rather than
+   being silently dropped, since these feed `FINANCIAL_ASSESSMENT_PROMPT`'s
+   numbers.
+
+4. **Mocked test fixtures** (`app/fionaa/tests/document_fixtures.py` +
+   `test_document_fixtures.py`, 24 tests) for GoodAI Consulting (active)
+   and Goodman's Consulting Limited (insolvent 28 Dec 2017), covering 5
+   scenarios: annual-report turnover matching vs. materially mismatching
+   the application; bank statements within vs. outside a 90-day freshness
+   window; and Goodman's documents predating its insolvency date (`TODAY`
+   pinned as a constant, not `date.today()`, so freshness checks stay
+   deterministic regardless of when tests run).
+
+5. **Bank statement count/recency → `check_against_policy`; everything
+   else → `check_financial_assessment`** (explicit split, not an
+   arbitrary one). `general.md` already stated the rule ("at least 3
+   months of statements, most recent statement must be less than 90 days
+   from date of application") — it just had no data to check against.
+   New deterministic tool `check_bank_statements_recent_and_sufficient`
+   (`check_tools.py`, declared via `general.md`'s own
+   `<!-- checks: ... -->` comment so every loan type gets it) does the
+   date counting/comparison — same rationale as the existing
+   `check_*_amount_in_range` tools: an eval run already showed the model
+   gets this kind of comparison wrong when left to reason about it from
+   prose itself. Deliberately did **not** reuse `prompts.py`'s existing
+   `TODAYS_DATE` constant for the "today" value — it's computed once at
+   module import time and would silently go stale in a long-lived Runtime
+   process; `check_against_policy` computes it fresh per invocation
+   instead. `check_financial_assessment`'s consistency checks now span
+   APPLICATION vs. COMPANIES HOUSE vs. each `ANNUAL ACCOUNTS` document's
+   `turnover_current_year`, and its affordability check prefers real
+   `BANK STATEMENTS` balance/payments data over self-reported figures when
+   available.
+
+   Verified against real Bedrock (not just the 74-test local suite): fed
+   `check_against_policy`/`check_financial_assessment` the GoodAI fixtures
+   directly. Turnover-mismatch fixture → "Material Discrepancy Identified"
+   with correct percentages; stale/too-few bank-statement fixtures → both
+   correctly surfaced under "Documentation Completeness" (not as
+   eligibility rejections, per the prompt's explicit instruction), citing
+   the tool's own `days_since_most_recent_statement`/`count_sufficient`
+   figures verbatim — confirming the model never did the date math itself.
+
+6. **Staging** (`eval_path2_stage_and_invoke.py`): new
+   `stage_documents(session, application_id, documents)` writes each
+   `annual_accounts`/`bank_statements` entry to
+   `input/annual_accounts_<n>.json` / `input/bank_statement_<n>.json` under
+   the same disposable prefix as `stage_application`, matching
+   `DOCUMENT_SPECS`' key prefixes exactly. `fionaa_eval_dataset.jsonl`'s
+   two scenarios that reach `financial_assessment`
+   (`fullapp-active-company-unsecured-loan`,
+   `fullapp-dissolved-company-unsecured-loan`) gained a `documents` field
+   mirroring `document_fixtures.py`'s GoodAI/Goodman's data — copied in,
+   not imported, since every `eval_path2_*.py` script here is deliberately
+   self-contained against the dataset file alone (same convention
+   `eval_path2_build_ground_truth.py` already follows).
+   `fullapp-fictitious-company-secured-loan` has no `documents` field —
+   it's rejected at `companies_house` before `financial_assessment` ever
+   runs, so it doesn't need any.
+
+7. **Real end-to-end verification (2026-08-30)**, in increasing order of
+   confidence: schema validation → local fake-store integration test →
+   real S3 write-back check (staged a throwaway `application_id` for real,
+   read it back via the actual `ApplicationStore.get_json`/`list_keys`) →
+   finally, a genuine `agentcore deploy` (dataset synced `+0 added, ~2
+   updated, -0 deleted` — exactly the two scenarios that gained a
+   `documents` field) followed by a real `eval_path2_stage_and_invoke.py`
+   run against the freshly-deployed Runtime. All 3 `fullapp-*` scenarios
+   returned 200. Inspecting the real S3 artifacts confirmed the whole
+   chain fired for real, not just in local tests:
+
+   - `check_bank_statements_recent_and_sufficient` was actually called by
+     the deployed `policy_check` node for both document-bearing scenarios,
+     with correct real day-math: GoodAI's fixture (`recent_enough: true,
+     days_since_most_recent_statement: 5`) and Goodman's
+     (`recent_enough: false, days_since_most_recent_statement: 3195`) —
+     both exactly matching what each fixture was designed to produce.
+   - `financial_assessment` cross-checked the fixtures' `ANNUAL ACCOUNTS`
+     data against the *real* live Companies House lookup for both real
+     companies (`17161121`, `08139267`) used throughout this eval suite.
+   - `synthesize_decision` populated a real `decision/result.json` for
+     **both** scenarios (previously only `reject_no_company` ever did) —
+     directly confirming item 7's `TaskCompletion` gap is closed: every
+     run now reaches a final verdict, not just the reject branch.
+
+   **A genuine, unplanned finding this run surfaced, then fixed and
+   re-verified**: GoodAI Consulting (`17161121`) — the real UK company used
+   across this whole eval suite — was actually incorporated in **April
+   2026** per its live Companies House record, not 2019 as
+   `document_fixtures.py`'s `GOODAI_APPLICATION`/`GOODAI_ANNUAL_ACCOUNTS_HAPPY`
+   fixture originally assumed (an FY2025 annual-accounts filing predating
+   the company's own incorporation). `financial_assessment` correctly
+   flagged this as a chronologically-impossible "material discrepancy",
+   and `synthesize_decision` **rejected** what the fixture was designed to
+   be the happy-path scenario as a result. Not a code bug — the opposite:
+   direct proof the consistency check works, catching an inconsistency
+   introduced by accident when authoring fixture data without checking it
+   against the real company's actual incorporation date.
+
+   **Fixed**: `GOODAI_ANNUAL_ACCOUNTS_HAPPY`'s `accounting_year` moved from
+   `2025-12-31` to `2026-06-30` (a shortened first accounting reference
+   period, safely after the real 2026-04-16 incorporation and before
+   `TODAY`), and every `*_last_year` figure nulled out — no prior year
+   exists for a company this young. `GOODAI_APPLICATION`'s own
+   `trading_start_date` was deliberately left as 2019: it's never staged
+   against the real deployed Runtime (the real run uses the dataset's bare
+   `application` dict, which has no `trading_start_date`/`annual_turnover`
+   fields at all — only `document_fixtures.py`'s separate, fuller
+   `GOODAI_APPLICATION` constant has them, used solely in local fake-store
+   tests and ad hoc real-Bedrock checks that never call the live Companies
+   House lookup), so it never hits this same conflict. Matching it to
+   reality would also flip the general policy's "6-12 months minimum
+   trading history" check to ineligible, since the real company is only
+   ~4.5 months old as of `TODAY` — a separate, deliberately out-of-scope
+   change. The eval dataset's embedded copy of this fixture
+   (`fionaa_eval_dataset.jsonl`'s `documents` field) was updated to match.
+
+   **Re-verified for real** (same day, no redeploy needed — only the
+   dataset file changed, `graph.py` didn't): reran
+   `eval_path2_stage_and_invoke.py` against `fullapp-active-company-unsecured-loan`
+   alone. `financial_assessment`'s Trading History line now reads "✓
+   Consistent: Company incorporated 16 April 2026; annual accounts cover
+   period ending 30 June 2026 (~2.5 months trading)... ~4.5 months trading
+   history" instead of flagging a material discrepancy, and
+   `synthesize_decision` now returns **`approved`** — "No material issues
+   identified across any of the four assessments." Bank statement
+   recency/count still correctly reported via the deterministic tool
+   (`recent_enough: true, days_since_most_recent_statement: 5`),
+   unaffected by this fix. Goodman's dissolved-company scenario was left
+   untouched and still rejects for the reasons it was designed to surface
+   (dissolved 2017, stale/pre-insolvency documents) — the intended result,
+   not re-run again since nothing about it changed.
 
 ### Existing AWS resources to reuse
 

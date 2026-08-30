@@ -10,7 +10,16 @@ design and the constraints this implements:
   (EVALS.md's "A caveat worth knowing" section). Each scenario's
   `application` dict is staged at input/application.json under a disposable
   (customer_id, application_id) prefix first, then the Runtime is invoked
-  normally and loads it itself via graph.py's load_application node.
+  normally and loads it itself via graph.py's load_application node. A
+  scenario may also declare a `documents` field ({"annual_accounts": [...],
+  "bank_statements": [...]}) -- schema-validated dicts matching schemas.py's
+  AnnualAccountsSchema/BankStatementSchema exactly, staged the same way
+  under input/annual_accounts_<n>.json / input/bank_statement_<n>.json so
+  load_application's DOCUMENT_SPECS prefix match (graph.py) picks them up.
+  Mirrors app/fionaa/tests/document_fixtures.py's GoodAI/Goodman's fixtures
+  (not imported directly -- every eval_path2_*.py script here is
+  self-contained against the dataset file alone, see
+  eval_path2_build_ground_truth.py for the same convention).
 - customer_id is sha256(email) from a verified JWT (security.py), never
   caller-supplied -- staging and invoking both use the one fixed disposable
   identity from work item 2 (fionaa-eval-ci@example.com).
@@ -137,6 +146,38 @@ def stage_application(session: boto3.Session, application: dict[str, Any]) -> st
     return application_id
 
 
+def stage_documents(session: boto3.Session, application_id: str, documents: dict[str, Any]) -> dict[str, int]:
+    """Writes each annual_accounts/bank_statements entry under
+    input/annual_accounts_<n>.json / input/bank_statement_<n>.json in the
+    same disposable prefix as stage_application -- same encryption context
+    shape, same reasoning (FionaaDataAccessRole's KMS grant condition needs
+    it to match on decrypt). Key prefix must match graph.py's DOCUMENT_SPECS
+    exactly ("input/annual_accounts", "input/bank_statement", note the
+    singular on the bank statement side) for store.list_keys to find these.
+
+    Returns a dict of how many documents were staged per type, for the
+    caller to log -- silent staging of zero documents when a scenario
+    declares `documents` but one list is empty would otherwise be invisible.
+    """
+    s3 = session.client("s3", region_name=REGION)
+    counts = {}
+    for doc_type, key_prefix in (("annual_accounts", "input/annual_accounts"), ("bank_statements", "input/bank_statement")):
+        docs = documents.get(doc_type, [])
+        for i, doc in enumerate(docs):
+            key = f"{EVAL_CUSTOMER_ID}/{application_id}/{key_prefix}_{i}.json"
+            s3.put_object(
+                Bucket=APPLICATIONS_BUCKET,
+                Key=key,
+                Body=json.dumps(doc, indent=2).encode(),
+                ContentType="application/json",
+                ServerSideEncryption="aws:kms",
+                SSEKMSKeyId=KMS_KEY_ARN,
+                SSEKMSEncryptionContext=base64.b64encode(json.dumps({"customer_id": EVAL_CUSTOMER_ID}).encode()).decode(),
+            )
+        counts[doc_type] = len(docs)
+    return counts
+
+
 def invoke_runtime(id_token: str, application_id: str, session_id: str, timeout_s: float = 300.0) -> dict[str, Any]:
     """POSTs directly to the Runtime's /invocations endpoint -- fionaa's
     payload shape ({"application_id": ...}) isn't something `agentcore
@@ -200,6 +241,20 @@ def main() -> None:
         print(f"[{scenario_id}] staging application data...")
         application_id = stage_application(session, application)
 
+        # Not every scenario declares documents -- e.g.
+        # fullapp-fictitious-company-secured-loan is rejected at
+        # companies_house before financial_assessment ever runs, so it has
+        # no need for annual_accounts/bank_statements. load_application
+        # handles nothing-staged fine (returns empty lists), so this is
+        # skipped rather than staging empty documents for its own sake.
+        documents = scenario.get("documents")
+        document_counts = {"annual_accounts": 0, "bank_statements": 0}
+        if documents:
+            print(f"[{scenario_id}] staging annual_accounts/bank_statements documents...")
+            document_counts = stage_documents(session, application_id, documents)
+            print(f"[{scenario_id}] staged {document_counts['annual_accounts']} annual_accounts, "
+                  f"{document_counts['bank_statements']} bank_statements")
+
         print(f"[{scenario_id}] invoking runtime (session_id={session_id})...")
         t0 = time.monotonic()
         outcome = invoke_runtime(id_token, application_id, session_id)
@@ -212,6 +267,7 @@ def main() -> None:
             "status_code": outcome["status_code"],
             "response": outcome["body"],
             "elapsed_s": round(elapsed, 1),
+            "documents_staged": document_counts,
         }
 
     out_path = Path(args.output)

@@ -72,6 +72,23 @@ class ApplicationStore:
         )
         return f"s3://{APPLICATIONS_BUCKET}/{key}"
 
+    def list_keys(self, key_prefix: str) -> list[str]:
+        """Lists this application's own JSON documents whose key starts with
+        `key_prefix` -- e.g. "input/annual_accounts" matches
+        input/annual_accounts_2023.json, input/annual_accounts_2024.json,
+        etc. Used by load_application to discover an unknown number of
+        annual_accounts*/bank_statement* documents at load time, since
+        there's no manifest listing them up front. Returns keys relative to
+        this store's own prefix -- the same shape get_json/put_json take,
+        not full S3 keys."""
+        prefix = f"{self._prefix}/{key_prefix}"
+        paginator = self._s3.get_paginator("list_objects_v2")
+        keys = []
+        for page in paginator.paginate(Bucket=APPLICATIONS_BUCKET, Prefix=prefix):
+            for obj in page.get("Contents", []):
+                keys.append(obj["Key"][len(self._prefix) + 1:])
+        return keys
+
     def get_document_bytes(self, filename: str) -> bytes:
         """Large blobs (application PDFs) live under the same enforced prefix."""
         key = f"{self._prefix}/input/documents/{filename}"
