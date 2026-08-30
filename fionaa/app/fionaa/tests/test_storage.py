@@ -30,6 +30,21 @@ class FakeS3Client:
     def put_object(self, **kwargs):
         self.put_calls.append(kwargs)
 
+    def get_paginator(self, operation_name):
+        assert operation_name == "list_objects_v2"
+        client = self
+
+        class FakePaginator:
+            def paginate(self, Bucket, Prefix):
+                # Single page is enough for these tests -- list_keys only
+                # cares about aggregating .get("Contents", []) across pages.
+                matching = [
+                    {"Key": key} for (bucket, key) in client.objects if bucket == Bucket and key.startswith(Prefix)
+                ]
+                yield {"Contents": matching}
+
+        return FakePaginator()
+
 
 @pytest.fixture
 def identity():
@@ -67,6 +82,31 @@ def test_put_json_writes_kms_encryption_context_matching_customer_id(monkeypatch
     context = json.loads(base64.b64decode(call["SSEKMSEncryptionContext"]))
     assert context == {"customer_id": identity.customer_id}
     assert uri == f"s3://{st.APPLICATIONS_BUCKET}/{identity.customer_id}/{identity.application_id}/policy_check/result.json"
+
+
+def test_list_keys_scopes_prefix_to_identity_and_strips_it(monkeypatch, identity):
+    prefix = f"{identity.customer_id}/{identity.application_id}"
+    fake_client = FakeS3Client(
+        {
+            (st.APPLICATIONS_BUCKET, f"{prefix}/input/annual_accounts_2023.json"): b"{}",
+            (st.APPLICATIONS_BUCKET, f"{prefix}/input/annual_accounts_2024.json"): b"{}",
+            # Same filename prefix, different identity -- must not leak across
+            # customers just because "input/annual_accounts" also matches.
+            ("other-bucket", f"{prefix}/input/annual_accounts_2025.json"): b"{}",
+            (st.APPLICATIONS_BUCKET, f"{prefix}/input/bank_statement_jan.json"): b"{}",
+            (st.APPLICATIONS_BUCKET, f"{prefix}/input/application.json"): b"{}",
+        }
+    )
+    store = st.ApplicationStore(identity, _session_with(monkeypatch, fake_client))
+
+    keys = store.list_keys("input/annual_accounts")
+
+    assert sorted(keys) == ["input/annual_accounts_2023.json", "input/annual_accounts_2024.json"]
+
+
+def test_list_keys_returns_empty_when_nothing_matches(monkeypatch, identity):
+    store = st.ApplicationStore(identity, _session_with(monkeypatch, FakeS3Client()))
+    assert store.list_keys("input/annual_accounts") == []
 
 
 def test_policy_doc_store_reads_from_shared_bucket(monkeypatch):

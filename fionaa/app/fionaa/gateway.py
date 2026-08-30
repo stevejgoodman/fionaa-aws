@@ -1,7 +1,6 @@
 """FIONAA — AgentCore Gateway MCP tool loading.
 
-The Gateway is an MCP target exposing Companies House, web search, the
-loan-policy knowledge base, etc. (see GatewayClaimsGatewayUrlOutput in the
+The Gateway is an MCP target exposing Companies House, web search, and location services. (see GatewayClaimsGatewayUrlOutput in the
 stack outputs). Cognito client-credentials flow to mint a bearer token by hand.
 """
 

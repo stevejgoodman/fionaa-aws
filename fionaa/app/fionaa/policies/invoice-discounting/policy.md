@@ -8,9 +8,9 @@ Loan Term: Minimum contract period 6–12 months, plus a notice period to exit
 Documents Required:
 
 - Business registration documents
-- Recent financial statements
+- Recent financial statements (annual accounts or reports  less 1 year old)
 - Aged debt reports
-- Bank statements
+- Bank statements (3 months worth, most recent must be in last 3 monts)
 - Details of customer base and credit control procedures
 
 Note: the advance amount is calculated deterministically by the

@@ -7,7 +7,7 @@ Loan Term: 12 – 72 months
 
 Documents Required:
 
-- Recent bank statements and annual accounts
+- 3 Recent bank statements, latest no more than 3 months old, and annual accounts
 - Proof of ownership/valuation of the collateral asset
 
 Other key eligibility/rules:
