@@ -3,10 +3,15 @@
 # could be used for OCR? Ned to eche the AWS BDT docs
 
 # todo add more schmas for passportid, driverslic.
-# 
+#
+from dataclasses import dataclass
 from datetime import date
 from enum import Enum
+from typing import Annotated, Any, Literal, TypedDict
+
 from pydantic import BaseModel, Field
+
+from storage import ApplicationStore, PolicyDocStore
 
 
 class LoanType(str, Enum):
@@ -136,3 +141,87 @@ class DocType(BaseModel):
         description="The type of document being analyzed.",
         title="Document Type",
     )
+
+
+# Langgraph States
+def _last_write_wins(_old: Any, new: Any) -> Any:
+    return new
+
+
+class ApplicationState(TypedDict, total=False):
+    """Checkpointed state captures application inputs and decision outputs"""
+    application: dict[str, Any]
+    # Loaded by load_application alongside application itself -- see
+    # graph.py's load_application docstring for the naming convention
+    # (annual_accounts*/bank_statement* under the same input/ location as
+    # application.json) and why each entry is schema-validated up front.
+    # A list, not a single dict: there may be multiple documents per type
+    # (e.g. two years of annual accounts, several months of statements).
+    annual_accounts: Annotated[list[dict[str, Any]], _last_write_wins]
+    bank_statements: Annotated[list[dict[str, Any]], _last_write_wins]
+    policy_check: Annotated[dict[str, Any], _last_write_wins]
+    companies_house: Annotated[dict[str, Any], _last_write_wins]
+    companies_house_found: Annotated[bool, _last_write_wins]
+    financial_assessment: Annotated[dict[str, Any], _last_write_wins]
+    web_search: Annotated[dict[str, Any], _last_write_wins]
+    final_decision: Annotated[dict[str, Any], _last_write_wins]
+
+
+@dataclass(frozen=True)
+class AgentContext:
+    """Per-invocation dependencies threaded via LangGraph's Runtime context
+    API (`StateGraph(..., context_schema=AgentContext)`), not graph state.
+
+    `store`/`policy_docs` wrap  boto3 S3 client and `tools` holds live
+    MCP `StructuredTool` objects — neither is msgpack-serializable, 
+    so can't live in  `ApplicationState`, which is checkpointered
+    Runtime context is passed via `graph.ainvoke(state,
+    context=...)`, kept immutable for the run, and is never part of the
+    checkpointed state.
+    """
+
+    store: ApplicationStore
+    policy_docs: PolicyDocStore
+    tools: list[Any]
+
+
+# ---------------------------------------------------------------------------
+# Forced structured-output schemas for graph.py's agentic nodes
+# ---------------------------------------------------------------------------
+
+class CompaniesHouseResult(BaseModel):
+    """Forced structured output for `check_companies_house` —
+    agent's final turn is constrained to this
+    schema and `found` becomes a branch condition in the graph."""
+
+    found: bool = Field(
+        description="True if the applicant's company was confirmed as a "
+        "genuine UK company with the named applicant as an officer "
+        "or PSC. False if no such company could be confirmed."
+    )
+    confidence: str = Field(description="high, medium, or low")
+    summary: str = Field(
+        description="Explanation of the finding, including any partial matches considered. "
+        "When a company was found, must include the registered office address and the "
+        "director/PSC names — search_web uses these to disambiguate the company online, "
+        "not just the summary verdict."
+    )
+
+
+class FinalDecisionResult(BaseModel):
+    """Forced structured output for `synthesize_decision` — the success-path
+    counterpart to `reject_no_company`'s hand-written `final_decision` dict.
+    Constrains the model to an actual outcome rather than a free-text
+    write-up that never resolves to approve/reject/refer."""
+
+    outcome: Literal["approved", "rejected", "referred"] = Field(
+        description="approved: no material issues across the four assessments. rejected: a clear, "
+        "material failure (ineligible on policy, insolvent/dissolved company, unaffordable "
+        "repayment, serious unresolved discrepancy). referred: issues a human underwriter should "
+        "review, but nothing rising to automatic rejection."
+    )
+    reason: str = Field(
+        description="Which of the four assessments (policy_check/companies_house/"
+        "financial_assessment/web_search) drove this outcome, and what in each."
+    )
+    rationale: str = Field(description="Brief overall rationale weighing the four assessments together.")

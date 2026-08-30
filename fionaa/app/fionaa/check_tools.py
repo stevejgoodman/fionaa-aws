@@ -19,6 +19,8 @@ not by the tools writing their own artifacts.
 
 from __future__ import annotations
 
+from datetime import date
+
 from langchain.tools import tool
 
 # ---------------------------------------------------------------------------
@@ -142,6 +144,45 @@ def check_revolving_credit_facility_amount_in_range(requested_amount: int) -> bo
     return REVOLVING_CREDIT_FACILITY_AMOUNT_MIN <= requested_amount <= REVOLVING_CREDIT_FACILITY_AMOUNT_MAX
 
 
+# ---------------------------------------------------------------------------
+# Bank statement documentation check — count and recency
+# ---------------------------------------------------------------------------
+#
+# general.md (applies to every loan type, via its own <!-- checks: ... -->
+# comment): "Recent bank statements means at least 3 months of statements,
+# most recent statement must be less than 90 days from date of application."
+# Same failure mode as check_*_amount_in_range above: counting dates and
+# comparing one to a 90-day threshold is exactly the kind of comparison an
+# eval run already showed the model gets wrong when left to read and reason
+# about it from prose/JSON itself. The agent supplies the raw dates (which
+# it can read faithfully) and today's date (given to it in the human
+# message, not computed by it); the actual counting/comparison happens here.
+
+BANK_STATEMENT_MIN_COUNT = 3
+BANK_STATEMENT_MAX_AGE_DAYS = 90
+
+
+@tool
+def check_bank_statements_recent_and_sufficient(statement_end_dates: list[str], reference_date: str) -> dict:
+    """Whether the supplied bank statements satisfy general.md's rule ("at
+    least 3 months of statements, most recent statement must be less than
+    90 days from date of application"). Call this with every bank
+    statement's end_date and today's date (reference_date) exactly as given
+    to you, both ISO YYYY-MM-DD — never count the statements or compare
+    dates to the 90-day threshold yourself."""
+    end_dates = [date.fromisoformat(d) for d in statement_end_dates]
+    most_recent = max(end_dates) if end_dates else None
+    days_since_most_recent = (
+        (date.fromisoformat(reference_date) - most_recent).days if most_recent is not None else None
+    )
+    return {
+        "statement_count": len(end_dates),
+        "count_sufficient": len(end_dates) >= BANK_STATEMENT_MIN_COUNT,
+        "days_since_most_recent_statement": days_since_most_recent,
+        "recent_enough": days_since_most_recent is not None and days_since_most_recent < BANK_STATEMENT_MAX_AGE_DAYS,
+    }
+
+
 # All tools in the pool, keyed by name — this is what `graph.tools_for` is
 # subset against using the names each policy.md declares.
 CHECK_TOOLS_POOL = [
@@ -151,4 +192,5 @@ CHECK_TOOLS_POOL = [
     check_secured_business_loan_amount_in_range,
     check_unsecured_business_loan_amount_in_range,
     check_revolving_credit_facility_amount_in_range,
+    check_bank_statements_recent_and_sufficient,
 ]
