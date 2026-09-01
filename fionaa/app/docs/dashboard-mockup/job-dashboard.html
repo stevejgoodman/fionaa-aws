@@ -1,0 +1,639 @@
+<title>Fionaa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+  :root{
+    --ink:#f3f1ea;
+    --paper:#ffffff;
+    --paper-raised:#fbfaf6;
+    --line:#d8d3c4;
+    --text:#211d16;
+    --text-dim:#6b6455;
+    --text-faint:#9c957f;
+    --brass:#9c7830;
+    --brass-ink:#7a5e22;
+    --sage:#3c7d5c;
+    --sage-bg:#e4efe6;
+    --rust:#a5432b;
+    --rust-bg:#f4e5df;
+    --slate:#3c5f8a;
+    --slate-bg:#e3e9f1;
+    --plum:#6f5488;
+    --plum-bg:#eae3ef;
+    --shadow: 0 1px 2px rgba(33,29,22,0.06), 0 8px 24px -12px rgba(33,29,22,0.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#10141a;
+      --paper:#1a2129;
+      --paper-raised:#202834;
+      --line:#333f4d;
+      --text:#eae6da;
+      --text-dim:#a3ada9;
+      --text-faint:#6d7783;
+      --brass:#c9a24b;
+      --brass-ink:#e0bc6c;
+      --sage:#5fa37d;
+      --sage-bg:#1c3327;
+      --rust:#c1553b;
+      --rust-bg:#392420;
+      --slate:#6d8cb5;
+      --slate-bg:#1e2c3d;
+      --plum:#9c7fb0;
+      --plum-bg:#2b2436;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px -14px rgba(0,0,0,0.55);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#10141a;
+    --paper:#1a2129;
+    --paper-raised:#202834;
+    --line:#333f4d;
+    --text:#eae6da;
+    --text-dim:#a3ada9;
+    --text-faint:#6d7783;
+    --brass:#c9a24b;
+    --brass-ink:#e0bc6c;
+    --sage:#5fa37d;
+    --sage-bg:#1c3327;
+    --rust:#c1553b;
+    --rust-bg:#392420;
+    --slate:#6d8cb5;
+    --slate-bg:#1e2c3d;
+    --plum:#9c7fb0;
+    --plum-bg:#2b2436;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px -14px rgba(0,0,0,0.55);
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--ink);
+    color:var(--text);
+    font-family:"IBM Plex Sans", system-ui, sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; }
+  }
+
+  .wrap{ max-width:1180px; margin:0 auto; padding:32px 24px 96px; }
+
+  h1,h2,h3,h4{ font-family:"Fraunces", Georgia, serif; text-wrap:balance; margin:0; }
+
+  .mono{ font-family:"IBM Plex Mono", ui-monospace, monospace; font-variant-numeric:tabular-nums; }
+  .label{ font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-faint); font-weight:600; }
+
+  .source-note{
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    font-size:11.5px; color:var(--text-faint); margin-bottom:18px;
+  }
+  .source-note .swatch{ width:7px; height:7px; border-radius:50%; background:var(--sage); flex-shrink:0; }
+
+  /* ---------- Header / case file ---------- */
+  .docket-header{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    gap:24px; flex-wrap:wrap;
+    padding-bottom:24px; margin-bottom:28px;
+    border-bottom:1px solid var(--line);
+  }
+  .docket-id{ display:flex; align-items:baseline; gap:10px; margin-bottom:6px; }
+  .docket-id .label{ margin:0; }
+  .docket-id .mono{ font-size:12px; color:var(--text-dim); }
+  h1.company{ font-size:32px; font-weight:600; font-optical-sizing:auto; }
+  .meta-row{ display:flex; gap:20px; flex-wrap:wrap; margin-top:10px; }
+  .meta-item{ font-size:13px; color:var(--text-dim); }
+  .meta-item b{ color:var(--text); font-weight:500; }
+
+  .status-pill{
+    display:inline-flex; align-items:center; gap:7px;
+    padding:6px 12px; border-radius:100px;
+    font-size:12px; font-weight:600; letter-spacing:0.02em;
+    border:1px solid var(--line);
+    background:var(--paper-raised);
+    white-space:nowrap;
+  }
+  .status-pill .dot{ width:7px; height:7px; border-radius:50%; background:var(--text-faint); }
+  .status-pill.running .dot{ background:var(--slate); animation:pulse 1.4s ease-in-out infinite; }
+  .status-pill.done .dot{ background:var(--sage); }
+  .status-pill.rejected .dot{ background:var(--rust); }
+  .status-pill.idle .dot{ background:var(--text-faint); }
+  @keyframes pulse{ 0%,100%{ opacity:1; transform:scale(1);} 50%{ opacity:0.45; transform:scale(1.3);} }
+
+  .controls{ display:flex; flex-direction:column; align-items:flex-end; gap:10px; }
+  .btn-row{ display:flex; gap:8px; }
+  button{
+    font-family:"IBM Plex Sans", sans-serif;
+    font-size:13px; font-weight:600;
+    padding:9px 16px;
+    border-radius:6px;
+    border:1px solid var(--line);
+    background:var(--paper-raised);
+    color:var(--text);
+    cursor:pointer;
+    transition:background 0.15s, border-color 0.15s, transform 0.1s;
+  }
+  button:hover{ border-color:var(--brass); }
+  button:active{ transform:translateY(1px); }
+  button:focus-visible{ outline:2px solid var(--brass); outline-offset:2px; }
+  button.primary{ background:var(--brass); border-color:var(--brass); color:#100c02; }
+  button.primary:hover{ filter:brightness(1.08); }
+  button:disabled{ opacity:0.45; cursor:not-allowed; }
+
+  /* ---------- Pipeline rail ---------- */
+  .rail-section{ margin-bottom:36px; }
+  .rail-scroll{ overflow-x:auto; padding-bottom:8px; }
+  .rail{
+    display:flex; align-items:stretch; gap:0;
+    min-width:max-content;
+    position:relative;
+  }
+  .stage{
+    display:flex; flex-direction:column; align-items:center;
+    width:158px; flex-shrink:0; position:relative;
+    padding-top:6px;
+  }
+  .stage-connector{
+    position:absolute; top:24px; left:-79px; width:158px; height:2px;
+    background:var(--line); z-index:0;
+  }
+  .stage:first-child .stage-connector{ display:none; }
+  .stage-connector.filled{ background:var(--sage); }
+  .stage-connector.branch-taken{ background:var(--slate); }
+  .stage-connector.branch-not-taken{ background:repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 11px); }
+
+  .stage-node{
+    width:46px; height:46px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--paper); border:2px solid var(--line);
+    font-family:"IBM Plex Mono", monospace; font-weight:600; font-size:14px;
+    color:var(--text-faint);
+    z-index:1; position:relative;
+    transition:border-color 0.3s, color 0.3s, background 0.3s, box-shadow 0.3s;
+  }
+  .stage-node.running{ border-color:var(--slate); color:var(--slate); box-shadow:0 0 0 4px var(--slate-bg); animation:ringpulse 1.3s ease-in-out infinite; }
+  .stage-node.done{ border-color:var(--sage); background:var(--sage-bg); color:var(--sage); }
+  .stage-node.rejected{ border-color:var(--rust); background:var(--rust-bg); color:var(--rust); }
+  .stage-node.skipped{ border-color:var(--line); color:var(--text-faint); opacity:0.4; }
+  @keyframes ringpulse{ 0%,100%{ box-shadow:0 0 0 4px var(--slate-bg);} 50%{ box-shadow:0 0 0 8px transparent;} }
+
+  .stage-label{ margin-top:10px; font-size:12.5px; font-weight:600; text-align:center; }
+  .stage-sub{ font-size:11px; color:var(--text-faint); text-align:center; margin-top:2px; }
+  .stage-dur{ font-size:10.5px; color:var(--text-faint); margin-top:3px; font-family:"IBM Plex Mono",monospace; }
+
+  .stage-hit{
+    background:none; border:none; margin:0; padding:6px 6px 8px;
+    display:flex; flex-direction:column; align-items:center; width:100%;
+    font-family:inherit; color:inherit; cursor:pointer; border-radius:10px;
+    transition:background 0.15s;
+  }
+  .stage-hit:hover:not(:disabled){ background:var(--paper-raised); }
+  .stage-hit:disabled{ cursor:default; }
+  .stage-hit:focus-visible{ outline:2px solid var(--brass); outline-offset:2px; }
+  .stage-hit.selected .stage-node{ box-shadow:0 0 0 4px var(--brass-bg, var(--slate-bg)); border-color:var(--brass); }
+  .stage-hit.selected .stage-label{ color:var(--brass-ink); }
+  .stage-hit:not(:disabled) .stage-node{ cursor:pointer; }
+  .stage-hint{ font-size:10px; color:var(--text-faint); margin-top:4px; opacity:0; transition:opacity 0.15s; }
+  .stage-hit:not(:disabled):hover .stage-hint, .stage-hit.selected .stage-hint{ opacity:1; }
+
+  /* ---------- Detail drawer ---------- */
+  .detail{
+    background:var(--paper); border:1px solid var(--line); border-radius:10px;
+    box-shadow:var(--shadow);
+    padding:22px 26px; margin-bottom:28px;
+    animation:reveal 0.25s ease;
+  }
+  @keyframes reveal{ from{ opacity:0; transform:translateY(-6px);} to{ opacity:1; transform:translateY(0);} }
+  .detail-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:16px; gap:12px; flex-wrap:wrap; }
+  .detail-head h2{ font-size:20px; font-weight:600; }
+  .detail-head .detail-dur{ font-size:12px; color:var(--text-faint); font-family:"IBM Plex Mono",monospace; }
+  .detail-close{ background:none; border:none; color:var(--text-faint); font-size:13px; padding:4px 8px; }
+  .detail-cols{ display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  @media (max-width:760px){ .detail-cols{ grid-template-columns:1fr; } }
+  .detail-col h3{ font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-faint); font-weight:600; margin-bottom:10px; }
+  .kv{ display:flex; justify-content:space-between; gap:12px; padding:7px 0; border-bottom:1px solid var(--line); font-size:13px; }
+  .kv:last-child{ border-bottom:none; }
+  .kv .k{ color:var(--text-dim); }
+  .kv .v{ font-family:"IBM Plex Mono", monospace; text-align:right; }
+
+  .prose{ font-size:13.5px; color:var(--text-dim); line-height:1.65; max-height:420px; overflow-y:auto; padding-right:4px; }
+  .prose h3, .prose h4{ font-family:"IBM Plex Sans",sans-serif; font-size:12.5px; font-weight:600; color:var(--text); margin:14px 0 6px; letter-spacing:0.01em; }
+  .prose h3:first-child, .prose h4:first-child{ margin-top:0; }
+  .prose strong{ color:var(--text); font-weight:600; }
+  .prose ul{ margin:6px 0; padding-left:20px; }
+  .prose li{ margin:3px 0; }
+  .prose p{ margin:8px 0; }
+
+  .toolcall{
+    font-family:"IBM Plex Mono", monospace; font-size:11.5px;
+    background:var(--paper-raised); border:1px solid var(--line); border-radius:6px;
+    padding:8px 10px; margin-top:6px; overflow-x:auto; white-space:pre-wrap; word-break:break-word;
+    color:var(--text-dim);
+  }
+
+  /* ---------- Verdict stamp ---------- */
+  .verdict-wrap{ display:flex; justify-content:center; margin-top:40px; }
+  .verdict{
+    width:100%; max-width:680px;
+    background:var(--paper); border:1px solid var(--line); border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:36px 40px; text-align:center;
+    opacity:0; transform:scale(0.9) rotate(-2deg);
+    transition:opacity 0.5s ease, transform 0.5s cubic-bezier(.2,1.4,.4,1);
+  }
+  .verdict.show{ opacity:1; transform:scale(1) rotate(-1deg); }
+  .verdict-seal{
+    display:inline-flex; align-items:center; gap:10px;
+    font-family:"Fraunces", serif; font-weight:700; font-size:30px;
+    padding:10px 28px; border-radius:8px; border:3px solid currentColor;
+    letter-spacing:0.03em;
+  }
+  .verdict-seal.approved{ color:var(--sage); }
+  .verdict-seal.rejected{ color:var(--rust); }
+  .verdict-seal.referred{ color:var(--plum); }
+  .verdict-meta{ margin-top:18px; font-size:13px; color:var(--text-dim); }
+  .verdict-reason{ margin-top:20px; text-align:left; font-size:13.5px; color:var(--text-dim); line-height:1.65; padding-top:18px; border-top:1px solid var(--line); }
+  .verdict-reason b{ color:var(--text); font-weight:600; display:block; margin-bottom:4px; }
+  .verdict-reason + .verdict-reason{ margin-top:14px; padding-top:14px; }
+
+  ::-webkit-scrollbar{ width:8px; height:8px; }
+  ::-webkit-scrollbar-thumb{ background:var(--line); border-radius:4px; }
+</style>
+
+<!-- Baked in by fetch_run.py from a real AgentCore checkpoint history + S3
+     evidence artifacts. See fetch_run.py in the same directory: it reads
+     compiled_graph.aget_state_history(config) for sequencing/timing and
+     ApplicationStore for the richer per-node detail (tool calls etc), then
+     this file's build step inlines the result here. Nothing in this page
+     calls AWS directly -- the Artifact CSP wouldn't allow it anyway. -->
+<script id="run-data" type="application/json">__RUN_DATA_JSON__</script>
+
+<div class="wrap">
+
+  <div class="docket-header">
+    <div>
+      <div class="source-note">
+        <span class="swatch"></span>
+        <span>Real run &mdash; replayed from AgentCore checkpoint history + S3 evidence</span>
+      </div>
+      <div class="docket-id">
+        <span class="label">Application</span>
+        <span class="mono" id="app-id">&mdash;</span>
+      </div>
+      <h1 class="company" id="company-name">&mdash;</h1>
+      <div class="meta-row">
+        <div class="meta-item" id="meta-loan-type">Loan type: <b>&mdash;</b></div>
+        <div class="meta-item" id="meta-amount">Requested: <b class="mono">&mdash;</b></div>
+        <div class="meta-item" id="meta-purpose">Purpose: <b>&mdash;</b></div>
+      </div>
+    </div>
+    <div class="controls">
+      <span class="status-pill idle" id="status-pill"><span class="dot"></span><span id="status-text">Ready to replay</span></span>
+      <div class="btn-row">
+        <button class="primary" id="run-btn">Replay run</button>
+        <button id="skip-btn">Jump to end</button>
+        <button id="reset-btn">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="rail-section">
+    <div class="rail-scroll">
+      <div class="rail" id="rail"></div>
+    </div>
+  </div>
+
+  <div id="detail-slot"></div>
+
+  <div class="verdict-wrap" id="verdict-wrap" style="display:none;">
+    <div class="verdict" id="verdict"></div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+
+  const RUN = JSON.parse(document.getElementById("run-data").textContent);
+
+  // ---------------------------------------------------------------------
+  // Stage metadata -- content itself comes entirely from RUN.steps
+  // ---------------------------------------------------------------------
+  const STAGE_META = {
+    load_application:    { short:"01", label:"Load application",    sub:"application.json + documents" },
+    policy_check:        { short:"02", label:"Policy check",        sub:"loan-type policy" },
+    companies_house:     { short:"03", label:"Companies House",     sub:"registry cross-check", branch:true },
+    reject_no_company:   { short:"×",  label:"Reject — no match",   sub:"terminal" },
+    financial_assessment:{ short:"04", label:"Financial assessment", sub:"accounts + statements" },
+    web_search:          { short:"05", label:"Web search",          sub:"presence & reputation" },
+    synthesize_decision: { short:"06", label:"Synthesize decision", sub:"final verdict" },
+  };
+  // Full canonical order, so branch-not-taken still renders (dimmed).
+  const CANONICAL = ["load_application","policy_check","companies_house","reject_no_company",
+                      "financial_assessment","web_search","synthesize_decision"];
+
+  const ranNodes = new Set(RUN.steps.map(s => s.node));
+  const companiesHouseFound = RUN.companies_house_found !== false;
+  const stages = CANONICAL.filter(id => {
+    if (id === "reject_no_company") return !companiesHouseFound;
+    if (id === "financial_assessment") return companiesHouseFound;
+    return true;
+  });
+
+  function stepFor(nodeId){ return RUN.steps.find(s => s.node === nodeId) || null; }
+
+  // ---------------------------------------------------------------------
+  // Lightweight markdown-lite renderer for the agents' own prose output
+  // (### headers, **bold**, "- " bullets) -- escapes first, formats after.
+  // ---------------------------------------------------------------------
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+  function renderProse(text){
+    if (!text) return "<p>&mdash;</p>";
+    const lines = escapeHtml(text).split("\n");
+    let html = "", inList = false;
+    const closeList = () => { if (inList){ html += "</ul>"; inList = false; } };
+    for (let raw of lines){
+      const line = raw.trim();
+      if (!line){ closeList(); continue; }
+      const heading = line.match(/^(#{2,4})\s+(.*)$/);
+      const bullet = line.match(/^[-*•]\s+(.*)$/);
+      if (heading){
+        closeList();
+        html += `<h4>${heading[2].replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")}</h4>`;
+      } else if (bullet){
+        if (!inList){ html += "<ul>"; inList = true; }
+        html += `<li>${bullet[1].replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")}</li>`;
+      } else {
+        closeList();
+        html += `<p>${line.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")}</p>`;
+      }
+    }
+    closeList();
+    return html;
+  }
+
+  function fmtDuration(ms){
+    if (ms == null) return "";
+    return ms < 1000 ? `${ms}ms` : `${(ms/1000).toFixed(1)}s`;
+  }
+  function fmtMoney(n){
+    if (n == null) return "—";
+    return "£" + Number(n).toLocaleString("en-GB");
+  }
+
+  // ---------------------------------------------------------------------
+  // Playback: compressed real timing (real durations shown as labels, but
+  // played back on a scaled clock so watching it doesn't take ~100s).
+  // ---------------------------------------------------------------------
+  const PLAYBACK_SCALE = 1 / 6;
+  const PLAYBACK_MIN = 500, PLAYBACK_MAX = 2600;
+  function playbackMs(realMs){
+    if (realMs == null) return 1200;
+    return Math.min(PLAYBACK_MAX, Math.max(PLAYBACK_MIN, realMs * PLAYBACK_SCALE));
+  }
+
+  let running = false, timer = null, stageStatus = {}, openDetail = null, stepIndex = 0;
+
+  const rail = document.getElementById("rail");
+  const detailSlot = document.getElementById("detail-slot");
+  const verdictWrap = document.getElementById("verdict-wrap");
+  const verdictEl = document.getElementById("verdict");
+  const statusPill = document.getElementById("status-pill");
+  const statusText = document.getElementById("status-text");
+  const runBtn = document.getElementById("run-btn");
+  const skipBtn = document.getElementById("skip-btn");
+  const resetBtn = document.getElementById("reset-btn");
+
+  function populateHeader(){
+    const app = (stepFor("load_application")?.state_value?.application) || RUN.application || {};
+    document.getElementById("app-id").textContent = RUN.application_id;
+    document.getElementById("company-name").textContent = app.company_name || "Unknown applicant";
+    document.getElementById("meta-loan-type").innerHTML = `Loan type: <b>${(app.loan_type||"—").replace(/-/g," ")}</b>`;
+    document.getElementById("meta-amount").innerHTML = `Requested: <b class="mono">${fmtMoney(app.requested_amount)}</b>`;
+    document.getElementById("meta-purpose").innerHTML = `Purpose: <b>${app.loan_purpose || "—"}</b>`;
+  }
+
+  function resetState(){
+    running = false;
+    clearTimeout(timer);
+    stepIndex = 0;
+    stageStatus = {};
+    openDetail = null;
+    stages.forEach(s => stageStatus[s] = "pending");
+    verdictWrap.style.display = "none";
+    verdictEl.classList.remove("show");
+    detailSlot.innerHTML = "";
+    statusPill.className = "status-pill idle";
+    statusText.textContent = "Ready to replay";
+    runBtn.disabled = false;
+    runBtn.textContent = "Replay run";
+    skipBtn.disabled = false;
+    render();
+  }
+
+  function jumpToEnd(){
+    running = false;
+    clearTimeout(timer);
+    stages.forEach(s => stageStatus[s] = (s === "reject_no_company" && !companiesHouseFound) ? "rejected" : "done");
+    stepIndex = stages.length;
+    openDetail = "synthesize_decision" in STAGE_META && stages.includes("synthesize_decision") ? "synthesize_decision" : stages[stages.length-1];
+    statusPill.className = "status-pill " + (RUN.final_decision?.outcome === "rejected" ? "rejected" : "done");
+    statusText.textContent = "Complete";
+    runBtn.disabled = false;
+    runBtn.textContent = "Replay again";
+    render();
+    showVerdict();
+  }
+
+  function iconFor(nodeId, status){
+    if (status === "done") return "✓";
+    if (status === "rejected") return "✕";
+    if (status === "running") return "";
+    return STAGE_META[nodeId].short;
+  }
+
+  function render(){
+    rail.innerHTML = "";
+    stages.forEach((nodeId, i) => {
+      const meta = STAGE_META[nodeId];
+      const status = stageStatus[nodeId] || "pending";
+      const step = stepFor(nodeId);
+      const wrapDiv = document.createElement("div");
+      wrapDiv.className = "stage" + (status === "pending" ? " disabled" : "");
+
+      let connectorClass = "stage-connector";
+      if (i > 0){
+        if (nodeId === "reject_no_company" || nodeId === "financial_assessment"){
+          const taken = (nodeId === "reject_no_company") === !companiesHouseFound;
+          connectorClass += taken ? " branch-taken" : " branch-not-taken";
+        } else if (stageStatus[stages[i-1]] === "done" || stageStatus[stages[i-1]] === "rejected"){
+          connectorClass += " filled";
+        }
+      }
+
+      const clickable = status !== "pending";
+      const selected = openDetail === nodeId;
+      wrapDiv.innerHTML = `
+        <div class="${connectorClass}"></div>
+        <button class="stage-hit ${selected ? "selected" : ""}" data-stage="${nodeId}"
+                ${clickable ? "" : "disabled"} aria-pressed="${selected}"
+                aria-label="${meta.label}${clickable ? " — view inputs and outputs" : ""}">
+          <span class="stage-node ${status}">${iconFor(nodeId, status)}</span>
+          <span class="stage-label">${meta.label}</span>
+          <span class="stage-sub">${meta.sub}</span>
+          <span class="stage-dur">${step && (status==="done"||status==="rejected") ? fmtDuration(step.duration_ms) : " "}</span>
+          <span class="stage-hint">${clickable ? (selected ? "viewing ▾" : "view I/O") : ""}</span>
+        </button>
+      `;
+      rail.appendChild(wrapDiv);
+    });
+
+    // Every completed/rejected stage stays clickable after the run finishes
+    // (or mid-run, for anything already done) -- lets you go back and read
+    // an earlier stage's cards instead of only seeing whatever's currently
+    // playing, which moves too fast to read on its own.
+    rail.querySelectorAll(".stage-hit").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-stage");
+        openDetail = openDetail === id ? null : id;
+        render();
+      });
+    });
+    renderDetail();
+  }
+
+  function renderDetail(){
+    if (!openDetail || !stageStatus[openDetail] || stageStatus[openDetail] === "pending"){
+      detailSlot.innerHTML = "";
+      return;
+    }
+    const meta = STAGE_META[openDetail];
+    const step = stepFor(openDetail);
+    let body = "";
+
+    if (openDetail === "load_application"){
+      const app = step?.state_value?.application || {};
+      const rows = [
+        ["Company", app.company_name], ["Company number", app.company_number],
+        ["Applicant", app.applicant_name], ["Loan type", app.loan_type],
+        ["Requested amount", fmtMoney(app.requested_amount)], ["Purpose", app.loan_purpose],
+        ["Annual accounts", `${(step?.state_value?.annual_accounts||[]).length} document(s)`],
+        ["Bank statements", `${(step?.state_value?.bank_statements||[]).length} document(s)`],
+      ];
+      body = `<div class="detail-cols"><div class="detail-col" style="grid-column:1/-1">
+        ${rows.map(([k,v]) => `<div class="kv"><span class="k">${k}</span><span class="v">${v ?? "—"}</span></div>`).join("")}
+      </div></div>`;
+    } else if (openDetail === "companies_house"){
+      const ev = step?.evidence || {};
+      body = `<div class="detail-cols">
+        <div class="detail-col">
+          <h3>Findings</h3>
+          <div class="kv"><span class="k">Found</span><span class="v">${ev.found}</span></div>
+          <div class="kv"><span class="k">Confidence</span><span class="v">${ev.confidence || "—"}</span></div>
+        </div>
+        <div class="detail-col">
+          <h3>Summary</h3>
+          <div class="prose">${renderProse(ev.summary)}</div>
+        </div>
+      </div>`;
+    } else if (openDetail === "policy_check" || openDetail === "financial_assessment"){
+      const ev = step?.evidence || {};
+      body = `<div class="detail-cols">
+        <div class="detail-col">
+          <h3>Assessment</h3>
+          <div class="prose">${renderProse(ev.result)}</div>
+        </div>
+        <div class="detail-col">
+          <h3>Tool calls</h3>
+          ${(ev.tool_calls||[]).length
+            ? ev.tool_calls.map(t => `<div class="toolcall">${escapeHtml(t.tool)}(...)\n→ ${escapeHtml(t.result)}</div>`).join("")
+            : `<div class="prose" style="color:var(--text-faint)">No deterministic tool calls on this run.</div>`}
+        </div>
+      </div>`;
+    } else if (openDetail === "web_search"){
+      const ev = step?.evidence;
+      body = `<div class="detail-col" style="max-width:760px"><h3>Findings</h3><div class="prose">${renderProse(typeof ev === "string" ? ev : JSON.stringify(ev))}</div></div>`;
+    } else if (openDetail === "synthesize_decision"){
+      const ev = step?.evidence || RUN.final_decision || {};
+      body = `<div class="detail-col" style="max-width:760px">
+        <div class="verdict-reason"><b>Reason</b>${renderProse(ev.reason)}</div>
+        <div class="verdict-reason"><b>Rationale</b>${renderProse(ev.rationale)}</div>
+      </div>`;
+    }
+
+    detailSlot.innerHTML = `<div class="detail">
+      <div class="detail-head">
+        <h2>${meta.label}</h2>
+        <span class="detail-dur">${step ? fmtDuration(step.duration_ms) + " (real) &middot; " + new Date(step.timestamp).toLocaleTimeString() : ""}</span>
+        <button class="detail-close" id="detail-close">Close ✕</button>
+      </div>
+      ${body}
+    </div>`;
+    document.getElementById("detail-close").addEventListener("click", () => { openDetail = null; renderDetail(); });
+  }
+
+  function showVerdict(){
+    const decision = RUN.final_decision || {};
+    const label = decision.outcome === "approved" ? "Approved" : decision.outcome === "referred" ? "Referred" : "Rejected";
+    const cls = decision.outcome === "approved" ? "approved" : decision.outcome === "referred" ? "referred" : "rejected";
+    const app = RUN.application || {};
+    verdictEl.innerHTML = `
+      <div class="verdict-seal ${cls}">${label}</div>
+      <div class="verdict-meta">${app.company_name || ""} &nbsp;·&nbsp; ${fmtMoney(app.requested_amount)} ${(app.loan_type||"").replace(/-/g," ")} &nbsp;·&nbsp; <span class="mono">${RUN.application_id}</span></div>
+      <div class="verdict-reason"><b>Reason</b>${renderProse(decision.reason)}</div>
+      <div class="verdict-reason"><b>Rationale</b>${renderProse(decision.rationale)}</div>
+    `;
+    verdictWrap.style.display = "flex";
+    requestAnimationFrame(() => requestAnimationFrame(() => verdictEl.classList.add("show")));
+  }
+
+  function step(){
+    if (stepIndex >= stages.length){
+      running = false;
+      const rejected = RUN.final_decision?.outcome === "rejected";
+      statusPill.className = "status-pill " + (rejected ? "rejected" : "done");
+      statusText.textContent = "Complete";
+      runBtn.disabled = false;
+      skipBtn.disabled = false;
+      runBtn.textContent = "Replay again";
+      showVerdict();
+      return;
+    }
+    const nodeId = stages[stepIndex];
+    const s = stepFor(nodeId);
+    stageStatus[nodeId] = "running";
+    openDetail = nodeId;
+    render();
+    const dur = playbackMs(s?.duration_ms);
+    timer = setTimeout(() => {
+      stageStatus[nodeId] = (nodeId === "reject_no_company") ? "rejected" : "done";
+      render();
+      stepIndex += 1;
+      timer = setTimeout(step, 220);
+    }, dur);
+  }
+
+  runBtn.addEventListener("click", () => {
+    if (running) return;
+    resetState();
+    running = true;
+    runBtn.disabled = true;
+    skipBtn.disabled = true;
+    runBtn.textContent = "Replaying…";
+    statusPill.className = "status-pill running";
+    statusText.textContent = "In progress";
+    step();
+  });
+  skipBtn.addEventListener("click", jumpToEnd);
+  resetBtn.addEventListener("click", resetState);
+
+  populateHeader();
+  resetState();
+
+})();
+</script>
