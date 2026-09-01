@@ -184,13 +184,20 @@
   .stage-sub{ font-size:11px; color:var(--text-faint); text-align:center; margin-top:2px; }
   .stage-dur{ font-size:10.5px; color:var(--text-faint); margin-top:3px; font-family:"IBM Plex Mono",monospace; }
 
-  .stage-card-btn{
-    margin-top:8px; background:none; border:none; padding:2px 8px;
-    font-size:11px; color:var(--text-faint); cursor:pointer; font-weight:500;
-    border-radius:4px;
+  .stage-hit{
+    background:none; border:none; margin:0; padding:6px 6px 8px;
+    display:flex; flex-direction:column; align-items:center; width:100%;
+    font-family:inherit; color:inherit; cursor:pointer; border-radius:10px;
+    transition:background 0.15s;
   }
-  .stage-card-btn:hover{ color:var(--brass); background:var(--paper-raised); }
-  .stage.disabled .stage-card-btn{ visibility:hidden; }
+  .stage-hit:hover:not(:disabled){ background:var(--paper-raised); }
+  .stage-hit:disabled{ cursor:default; }
+  .stage-hit:focus-visible{ outline:2px solid var(--brass); outline-offset:2px; }
+  .stage-hit.selected .stage-node{ box-shadow:0 0 0 4px var(--brass-bg, var(--slate-bg)); border-color:var(--brass); }
+  .stage-hit.selected .stage-label{ color:var(--brass-ink); }
+  .stage-hit:not(:disabled) .stage-node{ cursor:pointer; }
+  .stage-hint{ font-size:10px; color:var(--text-faint); margin-top:4px; opacity:0; transition:opacity 0.15s; }
+  .stage-hit:not(:disabled):hover .stage-hint, .stage-hit.selected .stage-hint{ opacity:1; }
 
   /* ---------- Detail drawer ---------- */
   .detail{
@@ -469,22 +476,32 @@
         }
       }
 
+      const clickable = status !== "pending";
+      const selected = openDetail === nodeId;
       wrapDiv.innerHTML = `
         <div class="${connectorClass}"></div>
-        <div class="stage-node ${status}">${iconFor(nodeId, status)}</div>
-        <div class="stage-label">${meta.label}</div>
-        <div class="stage-sub">${meta.sub}</div>
-        <div class="stage-dur">${step && (status==="done"||status==="rejected") ? fmtDuration(step.duration_ms) : " "}</div>
-        <button class="stage-card-btn" data-stage="${nodeId}" ${status==="pending" ? "disabled":""}>View I/O</button>
+        <button class="stage-hit ${selected ? "selected" : ""}" data-stage="${nodeId}"
+                ${clickable ? "" : "disabled"} aria-pressed="${selected}"
+                aria-label="${meta.label}${clickable ? " — view inputs and outputs" : ""}">
+          <span class="stage-node ${status}">${iconFor(nodeId, status)}</span>
+          <span class="stage-label">${meta.label}</span>
+          <span class="stage-sub">${meta.sub}</span>
+          <span class="stage-dur">${step && (status==="done"||status==="rejected") ? fmtDuration(step.duration_ms) : " "}</span>
+          <span class="stage-hint">${clickable ? (selected ? "viewing ▾" : "view I/O") : ""}</span>
+        </button>
       `;
       rail.appendChild(wrapDiv);
     });
 
-    rail.querySelectorAll(".stage-card-btn").forEach(btn => {
+    // Every completed/rejected stage stays clickable after the run finishes
+    // (or mid-run, for anything already done) -- lets you go back and read
+    // an earlier stage's cards instead of only seeing whatever's currently
+    // playing, which moves too fast to read on its own.
+    rail.querySelectorAll(".stage-hit").forEach(btn => {
       btn.addEventListener("click", () => {
         const id = btn.getAttribute("data-stage");
         openDetail = openDetail === id ? null : id;
-        renderDetail();
+        render();
       });
     });
     renderDetail();
