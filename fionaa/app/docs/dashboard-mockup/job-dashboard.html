@@ -1,4 +1,4 @@
-<title>The Docket</title>
+<title>Fionaa</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 
@@ -82,10 +82,16 @@
 
   .wrap{ max-width:1180px; margin:0 auto; padding:32px 24px 96px; }
 
-  h1,h2,h3{ font-family:"Fraunces", Georgia, serif; text-wrap:balance; margin:0; }
+  h1,h2,h3,h4{ font-family:"Fraunces", Georgia, serif; text-wrap:balance; margin:0; }
 
   .mono{ font-family:"IBM Plex Mono", ui-monospace, monospace; font-variant-numeric:tabular-nums; }
   .label{ font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-faint); font-weight:600; }
+
+  .source-note{
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    font-size:11.5px; color:var(--text-faint); margin-bottom:18px;
+  }
+  .source-note .swatch{ width:7px; height:7px; border-radius:50%; background:var(--sage); flex-shrink:0; }
 
   /* ---------- Header / case file ---------- */
   .docket-header{
@@ -113,6 +119,7 @@
   .status-pill .dot{ width:7px; height:7px; border-radius:50%; background:var(--text-faint); }
   .status-pill.running .dot{ background:var(--slate); animation:pulse 1.4s ease-in-out infinite; }
   .status-pill.done .dot{ background:var(--sage); }
+  .status-pill.rejected .dot{ background:var(--rust); }
   .status-pill.idle .dot{ background:var(--text-faint); }
   @keyframes pulse{ 0%,100%{ opacity:1; transform:scale(1);} 50%{ opacity:0.45; transform:scale(1.3);} }
 
@@ -135,13 +142,6 @@
   button.primary{ background:var(--brass); border-color:var(--brass); color:#100c02; }
   button.primary:hover{ filter:brightness(1.08); }
   button:disabled{ opacity:0.45; cursor:not-allowed; }
-
-  .path-toggle{ display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dim); }
-  .path-toggle select{
-    font-family:"IBM Plex Mono", monospace; font-size:12px;
-    background:var(--paper-raised); color:var(--text);
-    border:1px solid var(--line); border-radius:5px; padding:5px 8px;
-  }
 
   /* ---------- Pipeline rail ---------- */
   .rail-section{ margin-bottom:36px; }
@@ -202,6 +202,7 @@
   @keyframes reveal{ from{ opacity:0; transform:translateY(-6px);} to{ opacity:1; transform:translateY(0);} }
   .detail-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:16px; gap:12px; flex-wrap:wrap; }
   .detail-head h2{ font-size:20px; font-weight:600; }
+  .detail-head .detail-dur{ font-size:12px; color:var(--text-faint); font-family:"IBM Plex Mono",monospace; }
   .detail-close{ background:none; border:none; color:var(--text-faint); font-size:13px; padding:4px 8px; }
   .detail-cols{ display:grid; grid-template-columns:1fr 1fr; gap:24px; }
   @media (max-width:760px){ .detail-cols{ grid-template-columns:1fr; } }
@@ -211,29 +212,25 @@
   .kv .k{ color:var(--text-dim); }
   .kv .v{ font-family:"IBM Plex Mono", monospace; text-align:right; }
 
-  .checklist{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
-  .checklist li{ display:flex; align-items:flex-start; gap:9px; font-size:13px; }
-  .check-icon{ width:16px; height:16px; border-radius:50%; flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; }
-  .check-icon.pass{ background:var(--sage-bg); color:var(--sage); }
-  .check-icon.warn{ background:var(--plum-bg); color:var(--plum); }
+  .prose{ font-size:13.5px; color:var(--text-dim); line-height:1.65; max-height:420px; overflow-y:auto; padding-right:4px; }
+  .prose h3, .prose h4{ font-family:"IBM Plex Sans",sans-serif; font-size:12.5px; font-weight:600; color:var(--text); margin:14px 0 6px; letter-spacing:0.01em; }
+  .prose h3:first-child, .prose h4:first-child{ margin-top:0; }
+  .prose strong{ color:var(--text); font-weight:600; }
+  .prose ul{ margin:6px 0; padding-left:20px; }
+  .prose li{ margin:3px 0; }
+  .prose p{ margin:8px 0; }
 
-  .prose{ font-size:13.5px; color:var(--text-dim); line-height:1.65; }
   .toolcall{
     font-family:"IBM Plex Mono", monospace; font-size:11.5px;
     background:var(--paper-raised); border:1px solid var(--line); border-radius:6px;
-    padding:8px 10px; margin-top:6px; overflow-x:auto; white-space:pre;
+    padding:8px 10px; margin-top:6px; overflow-x:auto; white-space:pre-wrap; word-break:break-word;
     color:var(--text-dim);
   }
-
-  .source-card{ display:flex; flex-direction:column; gap:2px; padding:9px 0; border-bottom:1px solid var(--line); font-size:13px; }
-  .source-card:last-child{ border-bottom:none; }
-  .source-card .src-title{ font-weight:500; }
-  .source-card .src-url{ font-family:"IBM Plex Mono", monospace; font-size:11px; color:var(--text-faint); }
 
   /* ---------- Verdict stamp ---------- */
   .verdict-wrap{ display:flex; justify-content:center; margin-top:40px; }
   .verdict{
-    width:100%; max-width:640px;
+    width:100%; max-width:680px;
     background:var(--paper); border:1px solid var(--line); border-radius:14px;
     box-shadow:var(--shadow);
     padding:36px 40px; text-align:center;
@@ -252,43 +249,45 @@
   .verdict-seal.referred{ color:var(--plum); }
   .verdict-meta{ margin-top:18px; font-size:13px; color:var(--text-dim); }
   .verdict-reason{ margin-top:20px; text-align:left; font-size:13.5px; color:var(--text-dim); line-height:1.65; padding-top:18px; border-top:1px solid var(--line); }
-  .verdict-reason b{ color:var(--text); font-weight:600; }
+  .verdict-reason b{ color:var(--text); font-weight:600; display:block; margin-bottom:4px; }
+  .verdict-reason + .verdict-reason{ margin-top:14px; padding-top:14px; }
 
-  .empty-note{ text-align:center; color:var(--text-faint); font-size:13px; padding:60px 0; }
-
-  ::-webkit-scrollbar{ height:8px; }
+  ::-webkit-scrollbar{ width:8px; height:8px; }
   ::-webkit-scrollbar-thumb{ background:var(--line); border-radius:4px; }
 </style>
+
+<!-- Baked in by fetch_run.py from a real AgentCore checkpoint history + S3
+     evidence artifacts. See fetch_run.py in the same directory: it reads
+     compiled_graph.aget_state_history(config) for sequencing/timing and
+     ApplicationStore for the richer per-node detail (tool calls etc), then
+     this file's build step inlines the result here. Nothing in this page
+     calls AWS directly -- the Artifact CSP wouldn't allow it anyway. -->
+<script id="run-data" type="application/json">__RUN_DATA_JSON__</script>
 
 <div class="wrap">
 
   <div class="docket-header">
     <div>
-      <div class="docket-id">
-        <span class="label">Case</span>
-        <span class="mono" id="app-id">APP-2026-08114</span>
+      <div class="source-note">
+        <span class="swatch"></span>
+        <span>Real run &mdash; replayed from AgentCore checkpoint history + S3 evidence</span>
       </div>
-      <h1 class="company">Alderfen Joinery Ltd</h1>
+      <div class="docket-id">
+        <span class="label">Application</span>
+        <span class="mono" id="app-id">&mdash;</span>
+      </div>
+      <h1 class="company" id="company-name">&mdash;</h1>
       <div class="meta-row">
-        <div class="meta-item">Loan type: <b>Secured business loan</b></div>
-        <div class="meta-item">Requested: <b class="mono">£85,000</b></div>
-        <div class="meta-item">Thread: <span class="mono">thread_9f21c…</span></div>
+        <div class="meta-item" id="meta-loan-type">Loan type: <b>&mdash;</b></div>
+        <div class="meta-item" id="meta-amount">Requested: <b class="mono">&mdash;</b></div>
+        <div class="meta-item" id="meta-purpose">Purpose: <b>&mdash;</b></div>
       </div>
     </div>
     <div class="controls">
-      <span class="status-pill idle" id="status-pill"><span class="dot"></span><span id="status-text">Idle</span></span>
+      <span class="status-pill idle" id="status-pill"><span class="dot"></span><span id="status-text">Ready to replay</span></span>
       <div class="btn-row">
-        <div class="path-toggle">
-          <span>Outcome</span>
-          <select id="path-select">
-            <option value="approved">Company found → approved</option>
-            <option value="referred">Company found → referred</option>
-            <option value="rejected">No Companies House match</option>
-          </select>
-        </div>
-      </div>
-      <div class="btn-row">
-        <button class="primary" id="run-btn">Run application</button>
+        <button class="primary" id="run-btn">Replay run</button>
+        <button id="skip-btn">Jump to end</button>
         <button id="reset-btn">Reset</button>
       </div>
     </div>
@@ -311,89 +310,87 @@
 <script>
 (function(){
 
-  // ---------------------------------------------------------------------
-  // Stage definitions — mirrors graph.py's node order and semantics
-  // ---------------------------------------------------------------------
-  const STAGES = [
-    { id:"load_application",   short:"01", label:"Load application",     sub:"application.json + documents" },
-    { id:"policy_check",       short:"02", label:"Policy check",         sub:"secured_business_loan.md" },
-    { id:"companies_house",    short:"03", label:"Companies House",      sub:"registry cross-check", branch:true },
-    { id:"reject_no_company",  short:"×",  label:"Reject — no match",    sub:"terminal", onlyIf:"rejected" },
-    { id:"financial_assessment", short:"04", label:"Financial assessment", sub:"accounts + statements", onlyIf:["approved","referred"] },
-    { id:"web_search",         short:"05", label:"Web search",           sub:"presence & reputation", onlyIf:["approved","referred"] },
-    { id:"synthesize_decision", short:"06", label:"Synthesize decision", sub:"final verdict", onlyIf:["approved","referred"] },
-  ];
-
-  const DURATIONS = { load_application:900, policy_check:2600, companies_house:2100, reject_no_company:600,
-                       financial_assessment:3200, web_search:2400, synthesize_decision:1800 };
+  const RUN = JSON.parse(document.getElementById("run-data").textContent);
 
   // ---------------------------------------------------------------------
-  // Mock evidence per outcome path — stands in for each node's
-  // store.put_json artifact (policy_check/result.json, etc.)
+  // Stage metadata -- content itself comes entirely from RUN.steps
   // ---------------------------------------------------------------------
-  function buildData(path){
-    const base = {
-      load_application: {
-        kind:"kv",
-        rows:[["Application", "application.json"], ["Annual accounts", "2 documents"], ["Bank statements", "6 months"], ["Loan type", "secured_business_loan"]],
-      },
-      policy_check: {
-        kind:"checklist",
-        items:[
-          ["pass","Trading history ≥ 24 months (37 months)"],
-          ["pass","Bank statements recent & sufficient (6 of 6 required)"],
-          ["pass","Requested amount within policy ceiling (£85,000 ≤ £150,000)"],
-          [path==="referred" ? "warn":"pass", path==="referred" ? "Debt service coverage below preferred threshold (1.18× vs 1.25×)" : "Debt service coverage within threshold (1.41×)"],
-        ],
-        toolcalls:[["check_bank_statements_recent_and_sufficient","{\"sufficient\": true, \"months\": 6}"],["compute_monthly_repayment","{\"monthly_repayment\": 1614.32}"]],
-      },
-      companies_house: path==="rejected" ? {
-        kind:"kv",
-        rows:[["found", "false"], ["queried_name", "Alderfen Joinery Ltd"], ["closest_match", "none within registry"], ["address_match", "n/a"]],
-      } : {
-        kind:"kv",
-        rows:[["found", "true"], ["company_number", "09215774"], ["status", "active"], ["incorporated", "2014-03-11"], ["registered_office_match", "confirmed"]],
-      },
-      reject_no_company: {
-        kind:"prose",
-        text:"No entity matching “Alderfen Joinery Ltd” was found on the Companies House register. Per policy, UK company registration is a precondition for every loan type — the run terminates here rather than proceeding to a financial assessment against unverifiable trading history.",
-      },
-      financial_assessment: {
-        kind:"kv",
-        rows:[["Turnover (latest FY)", "£412,900"], ["Net profit margin", "9.8%"], ["Monthly repayment (computed)", "£1,614.32"], ["DSCR", path==="referred" ? "1.18×" : "1.41×"]],
-        toolcalls:[["compute_monthly_repayment","{\"principal\": 85000, \"term_months\": 60, \"rate\": 0.079}"]],
-      },
-      web_search: {
-        kind:"sources",
-        items:[
-          ["Company website — alderfenjoinery.co.uk", "Active trade site, portfolio last updated 3 months ago"],
-          ["Google Business Profile", "4.8★ across 61 reviews, no adverse mentions"],
-          ["Director LinkedIn — M. Ashworth", "Consistent tenure claim, matches Companies House officer record"],
-        ],
-      },
-      synthesize_decision: {
-        kind:"verdict",
-        outcome: path,
-        reasoning: path==="approved"
-          ? "Policy checks clear on every dimension, Companies House confirms an active, address-matched registration, DSCR sits comfortably above the 1.25× threshold, and web presence corroborates the application with no adverse findings."
-          : path==="referred"
-          ? "Policy and registry checks clear, but the debt service coverage ratio (1.18×) sits below the preferred 1.25× threshold. Web presence is otherwise clean. Recommend human underwriter review before disbursal."
-          : "No Companies House match — decision was already settled at the registry check.",
-      },
-    };
-    return base;
+  const STAGE_META = {
+    load_application:    { short:"01", label:"Load application",    sub:"application.json + documents" },
+    policy_check:        { short:"02", label:"Policy check",        sub:"loan-type policy" },
+    companies_house:     { short:"03", label:"Companies House",     sub:"registry cross-check", branch:true },
+    reject_no_company:   { short:"×",  label:"Reject — no match",   sub:"terminal" },
+    financial_assessment:{ short:"04", label:"Financial assessment", sub:"accounts + statements" },
+    web_search:          { short:"05", label:"Web search",          sub:"presence & reputation" },
+    synthesize_decision: { short:"06", label:"Synthesize decision", sub:"final verdict" },
+  };
+  // Full canonical order, so branch-not-taken still renders (dimmed).
+  const CANONICAL = ["load_application","policy_check","companies_house","reject_no_company",
+                      "financial_assessment","web_search","synthesize_decision"];
+
+  const ranNodes = new Set(RUN.steps.map(s => s.node));
+  const companiesHouseFound = RUN.companies_house_found !== false;
+  const stages = CANONICAL.filter(id => {
+    if (id === "reject_no_company") return !companiesHouseFound;
+    if (id === "financial_assessment") return companiesHouseFound;
+    return true;
+  });
+
+  function stepFor(nodeId){ return RUN.steps.find(s => s.node === nodeId) || null; }
+
+  // ---------------------------------------------------------------------
+  // Lightweight markdown-lite renderer for the agents' own prose output
+  // (### headers, **bold**, "- " bullets) -- escapes first, formats after.
+  // ---------------------------------------------------------------------
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+  function renderProse(text){
+    if (!text) return "<p>&mdash;</p>";
+    const lines = escapeHtml(text).split("\n");
+    let html = "", inList = false;
+    const closeList = () => { if (inList){ html += "</ul>"; inList = false; } };
+    for (let raw of lines){
+      const line = raw.trim();
+      if (!line){ closeList(); continue; }
+      const heading = line.match(/^(#{2,4})\s+(.*)$/);
+      const bullet = line.match(/^[-*•]\s+(.*)$/);
+      if (heading){
+        closeList();
+        html += `<h4>${heading[2].replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")}</h4>`;
+      } else if (bullet){
+        if (!inList){ html += "<ul>"; inList = true; }
+        html += `<li>${bullet[1].replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")}</li>`;
+      } else {
+        closeList();
+        html += `<p>${line.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")}</p>`;
+      }
+    }
+    closeList();
+    return html;
+  }
+
+  function fmtDuration(ms){
+    if (ms == null) return "";
+    return ms < 1000 ? `${ms}ms` : `${(ms/1000).toFixed(1)}s`;
+  }
+  function fmtMoney(n){
+    if (n == null) return "—";
+    return "£" + Number(n).toLocaleString("en-GB");
   }
 
   // ---------------------------------------------------------------------
-  // State
+  // Playback: compressed real timing (real durations shown as labels, but
+  // played back on a scaled clock so watching it doesn't take ~100s).
   // ---------------------------------------------------------------------
-  let running = false;
-  let timer = null;
-  let currentPath = "approved";
-  let stageStatus = {};   // id -> pending|running|done|skipped|rejected
-  let stageDur = {};
-  let openDetail = null;
-  let stepIndex = 0;
+  const PLAYBACK_SCALE = 1 / 6;
+  const PLAYBACK_MIN = 500, PLAYBACK_MAX = 2600;
+  function playbackMs(realMs){
+    if (realMs == null) return 1200;
+    return Math.min(PLAYBACK_MAX, Math.max(PLAYBACK_MIN, realMs * PLAYBACK_SCALE));
+  }
+
+  let running = false, timer = null, stageStatus = {}, openDetail = null, stepIndex = 0;
 
   const rail = document.getElementById("rail");
   const detailSlot = document.getElementById("detail-slot");
@@ -402,15 +399,16 @@
   const statusPill = document.getElementById("status-pill");
   const statusText = document.getElementById("status-text");
   const runBtn = document.getElementById("run-btn");
+  const skipBtn = document.getElementById("skip-btn");
   const resetBtn = document.getElementById("reset-btn");
-  const pathSelect = document.getElementById("path-select");
 
-  function activeStages(path){
-    return STAGES.filter(s => {
-      if (!s.onlyIf) return true;
-      if (Array.isArray(s.onlyIf)) return s.onlyIf.includes(path);
-      return s.onlyIf === path;
-    });
+  function populateHeader(){
+    const app = (stepFor("load_application")?.state_value?.application) || RUN.application || {};
+    document.getElementById("app-id").textContent = RUN.application_id;
+    document.getElementById("company-name").textContent = app.company_name || "Unknown applicant";
+    document.getElementById("meta-loan-type").innerHTML = `Loan type: <b>${(app.loan_type||"—").replace(/-/g," ")}</b>`;
+    document.getElementById("meta-amount").innerHTML = `Requested: <b class="mono">${fmtMoney(app.requested_amount)}</b>`;
+    document.getElementById("meta-purpose").innerHTML = `Purpose: <b>${app.loan_purpose || "—"}</b>`;
   }
 
   function resetState(){
@@ -418,56 +416,66 @@
     clearTimeout(timer);
     stepIndex = 0;
     stageStatus = {};
-    stageDur = {};
     openDetail = null;
-    STAGES.forEach(s => stageStatus[s.id] = "pending");
+    stages.forEach(s => stageStatus[s] = "pending");
     verdictWrap.style.display = "none";
     verdictEl.classList.remove("show");
     detailSlot.innerHTML = "";
     statusPill.className = "status-pill idle";
-    statusText.textContent = "Idle";
+    statusText.textContent = "Ready to replay";
     runBtn.disabled = false;
-    runBtn.textContent = "Run application";
-    pathSelect.disabled = false;
+    runBtn.textContent = "Replay run";
+    skipBtn.disabled = false;
     render();
   }
 
-  function iconFor(stage, status){
+  function jumpToEnd(){
+    running = false;
+    clearTimeout(timer);
+    stages.forEach(s => stageStatus[s] = (s === "reject_no_company" && !companiesHouseFound) ? "rejected" : "done");
+    stepIndex = stages.length;
+    openDetail = "synthesize_decision" in STAGE_META && stages.includes("synthesize_decision") ? "synthesize_decision" : stages[stages.length-1];
+    statusPill.className = "status-pill " + (RUN.final_decision?.outcome === "rejected" ? "rejected" : "done");
+    statusText.textContent = "Complete";
+    runBtn.disabled = false;
+    runBtn.textContent = "Replay again";
+    render();
+    showVerdict();
+  }
+
+  function iconFor(nodeId, status){
     if (status === "done") return "✓";
     if (status === "rejected") return "✕";
     if (status === "running") return "";
-    return stage.short;
+    return STAGE_META[nodeId].short;
   }
 
   function render(){
-    const path = currentPath;
-    const stages = activeStages(path);
     rail.innerHTML = "";
-    stages.forEach((s, i) => {
-      const status = stageStatus[s.id] || "pending";
+    stages.forEach((nodeId, i) => {
+      const meta = STAGE_META[nodeId];
+      const status = stageStatus[nodeId] || "pending";
+      const step = stepFor(nodeId);
       const wrapDiv = document.createElement("div");
       wrapDiv.className = "stage" + (status === "pending" ? " disabled" : "");
 
       let connectorClass = "stage-connector";
       if (i > 0){
-        const prev = stages[i-1];
-        const prevStatus = stageStatus[prev.id];
-        if (s.id === "reject_no_company" || prev.id === "companies_house"){
-          if (path === "rejected" && s.id === "reject_no_company") connectorClass += " branch-taken";
-          else if (path !== "rejected" && s.id === "financial_assessment") connectorClass += " branch-taken";
-          else connectorClass += " branch-not-taken";
-        } else if (prevStatus === "done"){
+        if (nodeId === "reject_no_company" || nodeId === "financial_assessment"){
+          const taken = (nodeId === "reject_no_company") === !companiesHouseFound;
+          connectorClass += taken ? " branch-taken" : " branch-not-taken";
+        } else if (stageStatus[stages[i-1]] === "done" || stageStatus[stages[i-1]] === "rejected"){
           connectorClass += " filled";
         }
       }
 
       wrapDiv.innerHTML = `
         <div class="${connectorClass}"></div>
-        <div class="stage-node ${status}">${iconFor(s, status)}</div>
-        <div class="stage-label">${s.label}</div>
-        <div class="stage-sub">${s.sub}</div>
-        <div class="stage-dur">${stageDur[s.id] ? (stageDur[s.id]/1000).toFixed(1)+"s" : " "}</div>
-        <button class="stage-card-btn" data-stage="${s.id}" ${status==="pending" ? "disabled":""}>View I/O</button>
+        <div class="stage-node ${status}">${iconFor(nodeId, status)}</div>
+        <div class="stage-label">${meta.label}</div>
+        <div class="stage-sub">${meta.sub}</div>
+        <div class="stage-dur">${step && (status==="done"||status==="rejected") ? fmtDuration(step.duration_ms) : " "}</div>
+        <button class="stage-card-btn" data-stage="${nodeId}" ${status==="pending" ? "disabled":""}>View I/O</button>
       `;
       rail.appendChild(wrapDiv);
     });
@@ -483,40 +491,68 @@
   }
 
   function renderDetail(){
-    if (!openDetail || stageStatus[openDetail] === "pending"){
+    if (!openDetail || !stageStatus[openDetail] || stageStatus[openDetail] === "pending"){
       detailSlot.innerHTML = "";
       return;
     }
-    const stage = STAGES.find(s => s.id === openDetail);
-    const data = buildData(currentPath)[openDetail];
+    const meta = STAGE_META[openDetail];
+    const step = stepFor(openDetail);
     let body = "";
 
-    if (data.kind === "kv"){
+    if (openDetail === "load_application"){
+      const app = step?.state_value?.application || {};
+      const rows = [
+        ["Company", app.company_name], ["Company number", app.company_number],
+        ["Applicant", app.applicant_name], ["Loan type", app.loan_type],
+        ["Requested amount", fmtMoney(app.requested_amount)], ["Purpose", app.loan_purpose],
+        ["Annual accounts", `${(step?.state_value?.annual_accounts||[]).length} document(s)`],
+        ["Bank statements", `${(step?.state_value?.bank_statements||[]).length} document(s)`],
+      ];
       body = `<div class="detail-cols"><div class="detail-col" style="grid-column:1/-1">
-        ${data.rows.map(([k,v]) => `<div class="kv"><span class="k">${k}</span><span class="v">${v}</span></div>`).join("")}
+        ${rows.map(([k,v]) => `<div class="kv"><span class="k">${k}</span><span class="v">${v ?? "—"}</span></div>`).join("")}
       </div></div>`;
-    } else if (data.kind === "checklist"){
+    } else if (openDetail === "companies_house"){
+      const ev = step?.evidence || {};
       body = `<div class="detail-cols">
         <div class="detail-col">
-          <h3>Checks</h3>
-          <ul class="checklist">${data.items.map(([st,txt]) => `<li><span class="check-icon ${st}">${st==="pass"?"✓":"!"}</span>${txt}</li>`).join("")}</ul>
+          <h3>Findings</h3>
+          <div class="kv"><span class="k">Found</span><span class="v">${ev.found}</span></div>
+          <div class="kv"><span class="k">Confidence</span><span class="v">${ev.confidence || "—"}</span></div>
+        </div>
+        <div class="detail-col">
+          <h3>Summary</h3>
+          <div class="prose">${renderProse(ev.summary)}</div>
+        </div>
+      </div>`;
+    } else if (openDetail === "policy_check" || openDetail === "financial_assessment"){
+      const ev = step?.evidence || {};
+      body = `<div class="detail-cols">
+        <div class="detail-col">
+          <h3>Assessment</h3>
+          <div class="prose">${renderProse(ev.result)}</div>
         </div>
         <div class="detail-col">
           <h3>Tool calls</h3>
-          ${(data.toolcalls||[]).map(([t,r]) => `<div class="toolcall">${t}(...)\n→ ${r}</div>`).join("")}
+          ${(ev.tool_calls||[]).length
+            ? ev.tool_calls.map(t => `<div class="toolcall">${escapeHtml(t.tool)}(...)\n→ ${escapeHtml(t.result)}</div>`).join("")
+            : `<div class="prose" style="color:var(--text-faint)">No deterministic tool calls on this run.</div>`}
         </div>
       </div>`;
-    } else if (data.kind === "prose"){
-      body = `<div class="prose">${data.text}</div>`;
-    } else if (data.kind === "sources"){
-      body = `<div class="detail-col" style="max-width:640px">${data.items.map(([t,d]) => `<div class="source-card"><span class="src-title">${t}</span><span class="src-url">${d}</span></div>`).join("")}</div>`;
-    } else if (data.kind === "verdict"){
-      body = `<div class="prose">${data.reasoning}</div>`;
+    } else if (openDetail === "web_search"){
+      const ev = step?.evidence;
+      body = `<div class="detail-col" style="max-width:760px"><h3>Findings</h3><div class="prose">${renderProse(typeof ev === "string" ? ev : JSON.stringify(ev))}</div></div>`;
+    } else if (openDetail === "synthesize_decision"){
+      const ev = step?.evidence || RUN.final_decision || {};
+      body = `<div class="detail-col" style="max-width:760px">
+        <div class="verdict-reason"><b>Reason</b>${renderProse(ev.reason)}</div>
+        <div class="verdict-reason"><b>Rationale</b>${renderProse(ev.rationale)}</div>
+      </div>`;
     }
 
     detailSlot.innerHTML = `<div class="detail">
       <div class="detail-head">
-        <h2>${stage.label}</h2>
+        <h2>${meta.label}</h2>
+        <span class="detail-dur">${step ? fmtDuration(step.duration_ms) + " (real) &middot; " + new Date(step.timestamp).toLocaleTimeString() : ""}</span>
         <button class="detail-close" id="detail-close">Close ✕</button>
       </div>
       ${body}
@@ -524,43 +560,44 @@
     document.getElementById("detail-close").addEventListener("click", () => { openDetail = null; renderDetail(); });
   }
 
-  function showVerdict(path){
-    const data = buildData(path).synthesize_decision;
-    const label = path === "approved" ? "Approved" : path === "referred" ? "Referred" : "Rejected";
-    const cls = path === "approved" ? "approved" : path === "referred" ? "referred" : "rejected";
+  function showVerdict(){
+    const decision = RUN.final_decision || {};
+    const label = decision.outcome === "approved" ? "Approved" : decision.outcome === "referred" ? "Referred" : "Rejected";
+    const cls = decision.outcome === "approved" ? "approved" : decision.outcome === "referred" ? "referred" : "rejected";
+    const app = RUN.application || {};
     verdictEl.innerHTML = `
       <div class="verdict-seal ${cls}">${label}</div>
-      <div class="verdict-meta">Alderfen Joinery Ltd &nbsp;·&nbsp; £85,000 secured business loan &nbsp;·&nbsp; <span class="mono">APP-2026-08114</span></div>
-      <div class="verdict-reason"><b>Reasoning</b><br>${data.reasoning}</div>
+      <div class="verdict-meta">${app.company_name || ""} &nbsp;·&nbsp; ${fmtMoney(app.requested_amount)} ${(app.loan_type||"").replace(/-/g," ")} &nbsp;·&nbsp; <span class="mono">${RUN.application_id}</span></div>
+      <div class="verdict-reason"><b>Reason</b>${renderProse(decision.reason)}</div>
+      <div class="verdict-reason"><b>Rationale</b>${renderProse(decision.rationale)}</div>
     `;
     verdictWrap.style.display = "flex";
     requestAnimationFrame(() => requestAnimationFrame(() => verdictEl.classList.add("show")));
   }
 
   function step(){
-    const path = currentPath;
-    const stages = activeStages(path);
     if (stepIndex >= stages.length){
       running = false;
-      statusPill.className = "status-pill done";
+      const rejected = RUN.final_decision?.outcome === "rejected";
+      statusPill.className = "status-pill " + (rejected ? "rejected" : "done");
       statusText.textContent = "Complete";
       runBtn.disabled = false;
-      runBtn.textContent = "Run again";
-      showVerdict(path);
+      skipBtn.disabled = false;
+      runBtn.textContent = "Replay again";
+      showVerdict();
       return;
     }
-    const s = stages[stepIndex];
-    stageStatus[s.id] = "running";
-    openDetail = s.id;
+    const nodeId = stages[stepIndex];
+    const s = stepFor(nodeId);
+    stageStatus[nodeId] = "running";
+    openDetail = nodeId;
     render();
-    const dur = DURATIONS[s.id] || 1500;
-    const start = dur; // fixed mock duration, no wall-clock dependency
+    const dur = playbackMs(s?.duration_ms);
     timer = setTimeout(() => {
-      stageStatus[s.id] = s.id === "reject_no_company" ? "rejected" : "done";
-      stageDur[s.id] = start;
+      stageStatus[nodeId] = (nodeId === "reject_no_company") ? "rejected" : "done";
       render();
       stepIndex += 1;
-      timer = setTimeout(step, 260);
+      timer = setTimeout(step, 220);
     }, dur);
   }
 
@@ -568,19 +605,17 @@
     if (running) return;
     resetState();
     running = true;
-    currentPath = pathSelect.value;
-    pathSelect.disabled = true;
     runBtn.disabled = true;
-    runBtn.textContent = "Running…";
+    skipBtn.disabled = true;
+    runBtn.textContent = "Replaying…";
     statusPill.className = "status-pill running";
     statusText.textContent = "In progress";
     step();
   });
-
+  skipBtn.addEventListener("click", jumpToEnd);
   resetBtn.addEventListener("click", resetState);
-  pathSelect.addEventListener("change", () => { currentPath = pathSelect.value; if (!running) resetState(); });
 
-  currentPath = pathSelect.value;
+  populateHeader();
   resetState();
 
 })();
