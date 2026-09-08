@@ -271,8 +271,23 @@ async def check_companies_house(
     result: CompaniesHouseResult = response["structured_response"]
     companies_house_result = result.model_dump()
 
+    # Tool calls the agent made along the way (CompaniesHouse___*,
+    # geo-target___CheckSameArea) are evidence too — same extraction
+    # check_against_policy/check_financial_assessment use for their
+    # (local, non-MCP) tools. Kept out of companies_house_result/state so
+    # downstream prompts (check_financial_assessment, synthesize_decision)
+    # keep seeing exactly the same CompaniesHouseResult shape as before —
+    # tool_calls is only added to the S3 evidence artifact.
+    tool_calls = [
+        {"tool": m.name, "result": m.content}
+        for m in response["messages"]
+        if isinstance(m, ToolMessage)
+    ]
+
     # save result back to application store
-    runtime.context.store.put_json("companies_house/result.json", companies_house_result)
+    runtime.context.store.put_json(
+        "companies_house/result.json", {**companies_house_result, "tool_calls": tool_calls}
+    )
 
     return Command(
         update={"companies_house": companies_house_result, "companies_house_found": result.found},
@@ -371,7 +386,20 @@ async def search_web(state: ApplicationState, runtime: Runtime[AgentContext]) ->
 
     web_search_result = response["messages"][-1].content
 
-    runtime.context.store.put_json("web_search/result.json", web_search_result)
+    # Same tool-call extraction as check_companies_house, for the same
+    # reason -- websearch-target___WebSearch invocations are evidence too.
+    # Kept out of the web_search state value (still the bare result string,
+    # as synthesize_decision expects); only added to the S3 evidence
+    # artifact, which changes shape here from a bare string to a dict.
+    tool_calls = [
+        {"tool": m.name, "result": m.content}
+        for m in response["messages"]
+        if isinstance(m, ToolMessage)
+    ]
+
+    runtime.context.store.put_json(
+        "web_search/result.json", {"result": web_search_result, "tool_calls": tool_calls}
+    )
     return {"web_search": web_search_result}
 
 
