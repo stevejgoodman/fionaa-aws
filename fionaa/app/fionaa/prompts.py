@@ -54,7 +54,7 @@ WEB_SEARCH_PROMPT = """
     on one side and not the other must not be treated as a mismatch.
 
     You are also given COMPANIES HOUSE FINDINGS from an earlier lookup — its summary may include the
-    registered office address and director/PSC names. Use these (not just the company name) to
+    registered office's town/postcode and director/PSC names. Use these (not just the company name) to
     disambiguate the correct company online when multiple similarly-named companies exist, and to
     confirm the website/profile you find actually belongs to this company rather than a same-named
     one elsewhere.
@@ -236,6 +236,13 @@ The company number may be missing or wrong, active or inactive, and the company 
 Searchby name first if the company number doesn't resolve.
 The applicant's given address may name a town or city more loosely than the address on file.
 Before treating an address difference as a red flag, use geo-target___CheckSameArea to check whether the two places are the same administrative area.
+
+**Never write the street-level address into your summary.** You may extract and reason with
+the full registered office address internally for Step 3's consistency checks (comparing it
+against the application's address, flagging discrepancies) — but the `summary` field itself
+must state the registered office's location as town/city and postcode area only, never the
+building/house number or street name. This keeps street-address PII out of the evidence
+record, traces, and the dashboard that read this summary.
 
 **found vs. active — do not conflate these.** `found` means the company and the named
 applicant (as officer or PSC) were both identified with confidence in Companies House — it is
