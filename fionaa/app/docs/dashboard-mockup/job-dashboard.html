@@ -535,10 +535,14 @@
           <h3>Findings</h3>
           <div class="kv"><span class="k">Found</span><span class="v">${ev.found}</span></div>
           <div class="kv"><span class="k">Confidence</span><span class="v">${ev.confidence || "—"}</span></div>
+          <h3 style="margin-top:16px">Summary</h3>
+          <div class="prose">${renderProse(ev.summary)}</div>
         </div>
         <div class="detail-col">
-          <h3>Summary</h3>
-          <div class="prose">${renderProse(ev.summary)}</div>
+          <h3>Tool calls</h3>
+          ${(ev.tool_calls||[]).length
+            ? ev.tool_calls.map(t => `<div class="toolcall">${escapeHtml(t.tool)}(...)\n→ ${escapeHtml(t.result)}</div>`).join("")
+            : `<div class="prose" style="color:var(--text-faint)">No tool calls recorded for this run.</div>`}
         </div>
       </div>`;
     } else if (openDetail === "policy_check" || openDetail === "financial_assessment"){
@@ -556,8 +560,22 @@
         </div>
       </div>`;
     } else if (openDetail === "web_search"){
-      const ev = step?.evidence;
-      body = `<div class="detail-col" style="max-width:760px"><h3>Findings</h3><div class="prose">${renderProse(typeof ev === "string" ? ev : JSON.stringify(ev))}</div></div>`;
+      const ev = step?.evidence || {};
+      // Older evidence artifacts stored web_search as a bare string rather
+      // than {result, tool_calls} -- handle both shapes.
+      const findings = typeof ev === "string" ? ev : ev.result;
+      body = `<div class="detail-cols">
+        <div class="detail-col">
+          <h3>Findings</h3>
+          <div class="prose">${renderProse(findings)}</div>
+        </div>
+        <div class="detail-col">
+          <h3>Tool calls</h3>
+          ${(ev.tool_calls||[]).length
+            ? ev.tool_calls.map(t => `<div class="toolcall">${escapeHtml(t.tool)}(...)\n→ ${escapeHtml(t.result)}</div>`).join("")
+            : `<div class="prose" style="color:var(--text-faint)">No tool calls recorded for this run.</div>`}
+        </div>
+      </div>`;
     } else if (openDetail === "synthesize_decision"){
       const ev = step?.evidence || RUN.final_decision || {};
       body = `<div class="detail-col" style="max-width:760px">
