@@ -57,6 +57,45 @@ ARTIFACT_BY_NODE = {
     "synthesize_decision": "decision/result.json",
 }
 
+REDACTED_ADDRESS = "[address redacted]"
+
+
+def _redact_address(address: str | None) -> str | None:
+    """Masks the first line (building/street) of an address, keeping
+    everything from the first comma onward (town/postcode) for context --
+    e.g. "14 Oak Avenue, Uxbridge" -> "[address redacted], Uxbridge". An
+    address with no comma is fully replaced."""
+    if not address:
+        return address
+    _, sep, rest = address.partition(",")
+    return REDACTED_ADDRESS if not sep else f"{REDACTED_ADDRESS},{rest}"
+
+
+def _redact_application(application: dict | None) -> dict | None:
+    """Copies `application` with company_address/director_residential_address
+    first-line-redacted. year_of_birth is left as-is -- ApplicationFormSchema
+    only ever stores a birth *year*, so it's already PII-minimized."""
+    if not application:
+        return application
+    redacted = dict(application)
+    for field in ("company_address", "director_residential_address"):
+        if field in redacted:
+            redacted[field] = _redact_address(redacted[field])
+    return redacted
+
+
+def _redact_annual_accounts(docs: list[dict] | None) -> list[dict] | None:
+    """Same first-line redaction as _redact_application, applied to each
+    annual-accounts document's registered_address (AnnualAccountsSchema)."""
+    if not docs:
+        return docs
+    return [
+        {**doc, "registered_address": _redact_address(doc["registered_address"])}
+        if "registered_address" in doc
+        else doc
+        for doc in docs
+    ]
+
 
 def build_steps(history, store) -> list[dict]:
     """Turns a chronological list of LangGraph StateSnapshots into one entry
@@ -87,6 +126,11 @@ def build_steps(history, store) -> list[dict]:
         before, after = history[i].values, history[i + 1].values
         keys = STATE_KEYS_BY_NODE.get(node_id, [])
         state_value = {k: after.get(k) for k in keys if after.get(k) != before.get(k)}
+        if node_id == "load_application":
+            if "application" in state_value:
+                state_value["application"] = _redact_application(state_value["application"])
+            if "annual_accounts" in state_value:
+                state_value["annual_accounts"] = _redact_annual_accounts(state_value["annual_accounts"])
 
         t0, t1 = parse(history[i].created_at), parse(history[i + 1].created_at)
         duration_ms = int((t1 - t0).total_seconds() * 1000) if t0 and t1 else None
@@ -135,7 +179,7 @@ async def _fetch(args) -> dict:
         return {"found": False}
 
     store = st.ApplicationStore(identity, session)
-    application = store.get_json("input/application.json")
+    application = _redact_application(store.get_json("input/application.json"))
     steps = build_steps(history, store)
     final_values = history[-1].values
 
