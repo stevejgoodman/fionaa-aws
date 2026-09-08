@@ -1,0 +1,6 @@
+# Raw fetched run data can contain real applicant financial/legal detail --
+# never committed. job-dashboard.html is the clean template (placeholder);
+# job-dashboard.rendered.html is the real, injected page actually published
+# as the Artifact -- regenerate both with fetch_run.py + build.py.
+run-data.json
+job-dashboard.rendered.html
