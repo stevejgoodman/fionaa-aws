@@ -49,6 +49,9 @@ WEB_SEARCH_PROMPT = """
     Your job is to search the internet for the company below (or the person behind it).
     Look for any websites or pages on linked-in. Note that there may be alternative spellings of the person or applicant
     such as shortened names or nick-names, or alternative names for the company, such as trading-as or minor grammatical differences.
+    Also ignore honorific titles (e.g. "Dr", "Prof") and post-nominal qualifications (e.g. "PhD", "MBA") when comparing
+    names — "Dr Steven Goodman" and "Steve Goodman, PhD" refer to the same person, so a title or qualification appearing
+    on one side and not the other must not be treated as a mismatch.
 
     You are also given COMPANIES HOUSE FINDINGS from an earlier lookup — its summary may include the
     registered office address and director/PSC names. Use these (not just the company name) to
