@@ -202,9 +202,12 @@ class CompaniesHouseResult(BaseModel):
     confidence: str = Field(description="high, medium, or low")
     summary: str = Field(
         description="Explanation of the finding, including any partial matches considered. "
-        "When a company was found, must include the registered office address and the "
-        "director/PSC names — search_web uses these to disambiguate the company online, "
-        "not just the summary verdict."
+        "When a company was found, must include the director/PSC names and the registered "
+        "office's town/city and postcode area — search_web uses these to disambiguate the "
+        "company online, not just the summary verdict. Do not include the building/house "
+        "number or street name (the first line of the address): state location at "
+        "town/postcode level only, to keep street-level address PII out of this free-text "
+        "field, which flows into evidence storage, traces, and the dashboard."
     )
 
 
