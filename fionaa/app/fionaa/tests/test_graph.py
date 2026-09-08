@@ -308,9 +308,54 @@ async def test_check_companies_house_calls_gateway_and_persists(monkeypatch):
 
     assert result.update == {"companies_house": fake_result, "companies_house_found": True}
     assert result.goto == "financial_assessment"
-    assert store.data["companies_house/result.json"] == fake_result
+    # tool_calls is added to the S3 evidence artifact only -- companies_house
+    # state (asserted above) keeps the plain CompaniesHouseResult shape so
+    # downstream prompts are unaffected. FakeAgent never emits ToolMessages,
+    # so tool_calls is empty here; see test_graph.py's ToolMessage-emitting
+    # coverage elsewhere for the non-empty case.
+    assert store.data["companies_house/result.json"] == {**fake_result, "tool_calls": []}
     assert calls[0]["tools"] == fake_tools
     assert calls[1]["message_content"] == json.dumps(application)
+
+
+@pytest.mark.asyncio
+async def test_check_companies_house_persists_tool_calls_as_evidence(monkeypatch):
+    """Tool calls the agent makes (CompaniesHouse___*, geo-target___CheckSameArea)
+    are harvested off the response the same way check_against_policy does, and
+    added to the S3 evidence artifact only -- the companies_house state value
+    (asserted separately above) stays a plain CompaniesHouseResult, since
+    check_financial_assessment/synthesize_decision read it as such."""
+    application = {"company_number": "12345678"}
+    store = FakeStore()
+    state = {"application": application}
+    runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
+    fake_result = {"found": True, "confidence": "high", "summary": "active company"}
+
+    class FakeAgentWithToolCall:
+        async def ainvoke(self, input):
+            return {
+                "messages": [
+                    input["messages"][0],
+                    ToolMessage(
+                        content='{"status": "active"}',
+                        name="CompaniesHouse___getCompanyProfile",
+                        tool_call_id="call-1",
+                    ),
+                ],
+                "structured_response": g.CompaniesHouseResult(**fake_result),
+            }
+
+    monkeypatch.setattr(g, "create_agent", lambda **kwargs: FakeAgentWithToolCall())
+
+    result = await g.check_companies_house(state, runtime)
+
+    assert result.update == {"companies_house": fake_result, "companies_house_found": True}
+    assert store.data["companies_house/result.json"] == {
+        **fake_result,
+        "tool_calls": [
+            {"tool": "CompaniesHouse___getCompanyProfile", "result": '{"status": "active"}'}
+        ],
+    }
 
 
 @pytest.mark.asyncio
@@ -466,13 +511,57 @@ async def test_search_web_builds_query_from_company_name(monkeypatch):
     result = await g.search_web(state, runtime)
 
     assert result == {"web_search": fake_result}
-    assert store.data["web_search/result.json"] == fake_result
+    # tool_calls is added to the S3 evidence artifact only -- web_search
+    # state (asserted above) stays the bare result string synthesize_decision
+    # expects. FakeAgent never emits ToolMessages, so tool_calls is empty
+    # here; see test_search_web_persists_tool_calls_as_evidence below.
+    assert store.data["web_search/result.json"] == {"result": fake_result, "tool_calls": []}
     assert calls[0]["tools"] == fake_tools
     expected_content = (
         f"Company: Acme Ltd\n\n"
         f"COMPANIES HOUSE FINDINGS:\n{json.dumps(companies_house)}"
     )
     assert calls[1]["message_content"] == expected_content
+
+
+@pytest.mark.asyncio
+async def test_search_web_persists_tool_calls_as_evidence(monkeypatch):
+    """Tool calls the agent makes (websearch-target___WebSearch) are harvested
+    off the response the same way check_against_policy does, and added to the
+    S3 evidence artifact only -- the web_search state value (asserted
+    separately above) stays the bare result string."""
+    store = FakeStore()
+    state = {"application": {"company_name": "Acme Ltd"}, "companies_house": None}
+    runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
+
+    class FakeAgentWithToolCall:
+        async def ainvoke(self, input):
+            return {
+                "messages": [
+                    input["messages"][0],
+                    ToolMessage(
+                        content="Acme Ltd linkedin.com/company/acme-ltd",
+                        name="websearch-target___WebSearch",
+                        tool_call_id="call-1",
+                    ),
+                    FakeMessage("no adverse findings"),
+                ]
+            }
+
+    monkeypatch.setattr(g, "create_agent", lambda **kwargs: FakeAgentWithToolCall())
+
+    result = await g.search_web(state, runtime)
+
+    assert result == {"web_search": "no adverse findings"}
+    assert store.data["web_search/result.json"] == {
+        "result": "no adverse findings",
+        "tool_calls": [
+            {
+                "tool": "websearch-target___WebSearch",
+                "result": "Acme Ltd linkedin.com/company/acme-ltd",
+            }
+        ],
+    }
 
 
 # ---------------------------------------------------------------------------
