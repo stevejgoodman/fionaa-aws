@@ -7,14 +7,14 @@ Loan Term: 12 – 72 months
 
 Documents Required:
 
-- 3 Recent bank statements, latest no more than 3 months old, and annual accounts
+- At least 3 months of bank statements, most recent statement less than 90 days old on the date of application, and annual accounts
 - Proof of ownership/valuation of the collateral asset
 
 Other key eligibility/rules:
 
 - Requires an asset as security (property, equipment, vehicles, invoices, or intangible assets)
 - Lower interest rates than unsecured; PG may still apply
-- Typically requires 12–36 months trading history
+- Minimum 12 months trading history
 - Approval slower due to valuation/legal checks
 
 Note: whether the requested amount falls within the £25,000–£20,000,000

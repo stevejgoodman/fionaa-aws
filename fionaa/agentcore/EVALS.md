@@ -1,5 +1,56 @@
 # Offline evals for fionaa
 
+## Runtime Automated Reasoning integration (2026-09-12)
+
+All five loan types now have versioned standalone guardrails and concrete
+runtime/IAM bindings. The four additional products passed 48/48 live boundary
+cases through `PolicyConsistencyChecker`: amount and term endpoints, trading
+minimums, personal guarantees strictly above GBP25,000, conditional revolving
+security documents, invoice turnover thresholds and 70–90% advances, strict
+89/90-day recency, missing documents and invalid approval claims. Failures
+must include an actual `invalid` finding; an API error cannot pass a negative
+case. Results are in `automated-reasoning/product-live-results.json`.
+
+The user confirmed a minimum 6-month contract for both invoice products;
+both Markdown policies and formal definitions now reflect that. Local tests:
+133 passed, including current-policy-digest/IAM coverage checks for every
+loan type. Runtime version 34 and all five bindings were activated on
+2026-09-12, with scoped IAM permissions including US guardrail profile destinations.
+
+
+Deployed smoke test (2026-09-12): runtime 34 returned HTTP 200 for a disposable
+unsecured-loan application. The standalone check consumed 3 Automated Reasoning
+units and returned `tooComplex`; the graph referred the application before final
+validation. This verifies runtime permissions and fail-closed enforcement, not a
+successful approval path. Evidence: `automated-reasoning/activation-results.json`. Simplifying the
+validation evidence and evaluating translation coverage remain follow-up work.
+The initial smoke test exposed missing cross-region profile permissions; these
+were corrected and six binding/IAM regression tests passed.
+
+Standalone `ApplyGuardrail` checks now gate policy assessment and final
+decision publication in the deployed implementation. Missing configuration,
+policy-source digest mismatch, empty/zero-usage findings, non-valid findings,
+and AWS errors refer the application. This is separate from the offline
+LLM judges below. New local tests exercise those failure paths and require
+both stages to pass before publishing an approved proposal.
+
+Formal-policy fidelity requires continued evaluation;
+see [Automated Reasoning setup](automated-reasoning/README.md). Existing
+node evals still measure candidate assessments, not validation fidelity.
+Full-runtime evals must use reviewed guardrail bindings or expect referral.
+
+Validation completed: 128 local unit tests passed. The secured-loan pilot's
+eight live standalone checks also matched expectations: valid amount,
+12-month trading and 89-day statements returned `valid`; below-minimum
+amount, 11-month trading, 90-day statements, 84-month-term approval and
+missing-collateral-document approval returned `invalid`. The policy and
+guardrail both have version 1 in AWS; runtime activation is now deployed.
+The generated rules needed correction before those tests (see REVIEW.md).
+
+Policy wording now specifies secured trading history >=12 months, unsecured
+trading history >=6 months, invoice-discounting annual turnover >=GBP100,000,
+and bank-statement recency strictly <90 days on the application date.
+
 Status: **registered locally, not yet deployed to AWS.** See "Deploying" below.
 
 ## What's here

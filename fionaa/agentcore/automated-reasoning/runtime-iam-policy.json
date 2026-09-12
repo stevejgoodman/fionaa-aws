@@ -1,0 +1,36 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "FionaaApplyPolicyGuardrail",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:ApplyGuardrail"
+      ],
+      "Resource": [
+        "arn:aws:bedrock:us-east-1:492646066653:guardrail/bwcgqb1tsa07",
+        "arn:aws:bedrock:us-east-1:492646066653:guardrail/5h5yunnkf895",
+        "arn:aws:bedrock:us-east-1:492646066653:guardrail/cdue92mr0ap4",
+        "arn:aws:bedrock:us-east-1:492646066653:guardrail/7kbeqj127jvv",
+        "arn:aws:bedrock:us-east-1:492646066653:guardrail/me18qejox6li",
+        "arn:aws:bedrock:us-east-1:492646066653:guardrail-profile/us.guardrail.v1:0",
+        "arn:aws:bedrock:us-east-2:492646066653:guardrail-profile/us.guardrail.v1:0",
+        "arn:aws:bedrock:us-west-2:492646066653:guardrail-profile/us.guardrail.v1:0"
+      ]
+    },
+    {
+      "Sid": "FionaaInvokeReasoningPolicy",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:InvokeAutomatedReasoningPolicy"
+      ],
+      "Resource": [
+        "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/t5e1432k93z6:1",
+        "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/8kzm1thspmq8:1",
+        "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/gwekvzglmnzl:1",
+        "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/0ms904vzpwz3:1",
+        "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/naky6j7kj4d7:1"
+      ]
+    }
+  ]
+}

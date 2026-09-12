@@ -1,5 +1,3 @@
-<!-- checks: check_bank_statements_recent_and_sufficient -->
-
 # General rules (apply to all loan types)
 
 - Recent bank statements means at least 3 months of statements, most recent statement must be less than 90 days from date of application
@@ -21,3 +19,29 @@ most recent less than 90 days old" rule above is checked deterministically by th
 `check_bank_statements_recent_and_sufficient` tool (see `check_tools.py`)
 — the policy-check agent calls it with each statement's end date and
 today's date rather than counting or comparing the dates itself.
+
+
+
+
+# Secured Business Loans
+
+Loan Amount: £25,000 – £20,000,000
+Loan Term: 12 – 72 months
+
+Documents Required:
+
+- At least 3 months of bank statements, most recent statement less than 90 days old on the date of application, and annual accounts
+- Proof of ownership/valuation of the collateral asset
+
+Other key eligibility/rules:
+
+- Requires an asset as security (property, equipment, vehicles, invoices, or intangible assets)
+- Lower interest rates than unsecured; PG may still apply
+- Minimum 12 months trading history
+- Approval slower due to valuation/legal checks
+
+Note: whether the requested amount falls within the £25,000–£20,000,000
+range above is checked deterministically by the
+`check_secured_business_loan_amount_in_range` tool (see `check_tools.py`) —
+the policy-check agent calls it with `loan_amount` rather than
+comparing the figures itself.

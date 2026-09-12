@@ -768,8 +768,8 @@ async def test_synthesize_decision_persists_and_returns_result(monkeypatch):
         "financial_assessment": financial_assessment,
         "web_search": web_search,
     }
-    assert result == {"final_decision": expected_final_decision}
-    assert store.data["decision/result.json"] == expected_final_decision
+    assert result == {"proposed_decision": expected_final_decision}
+    assert store.data["decision/proposed.json"] == expected_final_decision
     # No tools scoped in -- this node only weighs earlier findings already in
     # state, it doesn't call anything itself.
     assert calls[0]["tools"] == []
@@ -797,7 +797,7 @@ async def test_synthesize_decision_can_reject(monkeypatch):
 
     result = await g.synthesize_decision(state, runtime)
 
-    assert result["final_decision"]["outcome"] == "rejected"
+    assert result["proposed_decision"]["outcome"] == "rejected"
 
 
 # ---------------------------------------------------------------------------
@@ -807,6 +807,9 @@ async def test_synthesize_decision_can_reject(monkeypatch):
 def _patch_all_integration_points(monkeypatch, agent_response="ok"):
     calls = []
     monkeypatch.setattr(g, "create_agent", make_fake_create_agent(agent_response, calls))
+    async def valid(*args):
+        return {"passed": True, "status": "valid"}
+    monkeypatch.setattr(g, "_validate_assessment", valid)
     return calls
 
 
@@ -852,6 +855,9 @@ async def test_build_graph_runs_all_nodes_in_order(monkeypatch, identity):
         "financial_assessment/result.json",
         "web_search/result.json",
         "decision/result.json",
+        "decision/proposed.json",
+        "decision/validation.json",
+        "policy_check/validation.json",
     }
 
 
