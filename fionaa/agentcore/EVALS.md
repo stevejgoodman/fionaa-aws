@@ -900,6 +900,52 @@ it shows up one step lower, at 0.7. Worth the same threshold/retry decision
 the README flags as open, not something dataset/prompt changes alone would
 fix.
 
+### Bedrock Guardrail + schema bounds (guardrail gap #3, 2026-09-12)
+
+New `FionaaGuardrail`/`FionaaGuardrailVersion` (`cdk-stack.ts`) attached to
+`load_model()` (`model/load.py`) via `guardrail_config` whenever
+`FIONAA_GUARDRAIL_ID`/`FIONAA_GUARDRAIL_VERSION` are set. Deliberately
+narrow scope: content filters for prompt-attack (input, HIGH) + baseline
+hate/insults/sexual/violence/misconduct (MEDIUM both ways), plus a PII
+filter limited to identifiers with zero legitimate use in a UK business-loan
+application (credit card number/CVV/expiry, US SSN, UK National Insurance
+number, password, PIN, AWS access/secret key) — ANONYMIZE, not BLOCK, so a
+false match degrades gracefully rather than failing the whole response.
+Deliberately does **not** touch NAME/ADDRESS/PHONE/EMAIL — those are
+expected business content and the actual KYC signal this agent exists to
+check (same reasoning as `redaction.py`'s PII scope from the previous PR).
+IAM enforcement (denying model calls that omit this guardrail, per the
+Bedrock security skill's production recommendation) is an explicit,
+documented follow-up, not done here — a misconfigured account-wide Deny is
+higher-risk than the guardrail itself and deserves its own careful rollout.
+
+Also added `Field(ge=0, ...)` (and `le=100` for the one percentage field) to
+every `schemas.py` amount/count field that can never legitimately be
+negative, across `ApplicationFormSchema`/`AnnualAccountsSchema`/
+`BankStatementSchema`. Deliberately left unconstrained: profit-type fields
+(a loss is a legitimate value `financial_assessment` needs to see) and
+`balance`/`cash_at_bank_*` (an overdraft is likewise legitimate and
+meaningful, not a validation error).
+
+**Known gap, deliberately not fixed in this pass**: `ApplicationFormSchema`
+is not actually validated anywhere at runtime. `load_application`
+(`graph.py`) reads `input/application.json` raw and never calls
+`ApplicationFormSchema.model_validate` on it — unlike `annual_accounts`/
+`bank_statements`, which do go through schema validation via
+`_load_validated_documents`. So the new `ApplicationFormSchema` bounds are
+currently inert (schema documentation / future-readiness only) until
+something actually calls that validation; `AnnualAccountsSchema`/
+`BankStatementSchema`'s new bounds ARE enforced today, since those two
+schemas are already wired into the real validation path. Wiring
+`ApplicationFormSchema` into `load_application` was considered and
+deliberately deferred — it's a materially bigger, riskier change (could
+reject a real application if any production `application.json` deviates
+from the schema's exact field set, and there's no visibility from this repo
+alone into the real upstream ingestion contract) than "add bounds to a
+schema already in the validation path." Worth its own follow-up, with
+whoever owns the upstream ingestion pipeline confirming the schema still
+matches reality first.
+
 ### Existing AWS resources to reuse
 
 - Runtime: `fionaa_fionaa-xjO2ci9fd3`

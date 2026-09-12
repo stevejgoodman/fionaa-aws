@@ -30,33 +30,38 @@ class ApplicationFormSchema(BaseModel):
 
     loan_type: LoanType = Field(description="The type of loan being applied for")
     loan_purpose: str = Field(description="The stated purpose of the loan")
-    loan_amount: int | None = Field(default=None, description="amount to be borrowed optional depending on "
+    # ge=0/ge=1 below reject an obviously-invalid negative/zero amount at the
+    # schema boundary rather than letting it flow through to LLM prose review
+    # (the only place it would otherwise be caught, if at all). annual_profit
+    # is deliberately NOT bounded -- a loss is a legitimate value
+    # financial_assessment needs to see, not a validation error.
+    loan_amount: int | None = Field(default=None, ge=0, description="amount to be borrowed optional depending on "
                                      "loan type - UK Pounds")
-    loan_term: int | None = Field(default=None, descrption="term in months - optional depending on loan type")
+    loan_term: int | None = Field(default=None, ge=1, descrption="term in months - optional depending on loan type")
 
     companies_house_registered: bool = Field(description="Whether the company is registered with Companies House")
     industry: str = Field(description="The applicant's industry / business sector")
     trading_start_date: date = Field(description="The date trading began")
 
-    annual_turnover: int = Field(description="Typical annual turnover in UK Pounds")
+    annual_turnover: int = Field(ge=0, description="Typical annual turnover in UK Pounds")
     annual_profit: int = Field(description="Profit for the last 12 months in UK Pounds")
     income_decrease_expected: bool = Field(description="Whether the applicant expects income to decrease "
                                             "in the next 12 months")
     accepts_card_payments: bool = Field(description="Whether the business accepts card payments")
-    invoices_owed: int = Field(description="Amount owed to the business in unpaid invoices, UK Pounds")
+    invoices_owed: int = Field(ge=0, description="Amount owed to the business in unpaid invoices, UK Pounds")
 
-    monthly_expenses: int = Field(description="Monthly business expense amount, not including mortgage or "
+    monthly_expenses: int = Field(ge=0, description="Monthly business expense amount, not including mortgage or "
                                    "rent repayments, UK Pounds")
-    monthly_rent_or_mortgage: int = Field(description="Monthly rent or mortgage payment, UK Pounds")
-    num_dependants: int = Field(description="Number of dependants the applicant has")
-    monthly_childcare_expenses: int = Field(description="Typical monthly spend on childcare expenses, UK Pounds")
-    monthly_non_business_income: int = Field(description="Non-business income received each month, UK Pounds")
-    monthly_other_household_income: int = Field(description="Other monthly household income, UK Pounds")
+    monthly_rent_or_mortgage: int = Field(ge=0, description="Monthly rent or mortgage payment, UK Pounds")
+    num_dependants: int = Field(ge=0, description="Number of dependants the applicant has")
+    monthly_childcare_expenses: int = Field(ge=0, description="Typical monthly spend on childcare expenses, UK Pounds")
+    monthly_non_business_income: int = Field(ge=0, description="Non-business income received each month, UK Pounds")
+    monthly_other_household_income: int = Field(ge=0, description="Other monthly household income, UK Pounds")
 
     director_first_name: str = Field(description="First name of the director / beneficial owner "
                                       "with significant control")
     director_surname: str = Field(description="Surname of the director / beneficial owner with significant control")
-    director_percentage_control: float = Field(description="Percentage of control held by the director / "
+    director_percentage_control: float = Field(ge=0, le=100, description="Percentage of control held by the director / "
                                                  "beneficial owner")
     director_mobile_phone: str = Field(description="Mobile phone number of the director")
     director_residential_status: str = Field(description="Director's residential status, e.g. Owner With "
@@ -76,11 +81,14 @@ class BankStatementSchema(BaseModel):
     end_date: str = Field(description="The ending date for the statement.", 
                           title="End Date")
     
-    balance: float = Field(description="The current balance of the bank account.", 
+    # balance is deliberately NOT bounded -- an overdrawn account is a
+    # legitimate, meaningful negative value financial_assessment needs to
+    # see, not something schema validation should reject before it's seen.
+    balance: float = Field(description="The current balance of the bank account.",
                           title="Bank Balance")
-    payments_in: float = Field(description="total payments in during statement period", 
+    payments_in: float = Field(ge=0, description="total payments in during statement period",
                           title="Payments In")
-    payments_out: float = Field(description="total payments out during statement period", 
+    payments_out: float = Field(ge=0, description="total payments out during statement period",
                         title="Payments Out")
 
 # ---------------------------------------------------------
@@ -100,23 +108,30 @@ class AnnualAccountsSchema(BaseModel):
     title="Accounting Year")
     
     # P&L or Income statement
+    #
+    # turnover_*/tangible_fixed_assets_*/debtors_* below get ge=0 (these can
+    # never legitimately be negative); operating_profit_*/profit_*/
+    # cash_at_bank_* are deliberately left unbounded -- a loss or an
+    # overdraft is a real, meaningful negative value financial_assessment
+    # needs to see, not something schema validation should reject before
+    # it's seen.
 
-    turnover_current_year: int = Field(description = "Turnover for current year")
+    turnover_current_year: int = Field(ge=0, description = "Turnover for current year")
     operating_profit_current_year: int = Field(description = "operating_profit for current financial year")
     profit_current_year: int = Field(description="Annual profit for current financial year")
 
-    turnover_last_year: int | None = Field(description = "Turnover for last year")
+    turnover_last_year: int | None = Field(ge=0, description = "Turnover for last year")
     operating_profit_last_year: int | None = Field(description = "operating_profit for last year")
     profit_last_year: int | None = Field(description="Annual profit for last year")
 
     # balance sheet
 
-    tangible_fixed_assets_current_year: int | None = Field(description = "tangible fixed assets for current  financial year")
-    debtors_current_year: int | None = Field(description="debtors current financial year")
-    cash_at_bank_current_year: int | None  = Field(description="cash at band or in hand current financial year")               
+    tangible_fixed_assets_current_year: int | None = Field(ge=0, description = "tangible fixed assets for current  financial year")
+    debtors_current_year: int | None = Field(ge=0, description="debtors current financial year")
+    cash_at_bank_current_year: int | None  = Field(description="cash at band or in hand current financial year")
 
-    tangible_fixed_assets_last_year: int | None = Field(description = "tangible fixed assets for last year")
-    debtors_last_year: int | None = Field(description="debtors last year")
+    tangible_fixed_assets_last_year: int | None = Field(ge=0, description = "tangible fixed assets for last year")
+    debtors_last_year: int | None = Field(ge=0, description="debtors last year")
     cash_at_bank_last_year: int | None  = Field(description="cash at band or in hand last year")
 
 
