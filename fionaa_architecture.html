@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fionaa Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #f5f5f5; font-family: 'Geist', sans-serif; padding: 2rem; }
+.diagram-wrap { max-width: 900px; margin: 0 auto; }
+.eyebrow { font-family: 'Geist Mono', monospace; font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: #4f5d75; margin-bottom: 0.5rem; }
+h1 { font-family: 'Instrument Serif', serif; font-size: 1.75rem; font-weight: 400; color: #2d3142; margin-bottom: 0.25rem; }
+.subtitle { font-family: 'Geist Mono', monospace; font-size: 0.75rem; color: #7a8399; margin-bottom: 1.5rem; }
+svg { display: block; width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<div class="diagram-wrap">
+  <p class="eyebrow">Architecture</p>
+  <h1>Fionaa Loan Agent</h1>
+  <p class="subtitle">Amazon Bedrock AgentCore · LangGraph · MCP Gateway</p>
+
+  <svg viewBox="0 0 900 560" xmlns="http://www.w3.org/2000/svg"
+       role="img" aria-labelledby="fionaa-arch-title fionaa-arch-desc">
+    <title id="fionaa-arch-title">Fionaa Loan Agent Architecture</title>
+    <desc id="fionaa-arch-desc">Architecture showing a loan-application agent on Amazon Bedrock AgentCore: an HTTP client invokes the Runtime, which runs a LangGraph pipeline and calls tools via an MCP Gateway routing to Companies House, web search, and a Bedrock loan-policy knowledge base. Results are checkpointed to AgentCore Memory and written to KMS-encrypted S3.</desc>
+
+    <defs>
+      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/>
+      </marker>
+      <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/>
+      </marker>
+      <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/>
+      </marker>
+    </defs>
+
+    <!-- Background -->
+    <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+    <!-- Zone: BEDROCK AGENTCORE (drawn first, lowest z) -->
+    <!-- Covers Runtime (380–524, 216–272), Memory (652–796, 216–272), Gateway (380–524, 332–388) -->
+    <rect x="364" y="184" width="444" height="216" rx="8"
+          fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+    <rect x="548" y="188" width="96" height="12" rx="2" fill="#f5f5f5"/>
+    <text x="596" y="198" fill="rgba(45,49,66,0.40)" font-size="7"
+          font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.14em">BEDROCK AGENTCORE</text>
+
+    <!-- ════════════════════════════════════════════
+         ARROWS  (all drawn before boxes)
+         ════════════════════════════════════════════ -->
+
+    <!-- 1. Client → Runtime  (vertical, accent) -->
+    <line x1="452" y1="156" x2="452" y2="216"
+          stroke="#eb6c36" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+    <!-- label: INVOKE — sits to right of line, 8px gap -->
+    <rect x="460" y="180" width="48" height="12" rx="2" fill="#f5f5f5"/>
+    <text x="484" y="190" fill="#7a8399" font-size="8"
+          font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">INVOKE</text>
+
+    <!-- 2. Cognito → Runtime  (horizontal, muted) -->
+    <line x1="252" y1="244" x2="380" y2="244"
+          stroke="#4f5d75" stroke-width="1" marker-end="url(#arrow)"/>
+
+    <!-- 3. Runtime → Memory  (horizontal, muted) -->
+    <line x1="524" y1="244" x2="652" y2="244"
+          stroke="#4f5d75" stroke-width="1" marker-end="url(#arrow)"/>
+    <!-- label: CHECKPOINT — above the line, 8px gap -->
+    <rect x="548" y="224" width="80" height="12" rx="2" fill="#f5f5f5"/>
+    <text x="588" y="234" fill="#7a8399" font-size="8"
+          font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">CHECKPOINT</text>
+
+    <!-- 4. Runtime → S3 Applications  (elbow: down then left)
+         Fan-left exit: x=432 on Runtime bottom (y=272) -->
+    <path d="M 432,272 V 304 Q 432,312 424,312 H 188 Q 180,312 180,320 V 332"
+          fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#arrow)"/>
+
+    <!-- 5. Runtime → Gateway  (vertical, muted)
+         Fan-right exit: x=472 on Runtime bottom (y=272); enters Gateway top at x=472 -->
+    <line x1="472" y1="272" x2="472" y2="332"
+          stroke="#4f5d75" stroke-width="1" marker-end="url(#arrow)"/>
+    <!-- label: MCP — to right of line, 8px gap -->
+    <rect x="480" y="296" width="32" height="12" rx="2" fill="#f5f5f5"/>
+    <text x="496" y="306" fill="#7a8399" font-size="8"
+          font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">MCP</text>
+
+    <!-- 6. Gateway → Loan Policies KB  (elbow: down then left, link-blue)
+         Fan-left exit: x=420 on Gateway bottom (y=388) -->
+    <path d="M 420,388 V 420 Q 420,428 412,428 H 188 Q 180,428 180,436 V 444"
+          fill="none" stroke="#2e5aa8" stroke-width="1" marker-end="url(#arrow-link)"/>
+
+    <!-- 7. Gateway → Companies House  (vertical, link-blue)
+         Center exit: x=452 on Gateway bottom (y=388) -->
+    <line x1="452" y1="388" x2="452" y2="444"
+          stroke="#2e5aa8" stroke-width="1" marker-end="url(#arrow-link)"/>
+
+    <!-- 8. Gateway → Web Search  (elbow: down then right, link-blue)
+         Fan-right exit: x=484 on Gateway bottom (y=388) -->
+    <path d="M 484,388 V 420 Q 484,428 492,428 H 716 Q 724,428 724,436 V 444"
+          fill="none" stroke="#2e5aa8" stroke-width="1" marker-end="url(#arrow-link)"/>
+
+    <!-- ════════════════════════════════════════════
+         NODES  (drawn after arrows)
+         ════════════════════════════════════════════ -->
+
+    <!-- ── Row 1: Client (top-centre) ── -->
+    <!-- external style: ink@0.03 fill, ink@0.30 stroke -->
+    <rect x="380" y="100" width="144" height="56" rx="6" fill="#f5f5f5"/>
+    <rect x="380" y="100" width="144" height="56" rx="6"
+          fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+    <rect x="388" y="106" width="36" height="12" rx="2"
+          fill="transparent" stroke="rgba(45,49,66,0.30)" stroke-width="0.8"/>
+    <text x="406" y="115" fill="rgba(45,49,66,0.55)" font-size="7"
+          font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">CLIENT</text>
+    <text x="452" y="134" fill="#2d3142" font-size="12" font-weight="600"
+          font-family="'Geist', sans-serif" text-anchor="middle">Application</text>
+    <text x="452" y="148" fill="#4f5d75" font-size="9"
+          font-family="'Geist Mono', monospace" text-anchor="middle">HTTP · JWT Bearer</text>
+
+    <!-- ── Row 2: Cognito | Runtime | Memory ── -->
+
+    <!-- Cognito (backend: white fill, ink stroke) -->
+    <rect x="108" y="216" width="144" height="56" rx="6" fill="#f5f5f5"/>
+    <rect x="108" y="216" width="144" height="56" rx="6"
+          fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <rect x="116" y="222" width="28" height="12" rx="2"
+          fill="transparent" stroke="rgba(45,49,66,0.40)" stroke-width="0.8"/>
+    <text x="130" y="231" fill="rgba(45,49,66,0.65)" font-size="7"
+          font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">AUTH</text>
+    <text x="180" y="250" fill="#2d3142" font-size="12" font-weight="600"
+          font-family="'Geist', sans-serif" text-anchor="middle">Cognito</text>
+    <text x="180" y="264" fill="#4f5d75" font-size="9"
+          font-family="'Geist Mono', monospace" text-anchor="middle">us-east-1 · OIDC</text>
+
+    <!-- AgentCore Runtime (FOCAL: accent-tint fill, accent stroke) -->
+    <rect x="380" y="216" width="144" height="56" rx="6" fill="#f5f5f5"/>
+    <rect x="380" y="216" width="144" height="56" rx="6"
+          fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1.2"/>
+    <rect x="388" y="222" width="52" height="12" rx="2"
+          fill="transparent" stroke="rgba(235,108,54,0.50)" stroke-width="0.8"/>
+    <text x="414" y="231" fill="rgba(235,108,54,0.80)" font-size="7"
+          font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">RUNTIME</text>
+    <text x="452" y="250" fill="#2d3142" font-size="12" font-weight="600"
+          font-family="'Geist', sans-serif" text-anchor="middle">AgentCore</text>
+    <text x="452" y="264" fill="#4f5d75" font-size="9"
+          font-family="'Geist Mono', monospace" text-anchor="middle">LangGraph · CodeZip</text>
+
+    <!-- Memory (store: ink@0.05 fill, muted stroke) -->
+    <rect x="652" y="216" width="144" height="56" rx="6" fill="#f5f5f5"/>
+    <rect x="652" y="216" width="144" height="56" rx="6"
+          fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+    <rect x="660" y="222" width="44" height="12" rx="2"
+          fill="transparent" stroke="rgba(79,93,117,0.40)" stroke-width="0.8"/>
+    <text x="682" y="231" fill="rgba(79,93,117,0.75)" font-size="7"
+          font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">MEMORY</text>
+    <text x="724" y="250" fill="#2d3142" font-size="12" font-weight="600"
+          font-family="'Geist', sans-serif" text-anchor="middle">Checkpoints</text>
+    <text x="724" y="264" fill="#4f5d75" font-size="9"
+          font-family="'Geist Mono', monospace" text-anchor="middle">AgentCore Memory</text>
+
+    <!-- ── Row 3: S3 Applications | MCP Gateway ── -->
+
+    <!-- S3 Applications (store) -->
+    <rect x="108" y="332" width="144" height="56" rx="6" fill="#f5f5f5"/>
+    <rect x="108" y="332" width="144" height="56" rx="6"
+          fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+    <rect x="116" y="338" width="20" height="12" rx="2"
+          fill="transparent" stroke="rgba(79,93,117,0.40)" stroke-width="0.8"/>
+    <text x="126" y="347" fill="rgba(79,93,117,0.75)" font-size="7"
+          font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">S3</text>
+    <text x="180" y="366" fill="#2d3142" font-size="12" font-weight="600"
+          font-family="'Geist', sans-serif" text-anchor="middle">Applications</text>
+    <text x="180" y="380" fill="#4f5d75" font-size="9"
+          font-family="'Geist Mono', monospace" text-anchor="middle">KMS-encrypted</text>
+
+    <!-- MCP Gateway (backend) -->
+    <rect x="380" y="332" width="144" height="56" rx="6" fill="#f5f5f5"/>
+    <rect x="380" y="332" width="144" height="56" rx="6"
+          fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <rect x="388" y="338" width="52" height="12" rx="2"
+          fill="transparent" stroke="rgba(45,49,66,0.40)" stroke-width="0.8"/>
+    <text x="414" y="347" fill="rgba(45,49,66,0.65)" font-size="7"
+          font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">GATEWAY</text>
+    <text x="452" y="366" fill="#2d3142" font-size="12" font-weight="600"
+          font-family="'Geist', sans-serif" text-anchor="middle">MCP Gateway</text>
+    <text x="452" y="380" fill="#4f5d75" font-size="9"
+          font-family="'Geist Mono', monospace" text-anchor="middle">OAuth · Streamable HTTP</text>
+
+    <!-- ── Row 4: Loan Policies KB | Companies House | Web Search ── -->
+
+    <!-- Loan Policies KB (store) -->
+    <rect x="108" y="444" width="144" height="56" rx="6" fill="#f5f5f5"/>
+    <rect x="108" y="444" width="144" height="56" rx="6"
+          fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+    <rect x="116" y="450" width="20" height="12" rx="2"
+          fill="transparent" stroke="rgba(79,93,117,0.40)" stroke-width="0.8"/>
+    <text x="126" y="459" fill="rgba(79,93,117,0.75)" font-size="7"
+          font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">KB</text>
+    <text x="180" y="478" fill="#2d3142" font-size="12" font-weight="600"
+          font-family="'Geist', sans-serif" text-anchor="middle">Loan Policies</text>
+    <text x="180" y="492" fill="#4f5d75" font-size="9"
+          font-family="'Geist Mono', monospace" text-anchor="middle">Bedrock KB · RAG</text>
+
+    <!-- Companies House (external) -->
+    <rect x="380" y="444" width="144" height="56" rx="6" fill="#f5f5f5"/>
+    <rect x="380" y="444" width="144" height="56" rx="6"
+          fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+    <rect x="388" y="450" width="56" height="12" rx="2"
+          fill="transparent" stroke="rgba(45,49,66,0.25)" stroke-width="0.8"/>
+    <text x="416" y="459" fill="rgba(45,49,66,0.55)" font-size="7"
+          font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">EXTERNAL</text>
+    <text x="452" y="478" fill="#2d3142" font-size="12" font-weight="600"
+          font-family="'Geist', sans-serif" text-anchor="middle">Companies House</text>
+    <text x="452" y="492" fill="#4f5d75" font-size="9"
+          font-family="'Geist Mono', monospace" text-anchor="middle">UK registry API</text>
+
+    <!-- Web Search (external) -->
+    <rect x="652" y="444" width="144" height="56" rx="6" fill="#f5f5f5"/>
+    <rect x="652" y="444" width="144" height="56" rx="6"
+          fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+    <rect x="660" y="450" width="56" height="12" rx="2"
+          fill="transparent" stroke="rgba(45,49,66,0.25)" stroke-width="0.8"/>
+    <text x="688" y="459" fill="rgba(45,49,66,0.55)" font-size="7"
+          font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">EXTERNAL</text>
+    <text x="724" y="478" fill="#2d3142" font-size="12" font-weight="600"
+          font-family="'Geist', sans-serif" text-anchor="middle">Web Search</text>
+    <text x="724" y="492" fill="#4f5d75" font-size="9"
+          font-family="'Geist Mono', monospace" text-anchor="middle">websearch MCP tool</text>
+
+    <!-- ════════════════════════════════════════════
+         LEGEND  (horizontal strip, below diagram)
+         ════════════════════════════════════════════ -->
+    <line x1="40" y1="522" x2="860" y2="522"
+          stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+    <text x="40" y="536" fill="#4f5d75" font-size="8"
+          font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+
+    <!-- Focal -->
+    <rect x="112" y="528" width="10" height="10" rx="2"
+          fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+    <text x="128" y="537" fill="#4f5d75" font-size="8"
+          font-family="'Geist Mono', monospace">Focal service</text>
+
+    <!-- AWS managed / backend -->
+    <rect x="228" y="528" width="10" height="10" rx="2"
+          fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="244" y="537" fill="#4f5d75" font-size="8"
+          font-family="'Geist Mono', monospace">AWS managed</text>
+
+    <!-- Data store -->
+    <rect x="348" y="528" width="10" height="10" rx="2"
+          fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+    <text x="364" y="537" fill="#4f5d75" font-size="8"
+          font-family="'Geist Mono', monospace">Data store</text>
+
+    <!-- External -->
+    <rect x="448" y="528" width="10" height="10" rx="2"
+          fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+    <text x="464" y="537" fill="#4f5d75" font-size="8"
+          font-family="'Geist Mono', monospace">External</text>
+
+    <!-- Tool call arrow -->
+    <line x1="540" y1="533" x2="560" y2="533"
+          stroke="#2e5aa8" stroke-width="1" marker-end="url(#arrow-link)"/>
+    <text x="568" y="537" fill="#4f5d75" font-size="8"
+          font-family="'Geist Mono', monospace">Tool call</text>
+
+    <!-- Internal arrow -->
+    <line x1="640" y1="533" x2="660" y2="533"
+          stroke="#4f5d75" stroke-width="1" marker-end="url(#arrow)"/>
+    <text x="668" y="537" fill="#4f5d75" font-size="8"
+          font-family="'Geist Mono', monospace">Internal</text>
+
+    <!-- Invoke arrow -->
+    <line x1="728" y1="533" x2="748" y2="533"
+          stroke="#eb6c36" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+    <text x="756" y="537" fill="#4f5d75" font-size="8"
+          font-family="'Geist Mono', monospace">Entry</text>
+  </svg>
+
+  <p style="font-family: 'Geist Mono', monospace; font-size: 0.65rem; color: #7a8399; margin-top: 1rem; border-top: 1px solid rgba(45,49,66,0.10); padding-top: 0.75rem;">
+    fionaa-aws · agentcore + langgraph + mcp · diagram-design default skin
+  </p>
+</div>
+</body>
+</html>

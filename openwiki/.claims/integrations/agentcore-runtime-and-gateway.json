@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:6816e2afd4099c80135403cf8a5928206d4efc24c060f1fd252eb00edfa6f8bb",
+  "claims": [
+    {
+      "id": "claim_343c2466d1d9414e8867db13288a0d08",
+      "statement": "FIONAA enters through a single Bedrock AgentCore entrypoint, `invoke(payload, context)`, which derives trusted identity from the runtime context, builds a scoped boto3 session, creates a checkpointer, loads gateway tools, and invokes the LangGraph workflow with an empty initial state and runtime `AgentContext`.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa/main.py#L15-L47",
+          "version": "repo-lines-v1:sha256:2d49dcf57b782af683a44b3a703daa8ad9bf7abcee0f36ca764c1669c4d26378:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2OGNjNTJmMDYwY2ZhZTUxMmNiZDY0MzczZThhZWRmNzkyNTY3Y2JkZDQyMGIzMDYyMzg4M2FmOTQ1MzFkZjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM5ZjFiYWQ3N2EyOTcwODI5ZjM4OTVmMjY1YjRhZjRmMDU4MTlmMzNhZWQyZGZjMWI0MmU3NWRiMDQ3OTQ1MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUxNmUwYjYyNTU1ZDhmMjc2NmZhMjcyNGZlODBmMThkYWUxN2U3Nzc0NTZmMTdlOGI1MzA0YWE3OGMwMGJhNTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJkNjY4ZTEwYTljYmFhZjlhOWUzMDY3ZmFlMTY2ZWU3MGE0NzhlMDQ5ZjJlZmI2ODRiMTY1NjVkNmRjZjRkNGUifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/main.py#L49-L57",
+          "version": "repo-lines-v1:sha256:2ef61303022a1f676c2b636798455b45a008fda546fcfa63da2dd177e3691741:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDk5MTk1Mzg4ZjE3YWVhYTdkMmE0NTdhOWI0NTg2YWJkYjljYTRhNWE1YTQ2NWQwMDE0N2M2ZGMyNjQyNzZiMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmExMWMwNTY3ZDBhNWY5ZTliMTM1ZjY1Y2QyNTM3MmRmZDYyODc3NWY3YzFlZDI1M2Y4YmFkNDJkZDJkNjY2OSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTc1YzUwNWU3ODc4YWFkMmZmYzk3ODRhODhkYjk3NWEzZGMzNTM0YzhmNjk2OTgwMWJhOTgyNjgwYTBmOGY1OSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiM2Q0MTM0MGNjMjM5YTE1OWNlOWI2MDIyZTlmNjMyMjgzMmUyZWFkNzZjYWU5ZTQ3NTRkMjEwZWI4ZmI2ZDVlOCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_98c7616c439e46049fa7917723679c2e",
+      "statement": "`checkpoint_config(identity)` derives LangGraph checkpoint scope from verified identity by setting `thread_id` to the application id and `actor_id` to the customer id, and `build_checkpointer(session)` constructs `AgentCoreMemorySaver` from the scoped session credentials so checkpoint access is tied to the customer-scoped session rather than ambient runtime credentials.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa/graph.py#L60-L108",
+          "version": "repo-lines-v1:sha256:51eb891a64e08edb844754837c9eb351ecf7c68d38da02b87a2be12a669ae858:eyJzZWxlY3RlZExpbmVDb3VudCI6NDksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU1ZGJhZmZlNTczMTgwZmYzMTA5YmYwODNjYWYxNWJkMjUxMDZmMDdhNGY0ZWFmNTkzMzE0MzA1Nzg4Mjc3NmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU1M2U3ZDhiYmZhN2Q0NTFjNjFjMWRiZTM1NmY3NDQyNTUwMGJhNzlkZGJhYjI0M2Q4NjA1OGFiNTVmNDRkMjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA4NjZiYzllZWUxZGNjNWRmNzhjZTM2ODNjZWNlNjZhOTc2NmNmZTQyYTcxZjJmMjVmZGE5MTc2MDE5NGU3ZTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNhYzM5ZDU1YjFjNDA5YWVlN2MzMThhZThmZWU0ZjEyOWVlODM1OWViMjczNjU3NWJlYmI4MDcxN2E1Mzk2OWQifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/main.py#L25-L31",
+          "version": "repo-lines-v1:sha256:f6d8d02e5467ddf5e69d9ab0dd60214d305819dffa98e8104e4ffc23a1fc6351:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzQ1MDQ0Y2Y1OTE1ZDk2MmUzN2E2YWVkZmYyNGU5NzlkODQ1MDU5ZTI5ZTAxNTA1YmVhMWQ4Y2NlN2VhMGM1MyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWRlYWYwMjY2M2E1ZDMyZjkzYTNjYWY0ODQzZjliZGMyZGJiNjkwODEwM2MxNGNlZjk2MWQ4NjQ5MjQ4YTEwMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMjk1NTQ4YjQyYzZkMzY4YmVhM2Q3ODU1ZGE1MDEwNDBmOGRjN2U0NmFmYmYwMzM0YWVkOTNhMWM1NzI1NzFmZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNjRkYWExZTdiNjM2NmJjYjBlZWMyYjdiNWE5YTE5ZGZkZWEwNmZmOWU4Yjc1YTg5YTA0NWFiZWVjMGZkNTA5NCJ9"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/tests/test_graph.py#L31-L35",
+          "version": "repo-lines-v1:sha256:8c7cba8668b1a833f638c31d1c109d7a3380a3f31a8ce9a84d657d7db0e5b882:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMzkxYTVmZTg1MTRhMmRmOTM1OWVkMDQ5ODBhYjdjN2Y5ZTI3NjliZTIxMmNhNDIyMmU2ZWM4MWUzYzAxODQ4MSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDg5M2Y0MGUzNzgxZWI4OTZjODJkMDQ2YTA4MDY3YTExZTM1Y2RmMmYxZGZhZjI2ZmVhOTBiOGRiNjY3NjQxMyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOGU0ZTYyZGZiNDVhYTIwMzg1MjY4NTc4MjUwNGZhYTIwYzEyMDUwNDQxOTUzZDNmZjgzMjUzZGQ4OWVhMGE5OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiY2FjMzlkNTViMWM0MDlhZWU3YzMxOGFlOGZlZTRmMTI5ZWU4MzU5ZWIyNzM2NTc1YmViYjgwNzE3YTUzOTY5ZCJ9"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/tests/test_graph.py#L859-L894",
+          "version": "repo-lines-v1:sha256:1d3ed14606a260e4a192f502f220c2e5050a5c4b957d2be45bb4237e0729b7fd:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRmYmY4NTZkMzhlZWVkYTUyMDMzMTU1NDUxZWNkMTcyZTNjNjlkYWM4YzA2OTRhNTBiY2M3NDUxNzAzYjEyYWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBiNGYyYTI5N2Y2NTQ4Y2M4ZGM4ODBhZGE1ODMwMTJlYWNjYWI2ZGQxYjExZmYzNDg5ZGRiODJkOWZlYmNhNDAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjVhYjdiMjcyYWI0ZTI1MTc1YjVmZDI0YzEzY2ZlNTYzNDI1MTRjMDI3OTQ2ZjAzYjUzMDVkZjIwMzM3ODc5ZjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_509f9f03b3c24d9fb0c5ec8208c6691d",
+      "statement": "Gateway MCP tools are loaded fresh per invocation because the AgentCore Gateway OAuth token is short-lived; `load_gateway_tools()` mints a client-credentials token, builds a `MultiServerMCPClient` for `AGENTCORE_GATEWAY_URL`, and returns tools that are then threaded through runtime context rather than cached at module load.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa/gateway.py#L27-L79",
+          "version": "repo-lines-v1:sha256:d5dbcaf0a87f0e3915d59002d712a896223aa6b707c011471cb810f0924e423b:eyJzZWxlY3RlZExpbmVDb3VudCI6NTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI0MTI1NzZmZDA4YjU3NWZmZjhiMjcyNDRmZDEwMzcxYmMxZTYyMjEzNGRlZTljNzM4YjIzY2ZlYWRiMDllZDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYxZDFkYzE1Yjc5NzQ5NjA1YmY3Nzc0NGUwODcxZDIxYTdjMTI1MGU2MDQ0ODI2M2I1MjY2OWYwNjU5ZjJmMWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU3ZTgxYjg0NGEwMDBkNThlNmY2Y2ExMDVkYzJmZTBkMWYzZGQ5M2I4OWZhNjg5OGJiMDAwM2JmMzBjZWFkZDgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/main.py#L33-L45",
+          "version": "repo-lines-v1:sha256:4538abea4b1454ff3be59dec1e8cebcc84adaa2cd7ecd5454568262a4060e86d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY3ZDI4ODFjZmU3NzhhYTIwZWYwYjY0OTFjMDlmYzQxZjBmYTA1NmUxNTNlMmVmZGY1MDQ0NDlmOTBjZWZiNjUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUxYmZkYzZhMzJjNTQ3Y2Q3ODhiZDVhN2YyMmU1ZjgxZDg2MTgzYjExZGJiNjc4ZTU5MzkzODQwNzI5NzIyYzUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU3NWM1MDVlNzg3OGFhZDJmZmM5Nzg0YTg4ZGI5NzVhM2RjMzUzNGM4ZjY5Njk4MDFiYTk4MjY4MGEwZjhmNTkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_95962bebe97a41a984eb0829e9dfdfa2",
+      "statement": "The gateway integration keeps its credential boundary in Secrets Manager and call-time environment reads: `_gateway_client_secret()` resolves the client secret from `AGENTCORE_GATEWAY_CLIENT_SECRET_ARN`, `_gateway_token()` uses `AGENTCORE_GATEWAY_CLIENT_ID`, `AGENTCORE_GATEWAY_OAUTH_SCOPES`, and `AGENTCORE_GATEWAY_TOKEN_ENDPOINT`, and both functions read configuration inside the call rather than at import time to avoid binding stale test or runtime values.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa/gateway.py#L20-L36",
+          "version": "repo-lines-v1:sha256:3d456869086eceee2d5ba4c6125b8eb10f7edf9c632f7f170af7a05fa35c8fda:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU0ZjBiOTlhZDM4NGI0MzQ4MTQwNWUyNzE5Yzc0YWQzNGViMjE5YTdlZjdlNzMwMTgxYmU5NDQ3NmVmM2RjOTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRmMzNlNGEzOTA2NzY0ZmM4MTI3MjIzOTVlYTgyZjViMzBmYzMzYmUwNmRjMGFkZGU2ZTgwNGVhOTI2NTk1NTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI2YjA5MWJkY2FlOGQxNDYwMDM2M2Y5YTAyZGNmNzdkNDg5NzdmZWM1Nzc2YjQzNGRlOWQ5Y2E2YTY4ZTc3ZDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUzMDEwMjhmOTVkNWU0YmEyYjVlYWI1YTA0Y2I2OWVkMzIxNWQ4YmI5MTk1MzE2OWFhOWI1MDAyNzZlNmI3M2MifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/gateway.py#L39-L61",
+          "version": "repo-lines-v1:sha256:d73287a3f3ed4d367a4a66335ca92e56e9d2968566dbf650d784cea19d452545:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ5OTM5NTBhYTY2NTJjYTVlZTczZDQ5YmM5ZDdkNGFjOTRmNmY4MmNiMTU4MTcwNjA2ZjkxMTIxNzljOTI4MjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY4NTEwYjA1YzZhNWNmYzQ5ODA4ZGFmNmQwZmYzNDJjMDcxOGY2OWQwMTdlZWI3MmE5YzEzM2FiODI0ODgxMDYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBmMzgxMWQ1MDU3YTBmYzliZDRlMDFhODc3NzM4ODA3YWNjNDBkMzUwOWJmY2VhYjcwZThjNWViYWM3NjJjYTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImIzNGRlMWI3NTJlZjVlM2JjMGE5ZmZlMjBhNzdhN2VkYzUzM2YzMTdmOGU2NjM4NzI3MWE3OTYzM2NjYzU4NjMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_200e0fc9f18b44bd93d5b2966aed6492",
+      "statement": "The graph integration treats `store`, `policy_docs`, and `tools` as runtime-only collaborators carried by `AgentContext`, not checkpointed state, because those objects can include live boto3 and MCP client objects that are not msgpack-serializable.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa/graph.py#L111-L118",
+          "version": "repo-lines-v1:sha256:084a9c95e5b05e0a2329a76b962e12879fade5de9f4c6330136c7c5be15c7291:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZmEwYzIxYWVjMjhlNjYyMGZlYzIyNDU4OWU5YTAyNDY5OWVmM2JlOGVmY2FkZGFhMTZiNDM1M2JlYWIyZTU1ZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOTE0ZGZiNmVkNDZlZTQ5OGMxYzZiNDNkNmIzYzExNGU5NDExY2Y0NGQ5MTg3MzZjNTFkYTQwYzM5MjQyMWE2NCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNzc2ZGQ5NmE2MTY0NmY2ODExZGNlOWEyM2MxY2M0ZDY3ODhiM2ExNTRmYjA3MzMzYjViZjRiOWI5ZmQ1YjdmZiJ9"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/tests/test_graph.py#L858-L894",
+          "version": "repo-lines-v1:sha256:0ca2c507240139db9625a0b8874f1fcaaf120326f9de5a41cc2a133a6fa9be9a:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJkOTk0MmRlYjdkYmFiYzExNGIxYzQ4ZDAyZGE0NjM4NmU5YWNhNTE1YTUyZmI3YjNjNDEyZGM2Mjc5MjFiMDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBiNGYyYTI5N2Y2NTQ4Y2M4ZGM4ODBhZGE1ODMwMTJlYWNjYWI2ZGQxYjExZmYzNDg5ZGRiODJkOWZlYmNhNDAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRmYmQwMDkzMTRiYzI3MDg0MTY3MzRhMDJhZTVmZjM5YTFlNDhhMDUwYmU5MWY0M2IyZmFhOTIwMDJjNjJiZmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3878f121948941eda38d30e1be416eb8",
+      "statement": "The response from `invoke` returns `application_id` plus stable S3 URIs for `policy_check`, `companies_house`, and `web_search` results under the identity-derived `s3://<bucket>/<customer_id>/<application_id>` prefix, while the graph also writes other artifacts such as `financial_assessment/result.json` and `decision/result.json` to the same prefix.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa/main.py#L49-L57",
+          "version": "repo-lines-v1:sha256:2ef61303022a1f676c2b636798455b45a008fda546fcfa63da2dd177e3691741:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDk5MTk1Mzg4ZjE3YWVhYTdkMmE0NTdhOWI0NTg2YWJkYjljYTRhNWE1YTQ2NWQwMDE0N2M2ZGMyNjQyNzZiMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmExMWMwNTY3ZDBhNWY5ZTliMTM1ZjY1Y2QyNTM3MmRmZDYyODc3NWY3YzFlZDI1M2Y4YmFkNDJkZDJkNjY2OSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTc1YzUwNWU3ODc4YWFkMmZmYzk3ODRhODhkYjk3NWEzZGMzNTM0YzhmNjk2OTgwMWJhOTgyNjgwYTBmOGY1OSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiM2Q0MTM0MGNjMjM5YTE1OWNlOWI2MDIyZTlmNjMyMjgzMmUyZWFkNzZjYWU5ZTQ3NTRkMjEwZWI4ZmI2ZDVlOCJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.5.1",
+    "at": "2026-09-12T16:18:14.763Z"
+  }
+}

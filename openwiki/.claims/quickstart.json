@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:b97ddc34915b18d6c6e91dc78673777874dc3e323057e47ec53cae474b07a287",
+  "claims": [
+    {
+      "id": "claim_92cbcec0bc38426b90031c28c0ddc348",
+      "statement": "The quickstart begins with local setup: activate the app virtual environment, run `agentcore dev`, and invoke the local agent with `agentcore invoke --dev`.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/README.md#L23-L39",
+          "version": "repo-lines-v1:sha256:5d1a1b0d9c7ba9202ef96f57910c9f46b35f88d2ba6b4f664e4e3280992924f1:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFlNjk1YWIxMGFlOWFiZGU2MGRkYjZjZGMxYThlNDI1YWQ3NDRjYjYyMDMyZDY4N2M5MjQ0OTIxNmFhZjlkNzQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNlNzhkNjU5NmY2YmRiMWE1YzNiNTdmZjI2NDA4OGEzODRmN2U0OTUyZDU0ZmFmMWJjOTZiNzk0OTUzZjY4YmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg5MTJkODM1NjFiNDNjNjUwNjY2ZjIzMGYyYWQ5ZGRiMjMwM2MyNmUyZmVhYWU0MDMzY2NjZWVmNjI5ZjkwZjEifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/README.md#L22-L33",
+          "version": "repo-lines-v1:sha256:41e5a04861076aa9e9668705b3160e8a73ad5c9cd75c1bf96bce5b85a67f8d9c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU3YTIxYzljZjI4NDcwOGRiMjkwYmEzNjc3ZTQzN2JjZTQ0NGFjZmVmYjVjZjljYjhlM2M1Yjg2NTEyMTA3NjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcyY2JmNjk3ODZjMmFhZTZlYmI1ODVlZWEwNmNiYTQzYTYyZDgzNjcwYmVkODk0ZGVjOWE2NTZmYzQ4OTMyNTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA0YjVkY2E1NzMxN2VlMzU0YTAxOTFiZDU1MDFlOTYxOWY5ZGJhZDQ3MDUyYmIyOTVlNzgwMTZlMjJkYzg4MzgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_85e238f716414785b05def2e82c67ad4",
+      "statement": "`main.py` is the runtime entrypoint that derives verified identity from the request context, creates scoped credentials, loads gateway tools per invocation, builds the checkpointer and graph, and returns S3 result URIs after the run completes.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa/main.py#L15-L57",
+          "version": "repo-lines-v1:sha256:e7ef1787c9fe0c7ee2c6a96cb73cf95003470e73ed7181ff26e3bf9edc71a860:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2OGNjNTJmMDYwY2ZhZTUxMmNiZDY0MzczZThhZWRmNzkyNTY3Y2JkZDQyMGIzMDYyMzg4M2FmOTQ1MzFkZjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhMTFjMDU2N2QwYTVmOWU5YjEzNWY2NWNkMjUzNzJkZmQ2Mjg3NzVmN2MxZWQyNTNmOGJhZDQyZGQyZDY2NjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUxNmUwYjYyNTU1ZDhmMjc2NmZhMjcyNGZlODBmMThkYWUxN2U3Nzc0NTZmMTdlOGI1MzA0YWE3OGMwMGJhNTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNkNDEzNDBjYzIzOWExNTljZTliNjAyMmU5ZjYzMjI4MzJlMmVhZDc2Y2FlOWU0NzU0ZDIxMGViOGZiNmQ1ZTgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3dee166a3aa14362900f4ef6f6862fc4",
+      "statement": "`security.py` derives `customer_id` from the verified JWT email claim, rejects unsafe tag values, and assumes `FionaaDataAccessRole` with customer and application session tags so the runtime can use short-lived scoped credentials instead of the ambient execution role.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa/security.py#L42-L140",
+          "version": "repo-lines-v1:sha256:d5a39a61d7a4e8a1242fe3114a728b2135d974734fd2a4f7413b043081395fe7:eyJzZWxlY3RlZExpbmVDb3VudCI6OTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2OWExMzk3NWMyNTZlYzgzMjBlMjAxNjA4M2M5NmRmNjM3Y2EzZDM1YmViZGUyMzE0YmVlM2E0NzExYjU2Y2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRjYzYwNTkzMGQ2YTZmMWE0YmQ2Y2I3ZDg3NjI5MmUwOTdiYjc3OWJhN2VlZTY3ZDQxMGNhYjcxNTY3MDI3MTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY4OGU3OTgyMjhmZWM1ZDQyOTRkOGY4NzAyMzdmM2ExNTkzYzJjYmViYmFmOTQ5ZTBhMTVkN2ZiODFjYzA4MzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c392720c7ac0434487bfa911b13a4f37",
+      "statement": "`storage.py` is the only module that touches S3; it builds object keys from verified identity, persists JSON with SSE-KMS using the customer encryption context, treats `AccessDenied` as a security event, and keeps policy documents in a separate read-only bucket.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa/storage.py#L24-L106",
+          "version": "repo-lines-v1:sha256:636b84bfdac186f5835592337a5d3985457e0a6732232c3088354e3fc56e5359:eyJzZWxlY3RlZExpbmVDb3VudCI6ODMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkwNjQzYWNjODgyZjkyYmMwMzQ3NDBmZGM1MWU5NzUzMTViMTc2ODU2NDA3M2FkNGMzZWZmOWQ4NDdkZjFlYzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2NmRhYjhiYTA1MjYzNWQ2YWIxZTdiZGM1YzdhMzMxM2UxYjBlODg0ZTUwN2ZlNzMxMGYwZDc3NzZkYTI2MDIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA4NjZiYzllZWUxZGNjNWRmNzhjZTM2ODNjZWNlNjZhOTc2NmNmZTQyYTcxZjJmMjVmZGE5MTc2MDE5NGU3ZTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b1445cd3d0754a5abc05cd04649df3b0",
+      "statement": "`graph.py` wires the LangGraph workflow around runtime context plus checkpointed application state, loads application documents from S3, branches through policy, Companies House, financial assessment, web search, and final synthesis nodes, and writes each node's evidence artifact under a fixed subpath.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa/graph.py#L179-L251",
+          "version": "repo-lines-v1:sha256:c0354b72f1d118e2a4d106944e044832a75ca452be29185412f5129a4ac6c8e5:eyJzZWxlY3RlZExpbmVDb3VudCI6NzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlMTA0ZTM2M2JkMjQxOGE3ZjI4YmU0NGJmZmY3MDRhMzk5ODJkNTUwY2Y0NjA5YmJhMjk4MTRjYThjZmI4OWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZkOGRiODIxYTNmNzg4ZTA3ZGFkYjgyMDc1MzQ3NGU3MDFhOGI4YmIxMTUwYTg2MjFlYzU3NTkyMDMzNGY0ZDYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlhMmJlZGViN2JiMTc2NjdhZjJkM2YzNWUyMDUxZGFkNjg3NzhkOGExZTM1ZmM4NWZhZjUxMWM3YWE5Y2IxODQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg3YWZjY2FlYzA5NmUzNzBiNGY2Y2E1ZTE2YTk3Yjk2Zjc5YTNmNGYyNGM5N2FhYjQ4OWY0MGYyMTI4ZDdkM2MifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/graph.py#L254-L529",
+          "version": "repo-lines-v1:sha256:d0ed73da40ab948b4bee14bd3d9b960e6d5e2291736a2727e12e5acc021f79c1:eyJzZWxlY3RlZExpbmVDb3VudCI6Mjc2LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIwYWUwNmEzZDJiZmNiMTBkNmE4YzE3ODVjYmU0OTk5ZjUxM2YzMzdiM2RhODRjNGMyMDMzY2FhZGRkOTRjOGNhIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI3NWYzOWM1NTkyMDNkNmMwMmI1NTBhZDk5YmU2NmU0Yjc4NjQ3Yjc4ODZiNWE5ZGY4ZDc2ZTNiZmJiZDFlMDFlIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIwMzliMGQ0M2M1Y2Q4YzkxOGI1M2QwMDAyNjYyNjc4OGE1Zjg5NjkzNmZiYTMxZmVmNzNiYmU3YWIwOTBlOTZmIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIxNzRmODc0NTk1Y2FmNjY4MmQ0MWE5Y2VhOTI1NGIxNDc0NDJjNTZlNTk0OGI5NjNkMGZlYzIzMzhkZjA1NDY2In0"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/graph.py#L546-L589",
+          "version": "repo-lines-v1:sha256:4dc46fce0e253918f37456101d421dd2781e0474cbac12c69b068d63cd4716de:eyJzZWxlY3RlZExpbmVDb3VudCI6NDQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU1MWZlN2QzMGE2OTczYzM1ZDA0ZTJmMWU2MTY0ZjNiM2I0YjlkZjUxYjIwNzBhNWM0MTgxZWFjYmYzOTRhMjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI2YjdiOGQ1Y2I1NWI0YzZlMWFlOTc4ZTUyMTg5MWJiM2JmZTA2YzAyODlkNjdhNWUyNzEzYTlmZjNiMjQyYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM2YjM1NWMxODEyZTllNGZhMzI5YWE0MmIwNzMwMTY4MzNiODgzNDM2Y2ZhMzM5OWY2YTI5MDIzZThmZTJkN2EiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/graph.py#L69-L108",
+          "version": "repo-lines-v1:sha256:e1469d88a4b1d45e449fda1f52f63fa82ce160617b8fd66d7135fadf3d258642:eyJzZWxlY3RlZExpbmVDb3VudCI6NDAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhhYzJkZWNkMzAxODIyNGI0NGMzMGI5ZDAyZTlkZDJjZjQ5Yzk1MGRmYmE1N2FhMTU5YzBjYzBmMjI2YWY4N2UiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU1M2U3ZDhiYmZhN2Q0NTFjNjFjMWRiZTM1NmY3NDQyNTUwMGJhNzlkZGJhYjI0M2Q4NjA1OGFiNTVmNDRkMjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM1OGM2ZTI3YmIxNGNiZTJiZjY0YmYwMDIzZjg0N2IzMTZkNmQwNjIxY2QzNjI2MzA5NmZiYTM0MmMzZDFhOTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNhYzM5ZDU1YjFjNDA5YWVlN2MzMThhZThmZWU0ZjEyOWVlODM1OWViMjczNjU3NWJlYmI4MDcxN2E1Mzk2OWQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3fec0fb5133343fc96d95f49ae648162",
+      "statement": "The graph keeps storage, policy docs, and tools in runtime context rather than checkpointed state so checkpoint data remains serializable; `checkpoint_config` scopes checkpoints by `actor_id` and `thread_id`, and the unit tests protect that invariant with `MemorySaver`.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa/graph.py#L546-L589",
+          "version": "repo-lines-v1:sha256:4dc46fce0e253918f37456101d421dd2781e0474cbac12c69b068d63cd4716de:eyJzZWxlY3RlZExpbmVDb3VudCI6NDQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU1MWZlN2QzMGE2OTczYzM1ZDA0ZTJmMWU2MTY0ZjNiM2I0YjlkZjUxYjIwNzBhNWM0MTgxZWFjYmYzOTRhMjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI2YjdiOGQ1Y2I1NWI0YzZlMWFlOTc4ZTUyMTg5MWJiM2JmZTA2YzAyODlkNjdhNWUyNzEzYTlmZjNiMjQyYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM2YjM1NWMxODEyZTllNGZhMzI5YWE0MmIwNzMwMTY4MzNiODgzNDM2Y2ZhMzM5OWY2YTI5MDIzZThmZTJkN2EiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/graph.py#L69-L108",
+          "version": "repo-lines-v1:sha256:e1469d88a4b1d45e449fda1f52f63fa82ce160617b8fd66d7135fadf3d258642:eyJzZWxlY3RlZExpbmVDb3VudCI6NDAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhhYzJkZWNkMzAxODIyNGI0NGMzMGI5ZDAyZTlkZDJjZjQ5Yzk1MGRmYmE1N2FhMTU5YzBjYzBmMjI2YWY4N2UiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU1M2U3ZDhiYmZhN2Q0NTFjNjFjMWRiZTM1NmY3NDQyNTUwMGJhNzlkZGJhYjI0M2Q4NjA1OGFiNTVmNDRkMjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM1OGM2ZTI3YmIxNGNiZTJiZjY0YmYwMDIzZjg0N2IzMTZkNmQwNjIxY2QzNjI2MzA5NmZiYTM0MmMzZDFhOTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNhYzM5ZDU1YjFjNDA5YWVlN2MzMThhZThmZWU0ZjEyOWVlODM1OWViMjczNjU3NWJlYmI4MDcxN2E1Mzk2OWQifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/tests/test_graph.py#L31-L36",
+          "version": "repo-lines-v1:sha256:a2675976892305198988148c539a0e0b3209999303e49c7b4899f899a2187348:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMzkxYTVmZTg1MTRhMmRmOTM1OWVkMDQ5ODBhYjdjN2Y5ZTI3NjliZTIxMmNhNDIyMmU2ZWM4MWUzYzAxODQ4MSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOGU0ZTYyZGZiNDVhYTIwMzg1MjY4NTc4MjUwNGZhYTIwYzEyMDUwNDQxOTUzZDNmZjgzMjUzZGQ4OWVhMGE5OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZDI1MzJjYmM5MmVjYWQ4NTEyZGEyOWM4OWMzM2Y2MzRlYTYwNTk4ZTU4Y2U5YjZiZmRkNTM1ZDkwM2ZkM2M2YSJ9"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/tests/test_graph.py#L813-L894",
+          "version": "repo-lines-v1:sha256:456727ac75572f0699a2b655c20beb6b215c383fa2e1ec76cf4551d7b817e3ac:eyJzZWxlY3RlZExpbmVDb3VudCI6ODIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJkOTk0MmRlYjdkYmFiYzExNGIxYzQ4ZDAyZGE0NjM4NmU5YWNhNTE1YTUyZmI3YjNjNDEyZGM2Mjc5MjFiMDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBiNGYyYTI5N2Y2NTQ4Y2M4ZGM4ODBhZGE1ODMwMTJlYWNjYWI2ZGQxYjExZmYzNDg5ZGRiODJkOWZlYmNhNDAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFmMzZlMjU1NWQzZDFkODFkOWMwNDc5NDgxODU5ZDI1MjM1NzgzYzNjN2Q0ODc1ZTYxZTJmMmEzZjM0MmY1YWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_bded9736e34b493c8a95500ffd758e7f",
+      "statement": "The graph tests use in-memory fakes and monkeypatched agents to verify document loading, evidence persistence, redaction, Companies House grounding, routing, and final decision synthesis without calling real services.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa/tests/test_graph.py#L1-L7",
+          "version": "repo-lines-v1:sha256:8db13f0d983286560473ec1a4a75caf7d96cc063a083beb19f847bc089fdf8c4:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDgxYjIyZDRiMTZiM2EyZWU5MWU3MjY1NjBiMTIyY2RiM2VkZDVjYThjNDJlYWI3Y2U3YjhkYWI2MWZiMWRlOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTMwM2VjZGQ0YTRkMTBmMTljNzNmZDQyZmQxMjQzN2ZkMzM1NGE4MjY4MTYwNWRhNTI1NWE5N2EzOTA2OGRiYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjA3MzFjZmI0MTA5NTYwODZjMGYxYTE0OTIwY2ZjYTIyZjE4MzgyMjg1YWEwNTM0NDZlZWFjYTY1N2U4NmEyMCJ9"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/tests/test_graph.py#L159-L489",
+          "version": "repo-lines-v1:sha256:96a6141afcd8f07a483e266cda8e0ac316809c34bf3a7188219b61564c962407:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMxLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJiZDk5NDJkZWI3ZGJhYmMxMTRiMWM0OGQwMmRhNDYzODZlOWFjYTUxNWE1MmZiN2IzYzQxMmRjNjI3OTIxYjA4IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJkZDc2OGQ0ZWFmMTNkZDhhM2ZkYWQxZTFkZTEwZDI4MTY4NDI3MWFkMjZhNjdmMjE5NDYxMTY1MDljZjlkNDcwIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI3NTQ1ZDE4NzcyYzEzNjgxZWZhM2E4NGYwZjZiOTIzM2E1ZmYyOThmMDA1NjFkMzc4NmI0Y2ZkYzA5YTlmZTIxIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI1YWI3YjI3MmFiNGUyNTE3NWI1ZmQyNGMxM2NmZTU2MzQyNTE0YzAyNzk0NmYwM2I1MzA1ZGYyMDMzNzg3OWY5In0"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/tests/test_graph.py#L42-L153",
+          "version": "repo-lines-v1:sha256:87b4684f9caade34b4d6d99fe2245dadc02bd6a618ef464ec6d3c3b49fe0cff2:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJmZTQ1MWU3YWM2MGY2MWQzNzhiODJhZTllNWYyNjRhMzBlYjJjMWM0MTQ4ODU2YjlkZWViMTBjNTlhNjVmNWZlIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwMWJhNDcxOWM4MGI2ZmU5MTFiMDkxYTdjMDUxMjRiNjRlZWVjZTk2NGUwOWMwNThlZjhmOTgwNWRhY2E1NDZiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJkNzRiZmQxMTI2NzRiMTY3MTc1NTM3MjUyYjBkYzk4MjVhMDA0M2FjMTNhZDc4YTE0NTgyZjlmMTc1OWJlNWNmIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIwMjY1NTY5YjIyOTM5YmNlNTYyYWZjZjQxN2VhY2VhZDA4MmRhMDkyNDU4MGZhNTEzNzRjNGQ2YThiOTJlYTEwIn0"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/tests/test_graph.py#L532-L894",
+          "version": "repo-lines-v1:sha256:5dd6a96c167c6661dcd00b827ddfae98424ecea1f3f94ddb8f251ac7e894dd6e:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYzLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJiZDk5NDJkZWI3ZGJhYmMxMTRiMWM0OGQwMmRhNDYzODZlOWFjYTUxNWE1MmZiN2IzYzQxMmRjNjI3OTIxYjA4IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwYjRmMmEyOTdmNjU0OGNjOGRjODgwYWRhNTgzMDEyZWFjY2FiNmRkMWIxMWZmMzQ4OWRkYjgyZDlmZWJjYTQwIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJhMzIzZmI1NzczNTljMzE3ZjliYjk4ZGVmZmQ1ODU2ZWUzOGQ2NDFlMjc0NDA0NTllODU5Y2JmOGUyOWQwYjMzIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.5.1",
+    "at": "2026-09-12T16:18:14.763Z"
+  }
+}
