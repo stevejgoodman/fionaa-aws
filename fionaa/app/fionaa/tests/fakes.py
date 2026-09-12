@@ -8,6 +8,8 @@ model or S3.
 
 import typing
 
+from langchain.messages import ToolMessage
+
 
 def _generic_structured_fields(response_format, response_content) -> dict:
     """Build a valid kwargs dict for an arbitrary pydantic `response_format`
@@ -98,7 +100,13 @@ def make_fake_create_agent(response_content, calls: list):
     same `response_content` can drive a multi-node fake spanning more than
     one response_format shape (see `test_build_graph_runs_all_nodes_in_order`
     — companies_house and synthesize_decision both force structured output,
-    with different schemas)."""
+    with different schemas).
+
+    If any scoped `tools` entry is a CompaniesHouse___* tool, also emits a
+    harmless ToolMessage from it -- check_companies_house's runtime
+    groundedness check (groundedness.py) requires at least one such tool
+    call when the structured response claims found=True, which this generic
+    fake would otherwise never produce (it never actually calls a tool)."""
 
     def fake_create_agent(*, model, tools, system_prompt, response_format=None):
         calls.append({"tools": tools, "system_prompt": system_prompt})
@@ -106,7 +114,15 @@ def make_fake_create_agent(response_content, calls: list):
         class FakeAgent:
             async def ainvoke(self, input):
                 calls.append({"message_content": input["messages"][0].content})
-                result = {"messages": [FakeMessage(response_content)]}
+                messages = [FakeMessage(response_content)]
+                companies_house_tool = next(
+                    (t for t in tools if getattr(t, "name", "").startswith("CompaniesHouse___")), None
+                )
+                if companies_house_tool is not None:
+                    messages.append(
+                        ToolMessage(content="{}", name=companies_house_tool.name, tool_call_id="fake-call")
+                    )
+                result = {"messages": messages}
                 if response_format is not None:
                     fields = (
                         response_content

@@ -323,10 +323,17 @@ async def test_check_companies_house_calls_gateway_and_persists(monkeypatch):
     assert result.goto == "financial_assessment"
     # tool_calls is added to the S3 evidence artifact only -- companies_house
     # state (asserted above) keeps the plain CompaniesHouseResult shape so
-    # downstream prompts are unaffected. FakeAgent never emits ToolMessages,
-    # so tool_calls is empty here; see test_graph.py's ToolMessage-emitting
-    # coverage elsewhere for the non-empty case.
-    assert store.data["companies_house/result.json"] == {**fake_result, "tool_calls": []}
+    # downstream prompts are unaffected. make_fake_create_agent auto-emits a
+    # harmless CompaniesHouse___ ToolMessage here (see its docstring) so
+    # found=True passes the runtime groundedness check below -- see
+    # test_check_companies_house_persists_tool_calls_as_evidence for the
+    # manually-constructed, more detailed tool_calls coverage.
+    assert store.data["companies_house/result.json"] == {
+        **fake_result,
+        "tool_calls": [{"tool": "CompaniesHouse___getCompanyProfile", "result": "{}"}],
+        "grounded": True,
+        "grounding_reasons": [],
+    }
     assert calls[0]["tools"] == fake_tools
     assert calls[1]["message_content"] == json.dumps(application)
 
@@ -368,6 +375,8 @@ async def test_check_companies_house_persists_tool_calls_as_evidence(monkeypatch
         "tool_calls": [
             {"tool": "CompaniesHouse___getCompanyProfile", "result": '{"status": "active"}'}
         ],
+        "grounded": True,
+        "grounding_reasons": [],
     }
 
 
@@ -411,6 +420,73 @@ async def test_check_companies_house_redacts_address_lines_in_persisted_tool_cal
     persisted_address = json.loads(persisted_tool_call["result"])["registered_office_address"]
     assert persisted_address["address_line_1"] == "[address redacted]"
     assert persisted_address["locality"] == "Uxbridge"
+
+
+@pytest.mark.asyncio
+async def test_check_companies_house_overrides_ungrounded_found_true_with_no_tool_calls(monkeypatch):
+    """found=True with zero supporting tool calls is exactly the "invent a
+    plausible-sounding match" failure mode -- the runtime groundedness check
+    (groundedness.py) must override it to found=False and route to
+    reject_no_company, not trust the model's unsupported claim."""
+    application = {"company_number": "00000001"}
+    store = FakeStore()
+    state = {"application": application}
+    runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
+    fake_result = {"found": True, "confidence": "high", "summary": "Zorbex Quantum Widgets Ltd is active"}
+
+    class FakeAgentNoToolCalls:
+        async def ainvoke(self, input):
+            return {
+                "messages": [input["messages"][0]],
+                "structured_response": g.CompaniesHouseResult(**fake_result),
+            }
+
+    monkeypatch.setattr(g, "create_agent", lambda **kwargs: FakeAgentNoToolCalls())
+
+    result = await g.check_companies_house(state, runtime)
+
+    assert result.update["companies_house_found"] is False
+    assert result.update["companies_house"]["found"] is False
+    assert "runtime groundedness check overrode" in result.update["companies_house"]["summary"]
+    assert result.goto == "reject_no_company"
+    evidence = store.data["companies_house/result.json"]
+    assert evidence["found"] is False
+    assert evidence["grounded"] is False
+    assert "no CompaniesHouse tool call evidence" in evidence["grounding_reasons"][0]
+
+
+@pytest.mark.asyncio
+async def test_check_companies_house_overrides_ungrounded_found_true_with_wrong_company(monkeypatch):
+    """found=True where the only tool evidence is for a *different*
+    company_number than the one the application asked to verify -- the
+    model matched the wrong company."""
+    application = {"company_number": "12345678"}
+    store = FakeStore()
+    state = {"application": application}
+    runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
+    fake_result = {"found": True, "confidence": "high", "summary": "company is active"}
+
+    class FakeAgentWrongCompany:
+        async def ainvoke(self, input):
+            return {
+                "messages": [
+                    input["messages"][0],
+                    ToolMessage(
+                        content=json.dumps({"company_number": "00000000"}),
+                        name="CompaniesHouse___getCompanyProfile",
+                        tool_call_id="call-1",
+                    ),
+                ],
+                "structured_response": g.CompaniesHouseResult(**fake_result),
+            }
+
+    monkeypatch.setattr(g, "create_agent", lambda **kwargs: FakeAgentWrongCompany())
+
+    result = await g.check_companies_house(state, runtime)
+
+    assert result.update["companies_house_found"] is False
+    assert result.goto == "reject_no_company"
+    assert store.data["companies_house/result.json"]["grounded"] is False
 
 
 @pytest.mark.asyncio
@@ -606,7 +682,7 @@ async def test_search_web_builds_query_from_company_name(monkeypatch):
     # state (asserted above) stays the bare result string synthesize_decision
     # expects. FakeAgent never emits ToolMessages, so tool_calls is empty
     # here; see test_search_web_persists_tool_calls_as_evidence below.
-    assert store.data["web_search/result.json"] == {"result": fake_result, "tool_calls": []}
+    assert store.data["web_search/result.json"] == {"result": fake_result, "tool_calls": [], "grounded": False}
     assert calls[0]["tools"] == fake_tools
     expected_content = (
         f"Company: Acme Ltd\n\n"
@@ -652,6 +728,7 @@ async def test_search_web_persists_tool_calls_as_evidence(monkeypatch):
                 "result": "Acme Ltd linkedin.com/company/acme-ltd",
             }
         ],
+        "grounded": True,
     }
 
 
@@ -746,7 +823,12 @@ async def test_build_graph_runs_all_nodes_in_order(monkeypatch, identity):
 
     graph = g.build_graph(checkpointer=None)
     config = g.checkpoint_config(identity)
-    agent_context = g.AgentContext(store=store, policy_docs=policy_docs, tools=[])
+    # check_companies_house's runtime groundedness check needs at least one
+    # CompaniesHouse___* tool call when found=True -- see
+    # fakes.make_fake_create_agent's docstring.
+    agent_context = g.AgentContext(
+        store=store, policy_docs=policy_docs, tools=[FakeTool("CompaniesHouse___getCompanyProfile")]
+    )
 
     final_state = await graph.ainvoke({}, config, context=agent_context)
 
@@ -794,7 +876,9 @@ async def test_build_graph_checkpoints_successfully_with_deps_in_context(monkeyp
 
     graph = g.build_graph(checkpointer=MemorySaver())
     config = g.checkpoint_config(identity)
-    agent_context = g.AgentContext(store=store, policy_docs=policy_docs, tools=[])
+    agent_context = g.AgentContext(
+        store=store, policy_docs=policy_docs, tools=[FakeTool("CompaniesHouse___getCompanyProfile")]
+    )
 
     final_state = await graph.ainvoke({}, config, context=agent_context)
 
