@@ -900,6 +900,51 @@ it shows up one step lower, at 0.7. Worth the same threshold/retry decision
 the README flags as open, not something dataset/prompt changes alone would
 fix.
 
+### Runtime groundedness check on companies_house tool output (guardrail gap #6, 2026-09-12)
+
+`check_companies_house`'s `found` field gates the entire downstream graph
+(financial_assessment/web_search/synthesize_decision all only run on the
+`found=True` branch), so a fabricated match here was the single
+highest-leverage hallucination this agent could produce — the
+`injection_resistance`/`companies_house_correctness` evaluators catch this
+offline in CI against a handful of dataset scenarios, but nothing checked
+it at runtime; `tool_calls` capture (see `redaction.py`'s PII work) was
+purely an audit trail, never read back to verify a claim against it.
+
+New `groundedness.py`: `check_companies_house_grounding` deterministically
+checks a `found=True` claim against the actual `CompaniesHouse___*` tool
+calls made — flags it as ungrounded if either (a) no CompaniesHouse tool
+call happened at all, or (b) the application stated a `company_number` and
+at least one tool result exposed one, but none match. `check_companies_house`
+(`graph.py`) now runs this before persisting/returning, and **overrides
+`found` to `False`** (routing to `reject_no_company`, not
+`financial_assessment`) when the check fails — this is enforcement, not
+just logging. Deliberately asymmetric: `found=False` is never checked or
+upgraded, since automatically approving a company on a heuristic would be
+the wrong failure mode to introduce; only `found=True` (the dangerous
+direction) is ever downgraded. Fuzzy name-only matches (no `company_number`
+in the application) are left entirely to the model's own judgment — several
+existing eval scenarios exist specifically to test that behavior, and this
+check doesn't second-guess it.
+
+`search_web` gets a much lighter, audit-only counterpart: a `grounded`
+flag in its S3 evidence (`grounded: bool(tool_calls)`) recording whether
+the model actually searched before producing a summary. Not enforced —
+`web_search` never gates a hard branch decision the way `companies_house`
+does, and free-text search results have no structured claim to
+deterministically cross-check the way a `company_number` does.
+
+**Known limitation**: `deepeval_evals/test_companies_house.py`'s offline
+scenarios call the agent directly (`_run_companies_house`, duplicating
+`check_companies_house`'s agent construction) rather than the node
+function itself, specifically so `response["messages"]` stays reachable
+for `tool_calls` scoring — pre-existing, not something this change
+introduced. That means those scenarios exercise the raw model's behavior
+only, not this new deterministic backstop; coverage for the backstop
+itself is the new unit tests (`test_groundedness.py`,
+`test_graph.py::test_check_companies_house_overrides_ungrounded_found_true_*`),
+not the offline eval harness.
+
 ### Existing AWS resources to reuse
 
 - Runtime: `fionaa_fionaa-xjO2ci9fd3`
