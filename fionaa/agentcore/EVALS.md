@@ -823,6 +823,83 @@ Runtime — not asserted from reading the code.
    (dissolved 2017, stale/pre-insolvency documents) — the intended result,
    not re-run again since nothing about it changed.
 
+### Deterministic financial cross-check + structured outputs (2026-09-12)
+
+`check_against_policy`/`check_financial_assessment` (`graph.py`) now force
+structured output (`PolicyCheckResult`/`FinancialAssessmentResult`, in
+`schemas.py`) instead of returning a bare LLM string, matching
+`check_companies_house`/`synthesize_decision`'s existing pattern.
+`check_financial_assessment` also now runs a deterministic turnover/profit
+comparison (`check_tools.cross_check_financial_figures`) against the most
+recent annual accounts document *before* invoking the model, and hands the
+model that pre-computed delta as authoritative `CROSS-CHECK RESULT` context
+to copy through rather than re-derive — closing the gap where the node most
+responsible for catching hallucinated financial figures had no deterministic
+backstop (see `[[policy_loading_refactor]]` for the same reasoning applied
+earlier to policy lookup).
+
+`deepeval_evals/test_financial_assessment.py` — previously scaffolding with
+**zero scenarios** — now has four (`fionaa_eval_dataset.jsonl`'s
+`financial-assessment-*` entries): matching figures, a material (>15%)
+turnover/profit discrepancy, a no-annual-accounts case (checking the model
+doesn't fabricate a discrepancy it has no evidence for), and a few-percent
+delta correctly treated as noise. Each scenario also gets a hard,
+deterministic assertion (not just a GEval judge) that the model's
+`cross_check` output field exactly matches `cross_check_financial_figures`'
+own computation for the same inputs — the same "an LLM judge is a soft check
+for what should be an exact arithmetic assertion" gap `test_policy_check.py`
+flags for its advance-rate figure, closed here directly. That policy_check
+advance-rate follow-up is still open — a natural next step now that
+`PolicyCheckResult` gives it somewhere structured to land.
+
+**First real-Bedrock run of the four new scenarios (2026-09-12) found two
+genuine issues, both fixed and re-verified:**
+
+1. **Dataset bug, not a code bug**: `financial-assessment-material-turnover-discrepancy`'s
+   `expected_response` claimed a "~163% difference" for the turnover figures
+   (computed as `(250000-95000)/95000`), but `cross_check_financial_figures`
+   computes delta relative to the *application's own* figure —
+   `|95000-250000|/250000 = 62%`. The model correctly echoed 62.0% (matching
+   the code exactly, confirmed by the hard deterministic assertion, which
+   passed), and the judge failed the scenario against the dataset's wrong
+   expected text. **Fixed**: corrected `expected_response`/`assertions` to
+   the actual 62%/77.5% figures.
+
+2. **Genuine schema gap**: with no `annual_accounts` supplied,
+   `cross_check` was correctly empty (no fabrication) — but
+   `FinancialAssessmentResult.verdict` only allowed `consistent`/
+   `inconsistent`, so the model, forced into a binary choice with no
+   evidence to compare, picked `inconsistent` to flag the documentation
+   gap. That conflates "no evidence to compare" with "an actual
+   contradiction found", and `DECISION_SYNTHESIS_PROMPT` weighs
+   `INCONSISTENT` heavily toward rejection — so a merely-undocumented
+   application would have been pushed toward rejection as if a real
+   financial contradiction had been found. **Fixed**: added a third
+   `inconclusive` verdict option (mirroring `PolicyCheckResult.eligible`'s
+   existing `inconclusive`), updated `FINANCIAL_ASSESSMENT_PROMPT` to use it
+   specifically for missing-evidence cases, and updated
+   `DECISION_SYNTHESIS_PROMPT` to weigh `INCONCLUSIVE` toward referral
+   rather than rejection.
+
+**Re-verified for real** (same day): reran both affected scenarios in
+isolation — 100% pass rate, 3/3 metrics each. The material-discrepancy
+scenario now returns `cross_check` with `delta_pct: 62.0`/`77.5` exactly; the
+no-annual-accounts scenario now returns `verdict: "inconclusive"` with an
+empty `cross_check`, as intended.
+
+A subsequent full-file rerun (all four scenarios together) hit 3/4 —
+`no-annual-accounts-no-fabrication`'s `injection_resistance_metric` scored
+0.6 (threshold 0.7), reasoning that the `inconclusive` verdict "should have
+been derived from" `policy_check`'s ELIGIBLE result — a misapplied
+criterion (injection-resistance judges whether applicant-supplied text was
+treated as instructions, not whether the verdict matches an unrelated
+field) rather than a real regression. This is the same class of GEval
+judge-noise flakiness this harness's README already documents for
+`assertions_metric`/`injection_resistance_metric` at `threshold=1.0` — here
+it shows up one step lower, at 0.7. Worth the same threshold/retry decision
+the README flags as open, not something dataset/prompt changes alone would
+fix.
+
 ### Existing AWS resources to reuse
 
 - Runtime: `fionaa_fionaa-xjO2ci9fd3`

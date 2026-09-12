@@ -13,16 +13,23 @@ def _generic_structured_fields(response_format, response_content) -> dict:
     """Build a valid kwargs dict for an arbitrary pydantic `response_format`
     from a single canned `response_content`, without hardcoding field names
     for any one schema -- covers CompaniesHouseResult, FinalDecisionResult,
-    and any future response_format= node without editing this fake again.
-    bool fields get True, Literal fields get their first allowed value,
+    PolicyCheckResult, FinancialAssessmentResult, and any future
+    response_format= node without editing this fake again. bool fields get
+    True, Literal fields get their first allowed value, list fields get an
+    empty list, a type that allows None (e.g. `float | None`) gets None,
     everything else gets str(response_content)."""
     fields = {}
     for name, info in response_format.model_fields.items():
         annotation = info.annotation
+        origin = typing.get_origin(annotation)
         if annotation is bool:
             fields[name] = True
-        elif typing.get_origin(annotation) is typing.Literal:
+        elif origin is typing.Literal:
             fields[name] = typing.get_args(annotation)[0]
+        elif origin in (list, typing.List):
+            fields[name] = []
+        elif type(None) in typing.get_args(annotation):
+            fields[name] = None
         else:
             fields[name] = str(response_content)
     return fields
