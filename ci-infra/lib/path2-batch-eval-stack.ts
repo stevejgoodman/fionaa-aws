@@ -286,6 +286,23 @@ export class Path2BatchEvalStack extends Stack {
       }),
     );
 
+    // A real CI run (2026-09-12, PR #37 -- the first PR to add *new*
+    // scenario_ids to fionaa_eval_dataset.jsonl rather than editing existing
+    // ones) proved UpdateDatasetExamples above still isn't enough:
+    // `agentcore dataset push` calls AddDatasetExamples for genuinely new
+    // examples and UpdateDatasetExamples only for ones that already exist --
+    // two distinct IAM actions for what looks like one CLI operation. Same
+    // failure shape as UpdateDatasetExamplesPostDeploy above: deploy itself
+    // still succeeds, but the CLI reports "Push failed during add phase
+    // (0/1 batches completed)" as a post-deploy warning and exits 2 anyway.
+    this.ciRole.addToPolicy(
+      new iam.PolicyStatement({
+        sid: 'AddDatasetExamplesPostDeploy',
+        actions: ['bedrock-agentcore:AddDatasetExamples'],
+        resources: [props.datasetArn],
+      }),
+    );
+
     // A real CI run (2026-08-27) proved StartBatchEvaluation itself
     // verifies the target log group exists before starting the job,
     // requiring the CALLER (not just the service's own execution context)
