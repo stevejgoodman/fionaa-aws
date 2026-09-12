@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:ae23d549a8d977fe19c99d2bc9d927ac3400848e319fb4fb525beba0fa82afbd",
+  "claims": [
+    {
+      "id": "claim_51db5ae0c4f64108bf9d496532a34789",
+      "statement": "`identity_from_request_context` derives `customer_id` from the verified JWT email claim (`email` or `custom:email`), rejects missing Authorization headers or missing email claims with `ValueError`, and does not trust a caller-supplied customer identifier.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa/security.py#L74-L98",
+          "version": "repo-lines-v1:sha256:2df3fe61d316c2712bec401b8b38b333a69cb5c152ec8ad7c7b1d54f3959fc3f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhjMjNhZGM4YzA5MDYzN2Y0OTNkMDRhNWVmOWEzN2RkOTNhYzY4NmQ5ZDQyNWE2MjNmNzA0NWNlYTk5NTgyZjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU4ODg0YjA3MWNmZjUyOGRjYzllOTU5NDQwYzYzMjllNWQ0MzU2NTBhODA0N2NmOGE3ZDc0OTYzMGQ0OWE1Y2MiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ4YmIxMGQ1NDI2ZmNhYTVhZDYxYjk3MzJhMzdiY2JiNjg2ZTIyMGNmM2E2ZTVkZGZjZmMyYWE5ZjI3OGVhM2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU2MzYxNmIzYWU3MDNiNzRhYWFjN2ZkN2I3ODUyOWUwMjFlMDM5ZjM3NThiN2M2YjgzYTExNDQ5NDBiMjFmMGIifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/tests/test_security.py#L40-L69",
+          "version": "repo-lines-v1:sha256:ec3c746b6da7664ea9eda8c1a97247f45043d996572baa3113890fd56935e6c9:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU4ZGFhY2NjMWM2NTBhMzYwOWU2ODRhNzRhY2MyOWVlMmM0MzkxZGZhOGQ0OTAwNzg3Mjc4Njc3N2Q2YmNkZjUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY0ZWZkNWQ5ZDg4YzA2Zjc0ZTY5NzQ5NDkzZGJiZmJiYTcwNmZmYjA4NTg3OTVlMjdiNWYxNzk0NGNmOTY3M2YiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA5YmRjZGMxZWNkMmEyNThkNWY3MWYwMWMyZThjZjhmMmFkMTdlODBhZTE4NzdhYzRmNjk2MjA3M2I0NGY2MmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_fbe19d244ec1450298315a0504604d41",
+      "statement": "`customer_id` is computed as a SHA-256 hash of the trimmed, lowercased email address, so equivalent email casing or surrounding whitespace maps to the same isolation prefix while keeping the raw email out of storage tags.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa/security.py#L66-L71",
+          "version": "repo-lines-v1:sha256:7c72f4b0a8510e520afc56cb0e80b148f042b31e114a991045307ef3f96eb9a9:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjFlNDVhZDA0YTBjZmQ4MDAyOTllNTgxNmM0NDdjNGY4OTI4NTYxZGViZDMyNTZhZmVlNzRlMmYxMDdhYTNhZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZWJlN2Y1OWQ1YjJkYzg2NDQ4ZDliMjQzZDI1MWQ1ZDY1N2ZiM2Y1NmU0ZDMyN2E2M2E5NzBmMDlhYjA4YWM1MiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYmQyZTViNjEyMWU0MDljZWU3YTViMDIyMjNiMDZiNGE3NmFkNTQyNzQ3YjhjZDFjOWQ2NWNhOGRjZTI3MDVmZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZDMwNDYyOWI3MzljNTg4MmIzZDhjODU4MWJhNTVhZjRiMzk1YTBjZDRhNjUyZjdkY2VlNjZkNWZhOGRiZDliZiJ9"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/tests/test_security.py#L21-L23",
+          "version": "repo-lines-v1:sha256:c42b21f074e20fe545b1570604fb8f279d0dcf17754e04cbe336404dac90d55d:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYmZhMWNhNDllNGZmZDRiNDNhMTVkOTliMDg5NGVjNzkyOTc0MmZlNjYyNzYwNDA2MTg2ZDFhYjRjOTE2ZjJkOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZWI0NjE5MTAyZWE4ZjM3MjJlMDlkMmYwZmRlMmZmODJhYjhlNzRhZTBmNThhYTJiNjFlODMwYWMwZWY1ZDc3MSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiN2QxNzExYmEzNWQ5NWEyNjBmZmUzMGNkOWY2NDAzZWE1YWRiMjc2ZjFmZWNlZDg2ZWQyNDJhNjI3ZTQ0ZDYxYSJ9"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/tests/test_security.py#L40-L47",
+          "version": "repo-lines-v1:sha256:8cdf9f285d7fd2ff19626c5b22a2a529d8a77a24149ef8c540ea667152377272:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNThkYWFjY2MxYzY1MGEzNjA5ZTY4NGE3NGFjYzI5ZWUyYzQzOTFkZmE4ZDQ5MDA3ODcyNzg2Nzc3ZDZiY2RmNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMTg3YTExZjQ1YmIyNDRmZDdmNWZhYTJlMWM5ZDk4NTE0MjAwYjViNzc3NzMzNjU3ZjYxYTBmYWE0NGI3YzM4ZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDliZGNkYzFlY2QyYTI1OGQ1ZjcxZjAxYzJlOGNmOGYyYWQxN2U4MGFlMTg3N2FjNGY2OTYyMDczYjQ0ZjYyZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTVhM2Q3NTI1OTA2NzU1NTczM2JlNjM3NzE0Mjg4NWEzMWI4MGY3NDRjMzg5YmEwZTkxMzQ5MGM1OGE1OWI3YiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_b8d06323b6994af3bd35111245c6a0e3",
+      "statement": "`CustomerIdentity` rejects unsafe `customer_id` and `application_id` values before they can be used in STS session tags or object keys, failing fast on malformed identity inputs.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa/security.py#L42-L64",
+          "version": "repo-lines-v1:sha256:e3956ce6b7f7c1b45927624127afc4fe547d41c21d2ad757700f601d99bec83b:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2OWExMzk3NWMyNTZlYzgzMjBlMjAxNjA4M2M5NmRmNjM3Y2EzZDM1YmViZGUyMzE0YmVlM2E0NzExYjU2Y2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY4OGU3OTgyMjhmZWM1ZDQyOTRkOGY4NzAyMzdmM2ExNTkzYzJjYmViYmFmOTQ5ZTBhMTVkN2ZiODFjYzA4MzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRmNDE3NDQzNTg2ZjI3MWIyYTg3YjJiYjgxYzM3NGNjYmRhOWJiZGYyODRkNTg1NjA3MTYxYmY5NWJhMTQ1MjIifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/tests/test_security.py#L25-L28",
+          "version": "repo-lines-v1:sha256:61399842ddb01b21b764ed4855057736cac5b08619f4ea0191eec940c2a6a2ea:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZWEwNWM3YTZjYjQzNzNmODY2YWZlMjQ2NTBhODlmZjlhNWU3NmUyOWI2OTE1ZWZiYzZjYTRhNzkwMzdiYjU2ZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTA2MzU3ZWNiOTlhNTUxNGE4ZTE0YTk4ODBmOTEwYmFjYzVmOGM2OWNhYjkwOTAwZDNjMmY5YTZjYzFkYjc3YyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNjQ4N2JjNTI4ODM2OWEzNThhYTM3YjhhYjliOTQzZjM3M2Y2Y2YzYjdhNGZhZmJkOWUwY2RmZjQyOTlmN2E0MiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_3f5b529ccb5f4b7b87bd94b2f1baed9b",
+      "statement": "`scoped_boto_session` assumes `FionaaDataAccessRole` with STS session tags for `customer_id` and `application_id`, uses `TransitiveTagKeys=[\"customer_id\"]`, and relies on `DeferredRefreshableCredentials` so long-running graphs can re-assume the role when credentials expire.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa/security.py#L101-L140",
+          "version": "repo-lines-v1:sha256:4fe684f25d01132bc0d5a5ea3c89bfd9702fd962a3a8d7a109cc225a25831f7f:eyJzZWxlY3RlZExpbmVDb3VudCI6NDAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFjOGI4M2JmMjExZTFkMTBmM2IyZWRmOTg3MGRlYjQ1YmJjOWFlZTQxNjFjZjI0ZTM2Mjk3NGU2NzE2MzU1ZmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRjYzYwNTkzMGQ2YTZmMWE0YmQ2Y2I3ZDg3NjI5MmUwOTdiYjc3OWJhN2VlZTY3ZDQxMGNhYjcxNTY3MDI3MTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRiYTZhZDlhMjVlZDlmNWUxZDM3Y2I2Njg2YTFiM2ZjYjE1M2U0ODIzM2I3YmFhNGU2YzEzODQ2YzNmZjIwODYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_56928be59c704b3198e9038ed6b8dab4",
+      "statement": "`ApplicationStore` builds every application-data S3 key from `<customer_id>/<application_id>` and never from caller input, keeping all JSON documents and application PDFs inside the verified customer/application prefix.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa/storage.py#L28-L96",
+          "version": "repo-lines-v1:sha256:4286ca0c78d9c9217f65fcafcd0b0cca8611e4f877ff5609d2ed04d99b137d16:eyJzZWxlY3RlZExpbmVDb3VudCI6NjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJlMDcwNzI2NDdiYTNiMGY3YTg1YzNhMTZhYjhkODVhN2VlNDY2MDlkZTNiYWFjNmU1YjAyNDc4Y2E0MzFkOGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ5Zjg4NmQ4OThlNWJkYmM2MWIyN2MxNDQ5NDBlZTkxMGIwZTY2N2JlZWY1YWNlZDczZmJhMTkxYzlkZjJjODYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjIyMTU4NDc2YWZkN2M3YTZhZGVhMTBmNDZkOGY5N2E3YWEwYzQ3ZWM2N2IwNTk4NjU4NzFiMmFjNzU0OTMyMWQifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/tests/test_storage.py#L61-L109",
+          "version": "repo-lines-v1:sha256:0f66ba7d5066ee7ff3254da8e188aa6a89d9c4055e63ded4a8e4c41bef7ab69d:eyJzZWxlY3RlZExpbmVDb3VudCI6NDksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRiNDE5NjI5MDcxM2RjYjk0MzRkMWNiMDAyZTFhNGVlNWNjMTAyNWUzYzk0ZWMwMGUyMTNlNDUxYTRiMzNkZWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI0NjU1NzQ3YzYyZWQyZWNjYmNkZTcwYjdlZjA3ODA0NmI4MDg2YWFkMjljYjFkYzE3ZWE4NTBkM2IxNzI2OWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNkMzEwNDgyYTU1Mzk1YmRlNTU4YjRhZjExZDIzZTNmMjQ0ZDljY2E0YmNmMWQ0ZTZjZmVmZDQwZDgwMWM3ZjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMyYjZiYTdhODgyNmY0N2ZkYTBlYjk2NTU4Yjk0Zjg2NDgzYjFhYTkxY2U0NjhhYTcwMTRhNzY0MGI1NmM0NmQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_195a095c87ce4e988abcfa02d0e12073",
+      "statement": "`ApplicationStore.get_json` returns `None` for missing objects, but it logs and re-raises `AccessDenied` instead of swallowing it, because that error may indicate either a real isolation violation or a misconfigured tag.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa/storage.py#L39-L53",
+          "version": "repo-lines-v1:sha256:0898e143deb347d9834467cc3a57061757ddc3f67fe05c7f55d1fa58f4284630:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0ODE1OTc2YmU3Mzc1OGNjMmU0MjM2NGM2YzUyYmM0OWQxZDYwNzAzYjczYmFiODZlNzljNjhjYTQ5ZTY4Y2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEwNGFlNjE2MzY1MzU5Yjg4MjhlYjljOTE2ZDM1ZDU2NzU5ZmMzNzA3OGQyNzlhOGEwZmExYjlhNGU3NDQyZjEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFmZDg0ODgwMTdmNmZmYmY3MDY0MGNmZmYyN2NlMDc0MzFjMDBlMzYxYTA0OTYwZmQ4ZTU0OGEyZjViYjAxYTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg1Yzg4NjJjZTI3NTA5MGVmN2I1NGJiYTZiNGZmY2RiNGY3YTE5ODIwY2I1NzFmNWJkMDczZGRmZDY1OTFjY2IifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_cac6fdc041a74067a32ab82b4efd69e9",
+      "statement": "`ApplicationStore.put_json` writes with SSE-KMS and passes a base64-encoded encryption context containing the derived `customer_id`, matching the KMS grant condition used to enforce decryption access.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa/storage.py#L55-L73",
+          "version": "repo-lines-v1:sha256:62332741fa6d4d529edb5bb0abcdd089c39f565c7773466fd15a74d411bbb23c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNmMjIyYWU0NmVhZjBjZmZjZjE3MTYyNzFmNmEzN2I3YWI5N2NjNzllOTY0ZjU2YmExYzljYmMwMmY2ZjRjMTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjExMjZmMzhhMjBiYjQxYmU2Yzg0NTU0MTRkMDE0NmQyNDE2Yjk4MGRkNDU3OTYzODRmYTgxNGRhMmU0YjVmNzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQwYjRkODYzNWM2ZDdhNTFjYmViMmUxOGU2NjFkYjViYjgzYjVkMjA4NWFmMjZmMmFiODc5ZmU4MDZhNzFhNjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU4NTBjZWI4MGYzMWMyMDRhZWU3ZjcxMmFkN2ZkNzVmMDQ0YTgwYThmZGVlYWRmZjYzZTBkYWY2ZTIxOGM4MzkifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/tests/test_storage.py#L74-L85",
+          "version": "repo-lines-v1:sha256:28391c82669c8299dbdb89819875471b543a7c7545062e722b6b06abf8ac2c87:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ2MjhkNWNjYzhmM2I5YTQ0NDRiNGI1OGI4YTliZWM0M2ZjZTBlYzUyNWRiMGM4YzMyNGJmYjg2ZTFlYmE1OGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYzMDIxY2MxMTc1ODI5OTk1MGMxN2RiZmYxNWNhZWZjZDYxYjAwOWEwNTViMTFkZmMwNDZiZTU2MmMyYzc1ZmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjMwZjljNzk4NWJmYTRkNTRkYTU2NWFjODhmZjNiM2U3ODM1NDU3NTM0NzIxNGVmNTE1Yzk1MzA5ODRkMGYwNDkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_53b7af98046546509fec8513a5ae824a",
+      "statement": "`ApplicationStore.list_keys` paginates only within the identity prefix and strips that prefix from returned keys, which prevents cross-customer leakage when discovering application inputs.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa/storage.py#L75-L90",
+          "version": "repo-lines-v1:sha256:0dafd610a95adce09acff249b23354b5040bee369aebe0eb97769c5b8e551973:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2NzQzMDY5NzY4ODMwNTc1YzgzOTVmZDA5NTJkM2RjMzI5NzEyNDU4ZjRiZDQzN2U4ODRlN2Y5NWVlZTc4NDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZjZGQyYWY2ZGE1MzkxM2NmNmU0MjhlMTcxYjRkMzM5ODRmMGViODA3NTYxZTM3MjA3YWJmMjY5Yzg3YzJmYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY4NjI5NGY5MzBlZjFiODE4ZmE3MGU0ZDIzNmM1ZjQyOThjNzA1ZmU4YjkyZmQ2MzJhMDJkZjZjZjI0MmY3YjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdmZDdhN2IyZjhhYWIzNGNmZDg4Mjk3M2IwNTg4NDlmYjFkN2Q3NThjMTUyNWM5NGY0OGZiYmQ1MWI2NGU0NGMifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/tests/test_storage.py#L87-L109",
+          "version": "repo-lines-v1:sha256:01c02634858eaf08f9fab638ef9cffdb7c0500965fd42b4fff621f0eb921e10c:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUzOTViZGUwYWJlZWM3Y2JhMGEzZDJhYjYyOWFhYWNmOWQxNmFlZDg0NmNlOTM4NGRiMGNlNjcwYTc4OTI4YTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI0NjU1NzQ3YzYyZWQyZWNjYmNkZTcwYjdlZjA3ODA0NmI4MDg2YWFkMjljYjFkYzE3ZWE4NTBkM2IxNzI2OWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJhN2I0NTVlMGI4NmEwZjNjNDJhOTFmZTZkOWMzNWYxM2Q3NmQxYjVkNGI5YjY3NzVhMGFkYjYwZjE2ODY4MDciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMyYjZiYTdhODgyNmY0N2ZkYTBlYjk2NTU4Yjk0Zjg2NDgzYjFhYTkxY2U0NjhhYTcwMTRhNzY0MGI1NmM0NmQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_6a3f865ea6a34493ab1a89eff310e8b1",
+      "statement": "`PolicyDocStore` reads shared policy documents from `FIONAA_POLICY_DOCS_BUCKET` instead of the per-customer applications bucket, reflecting a separate read-only storage boundary for policy content.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa/storage.py#L98-L106",
+          "version": "repo-lines-v1:sha256:d38a08f85e2f83393e4131460009564e994b7e58de29b2f134f5b20ba076d7ed:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTkzNjVkZWMyNGFiZTg3ZGNiODVmM2RhODExZDYwYWZlODdkMjc1MDA3NmM0OTViNmNhYjY5OTc1YjNjZDM5YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZTY2ZGFiOGJhMDUyNjM1ZDZhYjFlN2JkYzVjN2EzMzEzZTFiMGU4ODRlNTA3ZmU3MzEwZjBkNzc3NmRhMjYwMiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNmY2Njc2MDJmNWM4YWNhYTE2YzBkNzU3MjgyMTcyYzQ4ZjZlOGI2ZWY4YTM1NGQ2NDA1NjMxM2IzY2M5YjA0ZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa/tests/test_storage.py#L112-L116",
+          "version": "repo-lines-v1:sha256:74baab87175b66183f430065c3d8a7be51adbafcdd0f146183761ad6e1c3106e:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMzIzZjQxNDhmNzBmNTVlNGQxYzgxMGVkOWVjNWIyOTg4NzcwZTk1MWVlYTk1ZjBmNDlhYjhlMmE1YzBhZmE4MyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMmZjMzg1N2U4MDZiYThlODM1OWJiYzE4MzZhNzIzMTI2MmVhYjMwZDRjOTc0ZmE3NjA5MWRkZDQ4ZThkZTEzMiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzM5ZmYwODdlOTdjMjgwMzIzMWNjMTRjZDJmZDgwZGMxODQwMjkxNDI5YmIxMTU5M2ZkZTcxOGQ2NDczYzY3ZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.5.1",
+    "at": "2026-09-12T16:18:14.763Z"
+  }
+}
