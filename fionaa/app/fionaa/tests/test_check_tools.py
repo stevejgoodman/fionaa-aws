@@ -71,3 +71,87 @@ def test_check_bank_statements_recent_and_sufficient_handles_no_statements():
         "days_since_most_recent_statement": None,
         "recent_enough": False,
     }
+
+
+# ---------------------------------------------------------------------------
+# cross_check_financial_figures — deterministic turnover/profit comparison
+# ---------------------------------------------------------------------------
+# Plain function, not an @tool -- see check_tools.py's module comment for
+# why (it must run unconditionally, not be agent tool-choice).
+
+def test_cross_check_financial_figures_no_discrepancy_for_matching_figures():
+    application = {"annual_turnover": 100000, "annual_profit": 20000}
+    annual_accounts = [{"turnover_current_year": 100000, "profit_current_year": 20000}]
+
+    result = ct.cross_check_financial_figures(application, annual_accounts, companies_house=None)
+
+    assert result.any_material_discrepancy is False
+    assert all(c.delta_pct == 0 for c in result.comparisons)
+    assert all(c.material is False for c in result.comparisons)
+
+
+def test_cross_check_financial_figures_few_percent_delta_is_non_material():
+    application = {"annual_turnover": 100000, "annual_profit": 20000}
+    annual_accounts = [{"turnover_current_year": 105000, "profit_current_year": 20000}]
+
+    result = ct.cross_check_financial_figures(application, annual_accounts, companies_house=None)
+
+    turnover_comparison = next(c for c in result.comparisons if c.field.startswith("annual_turnover"))
+    assert turnover_comparison.delta_pct == pytest.approx(5.0)
+    assert turnover_comparison.material is False
+    assert result.any_material_discrepancy is False
+
+
+def test_cross_check_financial_figures_tens_of_percent_delta_is_material():
+    application = {"annual_turnover": 100000, "annual_profit": 20000}
+    annual_accounts = [{"turnover_current_year": 60000, "profit_current_year": 20000}]
+
+    result = ct.cross_check_financial_figures(application, annual_accounts, companies_house=None)
+
+    turnover_comparison = next(c for c in result.comparisons if c.field.startswith("annual_turnover"))
+    assert turnover_comparison.delta_pct == pytest.approx(40.0)
+    assert turnover_comparison.material is True
+    assert result.any_material_discrepancy is True
+
+
+def test_cross_check_financial_figures_handles_no_annual_accounts():
+    result = ct.cross_check_financial_figures(
+        {"annual_turnover": 100000, "annual_profit": 20000}, [], companies_house=None
+    )
+
+    assert result.comparisons == []
+    assert result.any_material_discrepancy is False
+
+
+def test_cross_check_financial_figures_picks_most_recent_annual_accounts():
+    application = {"annual_turnover": 100000, "annual_profit": 20000}
+    annual_accounts = [
+        {"accounting_year": "2024-12-31", "turnover_current_year": 40000, "profit_current_year": 5000},
+        {"accounting_year": "2025-12-31", "turnover_current_year": 100000, "profit_current_year": 20000},
+    ]
+
+    result = ct.cross_check_financial_figures(application, annual_accounts, companies_house=None)
+
+    assert result.any_material_discrepancy is False
+
+
+def test_cross_check_financial_figures_handles_zero_application_turnover():
+    result = ct.cross_check_financial_figures(
+        {"annual_turnover": 0, "annual_profit": 0},
+        [{"turnover_current_year": 0, "profit_current_year": 0}],
+        companies_house=None,
+    )
+
+    assert result.any_material_discrepancy is False
+
+    result_with_mismatch = ct.cross_check_financial_figures(
+        {"annual_turnover": 0, "annual_profit": 0},
+        [{"turnover_current_year": 50000, "profit_current_year": 0}],
+        companies_house=None,
+    )
+
+    turnover_comparison = next(
+        c for c in result_with_mismatch.comparisons if c.field.startswith("annual_turnover")
+    )
+    assert turnover_comparison.material is True
+    assert result_with_mismatch.any_material_discrepancy is True

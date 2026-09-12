@@ -70,7 +70,10 @@ async def _run_policy_check(application: dict) -> tuple[str, list[ToolCall]]:
     store = FakeStore()
     runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
     result = await g.check_against_policy({"application": application}, runtime)
-    actual_output = result["policy_check"]
+    # check_against_policy now forces structured output (PolicyCheckResult),
+    # so result["policy_check"] is a dict, not a bare string -- JSON-encode
+    # it for the judge metrics below, which read actual_output as text.
+    actual_output = json.dumps(result["policy_check"])
     tool_calls = [
         ToolCall(name=c["tool"]) for c in store.data["policy_check/result.json"]["tool_calls"]
     ]

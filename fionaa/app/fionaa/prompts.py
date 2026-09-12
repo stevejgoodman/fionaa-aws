@@ -41,7 +41,15 @@ POLICY_CHECK_PROMPT = """You are a loan assessor.
     "at least 3 months of statements, most recent statement must be less than 90 days from date of
     application") belongs in the documentation completeness section, not as a standalone
     eligibility rejection — insufficient or stale bank statements are a documentation gap to flag,
-    the same as any other missing supporting document."""
+    the same as any other missing supporting document.
+
+    ## Output format
+    Your response is schema-enforced: `eligible` (eligible / ineligible / inconclusive — the
+    overall verdict against the policy's substantive criteria only), `clause_findings` (one entry
+    per quantifiable or explicitly-stated requirement you checked, per "How to structure your
+    response" above), `documentation_gaps` (missing supporting documents, kept separate from
+    `eligible` per the documentation-completeness guidance above), and `summary` (a brief overall
+    summary)."""
 
 
 WEB_SEARCH_PROMPT = """
@@ -139,17 +147,24 @@ FINANCIAL_ASSESSMENT_PROMPT = """You are a financial assessment analyst.
     given as financial evidence regardless of how many there are or how recent.
 
     ## Consistency checks
-    Compare figures and facts that should agree across sources — for example annual turnover/
-    income (APPLICATION vs. COMPANIES HOUSE FINDINGS vs. each ANNUAL ACCOUNTS document's
-    turnover_current_year), company name, and time trading. Report any conflict as a discrepancy:
-    state what each source says and how material the difference looks — a difference of a few
-    percent is normal rounding/estimation noise, not a discrepancy; a difference of several tens
-    of percent or more is material and must be flagged explicitly. The Companies House findings
-    are a free-text summary rather than structured accounts data, so only raise a discrepancy
-    where the summary actually states something the application contradicts — do not infer or
-    invent a figure that isn't there. If more than one ANNUAL ACCOUNTS document is present,
-    compare against the most recent one (by accounting_year) unless the application's stated
-    turnover is clearly meant to match an earlier year.
+    The turnover/profit comparison between APPLICATION and the most recent ANNUAL ACCOUNTS
+    document has already been computed for you and is provided as CROSS-CHECK RESULT in the human
+    message below — each entry gives the application's figure, the annual accounts figure, the
+    percentage difference, and whether that difference is material (a few percent is normal
+    rounding/estimation noise; tens of percent or more is material). Copy each CROSS-CHECK RESULT
+    entry into your output's `cross_check` field exactly as given — never recompute a delta
+    percentage or re-derive materiality yourself.
+
+    Beyond that computed comparison, still check other facts that should agree across sources —
+    company name, time trading, and anything COMPANIES HOUSE FINDINGS' free-text summary actually
+    states that the application contradicts (do not infer or invent a figure that isn't there,
+    since that summary is prose, not structured accounts data). Report these as `discrepancies` —
+    do not restate a CROSS-CHECK RESULT entry there, its `material` flag already covers it.
+
+    An empty CROSS-CHECK RESULT (no ANNUAL ACCOUNTS were supplied) means there's nothing to
+    compare, not a contradiction — do not report "no annual accounts to verify against" as a
+    discrepancy, and do not let it alone drive an `inconsistent` verdict (see Output format below
+    for when to use `inconclusive` instead).
 
     ## Policy check result
     Note the policy_check verdict (ELIGIBLE / INELIGIBLE / INCONCLUSIVE) and any red flags it
@@ -172,12 +187,19 @@ FINANCIAL_ASSESSMENT_PROMPT = """You are a financial assessment analyst.
     other household income) and say so explicitly rather than implying bank statements were
     reviewed.
 
-    ## Output
-    Give a concise assessment covering:
-      - Any cross-source discrepancies found (or none), naming which sources disagreed
-      - The calculated monthly repayment, if the loan type/fields make one applicable
-      - An affordability verdict, and what it is (and isn't) based on
-      - An overall **CONSISTENT** / **INCONSISTENT** verdict with brief rationale
+    ## Output format
+    Your response is schema-enforced: `verdict`, `discrepancies` (see Consistency checks above),
+    `monthly_repayment` and `affordability_basis`/`affordability_verdict` (see Affordability check
+    above), `cross_check` (copied through from CROSS-CHECK RESULT, verbatim — see Consistency
+    checks above), and `summary` (a brief overall summary).
+
+    `verdict` is one of three values, not a binary pass/fail: `consistent` (no material
+    discrepancy and no other cross-source contradiction found), `inconsistent` (a genuine
+    contradiction was found — a material CROSS-CHECK RESULT entry, or another cross-source fact
+    that actually disagrees), or `inconclusive` (there wasn't enough evidence to assess
+    consistency at all — e.g. no ANNUAL ACCOUNTS and no BANK STATEMENTS were supplied). Missing
+    documentation alone is `inconclusive`, never `inconsistent` — the latter must mean you found an
+    actual contradiction, not that evidence was absent.
 
     **Only draw conclusions from the data provided. Do not fabricate figures.**"""
 
@@ -296,9 +318,12 @@ DECISION_SYNTHESIS_PROMPT = """You are the final decision-maker for a business l
     - COMPANIES HOUSE FINDINGS: `found=True` with the company dissolved, insolvent, or in
       administration is a serious red flag even though identity was confirmed — do not treat
       "found" as equivalent to "in good standing." Weigh the flagged status here.
-    - FINANCIAL ASSESSMENT: an INCONSISTENT verdict, unresolved cross-source discrepancies, or an
-      affordability judgement that the repayment looks unaffordable all weigh toward rejection or
-      referral.
+    - FINANCIAL ASSESSMENT: an INCONSISTENT verdict (a genuine cross-source contradiction was
+      found), unresolved discrepancies, or an affordability judgement that the repayment looks
+      unaffordable all weigh toward rejection or referral. An INCONCLUSIVE verdict is different —
+      it means there wasn't enough evidence to assess consistency (e.g. no supporting documents),
+      not that a contradiction was found — weigh it toward referral for missing documentation, not
+      toward rejection the way an actual INCONSISTENT finding would be.
     - WEB SEARCH FINDINGS: corroborating or contradicting evidence about the company/applicant's
       online presence — weigh negative findings (e.g. no discoverable presence at all for an
       established business, or findings that contradict the application) but do not treat an
