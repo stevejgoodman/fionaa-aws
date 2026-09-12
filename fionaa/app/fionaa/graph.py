@@ -30,6 +30,7 @@ from model.load import load_model
 from check_tools import CHECK_TOOLS_POOL, cross_check_financial_figures
 from groundedness import check_companies_house_grounding
 from policy_loader import load_check_tool_names, load_policy_text
+from policy_consistency import PolicyConsistencyChecker
 from redaction import redact_tool_calls
 from prompts import (
     COMPANIES_HOUSE_PROMPT,
@@ -525,8 +526,62 @@ async def synthesize_decision(state: ApplicationState, runtime: Runtime[AgentCon
         "financial_assessment": financial_assessment,
         "web_search": web_search,
     }
-    runtime.context.store.put_json("decision/result.json", final_decision)
-    return {"final_decision": final_decision}
+    runtime.context.store.put_json("decision/proposed.json", final_decision)
+    return {"proposed_decision": final_decision}
+
+
+async def _validate_assessment(state, runtime, claim):
+    application = state["application"]
+    loan_type = LoanType(application["loan_type"])
+    checker = runtime.context.policy_checker or PolicyConsistencyChecker.from_environment()
+    # Evidence comes from graph inputs, not a model-authored restatement.
+    # Source labels retain the distinction between self-report and findings.
+    facts = {
+        "application_self_reported": application,
+        "annual_accounts": state.get("annual_accounts", []),
+        "bank_statements": state.get("bank_statements", []),
+        "companies_house_findings": state.get("companies_house"),
+        "financial_assessment": state.get("financial_assessment"),
+    }
+    return await checker.check(loan_type.value, load_policy_text(loan_type), facts, claim)
+
+
+def _refer_validation(runtime, stage, validation):
+    decision = {
+        "outcome": "referred",
+        "reason": "policy_consistency_not_validated",
+        "rationale": "Human review required: runtime policy consistency validation did not pass.",
+        "validation_stage": stage,
+        "validation": validation,
+    }
+    runtime.context.store.put_json("decision/result.json", decision)
+    return decision
+
+
+async def validate_policy_assessment(
+    state: ApplicationState, runtime: Runtime[AgentContext]
+) -> Command[Literal["companies_house", "__end__"]]:
+    validation = await _validate_assessment(state, runtime, state["policy_check"])
+    runtime.context.store.put_json("policy_check/validation.json", validation)
+    update = {"policy_validation": validation}
+    if not validation["passed"]:
+        update["final_decision"] = _refer_validation(runtime, "policy_check", validation)
+        return Command(update=update, goto=END)
+    return Command(update=update, goto="companies_house")
+
+
+async def validate_final_decision(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict:
+    proposed = state["proposed_decision"]
+    validation = await _validate_assessment(state, runtime, proposed)
+    # A final checker result cannot bypass missing/failed upstream validation.
+    if not state.get("policy_validation", {}).get("passed", False):
+        validation = {**validation, "passed": False, "status": "upstream_not_validated"}
+    runtime.context.store.put_json("decision/validation.json", validation)
+    if not validation["passed"]:
+        return {"final_decision": _refer_validation(runtime, "decision", validation)}
+    final = {**proposed, "validation": validation}
+    runtime.context.store.put_json("decision/result.json", final)
+    return {"final_decision": final}
 
 
 # policy check doesn't do agentic RAG — loan_type is known up front, so the
@@ -557,6 +612,8 @@ def build_graph(checkpointer: Optional[BaseCheckpointSaver] = None):
     g = StateGraph(ApplicationState, context_schema=AgentContext)
     g.add_node("load_application", load_application)
     g.add_node("policy_check", check_against_policy)
+    g.add_node("validate_policy_assessment", validate_policy_assessment)
+    g.add_node("validate_final_decision", validate_final_decision)
     g.add_node("companies_house", check_companies_house)
     g.add_node("reject_no_company", reject_no_company)
     g.add_node("financial_assessment", check_financial_assessment)
@@ -570,7 +627,7 @@ def build_graph(checkpointer: Optional[BaseCheckpointSaver] = None):
     # state (`policy_check`), so it flows into whichever artifact ends up
     # documenting the run's outcome instead of only living in
     # policy_check/result.json.
-    g.add_edge("policy_check", "companies_house")
+    g.add_edge("policy_check", "validate_policy_assessment")
     # companies_house routes dynamically via the Command it returns —
     # "financial_assessment" if the company was confirmed, "reject_no_company"
     # otherwise — so no static edge to either is declared here. Only the
@@ -585,5 +642,6 @@ def build_graph(checkpointer: Optional[BaseCheckpointSaver] = None):
     # closes that gap.
     g.add_edge("web_search", "synthesize_decision")
     g.add_edge("reject_no_company", END)
-    g.add_edge("synthesize_decision", END)
+    g.add_edge("synthesize_decision", "validate_final_decision")
+    g.add_edge("validate_final_decision", END)
     return g.compile(checkpointer=checkpointer)

@@ -178,6 +178,7 @@ class ApplicationState(TypedDict, total=False):
     # LLM string -- check_against_policy forces structured output the same
     # way check_companies_house already does for companies_house.
     policy_check: Annotated[dict[str, Any], _last_write_wins]
+    policy_validation: Annotated[dict[str, Any], _last_write_wins]
     companies_house: Annotated[dict[str, Any], _last_write_wins]
     companies_house_found: Annotated[bool, _last_write_wins]
     # A dict conforming to FinancialAssessmentResult's shape (see below), not
@@ -185,6 +186,7 @@ class ApplicationState(TypedDict, total=False):
     financial_assessment: Annotated[dict[str, Any], _last_write_wins]
     web_search: Annotated[dict[str, Any], _last_write_wins]
     final_decision: Annotated[dict[str, Any], _last_write_wins]
+    proposed_decision: Annotated[dict[str, Any], _last_write_wins]
 
 
 @dataclass(frozen=True)
@@ -203,6 +205,7 @@ class AgentContext:
     store: ApplicationStore
     policy_docs: PolicyDocStore
     tools: list[Any]
+    policy_checker: Any = None
 
 
 # ---------------------------------------------------------------------------

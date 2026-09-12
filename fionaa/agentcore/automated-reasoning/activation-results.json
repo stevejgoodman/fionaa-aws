@@ -1,0 +1,35 @@
+{
+  "date": "2026-09-12",
+  "runtime_version": "34",
+  "endpoint": "DEFAULT",
+  "scenario": "fullapp-active-company-unsecured-loan",
+  "application_id": "12417e13-adcc-4d84-8046-44f2225422df",
+  "session_id": "eval-fullapp-active-company-unsecured-loan-9568a361",
+  "http_status": 200,
+  "outcome": "referred",
+  "policy_validation": {
+    "passed": false,
+    "policy_sha256": "59192d6b3c4bb7a00ce0a4b26deb12633fa8970c4bc761ff2d1023962840c62c",
+    "findings": [
+      {
+        "tooComplex": {}
+      }
+    ],
+    "guardrail_id": "5h5yunnkf895",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 3,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "afb6a69a-3558-426b-9519-ca3d3d614eea"
+  },
+  "final_validation_executed": false
+}

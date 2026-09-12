@@ -8,7 +8,7 @@ Loan Term: 3 – 60 months
 Documents Required:
 
 - Director ID and proof of address
-- 3 Recent (latest must be in last 3 months) business bank statements
+- At least 3 months of business bank statements, most recent statement less than 90 days old on the date of application
 - Accounts/management information
 - VAT returns (if registered)
 - Details of existing borrowing if any
@@ -17,7 +17,7 @@ Other key eligibility/rules:
 
 - Applicant must be 18+, UK-based
 - No collateral required; personal guarantee (PG) required for loans over £25,000
-- Requires 6–12 months minimum trading history
+- Minimum 6 months trading history
 
 Note: whether the requested amount falls within the £1,000–£500,000 range
 above is checked deterministically by the

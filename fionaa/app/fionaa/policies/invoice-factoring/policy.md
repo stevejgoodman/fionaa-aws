@@ -3,7 +3,7 @@
 # Invoice Factoring
 
 Loan Amount: Advance of 70–90% of invoice value; available to businesses with annual turnover of £50,000+
-Loan Term: Minimum contract period 6–12 months, plus a notice period to exit
+Loan Term: Minimum contract period 6 months, plus an agreed notice period to exit
 
 Documents Required:
 
