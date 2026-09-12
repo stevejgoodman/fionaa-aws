@@ -19,6 +19,7 @@ not by the tools writing their own artifacts.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import date
 
 from langchain.tools import tool
@@ -181,6 +182,112 @@ def check_bank_statements_recent_and_sufficient(statement_end_dates: list[str], 
         "days_since_most_recent_statement": days_since_most_recent,
         "recent_enough": days_since_most_recent is not None and days_since_most_recent < BANK_STATEMENT_MAX_AGE_DAYS,
     }
+
+
+# ---------------------------------------------------------------------------
+# Financial figure cross-check — deterministic turnover/profit comparison
+# ---------------------------------------------------------------------------
+#
+# Same motivating failure mode as the tools above: FINANCIAL_ASSESSMENT_PROMPT
+# asks the model to compare the application's self-reported annual_turnover/
+# annual_profit against the most recent annual accounts document's
+# turnover_current_year/profit_current_year and judge whether the difference
+# is "a few percent" (noise) or "tens of percent" (material) — that's exactly
+# the kind of arithmetic-over-prose comparison an eval run already showed the
+# model gets wrong (see check_*_amount_in_range above). This is a plain
+# function, not an `@tool` — it must run unconditionally as part of
+# check_financial_assessment's own logic, not be something the agent can
+# choose to skip via tool-choice, so it isn't registered in CHECK_TOOLS_POOL.
+#
+# Companies House findings are deliberately NOT compared here:
+# CompaniesHouseResult.summary is free text that COMPANIES_HOUSE_PROMPT
+# explicitly instructs must never state a turnover/profit figure that isn't
+# actually there (see schemas.py's CompaniesHouseResult.summary docstring).
+# Regex-scraping a number out of that prose would reintroduce the exact
+# hallucination risk this check exists to remove, so Companies House is
+# accepted as a parameter for future extension (e.g. once/if Companies House
+# lookups expose structured filed-accounts figures) but never inspected here.
+
+MATERIAL_DISCREPANCY_THRESHOLD_PCT = 15.0  # "a few percent" = noise, "tens of percent" = material
+
+
+@dataclass(frozen=True)
+class FieldComparison:
+    field: str
+    application_value: float | None
+    reference_value: float | None
+    source: str
+    delta_pct: float | None
+    material: bool
+
+
+@dataclass(frozen=True)
+class FinancialCrossCheckResult:
+    comparisons: list[FieldComparison]
+    any_material_discrepancy: bool
+
+
+def _delta_pct(application_value: float | None, reference_value: float | None) -> float | None:
+    if application_value is None or reference_value is None:
+        return None
+    if application_value == 0:
+        return None if reference_value == 0 else float("inf")
+    return abs(reference_value - application_value) / abs(application_value) * 100
+
+
+def _most_recent_annual_accounts(annual_accounts: list[dict]) -> dict | None:
+    """Most recent by accounting_year (ISO date string), matching the
+    tie-break FINANCIAL_ASSESSMENT_PROMPT's prose already instructs the
+    model to apply when more than one accounts document is present."""
+    if not annual_accounts:
+        return None
+    return max(annual_accounts, key=lambda doc: doc.get("accounting_year") or "")
+
+
+def cross_check_financial_figures(
+    application: dict,
+    annual_accounts: list[dict],
+    companies_house: dict | None,
+) -> FinancialCrossCheckResult:
+    """Deterministic comparison of the application's annual_turnover/
+    annual_profit against the most recent annual accounts document's
+    turnover_current_year/profit_current_year. Pure function, no LLM/tool
+    call involved — unit-testable exactly like
+    check_bank_statements_recent_and_sufficient above.
+
+    `companies_house` is accepted but intentionally unused today — see the
+    module comment above this function."""
+    del companies_house  # not compared today; see comment above
+
+    most_recent = _most_recent_annual_accounts(annual_accounts)
+    if most_recent is None:
+        return FinancialCrossCheckResult(comparisons=[], any_material_discrepancy=False)
+
+    field_pairs = [
+        ("annual_turnover", "turnover_current_year"),
+        ("annual_profit", "profit_current_year"),
+    ]
+    comparisons = []
+    for application_field, accounts_field in field_pairs:
+        application_value = application.get(application_field)
+        reference_value = most_recent.get(accounts_field)
+        delta_pct = _delta_pct(application_value, reference_value)
+        material = delta_pct is not None and delta_pct >= MATERIAL_DISCREPANCY_THRESHOLD_PCT
+        comparisons.append(
+            FieldComparison(
+                field=f"{application_field}_vs_{accounts_field}",
+                application_value=application_value,
+                reference_value=reference_value,
+                source="annual_accounts",
+                delta_pct=delta_pct,
+                material=material,
+            )
+        )
+
+    return FinancialCrossCheckResult(
+        comparisons=comparisons,
+        any_material_discrepancy=any(c.material for c in comparisons),
+    )
 
 
 # All tools in the pool, keyed by name — this is what `graph.tools_for` is

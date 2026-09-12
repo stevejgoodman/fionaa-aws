@@ -167,7 +167,12 @@ async def test_check_against_policy_persists_and_returns_result(monkeypatch):
     # and unsecured-business-loans declares check_unsecured_business_loan_amount_in_range
     # (see check_tools.py/policy.md) -- the agent gets those two and no others.
     runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
-    fake_result = "policy check passed"
+    fake_result = {
+        "eligible": "eligible",
+        "clause_findings": ["loan amount within range"],
+        "documentation_gaps": [],
+        "summary": "policy check passed",
+    }
     calls = []
 
     monkeypatch.setattr(g, "create_agent", make_fake_create_agent(fake_result, calls))
@@ -175,7 +180,7 @@ async def test_check_against_policy_persists_and_returns_result(monkeypatch):
     result = await g.check_against_policy(state, runtime)
 
     assert result == {"policy_check": fake_result}
-    assert store.data["policy_check/result.json"] == {"result": fake_result, "tool_calls": []}
+    assert store.data["policy_check/result.json"] == {**fake_result, "tool_calls": []}
     # tools_for's output order follows CHECK_TOOLS_POOL's own definition
     # order, not load_check_tool_names'/tool_names' order -- see
     # check_tools.py, check_bank_statements_recent_and_sufficient is
@@ -252,6 +257,13 @@ async def test_check_against_policy_persists_tool_calls_as_evidence(monkeypatch)
     state = {"application": application}
     runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
 
+    fake_result = {
+        "eligible": "eligible",
+        "clause_findings": ["advance amount computed via tool"],
+        "documentation_gaps": [],
+        "summary": "eligible",
+    }
+
     class FakeAgentWithToolCall:
         async def ainvoke(self, input):
             return {
@@ -262,17 +274,18 @@ async def test_check_against_policy_persists_tool_calls_as_evidence(monkeypatch)
                         name="compute_invoice_factoring_advance",
                         tool_call_id="call-1",
                     ),
-                    FakeMessage("eligible"),
-                ]
+                    FakeMessage(fake_result["summary"]),
+                ],
+                "structured_response": g.PolicyCheckResult(**fake_result),
             }
 
     monkeypatch.setattr(g, "create_agent", lambda **kwargs: FakeAgentWithToolCall())
 
     result = await g.check_against_policy(state, runtime)
 
-    assert result == {"policy_check": "eligible"}
+    assert result == {"policy_check": fake_result}
     assert store.data["policy_check/result.json"] == {
-        "result": "eligible",
+        **fake_result,
         "tool_calls": [{"tool": "compute_invoice_factoring_advance", "result": "118400"}],
     }
 
@@ -406,7 +419,15 @@ async def test_check_financial_assessment_persists_and_returns_result(monkeypatc
     store = FakeStore()
     state = {"application": application, "companies_house": companies_house, "policy_check": policy_check}
     runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
-    fake_result = "consistent"
+    fake_result = {
+        "verdict": "consistent",
+        "discrepancies": [],
+        "monthly_repayment": 416.67,
+        "affordability_basis": "application_self_reported",
+        "affordability_verdict": "affordable",
+        "cross_check": [],
+        "summary": "consistent",
+    }
     calls = []
 
     monkeypatch.setattr(g, "create_agent", make_fake_create_agent(fake_result, calls))
@@ -414,18 +435,20 @@ async def test_check_financial_assessment_persists_and_returns_result(monkeypatc
     result = await g.check_financial_assessment(state, runtime)
 
     assert result == {"financial_assessment": fake_result}
-    assert store.data["financial_assessment/result.json"] == {"result": fake_result, "tool_calls": []}
+    assert store.data["financial_assessment/result.json"] == {**fake_result, "tool_calls": []}
     # Only the deterministic repayment tool is scoped in — no MCP tools here.
     assert [t.name for t in calls[0]["tools"]] == ["compute_monthly_repayment"]
     # No "annual_accounts"/"bank_statements" keys in state -- state.get(..., [])
     # defaults to empty, same as load_application would return when none
-    # were staged.
+    # were staged. cross_check_financial_figures also sees an empty
+    # annual_accounts list, so CROSS-CHECK RESULT is an empty list too.
     expected_content = (
         f"APPLICATION:\n{json.dumps(application)}\n\n"
         f"COMPANIES HOUSE FINDINGS:\n{json.dumps(companies_house)}\n\n"
         f"POLICY CHECK RESULT:\n{json.dumps(policy_check)}\n\n"
         f"ANNUAL ACCOUNTS:\n[]\n\n"
-        f"BANK STATEMENTS:\n[]"
+        f"BANK STATEMENTS:\n[]\n\n"
+        f"CROSS-CHECK RESULT:\n[]"
     )
     assert calls[1]["message_content"] == expected_content
 
@@ -446,13 +469,28 @@ async def test_check_financial_assessment_passes_annual_accounts_and_bank_statem
     }
     runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
     calls = []
+    # A dict, not a plain string -- FinancialAssessmentResult has list/float
+    # fields fakes.py's generic string-to-schema helper can't fill in.
+    fake_result = {
+        "verdict": "inconsistent",
+        "discrepancies": [],
+        "monthly_repayment": None,
+        "affordability_basis": "application_self_reported",
+        "affordability_verdict": "not assessed",
+        "cross_check": [],
+        "summary": "turnover mismatch",
+    }
 
-    monkeypatch.setattr(g, "create_agent", make_fake_create_agent("consistent", calls))
+    monkeypatch.setattr(g, "create_agent", make_fake_create_agent(fake_result, calls))
 
     await g.check_financial_assessment(state, runtime)
 
     assert json.dumps(annual_accounts) in calls[1]["message_content"]
     assert json.dumps(bank_statements) in calls[1]["message_content"]
+    # annual_turnover=250000 vs turnover_current_year=95000 is a >15% delta
+    # -- cross_check_financial_figures flags it material and it's passed
+    # through in the human message for the agent to copy verbatim.
+    assert '"material": true' in calls[1]["message_content"]
 
 
 @pytest.mark.asyncio
@@ -462,6 +500,16 @@ async def test_check_financial_assessment_persists_tool_calls_as_evidence(monkey
     store = FakeStore()
     state = {"application": application, "companies_house": companies_house}
     runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
+
+    fake_result = {
+        "verdict": "consistent",
+        "discrepancies": [],
+        "monthly_repayment": 416.67,
+        "affordability_basis": "application_self_reported",
+        "affordability_verdict": "affordable",
+        "cross_check": [],
+        "summary": "consistent, affordable",
+    }
 
     class FakeAgentWithToolCall:
         async def ainvoke(self, input):
@@ -473,17 +521,18 @@ async def test_check_financial_assessment_persists_tool_calls_as_evidence(monkey
                         name="compute_monthly_repayment",
                         tool_call_id="call-1",
                     ),
-                    FakeMessage("consistent, affordable"),
-                ]
+                    FakeMessage(fake_result["summary"]),
+                ],
+                "structured_response": g.FinancialAssessmentResult(**fake_result),
             }
 
     monkeypatch.setattr(g, "create_agent", lambda **kwargs: FakeAgentWithToolCall())
 
     result = await g.check_financial_assessment(state, runtime)
 
-    assert result == {"financial_assessment": "consistent, affordable"}
+    assert result == {"financial_assessment": fake_result}
     assert store.data["financial_assessment/result.json"] == {
-        "result": "consistent, affordable",
+        **fake_result,
         "tool_calls": [{"tool": "compute_monthly_repayment", "result": "416.67"}],
     }
 
@@ -659,12 +708,14 @@ async def test_build_graph_runs_all_nodes_in_order(monkeypatch, identity):
 
     final_state = await graph.ainvoke({}, config, context=agent_context)
 
-    assert final_state["policy_check"] == "ok"
-    # check_companies_house forces structured output — the fake wraps the
-    # plain "ok" response into a generic passing CompaniesHouseResult.
+    # check_against_policy/check_companies_house/check_financial_assessment
+    # all force structured output — the fake wraps the plain "ok" response
+    # into a generic passing result for each schema (see
+    # fakes._generic_structured_fields).
+    assert final_state["policy_check"]["eligible"] == "eligible"
     assert final_state["companies_house"]["found"] is True
     assert final_state["companies_house_found"] is True
-    assert final_state["financial_assessment"] == "ok"
+    assert final_state["financial_assessment"]["verdict"] == "consistent"
     assert final_state["web_search"] == "ok"
     # synthesize_decision also forces structured output — the fake wraps
     # "ok" into a generic passing FinalDecisionResult the same way it does
@@ -707,7 +758,11 @@ async def test_build_graph_checkpoints_successfully_with_deps_in_context(monkeyp
 
     assert final_state["web_search"] == "ok"
     saved = await graph.aget_state(config)
-    assert saved.values["policy_check"] == "ok"
-    assert saved.values["financial_assessment"] == "ok"
+    # policy_check/financial_assessment force structured output now (see
+    # test_build_graph_runs_all_nodes_in_order) -- checking their dict shape
+    # msgpack-serializes/deserializes cleanly is the actual point of this
+    # regression test, not any one field's value.
+    assert saved.values["policy_check"]["eligible"] == "eligible"
+    assert saved.values["financial_assessment"]["verdict"] == "consistent"
     assert saved.values["web_search"] == "ok"
     assert saved.values["final_decision"]["outcome"] == "approved"
