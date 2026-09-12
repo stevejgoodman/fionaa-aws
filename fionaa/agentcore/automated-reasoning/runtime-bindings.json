@@ -1,0 +1,27 @@
+{
+  "secured-business-loans": {
+    "guardrail_id": "bwcgqb1tsa07",
+    "guardrail_version": "1",
+    "policy_sha256": "1f2eed9854fd54bae05b1bdeadb9b1f4bc967cf8e51f183a811cc152d6e4eea6"
+  },
+  "unsecured-business-loans": {
+    "guardrail_id": "5h5yunnkf895",
+    "guardrail_version": "1",
+    "policy_sha256": "59192d6b3c4bb7a00ce0a4b26deb12633fa8970c4bc761ff2d1023962840c62c"
+  },
+  "revolving-credit-facility": {
+    "guardrail_id": "cdue92mr0ap4",
+    "guardrail_version": "1",
+    "policy_sha256": "8ffafa54cbf8f826f4742477eee12561f34e6c30bbe7386e0315fe938910337e"
+  },
+  "invoice-discounting": {
+    "guardrail_id": "7kbeqj127jvv",
+    "guardrail_version": "1",
+    "policy_sha256": "b1a79c82f543519da507b71aef7981671acea6dac2c57c0acfdbd40bdea26d63"
+  },
+  "invoice-factoring": {
+    "guardrail_id": "me18qejox6li",
+    "guardrail_version": "1",
+    "policy_sha256": "bbe4bc64b1596806088fdafb12c07c974db53cf43f89be344d738b29829cdeee"
+  }
+}

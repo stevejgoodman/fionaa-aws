@@ -1,5 +1,3 @@
-<!-- checks: check_bank_statements_recent_and_sufficient -->
-
 # General rules (apply to all loan types)
 
 - Recent bank statements means at least 3 months of statements, most recent statement must be less than 90 days from date of application
@@ -21,3 +19,31 @@ most recent less than 90 days old" rule above is checked deterministically by th
 `check_bank_statements_recent_and_sufficient` tool (see `check_tools.py`)
 — the policy-check agent calls it with each statement's end date and
 today's date rather than counting or comparing the dates itself.
+
+
+
+
+# Unsecured Business Loans
+
+Loan Amount: £1,000 – £500,000
+Loan Term: 3 – 60 months
+
+Documents Required:
+
+- Director ID and proof of address
+- At least 3 months of business bank statements, most recent statement less than 90 days old on the date of application
+- Accounts/management information
+- VAT returns (if registered)
+- Details of existing borrowing if any
+
+Other key eligibility/rules:
+
+- Applicant must be 18+, UK-based
+- No collateral required; personal guarantee (PG) required for loans over £25,000
+- Minimum 6 months trading history
+
+Note: whether the requested amount falls within the £1,000–£500,000 range
+above is checked deterministically by the
+`check_unsecured_business_loan_amount_in_range` tool (see `check_tools.py`)
+— the policy-check agent calls it with `loan_amount` rather than
+comparing the figures itself.

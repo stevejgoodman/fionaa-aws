@@ -2,6 +2,7 @@ from opentelemetry.instrumentation.langchain import LangchainInstrumentor
 from bedrock_agentcore.runtime import BedrockAgentCoreApp
 
 from gateway import load_gateway_tools
+from policy_consistency import PolicyConsistencyChecker
 from graph import AgentContext, build_checkpointer, build_graph, checkpoint_config
 from security import identity_from_request_context, scoped_boto_session
 from storage import APPLICATIONS_BUCKET, ApplicationStore, PolicyDocStore
@@ -42,17 +43,20 @@ async def invoke(payload, context):
         store=ApplicationStore(identity, session),
         policy_docs=PolicyDocStore(session),
         tools=tools,
+        policy_checker=PolicyConsistencyChecker.from_environment(),
     )
     # no msg as context contains the relevant info
-    await graph.ainvoke({}, config, context=agent_context)
+    final_state = await graph.ainvoke({}, config, context=agent_context)
 
     prefix = f"s3://{APPLICATIONS_BUCKET}/{identity.customer_id}/{identity.application_id}"
     result = {
         "application_id": identity.application_id,
-        "policy_check_uri": f"{prefix}/policy_check/result.json",
-        "companies_house_uri": f"{prefix}/companies_house/result.json",
-        "web_search_uri": f"{prefix}/web_search/result.json",
+        "outcome": final_state["final_decision"]["outcome"],
+        "decision_uri": f"{prefix}/decision/result.json",
     }
+    for stage in ("policy_check", "companies_house", "financial_assessment", "web_search"):
+        if stage in final_state:
+            result[f"{stage}_uri"] = f"{prefix}/{stage}/result.json"
     log.info(f"Agent output: {result}")
     return result
 

@@ -37,6 +37,22 @@ After providing credentials, `agentcore deploy` will deploy your project into Am
 
 Use `agentcore invoke` to invoke your deployed agent.
 
+# Runtime policy validation
+
+All five loan-type bindings and scoped guardrail IAM permissions are active
+on runtime version 34 (2026-09-12).
+
+Policy assessments and proposed final decisions now pass through standalone
+Bedrock Automated Reasoning checks before the graph continues or publishes
+the decision. Incomplete checks cause referral. Configure reviewed, numbered
+guardrail versions through `FIONAA_AR_GUARDRAILS`; without bindings, policy
+validation refers every application. See
+[setup and activation](../../agentcore/automated-reasoning/README.md).
+
+The response includes `outcome`, `decision_uri`, and evidence URIs for stages
+present in the final graph state. Proposed decisions are stored separately
+from published decisions.
+
 # Security model
 
 FIONAA is a LangGraph agent with IAM-enforced per-customer S3 isolation.
