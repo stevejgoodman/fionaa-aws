@@ -67,4 +67,5 @@ See `fionaa_iam_policies.md` for the matching trust/permission policies.
 - `gateway.py` — AgentCore Gateway OAuth + MCP tool loading.
 - `graph.py` — LangGraph state, runtime context, nodes, checkpointing, and graph wiring.
 - `prompts.py` — node system prompts.
+- `redaction.py` — PII-minimization helpers (street-level address, phone, bank account number) shared by `graph.py`'s S3 evidence writes and the job dashboard's `fetch_run.py`.
 - `main.py` — the AgentCore Runtime entrypoint (see `agentcore.json`); imports directly from the modules above.

@@ -372,6 +372,48 @@ async def test_check_companies_house_persists_tool_calls_as_evidence(monkeypatch
 
 
 @pytest.mark.asyncio
+async def test_check_companies_house_redacts_address_lines_in_persisted_tool_calls(monkeypatch):
+    """The raw CompaniesHouse___* tool result persisted as S3 evidence
+    bypasses COMPANIES_HOUSE_PROMPT's own "never write the street-level
+    address into your summary" instruction entirely, since it's the tool's
+    verbatim return value, not the model's summary -- redact_tool_calls
+    (redaction.py) closes that gap at the point of write."""
+    application = {"company_number": "12345678"}
+    store = FakeStore()
+    state = {"application": application}
+    runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
+    fake_result = {"found": True, "confidence": "high", "summary": "active company"}
+
+    class FakeAgentWithToolCall:
+        async def ainvoke(self, input):
+            return {
+                "messages": [
+                    input["messages"][0],
+                    ToolMessage(
+                        content=json.dumps({
+                            "registered_office_address": {
+                                "address_line_1": "14 Oak Avenue",
+                                "locality": "Uxbridge",
+                            }
+                        }),
+                        name="CompaniesHouse___getCompanyProfile",
+                        tool_call_id="call-1",
+                    ),
+                ],
+                "structured_response": g.CompaniesHouseResult(**fake_result),
+            }
+
+    monkeypatch.setattr(g, "create_agent", lambda **kwargs: FakeAgentWithToolCall())
+
+    await g.check_companies_house(state, runtime)
+
+    persisted_tool_call = store.data["companies_house/result.json"]["tool_calls"][0]
+    persisted_address = json.loads(persisted_tool_call["result"])["registered_office_address"]
+    assert persisted_address["address_line_1"] == "[address redacted]"
+    assert persisted_address["locality"] == "Uxbridge"
+
+
+@pytest.mark.asyncio
 async def test_check_companies_house_routes_to_reject_when_not_found(monkeypatch):
     application = {"company_number": "00000000"}
     store = FakeStore()
