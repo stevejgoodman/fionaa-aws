@@ -29,6 +29,7 @@ from model.load import load_model
 
 from check_tools import CHECK_TOOLS_POOL
 from policy_loader import load_check_tool_names, load_policy_text
+from redaction import redact_tool_calls
 from prompts import (
     COMPANIES_HOUSE_PROMPT,
     DECISION_SYNTHESIS_PROMPT,
@@ -232,11 +233,11 @@ async def check_against_policy(state: ApplicationState, runtime: Runtime[AgentCo
     # Tool calls the agent made along the way are evidence too — captured
     # here (from the response) rather than by the tools themselves, so the
     # tools in check_tools.py can stay plain, runtime-free functions.
-    tool_calls = [
+    tool_calls = redact_tool_calls([
         {"tool": m.name, "result": m.content}
         for m in messages
         if isinstance(m, ToolMessage)
-    ]
+    ])
 
     runtime.context.store.put_json(
         "policy_check/result.json", {"result": loan_result, "tool_calls": tool_calls}
@@ -278,11 +279,18 @@ async def check_companies_house(
     # downstream prompts (check_financial_assessment, synthesize_decision)
     # keep seeing exactly the same CompaniesHouseResult shape as before —
     # tool_calls is only added to the S3 evidence artifact.
-    tool_calls = [
+    #
+    # redact_tool_calls strips street/building-level address detail out of
+    # the raw CompaniesHouse___* results before they're persisted -- this
+    # is the one place that detail can leak, since it bypasses
+    # COMPANIES_HOUSE_PROMPT's own "never write the street-level address
+    # into your summary" instruction entirely (that instruction only
+    # constrains companies_house_result.summary, not this raw tool output).
+    tool_calls = redact_tool_calls([
         {"tool": m.name, "result": m.content}
         for m in response["messages"]
         if isinstance(m, ToolMessage)
-    ]
+    ])
 
     # save result back to application store
     runtime.context.store.put_json(
@@ -350,11 +358,11 @@ async def check_financial_assessment(state: ApplicationState, runtime: Runtime[A
     messages = response["messages"]
     financial_assessment_result = messages[-1].content
 
-    tool_calls = [
+    tool_calls = redact_tool_calls([
         {"tool": m.name, "result": m.content}
         for m in messages
         if isinstance(m, ToolMessage)
-    ]
+    ])
 
     runtime.context.store.put_json(
         "financial_assessment/result.json",
@@ -391,11 +399,11 @@ async def search_web(state: ApplicationState, runtime: Runtime[AgentContext]) ->
     # Kept out of the web_search state value (still the bare result string,
     # as synthesize_decision expects); only added to the S3 evidence
     # artifact, which changes shape here from a bare string to a dict.
-    tool_calls = [
+    tool_calls = redact_tool_calls([
         {"tool": m.name, "result": m.content}
         for m in response["messages"]
         if isinstance(m, ToolMessage)
-    ]
+    ])
 
     runtime.context.store.put_json(
         "web_search/result.json", {"result": web_search_result, "tool_calls": tool_calls}
