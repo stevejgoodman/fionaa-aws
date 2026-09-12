@@ -945,6 +945,47 @@ itself is the new unit tests (`test_groundedness.py`,
 `test_graph.py::test_check_companies_house_overrides_ungrounded_found_true_*`),
 not the offline eval harness.
 
+### Fix Path 2 CI: `fionaa_eval_dataset.jsonl`'s exampleId drift, not another missing permission (2026-09-12)
+
+The PR #41 merge failed `evals-path2-batch-eval` again -- this time "Push
+failed during delete phase (0/1 batches completed)... not authorized to
+perform: bedrock-agentcore:DeleteDatasetExamples". Looked like the same
+class of gap as the `AddDatasetExamples` fix a few commits ago, but it
+wasn't: comparing the local file against the real deployed dataset
+(`aws bedrock-agentcore-control list-dataset-examples`) showed the 4
+`financial-assessment-*` records' `exampleId` fields didn't match what AWS
+had actually assigned them.
+
+Root cause: `AddDatasetExamplesRequest` has no client-settable per-example
+ID field at all (confirmed against the API reference) -- the server always
+assigns its own `exampleId` on creation, ignoring whatever a hand-authored
+JSONL happens to contain. When those 4 scenarios were first added (PR #37,
+via `python3 uuid.uuid4()` for new records, the same convention the
+existing 12 records' IDs happen to already satisfy since *they* were
+correctly round-tripped from a real deploy at some point) AWS assigned
+different, real IDs than the fabricated ones committed to the file. Every
+subsequent `agentcore dataset push` then diffed "4 local IDs not present
+remotely" (→ add, again) against "4 remote IDs not present locally" (→
+delete) -- alternating which specific IAM action was missing depending on
+which half of that diff got attempted first, never actually converging.
+
+**Fixed**: pulled the real `exampleId` values for all 4 records from
+`list-dataset-examples` and wrote them into `fionaa_eval_dataset.jsonl`,
+after confirming full content equality (assertions/turns/scenario_id) for
+every one of the 16 examples between local and remote -- local and remote
+are now byte-identical in every field that matters, so the next push is a
+true no-op. **Deliberately did not add `DeleteDatasetExamples`** to the CI
+role -- granting it would have masked the real bug (letting the dataset
+silently delete-and-recreate examples, churning IDs on every deploy)
+rather than fixing the drift that caused the diff in the first place.
+
+**Lesson for next time a new scenario is added**: don't hand-author
+`exampleId` for a new record. Add it with `exampleId` omitted (or any
+placeholder), push once, then `list-dataset-examples` (or the CLI's own
+pull/export, if one exists) to get the real server-assigned ID back into
+the committed file before the next deploy -- otherwise this exact drift
+recurs.
+
 ### Existing AWS resources to reuse
 
 - Runtime: `fionaa_fionaa-xjO2ci9fd3`
