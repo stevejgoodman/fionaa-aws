@@ -9,6 +9,7 @@ import {
   type HarnessDeploymentConfig,
 } from '@aws/agentcore-cdk';
 import { CfnOutput, Duration, Stack, type StackProps } from 'aws-cdk-lib';
+import * as bedrock from 'aws-cdk-lib/aws-bedrock';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as kms from 'aws-cdk-lib/aws-kms';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
@@ -147,6 +148,55 @@ export class AgentCoreStack extends Stack {
         enableKeyRotation: true,
       });
 
+      // Model-invocation guardrail -- see app/fionaa/model/load.py, which
+      // reads FIONAA_GUARDRAIL_ID/FIONAA_GUARDRAIL_VERSION (set below) and
+      // attaches them via ChatBedrockConverse's guardrail_config. Deliberately
+      // narrow scope: content filters for prompt-attack + baseline harm
+      // categories, plus a PII filter limited to identifiers with zero
+      // legitimate use in a UK business-loan application (credit card/SSN/NI
+      // number/password/AWS keys). Never NAME/ADDRESS/PHONE/EMAIL -- those
+      // are expected business content and the actual KYC signal this agent
+      // exists to check (see app/fionaa/redaction.py's module docstring for
+      // the same reasoning applied to S3 evidence/dashboard redaction).
+      // IAM enforcement (denying model calls that omit this guardrail) is a
+      // deliberate follow-up, not done here -- see EVALS.md.
+      const guardrail = new bedrock.CfnGuardrail(this, 'FionaaGuardrail', {
+        name: 'fionaa-guardrail',
+        description: 'Prompt-attack/content filtering + non-business-PII masking for the fionaa loan agent',
+        blockedInputMessaging: 'This request could not be processed.',
+        blockedOutputsMessaging: 'This response could not be processed.',
+        contentPolicyConfig: {
+          filtersConfig: [
+            // PROMPT_ATTACK is input-only -- outputStrength must be NONE.
+            { type: 'PROMPT_ATTACK', inputStrength: 'HIGH', outputStrength: 'NONE' },
+            { type: 'HATE', inputStrength: 'MEDIUM', outputStrength: 'MEDIUM' },
+            { type: 'INSULTS', inputStrength: 'MEDIUM', outputStrength: 'MEDIUM' },
+            { type: 'SEXUAL', inputStrength: 'MEDIUM', outputStrength: 'MEDIUM' },
+            { type: 'VIOLENCE', inputStrength: 'MEDIUM', outputStrength: 'MEDIUM' },
+            { type: 'MISCONDUCT', inputStrength: 'MEDIUM', outputStrength: 'MEDIUM' },
+          ],
+        },
+        sensitiveInformationPolicyConfig: {
+          piiEntitiesConfig: [
+            'CREDIT_DEBIT_CARD_NUMBER',
+            'CREDIT_DEBIT_CARD_CVV',
+            'CREDIT_DEBIT_CARD_EXPIRY',
+            'US_SOCIAL_SECURITY_NUMBER',
+            'UK_NATIONAL_INSURANCE_NUMBER',
+            'PASSWORD',
+            'PIN',
+            'AWS_ACCESS_KEY',
+            'AWS_SECRET_KEY',
+          ].map((type) => ({ type, action: 'ANONYMIZE', inputEnabled: true, outputEnabled: true })),
+        },
+      });
+
+      // DRAFT is mutable and must never be used in production -- pin a
+      // numbered version (see FIONAA_GUARDRAIL_VERSION below).
+      const guardrailVersion = new bedrock.CfnGuardrailVersion(this, 'FionaaGuardrailVersion', {
+        guardrailIdentifier: guardrail.attrGuardrailId,
+      });
+
       // Assumed per-invocation by the runtime with a customer_id session tag
       // (see fionaa_scoped_agent.scoped_boto_session). The StringLike + ForAllValues
       // conditions force a non-empty customer_id and forbid smuggling extra tags.
@@ -243,6 +293,16 @@ export class AgentCoreStack extends Stack {
       fionaaEnv.runtime.addEnvironmentVariable('FIONAA_KMS_KEY_ARN', tenantKey.keyArn);
       fionaaEnv.runtime.addEnvironmentVariable('FIONAA_DATA_ACCESS_ROLE_ARN', dataAccessRole.roleArn);
       fionaaEnv.runtime.addEnvironmentVariable('FIONAA_CHECKPOINT_MEMORY_ID', checkpointMemory.memoryId);
+
+      fionaaEnv.runtime.addEnvironmentVariable('FIONAA_GUARDRAIL_ID', guardrail.attrGuardrailId);
+      fionaaEnv.runtime.addEnvironmentVariable('FIONAA_GUARDRAIL_VERSION', guardrailVersion.attrVersion);
+      fionaaEnv.runtime.addToPolicy(
+        new iam.PolicyStatement({
+          sid: 'ApplyFionaaGuardrail',
+          actions: ['bedrock:ApplyGuardrail'],
+          resources: [guardrail.attrGuardrailArn],
+        })
+      );
 
       // AgentCore Gateway — reused from the existing ClaimsAgent stack rather
       // than standing up a new one. The client secret is a real credential:
