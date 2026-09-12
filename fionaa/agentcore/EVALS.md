@@ -946,6 +946,92 @@ schema already in the validation path." Worth its own follow-up, with
 whoever owns the upstream ingestion pipeline confirming the schema still
 matches reality first.
 
+### Runtime groundedness check on companies_house tool output (guardrail gap #6, 2026-09-12)
+
+`check_companies_house`'s `found` field gates the entire downstream graph
+(financial_assessment/web_search/synthesize_decision all only run on the
+`found=True` branch), so a fabricated match here was the single
+highest-leverage hallucination this agent could produce — the
+`injection_resistance`/`companies_house_correctness` evaluators catch this
+offline in CI against a handful of dataset scenarios, but nothing checked
+it at runtime; `tool_calls` capture (see `redaction.py`'s PII work) was
+purely an audit trail, never read back to verify a claim against it.
+
+New `groundedness.py`: `check_companies_house_grounding` deterministically
+checks a `found=True` claim against the actual `CompaniesHouse___*` tool
+calls made — flags it as ungrounded if either (a) no CompaniesHouse tool
+call happened at all, or (b) the application stated a `company_number` and
+at least one tool result exposed one, but none match. `check_companies_house`
+(`graph.py`) now runs this before persisting/returning, and **overrides
+`found` to `False`** (routing to `reject_no_company`, not
+`financial_assessment`) when the check fails — this is enforcement, not
+just logging. Deliberately asymmetric: `found=False` is never checked or
+upgraded, since automatically approving a company on a heuristic would be
+the wrong failure mode to introduce; only `found=True` (the dangerous
+direction) is ever downgraded. Fuzzy name-only matches (no `company_number`
+in the application) are left entirely to the model's own judgment — several
+existing eval scenarios exist specifically to test that behavior, and this
+check doesn't second-guess it.
+
+`search_web` gets a much lighter, audit-only counterpart: a `grounded`
+flag in its S3 evidence (`grounded: bool(tool_calls)`) recording whether
+the model actually searched before producing a summary. Not enforced —
+`web_search` never gates a hard branch decision the way `companies_house`
+does, and free-text search results have no structured claim to
+deterministically cross-check the way a `company_number` does.
+
+**Known limitation**: `deepeval_evals/test_companies_house.py`'s offline
+scenarios call the agent directly (`_run_companies_house`, duplicating
+`check_companies_house`'s agent construction) rather than the node
+function itself, specifically so `response["messages"]` stays reachable
+for `tool_calls` scoring — pre-existing, not something this change
+introduced. That means those scenarios exercise the raw model's behavior
+only, not this new deterministic backstop; coverage for the backstop
+itself is the new unit tests (`test_groundedness.py`,
+`test_graph.py::test_check_companies_house_overrides_ungrounded_found_true_*`),
+not the offline eval harness.
+
+### Fix Path 2 CI: `fionaa_eval_dataset.jsonl`'s exampleId drift, not another missing permission (2026-09-12)
+
+The PR #41 merge failed `evals-path2-batch-eval` again -- this time "Push
+failed during delete phase (0/1 batches completed)... not authorized to
+perform: bedrock-agentcore:DeleteDatasetExamples". Looked like the same
+class of gap as the `AddDatasetExamples` fix a few commits ago, but it
+wasn't: comparing the local file against the real deployed dataset
+(`aws bedrock-agentcore-control list-dataset-examples`) showed the 4
+`financial-assessment-*` records' `exampleId` fields didn't match what AWS
+had actually assigned them.
+
+Root cause: `AddDatasetExamplesRequest` has no client-settable per-example
+ID field at all (confirmed against the API reference) -- the server always
+assigns its own `exampleId` on creation, ignoring whatever a hand-authored
+JSONL happens to contain. When those 4 scenarios were first added (PR #37,
+via `python3 uuid.uuid4()` for new records, the same convention the
+existing 12 records' IDs happen to already satisfy since *they* were
+correctly round-tripped from a real deploy at some point) AWS assigned
+different, real IDs than the fabricated ones committed to the file. Every
+subsequent `agentcore dataset push` then diffed "4 local IDs not present
+remotely" (→ add, again) against "4 remote IDs not present locally" (→
+delete) -- alternating which specific IAM action was missing depending on
+which half of that diff got attempted first, never actually converging.
+
+**Fixed**: pulled the real `exampleId` values for all 4 records from
+`list-dataset-examples` and wrote them into `fionaa_eval_dataset.jsonl`,
+after confirming full content equality (assertions/turns/scenario_id) for
+every one of the 16 examples between local and remote -- local and remote
+are now byte-identical in every field that matters, so the next push is a
+true no-op. **Deliberately did not add `DeleteDatasetExamples`** to the CI
+role -- granting it would have masked the real bug (letting the dataset
+silently delete-and-recreate examples, churning IDs on every deploy)
+rather than fixing the drift that caused the diff in the first place.
+
+**Lesson for next time a new scenario is added**: don't hand-author
+`exampleId` for a new record. Add it with `exampleId` omitted (or any
+placeholder), push once, then `list-dataset-examples` (or the CLI's own
+pull/export, if one exists) to get the real server-assigned ID back into
+the committed file before the next deploy -- otherwise this exact drift
+recurs.
+
 ### Existing AWS resources to reuse
 
 - Runtime: `fionaa_fionaa-xjO2ci9fd3`
