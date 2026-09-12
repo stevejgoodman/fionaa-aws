@@ -1,0 +1,265 @@
+{
+  "version": "1.0",
+  "types": [
+    {
+      "name": "BusinessType",
+      "description": "The legal structure of the applicant business.",
+      "values": [
+        {
+          "value": "BusinessType_LIMITED_COMPANY",
+          "description": "A limited company."
+        },
+        {
+          "value": "BusinessType_PARTNERSHIP",
+          "description": "A partnership."
+        },
+        {
+          "value": "BusinessType_SOLE_TRADER",
+          "description": "A sole trader."
+        },
+        {
+          "value": "BusinessType_OTHER",
+          "description": "A business type not otherwise modeled."
+        }
+      ]
+    },
+    {
+      "name": "DirectorIDType",
+      "description": "The type of identification document supplied as Director ID.",
+      "values": [
+        {
+          "value": "DirectorIDType_DRIVERS_LICENCE",
+          "description": "A driver's licence."
+        },
+        {
+          "value": "DirectorIDType_PASSPORT",
+          "description": "A passport."
+        },
+        {
+          "value": "DirectorIDType_NONE",
+          "description": "No valid director ID supplied."
+        },
+        {
+          "value": "DirectorIDType_OTHER",
+          "description": "A form of identification not modeled as valid director ID."
+        }
+      ]
+    },
+    {
+      "name": "CollateralAssetType",
+      "description": "The type of asset provided as security for a secured business loan.",
+      "values": [
+        {
+          "value": "CollateralAssetType_PROPERTY",
+          "description": "Property provided as security."
+        },
+        {
+          "value": "CollateralAssetType_EQUIPMENT",
+          "description": "Equipment provided as security."
+        },
+        {
+          "value": "CollateralAssetType_VEHICLES",
+          "description": "Vehicles provided as security."
+        },
+        {
+          "value": "CollateralAssetType_INVOICES",
+          "description": "Invoices provided as security."
+        },
+        {
+          "value": "CollateralAssetType_INTANGIBLE_ASSETS",
+          "description": "Intangible assets provided as security."
+        },
+        {
+          "value": "CollateralAssetType_NONE",
+          "description": "No asset provided as security."
+        },
+        {
+          "value": "CollateralAssetType_OTHER",
+          "description": "An asset type not otherwise modeled."
+        }
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "id": "RA12B76BF8DE",
+      "expression": "(= hasRecentBankStatements (and (>= bankStatementsMonthsCount 3) (>= mostRecentStatementAgeDays 0) (< mostRecentStatementAgeDays 90)))"
+    },
+    {
+      "id": "REA8EDEE79BD",
+      "expression": "(= isUKBased (and isRegisteredInUK hasUKAddress))"
+    },
+    {
+      "id": "R3BE377C8423",
+      "expression": "(=> hasCompaniesHouseMatch (and isRegisteredInUK hasUKAddress))"
+    },
+    {
+      "id": "RC963E9514CF",
+      "expression": "(= isEligibleBusinessType (or (= businessType BusinessType_LIMITED_COMPANY) (= businessType BusinessType_PARTNERSHIP)))"
+    },
+    {
+      "id": "R2525ED452F6",
+      "expression": "(= hasValidDirectorID (or (= directorIDType DirectorIDType_DRIVERS_LICENCE) (= directorIDType DirectorIDType_PASSPORT)))"
+    },
+    {
+      "id": "R13F54400C82",
+      "expression": "(= isApplicantAgeEligible (>= applicantAge 18))"
+    },
+    {
+      "id": "RF38D95C9C6B",
+      "expression": "(= loanAmountInRange (and (>= loanAmount 25000) (<= loanAmount 20000000)))"
+    },
+    {
+      "id": "RB16B44D0E0A",
+      "expression": "(= hasRequiredDocuments (and hasRecentBankStatements hasAnnualAccounts lastAccountingDateWithinPast12Months hasProofOfCollateralOwnershipValuation))"
+    },
+    {
+      "id": "RD2D3CEB7ABE",
+      "expression": "(= hasSecurityAsset (or (= collateralAssetType CollateralAssetType_PROPERTY) (= collateralAssetType CollateralAssetType_EQUIPMENT) (= collateralAssetType CollateralAssetType_VEHICLES) (= collateralAssetType CollateralAssetType_INVOICES) (= collateralAssetType CollateralAssetType_INTANGIBLE_ASSETS)))"
+    },
+    {
+      "id": "R035E3BED3A1",
+      "expression": "(= meetsMinimumTradingHistory (>= tradingHistoryMonths 12))"
+    },
+    {
+      "id": "R33CBFE95669",
+      "expression": "(= isSubstantivelyEligible (and isUKBased isEligibleBusinessType isApplicantAgeEligible loanAmountInRange (>= loanTermMonths 12) (<= loanTermMonths 72) hasSecurityAsset meetsMinimumTradingHistory))"
+    },
+    {
+      "id": "RDEB65B8788F",
+      "expression": "(= approvalMeetsCoveredPolicy (and isSubstantivelyEligible hasRequiredDocuments))"
+    }
+  ],
+  "variables": [
+    {
+      "name": "bankStatementsMonthsCount",
+      "type": "INT",
+      "description": "The number of months of bank statements supplied by the applicant. Policy requires at least 3 months."
+    },
+    {
+      "name": "mostRecentStatementAgeDays",
+      "type": "INT",
+      "description": "The age, in days, of the most recent bank statement measured from the date of application. Policy requires this to be less than 90 days."
+    },
+    {
+      "name": "hasRecentBankStatements",
+      "type": "BOOL",
+      "description": "True if the supplied bank statements meet the recency/sufficiency rule: at least 3 months of statements and the most recent statement is less than 90 days old on the date of application. Determined deterministically by the check_bank_statements_recent_and_sufficient tool."
+    },
+    {
+      "name": "isRegisteredInUK",
+      "type": "BOOL",
+      "description": "True if the business is registered in the UK (i.e. has a UK registration)."
+    },
+    {
+      "name": "hasUKAddress",
+      "type": "BOOL",
+      "description": "True if the business has a UK address."
+    },
+    {
+      "name": "isUKBased",
+      "type": "BOOL",
+      "description": "True if the business is UK-based, meaning it is registered in the UK and has a UK address."
+    },
+    {
+      "name": "hasCompaniesHouseMatch",
+      "type": "BOOL",
+      "description": "True if there is a confirmed Companies House match for the business (via the check_companies_house check). A confirmed match is itself proof that the business is both registered in the UK and has a UK address."
+    },
+    {
+      "name": "businessType",
+      "type": "BusinessType",
+      "description": "The legal structure of the applicant business. Must be a limited company or partnership (not a sole trader) to be eligible."
+    },
+    {
+      "name": "isEligibleBusinessType",
+      "type": "BOOL",
+      "description": "True if the business is an eligible business type: a limited company or a partnership (not a sole trader)."
+    },
+    {
+      "name": "lastAccountingDateWithinPast12Months",
+      "type": "BOOL",
+      "description": "True if the last accounting date of the filed accounts (accounting statements or annual reports) is within the past 12 months from the date of application."
+    },
+    {
+      "name": "directorIDType",
+      "type": "DirectorIDType",
+      "description": "The type of identification document supplied as Director ID. Valid Director ID is a driver's licence or a passport."
+    },
+    {
+      "name": "hasValidDirectorID",
+      "type": "BOOL",
+      "description": "True if a valid Director ID (a driver's licence or a passport) has been supplied."
+    },
+    {
+      "name": "applicantAge",
+      "type": "INT",
+      "description": "The age of the applicant in years. Must be 18 or older to be eligible."
+    },
+    {
+      "name": "isApplicantAgeEligible",
+      "type": "BOOL",
+      "description": "True if the applicant is aged 18 or older."
+    },
+    {
+      "name": "loanAmount",
+      "type": "NUMBER",
+      "description": "The requested secured business loan amount in GBP. Must be between \u00a325,000 and \u00a320,000,000 inclusive."
+    },
+    {
+      "name": "loanAmountInRange",
+      "type": "BOOL",
+      "description": "True if the requested loan amount falls within the \u00a325,000\u2013\u00a320,000,000 range. Determined deterministically by the check_secured_business_loan_amount_in_range tool."
+    },
+    {
+      "name": "loanTermMonths",
+      "type": "INT",
+      "description": "The requested loan term in months for a secured business loan. Must be between 12 and 72 months inclusive."
+    },
+    {
+      "name": "hasAnnualAccounts",
+      "type": "BOOL",
+      "description": "True if the applicant has supplied annual accounts as required for a secured business loan."
+    },
+    {
+      "name": "hasProofOfCollateralOwnershipValuation",
+      "type": "BOOL",
+      "description": "True if the applicant has supplied proof of ownership/valuation of the collateral asset."
+    },
+    {
+      "name": "hasRequiredDocuments",
+      "type": "BOOL",
+      "description": "Whether at least three months of bank statements with the latest less than 90 days old, annual accounts with the latest accounting date within the past 12 months, and proof of collateral ownership/valuation have been supplied."
+    },
+    {
+      "name": "collateralAssetType",
+      "type": "CollateralAssetType",
+      "description": "The type of asset provided as security for the secured business loan. Must be property, equipment, vehicles, invoices, or intangible assets."
+    },
+    {
+      "name": "hasSecurityAsset",
+      "type": "BOOL",
+      "description": "True if the applicant provides a valid asset as security (property, equipment, vehicles, invoices, or intangible assets)."
+    },
+    {
+      "name": "tradingHistoryMonths",
+      "type": "INT",
+      "description": "The number of months of trading history of the business. A secured business loan requires a minimum of 12 months trading history."
+    },
+    {
+      "name": "meetsMinimumTradingHistory",
+      "type": "BOOL",
+      "description": "True if the business has at least 12 months of trading history."
+    },
+    {
+      "name": "isSubstantivelyEligible",
+      "type": "BOOL",
+      "description": "Whether the application meets the secured-loan substantive eligibility requirements: UK-based, limited company or partnership, applicant at least 18, loan amount GBP25000 through GBP20000000 inclusive, term 12 through 72 months inclusive, qualifying collateral asset, and at least 12 months trading. Does not include document completeness."
+    },
+    {
+      "name": "approvalMeetsCoveredPolicy",
+      "type": "BOOL",
+      "description": "Whether a proposed approval satisfies the substantive eligibility and documentation requirements covered by this secured lending policy. This is permission under these covered rules, not an obligation to approve the loan; other assessments can still cause rejection or referral. An approved outcome claims that approvalMeetsCoveredPolicy is true. A referred or rejected outcome alone makes no claim about this variable."
+    }
+  ]
+}

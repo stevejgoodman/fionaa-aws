@@ -1,0 +1,15 @@
+{
+  "name": "FionaaSecuredPolicyConsistency",
+  "description": "Standalone Automated Reasoning checks for FIONAA secured lending",
+  "automatedReasoningPolicyConfig": {
+    "policies": [
+      "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/t5e1432k93z6:1"
+    ],
+    "confidenceThreshold": 0.8
+  },
+  "blockedInputMessaging": "Policy validation requires review.",
+  "blockedOutputsMessaging": "Policy validation requires review.",
+  "crossRegionConfig": {
+    "guardrailProfileIdentifier": "us.guardrail.v1:0"
+  }
+}

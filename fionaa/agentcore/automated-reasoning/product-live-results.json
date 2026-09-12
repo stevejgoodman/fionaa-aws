@@ -1,0 +1,5368 @@
+[
+  {
+    "product": "unsecured-business-loans",
+    "case": "statement_age_89",
+    "facts": {
+      "bankStatementsMonthsCount": 3,
+      "mostRecentStatementAgeDays": 89
+    },
+    "claim": {
+      "summary": "The bank statements meet the policy's coverage and recency requirements."
+    },
+    "expected": "valid",
+    "matched": true,
+    "passed": true,
+    "policy_sha256": "59192d6b3c4bb7a00ce0a4b26deb12633fa8970c4bc761ff2d1023962840c62c",
+    "findings": [
+      {
+        "valid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   89)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 89"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "hasRecentBankStatements",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= isVATRegistered\n   false)",
+                "naturalLanguage": "isVATRegistered is false"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= tradingHistoryMonths\n   6)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 6"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   89)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 89"
+              },
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   true)",
+                "naturalLanguage": "meetsMinimumTradingHistory is true"
+              },
+              {
+                "logic": "(= hasProofOfDirectorAddress\n   true)",
+                "naturalLanguage": "hasProofOfDirectorAddress is true"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= loanTermInRange true)",
+                "naturalLanguage": "loanTermInRange is true"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= loanTermMonths 3)",
+                "naturalLanguage": "loanTermMonths is equal to 3"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= hasExistingBorrowing\n   false)",
+                "naturalLanguage": "hasExistingBorrowing is false"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "(= loanAmount 1000)",
+                "naturalLanguage": "loanAmount is equal to 1000"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= applicantAge 18)",
+                "naturalLanguage": "applicantAge is equal to 18"
+              },
+              {
+                "logic": "(= hasPersonalGuarantee\n   false)",
+                "naturalLanguage": "hasPersonalGuarantee is false"
+              },
+              {
+                "logic": "(= personalGuaranteeRequirementMet\n   true)",
+                "naturalLanguage": "personalGuaranteeRequirementMet is true"
+              },
+              {
+                "logic": "(= hasBorrowingDetails\n   false)",
+                "naturalLanguage": "hasBorrowingDetails is false"
+              },
+              {
+                "logic": "(= hasAccountsOrManagementInformation\n   true)",
+                "naturalLanguage": "hasAccountsOrManagementInformation is true"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= hasVATReturns false)",
+                "naturalLanguage": "hasVATReturns is false"
+              },
+              {
+                "logic": "(= loanAmountInRange\n   true)",
+                "naturalLanguage": "loanAmountInRange is true"
+              }
+            ]
+          },
+          "supportingRules": [
+            {
+              "identifier": "RA12B76BF8DE",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/8kzm1thspmq8:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "5h5yunnkf895",
+    "guardrail_version": "1",
+    "status": "valid",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "f794b928-cb49-4b67-88ef-4466590a7a8e"
+  },
+  {
+    "product": "unsecured-business-loans",
+    "case": "statement_age_90",
+    "facts": {
+      "bankStatementsMonthsCount": 3,
+      "mostRecentStatementAgeDays": 90
+    },
+    "claim": {
+      "summary": "The bank statements meet the policy's coverage and recency requirements."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "59192d6b3c4bb7a00ce0a4b26deb12633fa8970c4bc761ff2d1023962840c62c",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   90)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 90"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "hasRecentBankStatements",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "RA12B76BF8DE",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/8kzm1thspmq8:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "5h5yunnkf895",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "d1a9ee52-a249-4a06-ac64-0c623fd16b2a"
+  },
+  {
+    "product": "unsecured-business-loans",
+    "case": "trading_5",
+    "facts": {
+      "tradingHistoryMonths": 5
+    },
+    "claim": {
+      "summary": "The business meets the minimum trading history requirement."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "59192d6b3c4bb7a00ce0a4b26deb12633fa8970c4bc761ff2d1023962840c62c",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= tradingHistoryMonths\n   5)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 5"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "meetsMinimumTradingHistory",
+                "naturalLanguage": "meetsMinimumTradingHistory is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "RCA211316A27",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/8kzm1thspmq8:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "5h5yunnkf895",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "509b9e12-782b-4828-8d80-3636e89c092c"
+  },
+  {
+    "product": "unsecured-business-loans",
+    "case": "trading_6",
+    "facts": {
+      "tradingHistoryMonths": 6
+    },
+    "claim": {
+      "summary": "The business meets the minimum trading history requirement."
+    },
+    "expected": "valid",
+    "matched": true,
+    "passed": true,
+    "policy_sha256": "59192d6b3c4bb7a00ce0a4b26deb12633fa8970c4bc761ff2d1023962840c62c",
+    "findings": [
+      {
+        "valid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= tradingHistoryMonths\n   6)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 6"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "meetsMinimumTradingHistory",
+                "naturalLanguage": "meetsMinimumTradingHistory is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= loanTermInRange true)",
+                "naturalLanguage": "loanTermInRange is true"
+              },
+              {
+                "logic": "(= isVATRegistered\n   false)",
+                "naturalLanguage": "isVATRegistered is false"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   true)",
+                "naturalLanguage": "meetsMinimumTradingHistory is true"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= tradingHistoryMonths\n   6)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 6"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= hasProofOfDirectorAddress\n   true)",
+                "naturalLanguage": "hasProofOfDirectorAddress is true"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              },
+              {
+                "logic": "(= personalGuaranteeRequirementMet\n   true)",
+                "naturalLanguage": "personalGuaranteeRequirementMet is true"
+              },
+              {
+                "logic": "(= hasBorrowingDetails\n   false)",
+                "naturalLanguage": "hasBorrowingDetails is false"
+              },
+              {
+                "logic": "(= hasAccountsOrManagementInformation\n   true)",
+                "naturalLanguage": "hasAccountsOrManagementInformation is true"
+              },
+              {
+                "logic": "(= loanAmountInRange\n   true)",
+                "naturalLanguage": "loanAmountInRange is true"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= hasVATReturns false)",
+                "naturalLanguage": "hasVATReturns is false"
+              },
+              {
+                "logic": "(= loanTermMonths 3)",
+                "naturalLanguage": "loanTermMonths is equal to 3"
+              },
+              {
+                "logic": "(= hasPersonalGuarantee\n   false)",
+                "naturalLanguage": "hasPersonalGuarantee is false"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "(= applicantAge 18)",
+                "naturalLanguage": "applicantAge is equal to 18"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= hasExistingBorrowing\n   false)",
+                "naturalLanguage": "hasExistingBorrowing is false"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= loanAmount 1000)",
+                "naturalLanguage": "loanAmount is equal to 1000"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              }
+            ]
+          },
+          "supportingRules": [
+            {
+              "identifier": "RCA211316A27",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/8kzm1thspmq8:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "5h5yunnkf895",
+    "guardrail_version": "1",
+    "status": "valid",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "97910b13-a698-4afe-bec0-dbaa7796389c"
+  },
+  {
+    "product": "unsecured-business-loans",
+    "case": "guarantee_25000",
+    "facts": {
+      "loanAmount": 25000,
+      "hasPersonalGuarantee": false
+    },
+    "claim": {
+      "summary": "The personal guarantee requirement is satisfied for this loan."
+    },
+    "expected": "valid",
+    "matched": true,
+    "passed": true,
+    "policy_sha256": "59192d6b3c4bb7a00ce0a4b26deb12633fa8970c4bc761ff2d1023962840c62c",
+    "findings": [
+      {
+        "valid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= loanAmount 25000.0)",
+                "naturalLanguage": "loanAmount is equal to 25000.0"
+              },
+              {
+                "logic": "(not hasPersonalGuarantee)",
+                "naturalLanguage": "hasPersonalGuarantee is false"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "personalGuaranteeRequirementMet",
+                "naturalLanguage": "personalGuaranteeRequirementMet is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   true)",
+                "naturalLanguage": "meetsMinimumTradingHistory is true"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= personalGuaranteeRequirementMet\n   true)",
+                "naturalLanguage": "personalGuaranteeRequirementMet is true"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= hasProofOfDirectorAddress\n   true)",
+                "naturalLanguage": "hasProofOfDirectorAddress is true"
+              },
+              {
+                "logic": "(= applicantAge 18)",
+                "naturalLanguage": "applicantAge is equal to 18"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= hasPersonalGuarantee\n   false)",
+                "naturalLanguage": "hasPersonalGuarantee is false"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= tradingHistoryMonths\n   6)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 6"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= loanAmount 25000)",
+                "naturalLanguage": "loanAmount is equal to 25000"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= isVATRegistered\n   false)",
+                "naturalLanguage": "isVATRegistered is false"
+              },
+              {
+                "logic": "(= loanTermInRange true)",
+                "naturalLanguage": "loanTermInRange is true"
+              },
+              {
+                "logic": "(= hasExistingBorrowing\n   false)",
+                "naturalLanguage": "hasExistingBorrowing is false"
+              },
+              {
+                "logic": "(= loanTermMonths 3)",
+                "naturalLanguage": "loanTermMonths is equal to 3"
+              },
+              {
+                "logic": "(= hasAccountsOrManagementInformation\n   true)",
+                "naturalLanguage": "hasAccountsOrManagementInformation is true"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= hasBorrowingDetails\n   false)",
+                "naturalLanguage": "hasBorrowingDetails is false"
+              },
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= hasVATReturns false)",
+                "naturalLanguage": "hasVATReturns is false"
+              },
+              {
+                "logic": "(= loanAmountInRange\n   true)",
+                "naturalLanguage": "loanAmountInRange is true"
+              }
+            ]
+          },
+          "supportingRules": [
+            {
+              "identifier": "RD826776CB67",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/8kzm1thspmq8:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "5h5yunnkf895",
+    "guardrail_version": "1",
+    "status": "valid",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "24d9f320-44d1-44fa-8944-d060ebb38660"
+  },
+  {
+    "product": "unsecured-business-loans",
+    "case": "guarantee_25001",
+    "facts": {
+      "loanAmount": 25001,
+      "hasPersonalGuarantee": false
+    },
+    "claim": {
+      "summary": "The personal guarantee requirement is satisfied for this loan."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "59192d6b3c4bb7a00ce0a4b26deb12633fa8970c4bc761ff2d1023962840c62c",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= loanAmount 25001.0)",
+                "naturalLanguage": "loanAmount is equal to 25001.0"
+              },
+              {
+                "logic": "(not hasPersonalGuarantee)",
+                "naturalLanguage": "hasPersonalGuarantee is false"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "personalGuaranteeRequirementMet",
+                "naturalLanguage": "personalGuaranteeRequirementMet is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "RD826776CB67",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/8kzm1thspmq8:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "5h5yunnkf895",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "315c092f-e328-4148-bb21-4850b460bb09"
+  },
+  {
+    "product": "unsecured-business-loans",
+    "case": "term_60",
+    "facts": {
+      "loanTermMonths": 60
+    },
+    "claim": {
+      "summary": "The requested loan term is within the allowed policy range."
+    },
+    "expected": "valid",
+    "matched": true,
+    "passed": true,
+    "policy_sha256": "59192d6b3c4bb7a00ce0a4b26deb12633fa8970c4bc761ff2d1023962840c62c",
+    "findings": [
+      {
+        "valid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= loanTermMonths 60)",
+                "naturalLanguage": "loanTermMonths is equal to 60"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "loanTermInRange",
+                "naturalLanguage": "loanTermInRange is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= loanTermInRange true)",
+                "naturalLanguage": "loanTermInRange is true"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   true)",
+                "naturalLanguage": "meetsMinimumTradingHistory is true"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= isVATRegistered\n   false)",
+                "naturalLanguage": "isVATRegistered is false"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= applicantAge 18)",
+                "naturalLanguage": "applicantAge is equal to 18"
+              },
+              {
+                "logic": "(= hasProofOfDirectorAddress\n   true)",
+                "naturalLanguage": "hasProofOfDirectorAddress is true"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              },
+              {
+                "logic": "(= loanAmountInRange\n   true)",
+                "naturalLanguage": "loanAmountInRange is true"
+              },
+              {
+                "logic": "(= hasBorrowingDetails\n   false)",
+                "naturalLanguage": "hasBorrowingDetails is false"
+              },
+              {
+                "logic": "(= personalGuaranteeRequirementMet\n   true)",
+                "naturalLanguage": "personalGuaranteeRequirementMet is true"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= hasVATReturns false)",
+                "naturalLanguage": "hasVATReturns is false"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= loanTermMonths 60)",
+                "naturalLanguage": "loanTermMonths is equal to 60"
+              },
+              {
+                "logic": "(= hasAccountsOrManagementInformation\n   true)",
+                "naturalLanguage": "hasAccountsOrManagementInformation is true"
+              },
+              {
+                "logic": "(= hasPersonalGuarantee\n   false)",
+                "naturalLanguage": "hasPersonalGuarantee is false"
+              },
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= tradingHistoryMonths\n   6)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 6"
+              },
+              {
+                "logic": "(= hasExistingBorrowing\n   false)",
+                "naturalLanguage": "hasExistingBorrowing is false"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= loanAmount 1000)",
+                "naturalLanguage": "loanAmount is equal to 1000"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              }
+            ]
+          },
+          "supportingRules": [
+            {
+              "identifier": "R794D56A3524",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/8kzm1thspmq8:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "5h5yunnkf895",
+    "guardrail_version": "1",
+    "status": "valid",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "498735ab-dbad-4ac7-925d-2371749244a5"
+  },
+  {
+    "product": "unsecured-business-loans",
+    "case": "term_61",
+    "facts": {
+      "loanTermMonths": 61
+    },
+    "claim": {
+      "summary": "The requested loan term is within the allowed policy range."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "59192d6b3c4bb7a00ce0a4b26deb12633fa8970c4bc761ff2d1023962840c62c",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= loanTermMonths 61)",
+                "naturalLanguage": "loanTermMonths is equal to 61"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "loanTermInRange",
+                "naturalLanguage": "loanTermInRange is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "R794D56A3524",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/8kzm1thspmq8:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "5h5yunnkf895",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "077dea9c-64e3-428d-b6e6-95c4b92c8d5d"
+  },
+  {
+    "product": "unsecured-business-loans",
+    "case": "amount_1000",
+    "facts": {
+      "loanAmount": 1000
+    },
+    "claim": {
+      "summary": "The requested loan amount is within the policy range."
+    },
+    "expected": "valid",
+    "matched": true,
+    "passed": true,
+    "policy_sha256": "59192d6b3c4bb7a00ce0a4b26deb12633fa8970c4bc761ff2d1023962840c62c",
+    "findings": [
+      {
+        "valid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= loanAmount 1000.0)",
+                "naturalLanguage": "loanAmount is equal to 1000.0"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "loanAmountInRange",
+                "naturalLanguage": "loanAmountInRange is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= personalGuaranteeRequirementMet\n   true)",
+                "naturalLanguage": "personalGuaranteeRequirementMet is true"
+              },
+              {
+                "logic": "(= loanAmount 1000)",
+                "naturalLanguage": "loanAmount is equal to 1000"
+              },
+              {
+                "logic": "(= loanAmountInRange\n   true)",
+                "naturalLanguage": "loanAmountInRange is true"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= hasVATReturns false)",
+                "naturalLanguage": "hasVATReturns is false"
+              },
+              {
+                "logic": "(= loanTermInRange true)",
+                "naturalLanguage": "loanTermInRange is true"
+              },
+              {
+                "logic": "(= loanTermMonths 3)",
+                "naturalLanguage": "loanTermMonths is equal to 3"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= hasAccountsOrManagementInformation\n   true)",
+                "naturalLanguage": "hasAccountsOrManagementInformation is true"
+              },
+              {
+                "logic": "(= isVATRegistered\n   false)",
+                "naturalLanguage": "isVATRegistered is false"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= hasProofOfDirectorAddress\n   true)",
+                "naturalLanguage": "hasProofOfDirectorAddress is true"
+              },
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   true)",
+                "naturalLanguage": "meetsMinimumTradingHistory is true"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= hasPersonalGuarantee\n   false)",
+                "naturalLanguage": "hasPersonalGuarantee is false"
+              },
+              {
+                "logic": "(= hasExistingBorrowing\n   false)",
+                "naturalLanguage": "hasExistingBorrowing is false"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= tradingHistoryMonths\n   6)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 6"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              },
+              {
+                "logic": "(= hasBorrowingDetails\n   false)",
+                "naturalLanguage": "hasBorrowingDetails is false"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "(= applicantAge 18)",
+                "naturalLanguage": "applicantAge is equal to 18"
+              }
+            ]
+          },
+          "supportingRules": [
+            {
+              "identifier": "R460A1CE8A09",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/8kzm1thspmq8:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "5h5yunnkf895",
+    "guardrail_version": "1",
+    "status": "valid",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "de7bd630-8e22-4fa3-a895-836b088bb601"
+  },
+  {
+    "product": "unsecured-business-loans",
+    "case": "amount_999",
+    "facts": {
+      "loanAmount": 999
+    },
+    "claim": {
+      "summary": "The requested loan amount is within the policy range."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "59192d6b3c4bb7a00ce0a4b26deb12633fa8970c4bc761ff2d1023962840c62c",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= loanAmount 999.0)",
+                "naturalLanguage": "loanAmount is equal to 999.0"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "loanAmountInRange",
+                "naturalLanguage": "loanAmountInRange is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "R460A1CE8A09",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/8kzm1thspmq8:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "5h5yunnkf895",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "a5133d0b-55a7-40e4-8d61-a98f5b1002e2"
+  },
+  {
+    "product": "unsecured-business-loans",
+    "case": "amount_500000",
+    "facts": {
+      "loanAmount": 500000
+    },
+    "claim": {
+      "summary": "The requested loan amount is within the policy range."
+    },
+    "expected": "valid",
+    "matched": true,
+    "passed": true,
+    "policy_sha256": "59192d6b3c4bb7a00ce0a4b26deb12633fa8970c4bc761ff2d1023962840c62c",
+    "findings": [
+      {
+        "valid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= loanAmount 500000.0)",
+                "naturalLanguage": "loanAmount is equal to 500000.0"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "loanAmountInRange",
+                "naturalLanguage": "loanAmountInRange is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= hasBorrowingDetails\n   false)",
+                "naturalLanguage": "hasBorrowingDetails is false"
+              },
+              {
+                "logic": "(= hasAccountsOrManagementInformation\n   true)",
+                "naturalLanguage": "hasAccountsOrManagementInformation is true"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              },
+              {
+                "logic": "(= hasExistingBorrowing\n   false)",
+                "naturalLanguage": "hasExistingBorrowing is false"
+              },
+              {
+                "logic": "(= loanTermMonths 3)",
+                "naturalLanguage": "loanTermMonths is equal to 3"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= isVATRegistered\n   false)",
+                "naturalLanguage": "isVATRegistered is false"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= tradingHistoryMonths\n   6)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 6"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   true)",
+                "naturalLanguage": "meetsMinimumTradingHistory is true"
+              },
+              {
+                "logic": "(= hasProofOfDirectorAddress\n   true)",
+                "naturalLanguage": "hasProofOfDirectorAddress is true"
+              },
+              {
+                "logic": "(= hasPersonalGuarantee\n   true)",
+                "naturalLanguage": "hasPersonalGuarantee is true"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= loanTermInRange true)",
+                "naturalLanguage": "loanTermInRange is true"
+              },
+              {
+                "logic": "(= personalGuaranteeRequirementMet\n   true)",
+                "naturalLanguage": "personalGuaranteeRequirementMet is true"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= hasVATReturns false)",
+                "naturalLanguage": "hasVATReturns is false"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= loanAmount 500000)",
+                "naturalLanguage": "loanAmount is equal to 500000"
+              },
+              {
+                "logic": "(= loanAmountInRange\n   true)",
+                "naturalLanguage": "loanAmountInRange is true"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "(= applicantAge 18)",
+                "naturalLanguage": "applicantAge is equal to 18"
+              }
+            ]
+          },
+          "supportingRules": [
+            {
+              "identifier": "R460A1CE8A09",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/8kzm1thspmq8:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "5h5yunnkf895",
+    "guardrail_version": "1",
+    "status": "valid",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "37cb2e34-40cb-4638-996c-45167da5dd91"
+  },
+  {
+    "product": "unsecured-business-loans",
+    "case": "amount_500001",
+    "facts": {
+      "loanAmount": 500001
+    },
+    "claim": {
+      "summary": "The requested loan amount is within the policy range."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "59192d6b3c4bb7a00ce0a4b26deb12633fa8970c4bc761ff2d1023962840c62c",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= loanAmount 500001.0)",
+                "naturalLanguage": "loanAmount is equal to 500001.0"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "loanAmountInRange",
+                "naturalLanguage": "loanAmountInRange is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "R460A1CE8A09",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/8kzm1thspmq8:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "5h5yunnkf895",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "24ed363e-9153-4266-8648-f6a5d91bdd08"
+  },
+  {
+    "product": "unsecured-business-loans",
+    "case": "approval_missing_documents",
+    "facts": {
+      "hasRequiredDocuments": false
+    },
+    "claim": {
+      "outcome": "approved",
+      "reason": "This approval meets all covered policy requirements."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "59192d6b3c4bb7a00ce0a4b26deb12633fa8970c4bc761ff2d1023962840c62c",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= hasRequiredDocuments\n   false)",
+                "naturalLanguage": "hasRequiredDocuments is false"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "approvalMeetsCoveredPolicy",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "RBDC420BFF59",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/8kzm1thspmq8:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "5h5yunnkf895",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "05305f01-b036-4507-a02e-967afb529b15"
+  },
+  {
+    "product": "revolving-credit-facility",
+    "case": "statement_age_89",
+    "facts": {
+      "bankStatementsMonthsCount": 3,
+      "mostRecentStatementAgeDays": 89
+    },
+    "claim": {
+      "summary": "The bank statements meet the policy's coverage and recency requirements."
+    },
+    "expected": "valid",
+    "matched": true,
+    "passed": true,
+    "policy_sha256": "8ffafa54cbf8f826f4742477eee12561f34e6c30bbe7386e0315fe938910337e",
+    "findings": [
+      {
+        "valid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   89)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 89"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "hasRecentBankStatements",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= loanAmountInRange\n   true)",
+                "naturalLanguage": "loanAmountInRange is true"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   89)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 89"
+              },
+              {
+                "logic": "(= tradingHistoryMonths\n   12)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 12"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= hasProofOfDirectorAddress\n   true)",
+                "naturalLanguage": "hasProofOfDirectorAddress is true"
+              },
+              {
+                "logic": "(= hasBorrowingDetails\n   true)",
+                "naturalLanguage": "hasBorrowingDetails is true"
+              },
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   true)",
+                "naturalLanguage": "meetsMinimumTradingHistory is true"
+              },
+              {
+                "logic": "(= hasAccountsOrManagementInformation\n   true)",
+                "naturalLanguage": "hasAccountsOrManagementInformation is true"
+              },
+              {
+                "logic": "(= isSecuredFacility\n   false)",
+                "naturalLanguage": "isSecuredFacility is false"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= hasVATReturns false)",
+                "naturalLanguage": "hasVATReturns is false"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= isVATRegistered\n   false)",
+                "naturalLanguage": "isVATRegistered is false"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= applicantAge 18)",
+                "naturalLanguage": "applicantAge is equal to 18"
+              },
+              {
+                "logic": "(= hasSecurityAssetDetails\n   false)",
+                "naturalLanguage": "hasSecurityAssetDetails is false"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= loanAmount 10000)",
+                "naturalLanguage": "loanAmount is equal to 10000"
+              }
+            ]
+          },
+          "supportingRules": [
+            {
+              "identifier": "RA12B76BF8DE",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/gwekvzglmnzl:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "cdue92mr0ap4",
+    "guardrail_version": "1",
+    "status": "valid",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "fe709f25-0c72-462d-ba06-8263f299f24b"
+  },
+  {
+    "product": "revolving-credit-facility",
+    "case": "statement_age_90",
+    "facts": {
+      "bankStatementsMonthsCount": 3,
+      "mostRecentStatementAgeDays": 90
+    },
+    "claim": {
+      "summary": "The bank statements meet the policy's coverage and recency requirements."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "8ffafa54cbf8f826f4742477eee12561f34e6c30bbe7386e0315fe938910337e",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   90)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 90"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "hasRecentBankStatements",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "RA12B76BF8DE",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/gwekvzglmnzl:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "cdue92mr0ap4",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "a6a5d029-3a1c-4045-89e5-b418f961afc7"
+  },
+  {
+    "product": "revolving-credit-facility",
+    "case": "trading_11",
+    "facts": {
+      "tradingHistoryMonths": 11
+    },
+    "claim": {
+      "summary": "The business meets the minimum trading history requirement."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "8ffafa54cbf8f826f4742477eee12561f34e6c30bbe7386e0315fe938910337e",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= tradingHistoryMonths\n   11)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 11"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "meetsMinimumTradingHistory",
+                "naturalLanguage": "meetsMinimumTradingHistory is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "RB890D3E7502",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/gwekvzglmnzl:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "cdue92mr0ap4",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "28b918fb-280f-4c32-b9e8-5013fbf0824d"
+  },
+  {
+    "product": "revolving-credit-facility",
+    "case": "trading_12",
+    "facts": {
+      "tradingHistoryMonths": 12
+    },
+    "claim": {
+      "summary": "The business meets the minimum trading history requirement."
+    },
+    "expected": "valid",
+    "matched": true,
+    "passed": true,
+    "policy_sha256": "8ffafa54cbf8f826f4742477eee12561f34e6c30bbe7386e0315fe938910337e",
+    "findings": [
+      {
+        "valid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= tradingHistoryMonths\n   12)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 12"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "meetsMinimumTradingHistory",
+                "naturalLanguage": "meetsMinimumTradingHistory is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= loanAmountInRange\n   true)",
+                "naturalLanguage": "loanAmountInRange is true"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= loanAmount 10000)",
+                "naturalLanguage": "loanAmount is equal to 10000"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= hasAccountsOrManagementInformation\n   true)",
+                "naturalLanguage": "hasAccountsOrManagementInformation is true"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= isSecuredFacility\n   false)",
+                "naturalLanguage": "isSecuredFacility is false"
+              },
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   true)",
+                "naturalLanguage": "meetsMinimumTradingHistory is true"
+              },
+              {
+                "logic": "(= hasProofOfDirectorAddress\n   true)",
+                "naturalLanguage": "hasProofOfDirectorAddress is true"
+              },
+              {
+                "logic": "(= isVATRegistered\n   false)",
+                "naturalLanguage": "isVATRegistered is false"
+              },
+              {
+                "logic": "(= tradingHistoryMonths\n   12)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 12"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= hasVATReturns false)",
+                "naturalLanguage": "hasVATReturns is false"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= hasBorrowingDetails\n   true)",
+                "naturalLanguage": "hasBorrowingDetails is true"
+              },
+              {
+                "logic": "(= hasSecurityAssetDetails\n   false)",
+                "naturalLanguage": "hasSecurityAssetDetails is false"
+              },
+              {
+                "logic": "(= applicantAge 18)",
+                "naturalLanguage": "applicantAge is equal to 18"
+              },
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              }
+            ]
+          },
+          "supportingRules": [
+            {
+              "identifier": "RB890D3E7502",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/gwekvzglmnzl:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "cdue92mr0ap4",
+    "guardrail_version": "1",
+    "status": "valid",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "d3ee5797-a164-4e10-aef1-12b98d2af9eb"
+  },
+  {
+    "product": "revolving-credit-facility",
+    "case": "amount_10000",
+    "facts": {
+      "loanAmount": 10000
+    },
+    "claim": {
+      "summary": "The requested facility amount is within the policy range."
+    },
+    "expected": "valid",
+    "matched": true,
+    "passed": true,
+    "policy_sha256": "8ffafa54cbf8f826f4742477eee12561f34e6c30bbe7386e0315fe938910337e",
+    "findings": [
+      {
+        "valid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= loanAmount 10000.0)",
+                "naturalLanguage": "loanAmount is equal to 10000.0"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "loanAmountInRange",
+                "naturalLanguage": "loanAmountInRange is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= loanAmountInRange\n   true)",
+                "naturalLanguage": "loanAmountInRange is true"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= loanAmount 10000)",
+                "naturalLanguage": "loanAmount is equal to 10000"
+              },
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "(= applicantAge 18)",
+                "naturalLanguage": "applicantAge is equal to 18"
+              },
+              {
+                "logic": "(= hasSecurityAssetDetails\n   false)",
+                "naturalLanguage": "hasSecurityAssetDetails is false"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              },
+              {
+                "logic": "(= hasVATReturns false)",
+                "naturalLanguage": "hasVATReturns is false"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= hasBorrowingDetails\n   true)",
+                "naturalLanguage": "hasBorrowingDetails is true"
+              },
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   true)",
+                "naturalLanguage": "meetsMinimumTradingHistory is true"
+              },
+              {
+                "logic": "(= hasAccountsOrManagementInformation\n   true)",
+                "naturalLanguage": "hasAccountsOrManagementInformation is true"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= isSecuredFacility\n   false)",
+                "naturalLanguage": "isSecuredFacility is false"
+              },
+              {
+                "logic": "(= hasProofOfDirectorAddress\n   true)",
+                "naturalLanguage": "hasProofOfDirectorAddress is true"
+              },
+              {
+                "logic": "(= isVATRegistered\n   false)",
+                "naturalLanguage": "isVATRegistered is false"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= tradingHistoryMonths\n   12)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 12"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              }
+            ]
+          },
+          "supportingRules": [
+            {
+              "identifier": "RC7B9F9A5B43",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/gwekvzglmnzl:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "cdue92mr0ap4",
+    "guardrail_version": "1",
+    "status": "valid",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "6ee19dfa-9b45-41cd-a11a-84ea87a2e8ef"
+  },
+  {
+    "product": "revolving-credit-facility",
+    "case": "amount_9999",
+    "facts": {
+      "loanAmount": 9999
+    },
+    "claim": {
+      "summary": "The requested facility amount is within the policy range."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "8ffafa54cbf8f826f4742477eee12561f34e6c30bbe7386e0315fe938910337e",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= loanAmount 9999.0)",
+                "naturalLanguage": "loanAmount is equal to 9999.0"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "loanAmountInRange",
+                "naturalLanguage": "loanAmountInRange is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "RC7B9F9A5B43",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/gwekvzglmnzl:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "cdue92mr0ap4",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "4eacd0f3-80e9-464f-ba7a-bfb7e10411eb"
+  },
+  {
+    "product": "revolving-credit-facility",
+    "case": "amount_1000000",
+    "facts": {
+      "loanAmount": 1000000
+    },
+    "claim": {
+      "summary": "The requested facility amount is within the policy range."
+    },
+    "expected": "valid",
+    "matched": true,
+    "passed": true,
+    "policy_sha256": "8ffafa54cbf8f826f4742477eee12561f34e6c30bbe7386e0315fe938910337e",
+    "findings": [
+      {
+        "valid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= loanAmount 1000000.0)",
+                "naturalLanguage": "loanAmount is equal to 1000000.0"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "loanAmountInRange",
+                "naturalLanguage": "loanAmountInRange is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= isSecuredFacility\n   false)",
+                "naturalLanguage": "isSecuredFacility is false"
+              },
+              {
+                "logic": "(= hasSecurityAssetDetails\n   false)",
+                "naturalLanguage": "hasSecurityAssetDetails is false"
+              },
+              {
+                "logic": "(= tradingHistoryMonths\n   12)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 12"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= isVATRegistered\n   false)",
+                "naturalLanguage": "isVATRegistered is false"
+              },
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= loanAmount 1000000)",
+                "naturalLanguage": "loanAmount is equal to 1000000"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= applicantAge 18)",
+                "naturalLanguage": "applicantAge is equal to 18"
+              },
+              {
+                "logic": "(= hasProofOfDirectorAddress\n   true)",
+                "naturalLanguage": "hasProofOfDirectorAddress is true"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= loanAmountInRange\n   true)",
+                "naturalLanguage": "loanAmountInRange is true"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= hasVATReturns false)",
+                "naturalLanguage": "hasVATReturns is false"
+              },
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   true)",
+                "naturalLanguage": "meetsMinimumTradingHistory is true"
+              },
+              {
+                "logic": "(= hasAccountsOrManagementInformation\n   true)",
+                "naturalLanguage": "hasAccountsOrManagementInformation is true"
+              },
+              {
+                "logic": "(= hasBorrowingDetails\n   true)",
+                "naturalLanguage": "hasBorrowingDetails is true"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              }
+            ]
+          },
+          "supportingRules": [
+            {
+              "identifier": "RC7B9F9A5B43",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/gwekvzglmnzl:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "cdue92mr0ap4",
+    "guardrail_version": "1",
+    "status": "valid",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "df333d82-cb52-44e2-bbe6-29fa9a90caa9"
+  },
+  {
+    "product": "revolving-credit-facility",
+    "case": "amount_1000001",
+    "facts": {
+      "loanAmount": 1000001
+    },
+    "claim": {
+      "summary": "The requested facility amount is within the policy range."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "8ffafa54cbf8f826f4742477eee12561f34e6c30bbe7386e0315fe938910337e",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= loanAmount 1000001.0)",
+                "naturalLanguage": "loanAmount is equal to 1000001.0"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "loanAmountInRange",
+                "naturalLanguage": "loanAmountInRange is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "RC7B9F9A5B43",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/gwekvzglmnzl:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "cdue92mr0ap4",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "0a5a87d7-13f5-4bf7-a9d9-a3f18e0fe4d2"
+  },
+  {
+    "product": "revolving-credit-facility",
+    "case": "conditional_security_False",
+    "facts": {
+      "hasRecentBankStatements": true,
+      "hasValidDirectorID": true,
+      "hasProofOfDirectorAddress": true,
+      "hasAccountsOrManagementInformation": true,
+      "isVATRegistered": false,
+      "hasBorrowingDetails": true,
+      "isSecuredFacility": false,
+      "hasSecurityAssetDetails": false
+    },
+    "claim": {
+      "summary": "All required documents for this revolving facility have been supplied."
+    },
+    "expected": "valid",
+    "matched": true,
+    "passed": true,
+    "policy_sha256": "8ffafa54cbf8f826f4742477eee12561f34e6c30bbe7386e0315fe938910337e",
+    "findings": [
+      {
+        "valid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "hasRecentBankStatements",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "hasValidDirectorID",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "hasProofOfDirectorAddress",
+                "naturalLanguage": "hasProofOfDirectorAddress is true"
+              },
+              {
+                "logic": "hasAccountsOrManagementInformation",
+                "naturalLanguage": "hasAccountsOrManagementInformation is true"
+              },
+              {
+                "logic": "(not isVATRegistered)",
+                "naturalLanguage": "isVATRegistered is false"
+              },
+              {
+                "logic": "hasBorrowingDetails",
+                "naturalLanguage": "hasBorrowingDetails is true"
+              },
+              {
+                "logic": "(not isSecuredFacility)",
+                "naturalLanguage": "isSecuredFacility is false"
+              },
+              {
+                "logic": "(not hasSecurityAssetDetails)",
+                "naturalLanguage": "hasSecurityAssetDetails is false"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "hasRequiredDocuments",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= loanAmount 10000)",
+                "naturalLanguage": "loanAmount is equal to 10000"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= hasAccountsOrManagementInformation\n   true)",
+                "naturalLanguage": "hasAccountsOrManagementInformation is true"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= hasBorrowingDetails\n   true)",
+                "naturalLanguage": "hasBorrowingDetails is true"
+              },
+              {
+                "logic": "(= applicantAge 18)",
+                "naturalLanguage": "applicantAge is equal to 18"
+              },
+              {
+                "logic": "(= hasSecurityAssetDetails\n   false)",
+                "naturalLanguage": "hasSecurityAssetDetails is false"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= loanAmountInRange\n   true)",
+                "naturalLanguage": "loanAmountInRange is true"
+              },
+              {
+                "logic": "(= isVATRegistered\n   false)",
+                "naturalLanguage": "isVATRegistered is false"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= hasVATReturns false)",
+                "naturalLanguage": "hasVATReturns is false"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   true)",
+                "naturalLanguage": "meetsMinimumTradingHistory is true"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              },
+              {
+                "logic": "(= isSecuredFacility\n   false)",
+                "naturalLanguage": "isSecuredFacility is false"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= hasProofOfDirectorAddress\n   true)",
+                "naturalLanguage": "hasProofOfDirectorAddress is true"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= tradingHistoryMonths\n   12)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 12"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              }
+            ]
+          },
+          "supportingRules": [
+            {
+              "identifier": "R4CA51F88E21",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/gwekvzglmnzl:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "cdue92mr0ap4",
+    "guardrail_version": "1",
+    "status": "valid",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "bffc8d4b-c327-42c4-8a20-ef5a2fd8605d"
+  },
+  {
+    "product": "revolving-credit-facility",
+    "case": "conditional_security_True",
+    "facts": {
+      "hasRecentBankStatements": true,
+      "hasValidDirectorID": true,
+      "hasProofOfDirectorAddress": true,
+      "hasAccountsOrManagementInformation": true,
+      "isVATRegistered": false,
+      "hasBorrowingDetails": true,
+      "isSecuredFacility": true,
+      "hasSecurityAssetDetails": false
+    },
+    "claim": {
+      "summary": "All required documents for this revolving facility have been supplied."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "8ffafa54cbf8f826f4742477eee12561f34e6c30bbe7386e0315fe938910337e",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "hasRecentBankStatements",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "hasValidDirectorID",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "hasProofOfDirectorAddress",
+                "naturalLanguage": "hasProofOfDirectorAddress is true"
+              },
+              {
+                "logic": "hasAccountsOrManagementInformation",
+                "naturalLanguage": "hasAccountsOrManagementInformation is true"
+              },
+              {
+                "logic": "(not isVATRegistered)",
+                "naturalLanguage": "isVATRegistered is false"
+              },
+              {
+                "logic": "hasBorrowingDetails",
+                "naturalLanguage": "hasBorrowingDetails is true"
+              },
+              {
+                "logic": "isSecuredFacility",
+                "naturalLanguage": "isSecuredFacility is true"
+              },
+              {
+                "logic": "(not hasSecurityAssetDetails)",
+                "naturalLanguage": "hasSecurityAssetDetails is false"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "hasRequiredDocuments",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "R4CA51F88E21",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/gwekvzglmnzl:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "cdue92mr0ap4",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "3c00868c-03e2-426c-af81-8c6c132073ac"
+  },
+  {
+    "product": "revolving-credit-facility",
+    "case": "approval_missing_documents",
+    "facts": {
+      "hasRequiredDocuments": false
+    },
+    "claim": {
+      "outcome": "approved",
+      "reason": "This approval meets all covered policy requirements."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "8ffafa54cbf8f826f4742477eee12561f34e6c30bbe7386e0315fe938910337e",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(not hasRequiredDocuments)",
+                "naturalLanguage": "hasRequiredDocuments is false"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "approvalMeetsCoveredPolicy",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [
+              {
+                "text": "SOURCE_TEXT_NOT_LOCATED"
+              }
+            ],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "R7D8214FB6F1",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/gwekvzglmnzl:1"
+            }
+          ]
+        }
+      },
+      {
+        "noTranslations": {}
+      }
+    ],
+    "guardrail_id": "cdue92mr0ap4",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "a42e3ee4-cfdc-4344-948b-212632a88292"
+  },
+  {
+    "product": "invoice-discounting",
+    "case": "statement_age_89",
+    "facts": {
+      "bankStatementsMonthsCount": 3,
+      "mostRecentStatementAgeDays": 89
+    },
+    "claim": {
+      "summary": "The bank statements meet the policy's coverage and recency requirements."
+    },
+    "expected": "valid",
+    "matched": true,
+    "passed": true,
+    "policy_sha256": "b1a79c82f543519da507b71aef7981671acea6dac2c57c0acfdbd40bdea26d63",
+    "findings": [
+      {
+        "valid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   89)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 89"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "hasRecentBankStatements",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= advanceRateInRange\n   true)",
+                "naturalLanguage": "advanceRateInRange is true"
+              },
+              {
+                "logic": "(= hasCreditControlProcedures\n   true)",
+                "naturalLanguage": "hasCreditControlProcedures is true"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= contractTermMonths 6)",
+                "naturalLanguage": "contractTermMonths is equal to 6"
+              },
+              {
+                "logic": "(= hasRecentFinancialStatements\n   true)",
+                "naturalLanguage": "hasRecentFinancialStatements is true"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= advanceRatePercent\n   70)",
+                "naturalLanguage": "advanceRatePercent is equal to 70"
+              },
+              {
+                "logic": "(= hasBusinessRegistrationDocuments\n   true)",
+                "naturalLanguage": "hasBusinessRegistrationDocuments is true"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   89)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 89"
+              },
+              {
+                "logic": "(= hasAgreedExitNoticePeriod\n   true)",
+                "naturalLanguage": "hasAgreedExitNoticePeriod is true"
+              },
+              {
+                "logic": "(= applicantAge 18)",
+                "naturalLanguage": "applicantAge is equal to 18"
+              },
+              {
+                "logic": "(= turnoverRequirementMet\n   true)",
+                "naturalLanguage": "turnoverRequirementMet is true"
+              },
+              {
+                "logic": "(= contractTermRequirementMet\n   true)",
+                "naturalLanguage": "contractTermRequirementMet is true"
+              },
+              {
+                "logic": "(= hasAgedDebtReports\n   true)",
+                "naturalLanguage": "hasAgedDebtReports is true"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= hasCustomerBaseDetails\n   true)",
+                "naturalLanguage": "hasCustomerBaseDetails is true"
+              },
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= annualTurnover\n   100000)",
+                "naturalLanguage": "annualTurnover is equal to 100000"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              }
+            ]
+          },
+          "supportingRules": [
+            {
+              "identifier": "RA12B76BF8DE",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/0ms904vzpwz3:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "7kbeqj127jvv",
+    "guardrail_version": "1",
+    "status": "valid",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "bd23ae36-2961-4023-b3f4-399c5574cd94"
+  },
+  {
+    "product": "invoice-discounting",
+    "case": "statement_age_90",
+    "facts": {
+      "bankStatementsMonthsCount": 3,
+      "mostRecentStatementAgeDays": 90
+    },
+    "claim": {
+      "summary": "The bank statements meet the policy's coverage and recency requirements."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "b1a79c82f543519da507b71aef7981671acea6dac2c57c0acfdbd40bdea26d63",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   90)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 90"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "hasRecentBankStatements",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "RA12B76BF8DE",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/0ms904vzpwz3:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "7kbeqj127jvv",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "0dc2f0fa-7c0f-4e01-8772-8cbe9d4e883d"
+  },
+  {
+    "product": "invoice-discounting",
+    "case": "turnover_99999",
+    "facts": {
+      "annualTurnover": 99999
+    },
+    "claim": {
+      "summary": "The annual turnover meets the minimum turnover requirement."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "b1a79c82f543519da507b71aef7981671acea6dac2c57c0acfdbd40bdea26d63",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= annualTurnover\n   99999.0)",
+                "naturalLanguage": "annualTurnover is equal to 99999.0"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "turnoverRequirementMet",
+                "naturalLanguage": "turnoverRequirementMet is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "R190B21D87A2",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/0ms904vzpwz3:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "7kbeqj127jvv",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "49ff0b13-55a7-4342-9cab-fef0c146b157"
+  },
+  {
+    "product": "invoice-discounting",
+    "case": "turnover_100000",
+    "facts": {
+      "annualTurnover": 100000
+    },
+    "claim": {
+      "summary": "The annual turnover meets the minimum turnover requirement."
+    },
+    "expected": "valid",
+    "matched": true,
+    "passed": true,
+    "policy_sha256": "b1a79c82f543519da507b71aef7981671acea6dac2c57c0acfdbd40bdea26d63",
+    "findings": [
+      {
+        "valid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= annualTurnover\n   100000.0)",
+                "naturalLanguage": "annualTurnover is equal to 100000.0"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "turnoverRequirementMet",
+                "naturalLanguage": "turnoverRequirementMet is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= annualTurnover\n   100000)",
+                "naturalLanguage": "annualTurnover is equal to 100000"
+              },
+              {
+                "logic": "(= advanceRatePercent\n   70)",
+                "naturalLanguage": "advanceRatePercent is equal to 70"
+              },
+              {
+                "logic": "(= hasRecentFinancialStatements\n   true)",
+                "naturalLanguage": "hasRecentFinancialStatements is true"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              },
+              {
+                "logic": "(= hasBusinessRegistrationDocuments\n   true)",
+                "naturalLanguage": "hasBusinessRegistrationDocuments is true"
+              },
+              {
+                "logic": "(= hasCreditControlProcedures\n   true)",
+                "naturalLanguage": "hasCreditControlProcedures is true"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= contractTermRequirementMet\n   true)",
+                "naturalLanguage": "contractTermRequirementMet is true"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "(= applicantAge 18)",
+                "naturalLanguage": "applicantAge is equal to 18"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= turnoverRequirementMet\n   true)",
+                "naturalLanguage": "turnoverRequirementMet is true"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= contractTermMonths 6)",
+                "naturalLanguage": "contractTermMonths is equal to 6"
+              },
+              {
+                "logic": "(= hasCustomerBaseDetails\n   true)",
+                "naturalLanguage": "hasCustomerBaseDetails is true"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= hasAgedDebtReports\n   true)",
+                "naturalLanguage": "hasAgedDebtReports is true"
+              },
+              {
+                "logic": "(= hasAgreedExitNoticePeriod\n   true)",
+                "naturalLanguage": "hasAgreedExitNoticePeriod is true"
+              },
+              {
+                "logic": "(= advanceRateInRange\n   true)",
+                "naturalLanguage": "advanceRateInRange is true"
+              }
+            ]
+          },
+          "supportingRules": [
+            {
+              "identifier": "R190B21D87A2",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/0ms904vzpwz3:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "7kbeqj127jvv",
+    "guardrail_version": "1",
+    "status": "valid",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "e06590da-4531-48d0-84b1-5c51f3696206"
+  },
+  {
+    "product": "invoice-discounting",
+    "case": "advance_69",
+    "facts": {
+      "advanceRatePercent": 69
+    },
+    "claim": {
+      "summary": "The proposed advance rate is within the policy's allowed advance band."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "b1a79c82f543519da507b71aef7981671acea6dac2c57c0acfdbd40bdea26d63",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= advanceRatePercent\n   69.0)",
+                "naturalLanguage": "advanceRatePercent is equal to 69.0"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "advanceRateInRange",
+                "naturalLanguage": "advanceRateInRange is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "RE10F9DA0037",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/0ms904vzpwz3:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "7kbeqj127jvv",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "be4834c8-f648-488a-9059-5bb5120e1329"
+  },
+  {
+    "product": "invoice-discounting",
+    "case": "advance_70",
+    "facts": {
+      "advanceRatePercent": 70
+    },
+    "claim": {
+      "summary": "The proposed advance rate is within the policy's allowed advance band."
+    },
+    "expected": "valid",
+    "matched": true,
+    "passed": true,
+    "policy_sha256": "b1a79c82f543519da507b71aef7981671acea6dac2c57c0acfdbd40bdea26d63",
+    "findings": [
+      {
+        "valid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= advanceRatePercent\n   70.0)",
+                "naturalLanguage": "advanceRatePercent is equal to 70.0"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "advanceRateInRange",
+                "naturalLanguage": "advanceRateInRange is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= hasRecentFinancialStatements\n   true)",
+                "naturalLanguage": "hasRecentFinancialStatements is true"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= applicantAge 18)",
+                "naturalLanguage": "applicantAge is equal to 18"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= turnoverRequirementMet\n   true)",
+                "naturalLanguage": "turnoverRequirementMet is true"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              },
+              {
+                "logic": "(= hasBusinessRegistrationDocuments\n   true)",
+                "naturalLanguage": "hasBusinessRegistrationDocuments is true"
+              },
+              {
+                "logic": "(= contractTermRequirementMet\n   true)",
+                "naturalLanguage": "contractTermRequirementMet is true"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= advanceRatePercent\n   70)",
+                "naturalLanguage": "advanceRatePercent is equal to 70"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= contractTermMonths 6)",
+                "naturalLanguage": "contractTermMonths is equal to 6"
+              },
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= hasCreditControlProcedures\n   true)",
+                "naturalLanguage": "hasCreditControlProcedures is true"
+              },
+              {
+                "logic": "(= annualTurnover\n   100000)",
+                "naturalLanguage": "annualTurnover is equal to 100000"
+              },
+              {
+                "logic": "(= advanceRateInRange\n   true)",
+                "naturalLanguage": "advanceRateInRange is true"
+              },
+              {
+                "logic": "(= hasAgreedExitNoticePeriod\n   true)",
+                "naturalLanguage": "hasAgreedExitNoticePeriod is true"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= hasAgedDebtReports\n   true)",
+                "naturalLanguage": "hasAgedDebtReports is true"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= hasCustomerBaseDetails\n   true)",
+                "naturalLanguage": "hasCustomerBaseDetails is true"
+              }
+            ]
+          },
+          "supportingRules": [
+            {
+              "identifier": "RE10F9DA0037",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/0ms904vzpwz3:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "7kbeqj127jvv",
+    "guardrail_version": "1",
+    "status": "valid",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "632b0c75-968f-4b06-893e-0de29062a26e"
+  },
+  {
+    "product": "invoice-discounting",
+    "case": "advance_90",
+    "facts": {
+      "advanceRatePercent": 90
+    },
+    "claim": {
+      "summary": "The proposed advance rate is within the policy's allowed advance band."
+    },
+    "expected": "valid",
+    "matched": true,
+    "passed": true,
+    "policy_sha256": "b1a79c82f543519da507b71aef7981671acea6dac2c57c0acfdbd40bdea26d63",
+    "findings": [
+      {
+        "valid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= advanceRatePercent\n   90.0)",
+                "naturalLanguage": "advanceRatePercent is equal to 90.0"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "advanceRateInRange",
+                "naturalLanguage": "advanceRateInRange is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= turnoverRequirementMet\n   true)",
+                "naturalLanguage": "turnoverRequirementMet is true"
+              },
+              {
+                "logic": "(= applicantAge 18)",
+                "naturalLanguage": "applicantAge is equal to 18"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "(= hasRecentFinancialStatements\n   true)",
+                "naturalLanguage": "hasRecentFinancialStatements is true"
+              },
+              {
+                "logic": "(= contractTermRequirementMet\n   true)",
+                "naturalLanguage": "contractTermRequirementMet is true"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= advanceRatePercent\n   90)",
+                "naturalLanguage": "advanceRatePercent is equal to 90"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              },
+              {
+                "logic": "(= hasCreditControlProcedures\n   true)",
+                "naturalLanguage": "hasCreditControlProcedures is true"
+              },
+              {
+                "logic": "(= hasBusinessRegistrationDocuments\n   true)",
+                "naturalLanguage": "hasBusinessRegistrationDocuments is true"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= contractTermMonths 6)",
+                "naturalLanguage": "contractTermMonths is equal to 6"
+              },
+              {
+                "logic": "(= hasCustomerBaseDetails\n   true)",
+                "naturalLanguage": "hasCustomerBaseDetails is true"
+              },
+              {
+                "logic": "(= advanceRateInRange\n   true)",
+                "naturalLanguage": "advanceRateInRange is true"
+              },
+              {
+                "logic": "(= hasAgreedExitNoticePeriod\n   true)",
+                "naturalLanguage": "hasAgreedExitNoticePeriod is true"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= hasAgedDebtReports\n   true)",
+                "naturalLanguage": "hasAgedDebtReports is true"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= annualTurnover\n   100000)",
+                "naturalLanguage": "annualTurnover is equal to 100000"
+              }
+            ]
+          },
+          "supportingRules": [
+            {
+              "identifier": "RE10F9DA0037",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/0ms904vzpwz3:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "7kbeqj127jvv",
+    "guardrail_version": "1",
+    "status": "valid",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "c1fd4116-62ba-4c0c-9bf1-660020f5c9d3"
+  },
+  {
+    "product": "invoice-discounting",
+    "case": "advance_91",
+    "facts": {
+      "advanceRatePercent": 91
+    },
+    "claim": {
+      "summary": "The proposed advance rate is within the policy's allowed advance band."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "b1a79c82f543519da507b71aef7981671acea6dac2c57c0acfdbd40bdea26d63",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= advanceRatePercent\n   91.0)",
+                "naturalLanguage": "advanceRatePercent is equal to 91.0"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "advanceRateInRange",
+                "naturalLanguage": "advanceRateInRange is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "RE10F9DA0037",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/0ms904vzpwz3:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "7kbeqj127jvv",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "2c03efe2-f511-4d95-95b7-962cb4e193a7"
+  },
+  {
+    "product": "invoice-discounting",
+    "case": "contract_5",
+    "facts": {
+      "contractTermMonths": 5
+    },
+    "claim": {
+      "summary": "The contract duration meets the minimum contract period requirement."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "b1a79c82f543519da507b71aef7981671acea6dac2c57c0acfdbd40bdea26d63",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= contractTermMonths 5)",
+                "naturalLanguage": "contractTermMonths is equal to 5"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "contractTermRequirementMet",
+                "naturalLanguage": "contractTermRequirementMet is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "R2AA555FE678",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/0ms904vzpwz3:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "7kbeqj127jvv",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "7b97943b-de01-47a6-b270-9c35210aeb57"
+  },
+  {
+    "product": "invoice-discounting",
+    "case": "contract_6",
+    "facts": {
+      "contractTermMonths": 6
+    },
+    "claim": {
+      "summary": "The contract duration meets the minimum contract period requirement."
+    },
+    "expected": "valid",
+    "matched": true,
+    "passed": true,
+    "policy_sha256": "b1a79c82f543519da507b71aef7981671acea6dac2c57c0acfdbd40bdea26d63",
+    "findings": [
+      {
+        "valid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= contractTermMonths 6)",
+                "naturalLanguage": "contractTermMonths is equal to 6"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "contractTermRequirementMet",
+                "naturalLanguage": "contractTermRequirementMet is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= advanceRateInRange\n   true)",
+                "naturalLanguage": "advanceRateInRange is true"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= turnoverRequirementMet\n   true)",
+                "naturalLanguage": "turnoverRequirementMet is true"
+              },
+              {
+                "logic": "(= annualTurnover\n   100000)",
+                "naturalLanguage": "annualTurnover is equal to 100000"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              },
+              {
+                "logic": "(= hasBusinessRegistrationDocuments\n   true)",
+                "naturalLanguage": "hasBusinessRegistrationDocuments is true"
+              },
+              {
+                "logic": "(= contractTermMonths 6)",
+                "naturalLanguage": "contractTermMonths is equal to 6"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= hasAgreedExitNoticePeriod\n   true)",
+                "naturalLanguage": "hasAgreedExitNoticePeriod is true"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= contractTermRequirementMet\n   true)",
+                "naturalLanguage": "contractTermRequirementMet is true"
+              },
+              {
+                "logic": "(= hasAgedDebtReports\n   true)",
+                "naturalLanguage": "hasAgedDebtReports is true"
+              },
+              {
+                "logic": "(= advanceRatePercent\n   70)",
+                "naturalLanguage": "advanceRatePercent is equal to 70"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= hasCustomerBaseDetails\n   true)",
+                "naturalLanguage": "hasCustomerBaseDetails is true"
+              },
+              {
+                "logic": "(= hasCreditControlProcedures\n   true)",
+                "naturalLanguage": "hasCreditControlProcedures is true"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= hasRecentFinancialStatements\n   true)",
+                "naturalLanguage": "hasRecentFinancialStatements is true"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= applicantAge 18)",
+                "naturalLanguage": "applicantAge is equal to 18"
+              },
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              }
+            ]
+          },
+          "supportingRules": [
+            {
+              "identifier": "R2AA555FE678",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/0ms904vzpwz3:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "7kbeqj127jvv",
+    "guardrail_version": "1",
+    "status": "valid",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "16bf1cd5-4eb9-4116-9e4a-a64120cddf45"
+  },
+  {
+    "product": "invoice-discounting",
+    "case": "missing_aged_debt_report",
+    "facts": {
+      "hasAgedDebtReports": false
+    },
+    "claim": {
+      "summary": "All required documentation has been supplied."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "b1a79c82f543519da507b71aef7981671acea6dac2c57c0acfdbd40bdea26d63",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= hasAgedDebtReports\n   false)",
+                "naturalLanguage": "hasAgedDebtReports is false"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "hasRequiredDocuments",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "R39410365E12",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/0ms904vzpwz3:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "7kbeqj127jvv",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "6e489f1f-1e38-4749-9909-9de63f21810e"
+  },
+  {
+    "product": "invoice-discounting",
+    "case": "approval_missing_documents",
+    "facts": {
+      "hasRequiredDocuments": false
+    },
+    "claim": {
+      "outcome": "approved",
+      "reason": "This approval meets all covered policy requirements."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "b1a79c82f543519da507b71aef7981671acea6dac2c57c0acfdbd40bdea26d63",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(not hasRequiredDocuments)",
+                "naturalLanguage": "hasRequiredDocuments is false"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "approvalMeetsCoveredPolicy",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [
+              {
+                "text": "SOURCE_TEXT_NOT_LOCATED"
+              }
+            ],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "R5EA84C98BE3",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/0ms904vzpwz3:1"
+            }
+          ]
+        }
+      },
+      {
+        "noTranslations": {}
+      }
+    ],
+    "guardrail_id": "7kbeqj127jvv",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "376d4a6d-9fc3-4829-821b-7f6274bf4159"
+  },
+  {
+    "product": "invoice-factoring",
+    "case": "statement_age_89",
+    "facts": {
+      "bankStatementsMonthsCount": 3,
+      "mostRecentStatementAgeDays": 89
+    },
+    "claim": {
+      "summary": "The bank statements meet the policy's coverage and recency requirements."
+    },
+    "expected": "valid",
+    "matched": true,
+    "passed": true,
+    "policy_sha256": "bbe4bc64b1596806088fdafb12c07c974db53cf43f89be344d738b29829cdeee",
+    "findings": [
+      {
+        "valid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   89)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 89"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "hasRecentBankStatements",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= hasAgreedExitNoticePeriod\n   true)",
+                "naturalLanguage": "hasAgreedExitNoticePeriod is true"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= contractTermRequirementMet\n   true)",
+                "naturalLanguage": "contractTermRequirementMet is true"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= applicantAge 18)",
+                "naturalLanguage": "applicantAge is equal to 18"
+              },
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= hasRecentFinancialStatements\n   true)",
+                "naturalLanguage": "hasRecentFinancialStatements is true"
+              },
+              {
+                "logic": "(= annualTurnover 50000)",
+                "naturalLanguage": "annualTurnover is equal to 50000"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= advanceRatePercent\n   70)",
+                "naturalLanguage": "advanceRatePercent is equal to 70"
+              },
+              {
+                "logic": "(= hasCustomerBaseDetails\n   true)",
+                "naturalLanguage": "hasCustomerBaseDetails is true"
+              },
+              {
+                "logic": "(= advanceRateInRange\n   true)",
+                "naturalLanguage": "advanceRateInRange is true"
+              },
+              {
+                "logic": "(= contractTermMonths 6)",
+                "naturalLanguage": "contractTermMonths is equal to 6"
+              },
+              {
+                "logic": "(= hasAgedDebtReports\n   true)",
+                "naturalLanguage": "hasAgedDebtReports is true"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   89)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 89"
+              },
+              {
+                "logic": "(= hasBusinessRegistrationDocuments\n   true)",
+                "naturalLanguage": "hasBusinessRegistrationDocuments is true"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= turnoverRequirementMet\n   true)",
+                "naturalLanguage": "turnoverRequirementMet is true"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              }
+            ]
+          },
+          "supportingRules": [
+            {
+              "identifier": "RA12B76BF8DE",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/naky6j7kj4d7:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "me18qejox6li",
+    "guardrail_version": "1",
+    "status": "valid",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "7428bd9d-da3d-4cd9-a6e9-024eaacc0967"
+  },
+  {
+    "product": "invoice-factoring",
+    "case": "statement_age_90",
+    "facts": {
+      "bankStatementsMonthsCount": 3,
+      "mostRecentStatementAgeDays": 90
+    },
+    "claim": {
+      "summary": "The bank statements meet the policy's coverage and recency requirements."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "bbe4bc64b1596806088fdafb12c07c974db53cf43f89be344d738b29829cdeee",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   90)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 90"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "hasRecentBankStatements",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "RA12B76BF8DE",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/naky6j7kj4d7:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "me18qejox6li",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "7f76cda6-5292-4f4c-a107-40f2f0840163"
+  },
+  {
+    "product": "invoice-factoring",
+    "case": "turnover_49999",
+    "facts": {
+      "annualTurnover": 49999
+    },
+    "claim": {
+      "summary": "The annual turnover meets the minimum turnover requirement."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "bbe4bc64b1596806088fdafb12c07c974db53cf43f89be344d738b29829cdeee",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= annualTurnover\n   49999.0)",
+                "naturalLanguage": "annualTurnover is equal to 49999.0"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "turnoverRequirementMet",
+                "naturalLanguage": "turnoverRequirementMet is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "R7B1956164C2",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/naky6j7kj4d7:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "me18qejox6li",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "01dae86a-7765-48fa-9ae4-646c5825dae1"
+  },
+  {
+    "product": "invoice-factoring",
+    "case": "turnover_50000",
+    "facts": {
+      "annualTurnover": 50000
+    },
+    "claim": {
+      "summary": "The annual turnover meets the minimum turnover requirement."
+    },
+    "expected": "valid",
+    "matched": true,
+    "passed": true,
+    "policy_sha256": "bbe4bc64b1596806088fdafb12c07c974db53cf43f89be344d738b29829cdeee",
+    "findings": [
+      {
+        "valid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= annualTurnover\n   50000.0)",
+                "naturalLanguage": "annualTurnover is equal to 50000.0"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "turnoverRequirementMet",
+                "naturalLanguage": "turnoverRequirementMet is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= contractTermMonths 6)",
+                "naturalLanguage": "contractTermMonths is equal to 6"
+              },
+              {
+                "logic": "(= hasBusinessRegistrationDocuments\n   true)",
+                "naturalLanguage": "hasBusinessRegistrationDocuments is true"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= hasCustomerBaseDetails\n   true)",
+                "naturalLanguage": "hasCustomerBaseDetails is true"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= annualTurnover 50000)",
+                "naturalLanguage": "annualTurnover is equal to 50000"
+              },
+              {
+                "logic": "(= hasAgedDebtReports\n   true)",
+                "naturalLanguage": "hasAgedDebtReports is true"
+              },
+              {
+                "logic": "(= advanceRateInRange\n   true)",
+                "naturalLanguage": "advanceRateInRange is true"
+              },
+              {
+                "logic": "(= contractTermRequirementMet\n   true)",
+                "naturalLanguage": "contractTermRequirementMet is true"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= hasAgreedExitNoticePeriod\n   true)",
+                "naturalLanguage": "hasAgreedExitNoticePeriod is true"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= turnoverRequirementMet\n   true)",
+                "naturalLanguage": "turnoverRequirementMet is true"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= applicantAge 18)",
+                "naturalLanguage": "applicantAge is equal to 18"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= hasRecentFinancialStatements\n   true)",
+                "naturalLanguage": "hasRecentFinancialStatements is true"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= advanceRatePercent\n   70)",
+                "naturalLanguage": "advanceRatePercent is equal to 70"
+              },
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              }
+            ]
+          },
+          "supportingRules": [
+            {
+              "identifier": "R7B1956164C2",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/naky6j7kj4d7:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "me18qejox6li",
+    "guardrail_version": "1",
+    "status": "valid",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "ce26881c-8a2c-4893-8935-a1136ebe08b3"
+  },
+  {
+    "product": "invoice-factoring",
+    "case": "advance_69",
+    "facts": {
+      "advanceRatePercent": 69
+    },
+    "claim": {
+      "summary": "The proposed advance rate is within the policy's allowed advance band."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "bbe4bc64b1596806088fdafb12c07c974db53cf43f89be344d738b29829cdeee",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= advanceRatePercent\n   69.0)",
+                "naturalLanguage": "advanceRatePercent is equal to 69.0"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "advanceRateInRange",
+                "naturalLanguage": "advanceRateInRange is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "RAA44615DFDC",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/naky6j7kj4d7:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "me18qejox6li",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "ffeb88fc-4e1a-4e58-8971-da255eb3722f"
+  },
+  {
+    "product": "invoice-factoring",
+    "case": "advance_70",
+    "facts": {
+      "advanceRatePercent": 70
+    },
+    "claim": {
+      "summary": "The proposed advance rate is within the policy's allowed advance band."
+    },
+    "expected": "valid",
+    "matched": true,
+    "passed": true,
+    "policy_sha256": "bbe4bc64b1596806088fdafb12c07c974db53cf43f89be344d738b29829cdeee",
+    "findings": [
+      {
+        "valid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= advanceRatePercent\n   70.0)",
+                "naturalLanguage": "advanceRatePercent is equal to 70.0"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "advanceRateInRange",
+                "naturalLanguage": "advanceRateInRange is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= contractTermMonths 6)",
+                "naturalLanguage": "contractTermMonths is equal to 6"
+              },
+              {
+                "logic": "(= hasAgedDebtReports\n   true)",
+                "naturalLanguage": "hasAgedDebtReports is true"
+              },
+              {
+                "logic": "(= applicantAge 18)",
+                "naturalLanguage": "applicantAge is equal to 18"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= hasAgreedExitNoticePeriod\n   true)",
+                "naturalLanguage": "hasAgreedExitNoticePeriod is true"
+              },
+              {
+                "logic": "(= advanceRateInRange\n   true)",
+                "naturalLanguage": "advanceRateInRange is true"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= hasCustomerBaseDetails\n   true)",
+                "naturalLanguage": "hasCustomerBaseDetails is true"
+              },
+              {
+                "logic": "(= annualTurnover 50000)",
+                "naturalLanguage": "annualTurnover is equal to 50000"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= hasRecentFinancialStatements\n   true)",
+                "naturalLanguage": "hasRecentFinancialStatements is true"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              },
+              {
+                "logic": "(= hasBusinessRegistrationDocuments\n   true)",
+                "naturalLanguage": "hasBusinessRegistrationDocuments is true"
+              },
+              {
+                "logic": "(= turnoverRequirementMet\n   true)",
+                "naturalLanguage": "turnoverRequirementMet is true"
+              },
+              {
+                "logic": "(= contractTermRequirementMet\n   true)",
+                "naturalLanguage": "contractTermRequirementMet is true"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= advanceRatePercent\n   70)",
+                "naturalLanguage": "advanceRatePercent is equal to 70"
+              }
+            ]
+          },
+          "supportingRules": [
+            {
+              "identifier": "RAA44615DFDC",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/naky6j7kj4d7:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "me18qejox6li",
+    "guardrail_version": "1",
+    "status": "valid",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "b7250259-013c-4689-87b4-ed66cba806cd"
+  },
+  {
+    "product": "invoice-factoring",
+    "case": "advance_90",
+    "facts": {
+      "advanceRatePercent": 90
+    },
+    "claim": {
+      "summary": "The proposed advance rate is within the policy's allowed advance band."
+    },
+    "expected": "valid",
+    "matched": true,
+    "passed": true,
+    "policy_sha256": "bbe4bc64b1596806088fdafb12c07c974db53cf43f89be344d738b29829cdeee",
+    "findings": [
+      {
+        "valid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= advanceRatePercent\n   90.0)",
+                "naturalLanguage": "advanceRatePercent is equal to 90.0"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "advanceRateInRange",
+                "naturalLanguage": "advanceRateInRange is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= annualTurnover 50000)",
+                "naturalLanguage": "annualTurnover is equal to 50000"
+              },
+              {
+                "logic": "(= advanceRatePercent\n   90)",
+                "naturalLanguage": "advanceRatePercent is equal to 90"
+              },
+              {
+                "logic": "(= hasBusinessRegistrationDocuments\n   true)",
+                "naturalLanguage": "hasBusinessRegistrationDocuments is true"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= hasCustomerBaseDetails\n   true)",
+                "naturalLanguage": "hasCustomerBaseDetails is true"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= advanceRateInRange\n   true)",
+                "naturalLanguage": "advanceRateInRange is true"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= contractTermMonths 6)",
+                "naturalLanguage": "contractTermMonths is equal to 6"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= turnoverRequirementMet\n   true)",
+                "naturalLanguage": "turnoverRequirementMet is true"
+              },
+              {
+                "logic": "(= hasAgedDebtReports\n   true)",
+                "naturalLanguage": "hasAgedDebtReports is true"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= hasAgreedExitNoticePeriod\n   true)",
+                "naturalLanguage": "hasAgreedExitNoticePeriod is true"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= contractTermRequirementMet\n   true)",
+                "naturalLanguage": "contractTermRequirementMet is true"
+              },
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "(= applicantAge 18)",
+                "naturalLanguage": "applicantAge is equal to 18"
+              },
+              {
+                "logic": "(= hasRecentFinancialStatements\n   true)",
+                "naturalLanguage": "hasRecentFinancialStatements is true"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              }
+            ]
+          },
+          "supportingRules": [
+            {
+              "identifier": "RAA44615DFDC",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/naky6j7kj4d7:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "me18qejox6li",
+    "guardrail_version": "1",
+    "status": "valid",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "e7326c96-f0ba-4375-b6ae-071fef91872d"
+  },
+  {
+    "product": "invoice-factoring",
+    "case": "advance_91",
+    "facts": {
+      "advanceRatePercent": 91
+    },
+    "claim": {
+      "summary": "The proposed advance rate is within the policy's allowed advance band."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "bbe4bc64b1596806088fdafb12c07c974db53cf43f89be344d738b29829cdeee",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= advanceRatePercent\n   91.0)",
+                "naturalLanguage": "advanceRatePercent is equal to 91.0"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "advanceRateInRange",
+                "naturalLanguage": "advanceRateInRange is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "RAA44615DFDC",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/naky6j7kj4d7:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "me18qejox6li",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "b8312a2e-fb5e-43e6-88af-7cbe3597296e"
+  },
+  {
+    "product": "invoice-factoring",
+    "case": "contract_5",
+    "facts": {
+      "contractTermMonths": 5
+    },
+    "claim": {
+      "summary": "The contract duration meets the minimum contract period requirement."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "bbe4bc64b1596806088fdafb12c07c974db53cf43f89be344d738b29829cdeee",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= contractTermMonths 5)",
+                "naturalLanguage": "contractTermMonths is equal to 5"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "contractTermRequirementMet",
+                "naturalLanguage": "contractTermRequirementMet is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "RA16EE897726",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/naky6j7kj4d7:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "me18qejox6li",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "bb4343a8-78a6-40d7-b909-4dd36e60894e"
+  },
+  {
+    "product": "invoice-factoring",
+    "case": "contract_6",
+    "facts": {
+      "contractTermMonths": 6
+    },
+    "claim": {
+      "summary": "The contract duration meets the minimum contract period requirement."
+    },
+    "expected": "valid",
+    "matched": true,
+    "passed": true,
+    "policy_sha256": "bbe4bc64b1596806088fdafb12c07c974db53cf43f89be344d738b29829cdeee",
+    "findings": [
+      {
+        "valid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= contractTermMonths 6)",
+                "naturalLanguage": "contractTermMonths is equal to 6"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "contractTermRequirementMet",
+                "naturalLanguage": "contractTermRequirementMet is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= hasAgedDebtReports\n   true)",
+                "naturalLanguage": "hasAgedDebtReports is true"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= advanceRateInRange\n   true)",
+                "naturalLanguage": "advanceRateInRange is true"
+              },
+              {
+                "logic": "(= contractTermMonths 6)",
+                "naturalLanguage": "contractTermMonths is equal to 6"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              },
+              {
+                "logic": "(= hasBusinessRegistrationDocuments\n   true)",
+                "naturalLanguage": "hasBusinessRegistrationDocuments is true"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= turnoverRequirementMet\n   true)",
+                "naturalLanguage": "turnoverRequirementMet is true"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= hasCustomerBaseDetails\n   true)",
+                "naturalLanguage": "hasCustomerBaseDetails is true"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= hasRecentFinancialStatements\n   true)",
+                "naturalLanguage": "hasRecentFinancialStatements is true"
+              },
+              {
+                "logic": "(= annualTurnover 50000)",
+                "naturalLanguage": "annualTurnover is equal to 50000"
+              },
+              {
+                "logic": "(= advanceRatePercent\n   70)",
+                "naturalLanguage": "advanceRatePercent is equal to 70"
+              },
+              {
+                "logic": "(= contractTermRequirementMet\n   true)",
+                "naturalLanguage": "contractTermRequirementMet is true"
+              },
+              {
+                "logic": "(= hasAgreedExitNoticePeriod\n   true)",
+                "naturalLanguage": "hasAgreedExitNoticePeriod is true"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= applicantAge 18)",
+                "naturalLanguage": "applicantAge is equal to 18"
+              }
+            ]
+          },
+          "supportingRules": [
+            {
+              "identifier": "RA16EE897726",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/naky6j7kj4d7:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "me18qejox6li",
+    "guardrail_version": "1",
+    "status": "valid",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "5f911965-4912-419c-8300-27786a90ff2f"
+  },
+  {
+    "product": "invoice-factoring",
+    "case": "missing_aged_debt_report",
+    "facts": {
+      "hasAgedDebtReports": false
+    },
+    "claim": {
+      "summary": "All required documentation has been supplied."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "bbe4bc64b1596806088fdafb12c07c974db53cf43f89be344d738b29829cdeee",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= hasAgedDebtReports\n   false)",
+                "naturalLanguage": "hasAgedDebtReports is false"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "hasRequiredDocuments",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "R13BBB8E105E",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/naky6j7kj4d7:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "me18qejox6li",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "32e456b2-79f0-4876-9f1d-31a9053ed697"
+  },
+  {
+    "product": "invoice-factoring",
+    "case": "approval_missing_documents",
+    "facts": {
+      "hasRequiredDocuments": false
+    },
+    "claim": {
+      "outcome": "approved",
+      "reason": "This approval meets all covered policy requirements."
+    },
+    "expected": "invalid",
+    "matched": true,
+    "passed": false,
+    "policy_sha256": "bbe4bc64b1596806088fdafb12c07c974db53cf43f89be344d738b29829cdeee",
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "(= hasRequiredDocuments\n   false)",
+                "naturalLanguage": "hasRequiredDocuments is false"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "approvalMeetsCoveredPolicy",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "RCFF6B5F54C1",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/naky6j7kj4d7:1"
+            }
+          ]
+        }
+      }
+    ],
+    "guardrail_id": "me18qejox6li",
+    "guardrail_version": "1",
+    "status": "not_validated",
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "8eb578cf-0f99-438e-a60f-d894f0e8ce6d"
+  }
+]

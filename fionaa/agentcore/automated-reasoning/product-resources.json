@@ -1,0 +1,314 @@
+{
+  "unsecured-business-loans": {
+    "local_definition_sha256": "977756ec3c37876743756a00f703733672743cc737d7ee09a7e409117799beec",
+    "policy": {
+      "ResponseMetadata": {
+        "RequestId": "a29b8002-178c-4bb9-a9c3-1185e9cfb85d",
+        "HTTPStatusCode": 200,
+        "HTTPHeaders": {
+          "date": "Sat, 12 Sep 2026 13:51:14 GMT",
+          "content-type": "application/json",
+          "content-length": "448",
+          "connection": "keep-alive",
+          "x-amzn-requestid": "a29b8002-178c-4bb9-a9c3-1185e9cfb85d"
+        },
+        "RetryAttempts": 0
+      },
+      "policyArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/8kzm1thspmq8",
+      "version": "DRAFT",
+      "name": "FionaaUnsecuredBusinessLoans",
+      "description": "Runtime policy consistency for unsecured-business-loans",
+      "definitionHash": "15eb6d1321f2960eeb1cb5f323a8029211dd87878ca932c2e922c3de998d0179346f5f77ec83cb90c387ec74d028660ef9186992d01b2a6785c632eece434154",
+      "createdAt": "2026-09-12 13:51:13.794000+00:00",
+      "updatedAt": "2026-09-12 13:51:13.794000+00:00"
+    },
+    "policy_version": {
+      "ResponseMetadata": {
+        "RequestId": "38f793e4-655e-402c-a018-424e182eee54",
+        "HTTPStatusCode": 200,
+        "HTTPHeaders": {
+          "date": "Sat, 12 Sep 2026 13:51:14 GMT",
+          "content-type": "application/json",
+          "content-length": "407",
+          "connection": "keep-alive",
+          "x-amzn-requestid": "38f793e4-655e-402c-a018-424e182eee54"
+        },
+        "RetryAttempts": 0
+      },
+      "policyArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/8kzm1thspmq8:1",
+      "version": "1",
+      "name": "FionaaUnsecuredBusinessLoans",
+      "description": "Runtime policy consistency for unsecured-business-loans",
+      "definitionHash": "15eb6d1321f2960eeb1cb5f323a8029211dd87878ca932c2e922c3de998d0179346f5f77ec83cb90c387ec74d028660ef9186992d01b2a6785c632eece434154",
+      "createdAt": "2026-09-12 13:51:14.340000+00:00"
+    },
+    "guardrail": {
+      "ResponseMetadata": {
+        "RequestId": "d7ec35f4-59aa-4691-9967-2c4831f8d3a7",
+        "HTTPStatusCode": 202,
+        "HTTPHeaders": {
+          "date": "Sat, 12 Sep 2026 13:51:15 GMT",
+          "content-type": "application/json",
+          "content-length": "172",
+          "connection": "keep-alive",
+          "x-amzn-requestid": "d7ec35f4-59aa-4691-9967-2c4831f8d3a7"
+        },
+        "RetryAttempts": 0
+      },
+      "guardrailId": "5h5yunnkf895",
+      "guardrailArn": "arn:aws:bedrock:us-east-1:492646066653:guardrail/5h5yunnkf895",
+      "version": "DRAFT",
+      "createdAt": "2026-09-12 13:51:14.881393+00:00"
+    },
+    "guardrail_version": {
+      "ResponseMetadata": {
+        "RequestId": "436d3ec8-2340-4378-8ca7-6269aeaf9061",
+        "HTTPStatusCode": 202,
+        "HTTPHeaders": {
+          "date": "Sat, 12 Sep 2026 13:51:15 GMT",
+          "content-type": "application/json",
+          "content-length": "44",
+          "connection": "keep-alive",
+          "x-amzn-requestid": "436d3ec8-2340-4378-8ca7-6269aeaf9061"
+        },
+        "RetryAttempts": 0
+      },
+      "guardrailId": "5h5yunnkf895",
+      "version": "1"
+    }
+  },
+  "revolving-credit-facility": {
+    "local_definition_sha256": "9cb1674bd8d54e2fae5389acc8034e97efd1447c14152cd01c04743c5ec734d2",
+    "policy": {
+      "ResponseMetadata": {
+        "RequestId": "bfca3c63-f018-4596-bd62-1484787689ce",
+        "HTTPStatusCode": 200,
+        "HTTPHeaders": {
+          "date": "Sat, 12 Sep 2026 13:51:15 GMT",
+          "content-type": "application/json",
+          "content-length": "450",
+          "connection": "keep-alive",
+          "x-amzn-requestid": "bfca3c63-f018-4596-bd62-1484787689ce"
+        },
+        "RetryAttempts": 0
+      },
+      "policyArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/gwekvzglmnzl",
+      "version": "DRAFT",
+      "name": "FionaaRevolvingCreditFacility",
+      "description": "Runtime policy consistency for revolving-credit-facility",
+      "definitionHash": "4a6d761f8339e262930387172aa8619ff4f501bd91b62f860939990489c821b653959f46ef9fa9cec09b471134d135ab93df2810e18769c0ac21ff396aee7fa9",
+      "createdAt": "2026-09-12 13:51:15.696000+00:00",
+      "updatedAt": "2026-09-12 13:51:15.696000+00:00"
+    },
+    "policy_version": {
+      "ResponseMetadata": {
+        "RequestId": "f2962970-6c85-40c5-9159-f5ea696b90b6",
+        "HTTPStatusCode": 200,
+        "HTTPHeaders": {
+          "date": "Sat, 12 Sep 2026 13:51:16 GMT",
+          "content-type": "application/json",
+          "content-length": "409",
+          "connection": "keep-alive",
+          "x-amzn-requestid": "f2962970-6c85-40c5-9159-f5ea696b90b6"
+        },
+        "RetryAttempts": 0
+      },
+      "policyArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/gwekvzglmnzl:1",
+      "version": "1",
+      "name": "FionaaRevolvingCreditFacility",
+      "description": "Runtime policy consistency for revolving-credit-facility",
+      "definitionHash": "4a6d761f8339e262930387172aa8619ff4f501bd91b62f860939990489c821b653959f46ef9fa9cec09b471134d135ab93df2810e18769c0ac21ff396aee7fa9",
+      "createdAt": "2026-09-12 13:51:16.147000+00:00"
+    },
+    "guardrail": {
+      "ResponseMetadata": {
+        "RequestId": "ac13df21-0261-4913-a72f-612dac5d8017",
+        "HTTPStatusCode": 202,
+        "HTTPHeaders": {
+          "date": "Sat, 12 Sep 2026 13:51:16 GMT",
+          "content-type": "application/json",
+          "content-length": "172",
+          "connection": "keep-alive",
+          "x-amzn-requestid": "ac13df21-0261-4913-a72f-612dac5d8017"
+        },
+        "RetryAttempts": 0
+      },
+      "guardrailId": "cdue92mr0ap4",
+      "guardrailArn": "arn:aws:bedrock:us-east-1:492646066653:guardrail/cdue92mr0ap4",
+      "version": "DRAFT",
+      "createdAt": "2026-09-12 13:51:16.642996+00:00"
+    },
+    "guardrail_version": {
+      "ResponseMetadata": {
+        "RequestId": "bbda2d61-ff77-4bf6-baca-714233d80086",
+        "HTTPStatusCode": 202,
+        "HTTPHeaders": {
+          "date": "Sat, 12 Sep 2026 13:51:17 GMT",
+          "content-type": "application/json",
+          "content-length": "44",
+          "connection": "keep-alive",
+          "x-amzn-requestid": "bbda2d61-ff77-4bf6-baca-714233d80086"
+        },
+        "RetryAttempts": 0
+      },
+      "guardrailId": "cdue92mr0ap4",
+      "version": "1"
+    }
+  },
+  "invoice-discounting": {
+    "local_definition_sha256": "b7520a109822498ad8c5e02d567ec334a90fb260c24e7af91a4f0a529f4da0a5",
+    "policy": {
+      "ResponseMetadata": {
+        "RequestId": "e208d8ad-287b-4182-81ef-f5348c524108",
+        "HTTPStatusCode": 200,
+        "HTTPHeaders": {
+          "date": "Sat, 12 Sep 2026 13:51:17 GMT",
+          "content-type": "application/json",
+          "content-length": "439",
+          "connection": "keep-alive",
+          "x-amzn-requestid": "e208d8ad-287b-4182-81ef-f5348c524108"
+        },
+        "RetryAttempts": 0
+      },
+      "policyArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/0ms904vzpwz3",
+      "version": "DRAFT",
+      "name": "FionaaInvoiceDiscounting",
+      "description": "Runtime policy consistency for invoice-discounting",
+      "definitionHash": "e75bfb00fbc3dafb27df58a6e23762bfde69ffdb0e5374ee3ae5f8bade919a81d9b0880a1b0348a03dd2b4a05df00b92fa1cfe04db5a52470a63d5e50a6f7952",
+      "createdAt": "2026-09-12 13:51:17.456000+00:00",
+      "updatedAt": "2026-09-12 13:51:17.456000+00:00"
+    },
+    "policy_version": {
+      "ResponseMetadata": {
+        "RequestId": "353316bb-aee2-4b65-8f8c-4f57870fe78d",
+        "HTTPStatusCode": 200,
+        "HTTPHeaders": {
+          "date": "Sat, 12 Sep 2026 13:51:18 GMT",
+          "content-type": "application/json",
+          "content-length": "398",
+          "connection": "keep-alive",
+          "x-amzn-requestid": "353316bb-aee2-4b65-8f8c-4f57870fe78d"
+        },
+        "RetryAttempts": 0
+      },
+      "policyArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/0ms904vzpwz3:1",
+      "version": "1",
+      "name": "FionaaInvoiceDiscounting",
+      "description": "Runtime policy consistency for invoice-discounting",
+      "definitionHash": "e75bfb00fbc3dafb27df58a6e23762bfde69ffdb0e5374ee3ae5f8bade919a81d9b0880a1b0348a03dd2b4a05df00b92fa1cfe04db5a52470a63d5e50a6f7952",
+      "createdAt": "2026-09-12 13:51:17.951000+00:00"
+    },
+    "guardrail": {
+      "ResponseMetadata": {
+        "RequestId": "760e29a2-9c04-4a3f-841a-9d63c23a962e",
+        "HTTPStatusCode": 202,
+        "HTTPHeaders": {
+          "date": "Sat, 12 Sep 2026 13:51:18 GMT",
+          "content-type": "application/json",
+          "content-length": "172",
+          "connection": "keep-alive",
+          "x-amzn-requestid": "760e29a2-9c04-4a3f-841a-9d63c23a962e"
+        },
+        "RetryAttempts": 0
+      },
+      "guardrailId": "7kbeqj127jvv",
+      "guardrailArn": "arn:aws:bedrock:us-east-1:492646066653:guardrail/7kbeqj127jvv",
+      "version": "DRAFT",
+      "createdAt": "2026-09-12 13:51:18.331306+00:00"
+    },
+    "guardrail_version": {
+      "ResponseMetadata": {
+        "RequestId": "0ca3acdf-e129-4e37-b976-0e1f11dc60cb",
+        "HTTPStatusCode": 202,
+        "HTTPHeaders": {
+          "date": "Sat, 12 Sep 2026 13:51:18 GMT",
+          "content-type": "application/json",
+          "content-length": "44",
+          "connection": "keep-alive",
+          "x-amzn-requestid": "0ca3acdf-e129-4e37-b976-0e1f11dc60cb"
+        },
+        "RetryAttempts": 0
+      },
+      "guardrailId": "7kbeqj127jvv",
+      "version": "1"
+    }
+  },
+  "invoice-factoring": {
+    "local_definition_sha256": "20c5a403d86fb726d9ede8ee310784dce1170bf8d691d8b2bd0b9857514ec4b5",
+    "policy": {
+      "ResponseMetadata": {
+        "RequestId": "31dc0513-7f01-4ba6-8b58-a46c7cff8e57",
+        "HTTPStatusCode": 200,
+        "HTTPHeaders": {
+          "date": "Sat, 12 Sep 2026 13:51:19 GMT",
+          "content-type": "application/json",
+          "content-length": "435",
+          "connection": "keep-alive",
+          "x-amzn-requestid": "31dc0513-7f01-4ba6-8b58-a46c7cff8e57"
+        },
+        "RetryAttempts": 0
+      },
+      "policyArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/naky6j7kj4d7",
+      "version": "DRAFT",
+      "name": "FionaaInvoiceFactoring",
+      "description": "Runtime policy consistency for invoice-factoring",
+      "definitionHash": "9180b76d6b2184692ca56a1214f7a9db337d90b932c7ee864a855e5075fc9a012f8efe9531db86883a7e994d65986f80f2760ca3872b4dd5e3bfdd93255b8ccb",
+      "createdAt": "2026-09-12 13:51:19.397000+00:00",
+      "updatedAt": "2026-09-12 13:51:19.397000+00:00"
+    },
+    "policy_version": {
+      "ResponseMetadata": {
+        "RequestId": "0ac7edef-6259-465d-bb2f-583d12468f96",
+        "HTTPStatusCode": 200,
+        "HTTPHeaders": {
+          "date": "Sat, 12 Sep 2026 13:51:20 GMT",
+          "content-type": "application/json",
+          "content-length": "394",
+          "connection": "keep-alive",
+          "x-amzn-requestid": "0ac7edef-6259-465d-bb2f-583d12468f96"
+        },
+        "RetryAttempts": 0
+      },
+      "policyArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/naky6j7kj4d7:1",
+      "version": "1",
+      "name": "FionaaInvoiceFactoring",
+      "description": "Runtime policy consistency for invoice-factoring",
+      "definitionHash": "9180b76d6b2184692ca56a1214f7a9db337d90b932c7ee864a855e5075fc9a012f8efe9531db86883a7e994d65986f80f2760ca3872b4dd5e3bfdd93255b8ccb",
+      "createdAt": "2026-09-12 13:51:19.915000+00:00"
+    },
+    "guardrail": {
+      "ResponseMetadata": {
+        "RequestId": "c717bb6d-86e9-4f56-93b9-61aac69f363d",
+        "HTTPStatusCode": 202,
+        "HTTPHeaders": {
+          "date": "Sat, 12 Sep 2026 13:51:20 GMT",
+          "content-type": "application/json",
+          "content-length": "172",
+          "connection": "keep-alive",
+          "x-amzn-requestid": "c717bb6d-86e9-4f56-93b9-61aac69f363d"
+        },
+        "RetryAttempts": 0
+      },
+      "guardrailId": "me18qejox6li",
+      "guardrailArn": "arn:aws:bedrock:us-east-1:492646066653:guardrail/me18qejox6li",
+      "version": "DRAFT",
+      "createdAt": "2026-09-12 13:51:20.295264+00:00"
+    },
+    "guardrail_version": {
+      "ResponseMetadata": {
+        "RequestId": "d009107a-9af6-4467-8403-56e2b7f6aacb",
+        "HTTPStatusCode": 202,
+        "HTTPHeaders": {
+          "date": "Sat, 12 Sep 2026 13:51:20 GMT",
+          "content-type": "application/json",
+          "content-length": "44",
+          "connection": "keep-alive",
+          "x-amzn-requestid": "d009107a-9af6-4467-8403-56e2b7f6aacb"
+        },
+        "RetryAttempts": 0
+      },
+      "guardrailId": "me18qejox6li",
+      "version": "1"
+    }
+  }
+}

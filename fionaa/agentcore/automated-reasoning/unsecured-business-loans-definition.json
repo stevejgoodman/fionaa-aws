@@ -1,0 +1,255 @@
+{
+  "version": "1.0",
+  "types": [
+    {
+      "name": "BusinessType",
+      "description": "The legal structure of the applicant business.",
+      "values": [
+        {
+          "value": "BusinessType_LIMITED_COMPANY",
+          "description": "A limited company."
+        },
+        {
+          "value": "BusinessType_PARTNERSHIP",
+          "description": "A partnership."
+        },
+        {
+          "value": "BusinessType_SOLE_TRADER",
+          "description": "A sole trader."
+        },
+        {
+          "value": "BusinessType_OTHER",
+          "description": "A business type not otherwise modeled."
+        }
+      ]
+    },
+    {
+      "name": "DirectorIDType",
+      "description": "The type of identification document supplied as Director ID.",
+      "values": [
+        {
+          "value": "DirectorIDType_DRIVERS_LICENCE",
+          "description": "A driver's licence."
+        },
+        {
+          "value": "DirectorIDType_PASSPORT",
+          "description": "A passport."
+        },
+        {
+          "value": "DirectorIDType_NONE",
+          "description": "No valid director ID supplied."
+        },
+        {
+          "value": "DirectorIDType_OTHER",
+          "description": "A form of identification not modeled as valid director ID."
+        }
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "id": "RA12B76BF8DE",
+      "expression": "(= hasRecentBankStatements (and (>= bankStatementsMonthsCount 3) (>= mostRecentStatementAgeDays 0) (< mostRecentStatementAgeDays 90)))"
+    },
+    {
+      "id": "REA8EDEE79BD",
+      "expression": "(= isUKBased (and isRegisteredInUK hasUKAddress))"
+    },
+    {
+      "id": "R3BE377C8423",
+      "expression": "(=> hasCompaniesHouseMatch (and isRegisteredInUK hasUKAddress))"
+    },
+    {
+      "id": "RC963E9514CF",
+      "expression": "(= isEligibleBusinessType (or (= businessType BusinessType_LIMITED_COMPANY) (= businessType BusinessType_PARTNERSHIP)))"
+    },
+    {
+      "id": "R2525ED452F6",
+      "expression": "(= hasValidDirectorID (or (= directorIDType DirectorIDType_DRIVERS_LICENCE) (= directorIDType DirectorIDType_PASSPORT)))"
+    },
+    {
+      "id": "R13F54400C82",
+      "expression": "(= isApplicantAgeEligible (>= applicantAge 18))"
+    },
+    {
+      "id": "R460A1CE8A09",
+      "expression": "(= loanAmountInRange (and (>= loanAmount 1000) (<= loanAmount 500000)))"
+    },
+    {
+      "id": "RCA211316A27",
+      "expression": "(= meetsMinimumTradingHistory (>= tradingHistoryMonths 6))"
+    },
+    {
+      "id": "R794D56A3524",
+      "expression": "(= loanTermInRange (and (>= loanTermMonths 3) (<= loanTermMonths 60)))"
+    },
+    {
+      "id": "RD826776CB67",
+      "expression": "(= personalGuaranteeRequirementMet (or (<= loanAmount 25000) hasPersonalGuarantee))"
+    },
+    {
+      "id": "RD10B94E0167",
+      "expression": "(= hasRequiredDocuments (and hasRecentBankStatements hasValidDirectorID hasProofOfDirectorAddress hasAccountsOrManagementInformation (or (not isVATRegistered) hasVATReturns) (or (not hasExistingBorrowing) hasBorrowingDetails)))"
+    },
+    {
+      "id": "R60162591A0C",
+      "expression": "(= isSubstantivelyEligible (and isUKBased isEligibleBusinessType isApplicantAgeEligible loanAmountInRange meetsMinimumTradingHistory loanTermInRange personalGuaranteeRequirementMet))"
+    },
+    {
+      "id": "RBDC420BFF59",
+      "expression": "(= approvalMeetsCoveredPolicy (and isSubstantivelyEligible hasRequiredDocuments))"
+    }
+  ],
+  "variables": [
+    {
+      "name": "bankStatementsMonthsCount",
+      "type": "INT",
+      "description": "The number of months of bank statements supplied by the applicant. Policy requires at least 3 months."
+    },
+    {
+      "name": "mostRecentStatementAgeDays",
+      "type": "INT",
+      "description": "The age, in days, of the most recent bank statement measured from the date of application. Policy requires this to be less than 90 days."
+    },
+    {
+      "name": "hasRecentBankStatements",
+      "type": "BOOL",
+      "description": "True if the supplied bank statements meet the recency/sufficiency rule: at least 3 months of statements and the most recent statement is less than 90 days old on the date of application. Determined deterministically by the check_bank_statements_recent_and_sufficient tool."
+    },
+    {
+      "name": "isRegisteredInUK",
+      "type": "BOOL",
+      "description": "True if the business is registered in the UK (i.e. has a UK registration)."
+    },
+    {
+      "name": "hasUKAddress",
+      "type": "BOOL",
+      "description": "True if the business has a UK address."
+    },
+    {
+      "name": "isUKBased",
+      "type": "BOOL",
+      "description": "True if the business is UK-based, meaning it is registered in the UK and has a UK address."
+    },
+    {
+      "name": "hasCompaniesHouseMatch",
+      "type": "BOOL",
+      "description": "True if there is a confirmed Companies House match for the business (via the check_companies_house check). A confirmed match is itself proof that the business is both registered in the UK and has a UK address."
+    },
+    {
+      "name": "businessType",
+      "type": "BusinessType",
+      "description": "The legal structure of the applicant business. Must be a limited company or partnership (not a sole trader) to be eligible."
+    },
+    {
+      "name": "isEligibleBusinessType",
+      "type": "BOOL",
+      "description": "True if the business is an eligible business type: a limited company or a partnership (not a sole trader)."
+    },
+    {
+      "name": "directorIDType",
+      "type": "DirectorIDType",
+      "description": "The type of identification document supplied as Director ID. Valid Director ID is a driver's licence or a passport."
+    },
+    {
+      "name": "hasValidDirectorID",
+      "type": "BOOL",
+      "description": "True if a valid Director ID (a driver's licence or a passport) has been supplied."
+    },
+    {
+      "name": "applicantAge",
+      "type": "INT",
+      "description": "The age of the applicant in years. Must be 18 or older to be eligible."
+    },
+    {
+      "name": "isApplicantAgeEligible",
+      "type": "BOOL",
+      "description": "True if the applicant is aged 18 or older."
+    },
+    {
+      "name": "loanAmount",
+      "type": "NUMBER",
+      "description": "Requested loan_amount or facility limit in GBP."
+    },
+    {
+      "name": "loanAmountInRange",
+      "type": "BOOL",
+      "description": "Whether requested amount is between GBP 1000 and 500000, inclusive."
+    },
+    {
+      "name": "tradingHistoryMonths",
+      "type": "INT",
+      "description": "Complete months of business trading history."
+    },
+    {
+      "name": "meetsMinimumTradingHistory",
+      "type": "BOOL",
+      "description": "Whether the business meets the minimum 6 months trading history."
+    },
+    {
+      "name": "hasProofOfDirectorAddress",
+      "type": "BOOL",
+      "description": "Proof of director address is supplied."
+    },
+    {
+      "name": "hasAccountsOrManagementInformation",
+      "type": "BOOL",
+      "description": "Accounts or management information is supplied; any filed accounts relied upon meet the general policy recency rule."
+    },
+    {
+      "name": "isVATRegistered",
+      "type": "BOOL",
+      "description": "Business is VAT registered."
+    },
+    {
+      "name": "hasVATReturns",
+      "type": "BOOL",
+      "description": "VAT returns are supplied."
+    },
+    {
+      "name": "hasExistingBorrowing",
+      "type": "BOOL",
+      "description": "Business has existing borrowing."
+    },
+    {
+      "name": "hasBorrowingDetails",
+      "type": "BOOL",
+      "description": "Details of existing borrowing are supplied."
+    },
+    {
+      "name": "loanTermMonths",
+      "type": "INT",
+      "description": "Requested loan_term in months."
+    },
+    {
+      "name": "loanTermInRange",
+      "type": "BOOL",
+      "description": "Whether the requested loan term is within 3 through 60 months inclusive."
+    },
+    {
+      "name": "hasPersonalGuarantee",
+      "type": "BOOL",
+      "description": "A personal guarantee has been agreed for this loan."
+    },
+    {
+      "name": "personalGuaranteeRequirementMet",
+      "type": "BOOL",
+      "description": "Whether the personal guarantee requirement is met: required strictly above GBP25000; not required at or below GBP25000."
+    },
+    {
+      "name": "hasRequiredDocuments",
+      "type": "BOOL",
+      "description": "Whether all documents required for unsecured-business-loans have been supplied, including conditional documents when applicable. Missing information is unknown, not automatically true."
+    },
+    {
+      "name": "isSubstantivelyEligible",
+      "type": "BOOL",
+      "description": "Whether all substantive eligibility conditions for unsecured-business-loans are met. Missing documentation alone is not substantive ineligibility."
+    },
+    {
+      "name": "approvalMeetsCoveredPolicy",
+      "type": "BOOL",
+      "description": "Whether a proposed approval meets the covered eligibility and document requirements for unsecured-business-loans. An approved outcome asserts this is true. Rejection or referral alone does not assert it is false. Other assessments may still prevent approval."
+    }
+  ]
+}

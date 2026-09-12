@@ -1,0 +1,458 @@
+{
+    "policyArn": "arn:aws:bedrock:us-east-1:492646066653:automated-reasoning-policy/t5e1432k93z6",
+    "buildWorkflowId": "5675789d-280c-42e7-bb9e-3ae85bb8d8f4",
+    "buildWorkflowAssets": {
+        "policyDefinition": {
+            "version": "1",
+            "types": [
+                {
+                    "name": "BusinessType",
+                    "description": "The legal structure of the applicant business.",
+                    "values": [
+                        {
+                            "value": "BusinessType_LIMITED_COMPANY",
+                            "description": "A limited company."
+                        },
+                        {
+                            "value": "BusinessType_PARTNERSHIP",
+                            "description": "A partnership."
+                        },
+                        {
+                            "value": "BusinessType_SOLE_TRADER",
+                            "description": "A sole trader."
+                        },
+                        {
+                            "value": "BusinessType_OTHER",
+                            "description": "A business type not otherwise modeled."
+                        }
+                    ]
+                },
+                {
+                    "name": "DirectorIDType",
+                    "description": "The type of identification document supplied as Director ID.",
+                    "values": [
+                        {
+                            "value": "DirectorIDType_DRIVERS_LICENCE",
+                            "description": "A driver's licence."
+                        },
+                        {
+                            "value": "DirectorIDType_PASSPORT",
+                            "description": "A passport."
+                        },
+                        {
+                            "value": "DirectorIDType_NONE",
+                            "description": "No valid director ID supplied."
+                        },
+                        {
+                            "value": "DirectorIDType_OTHER",
+                            "description": "A form of identification not modeled as valid director ID."
+                        }
+                    ]
+                },
+                {
+                    "name": "CollateralAssetType",
+                    "description": "The type of asset provided as security for a secured business loan.",
+                    "values": [
+                        {
+                            "value": "CollateralAssetType_PROPERTY",
+                            "description": "Property provided as security."
+                        },
+                        {
+                            "value": "CollateralAssetType_EQUIPMENT",
+                            "description": "Equipment provided as security."
+                        },
+                        {
+                            "value": "CollateralAssetType_VEHICLES",
+                            "description": "Vehicles provided as security."
+                        },
+                        {
+                            "value": "CollateralAssetType_INVOICES",
+                            "description": "Invoices provided as security."
+                        },
+                        {
+                            "value": "CollateralAssetType_INTANGIBLE_ASSETS",
+                            "description": "Intangible assets provided as security."
+                        },
+                        {
+                            "value": "CollateralAssetType_NONE",
+                            "description": "No asset provided as security."
+                        },
+                        {
+                            "value": "CollateralAssetType_OTHER",
+                            "description": "An asset type not otherwise modeled."
+                        }
+                    ]
+                }
+            ],
+            "rules": [
+                {
+                    "id": "NGBDGLFJD66D",
+                    "expression": "(= lastAccountingDateWithinPast12Months\n   lastAccountingDateWithinPast12Months)",
+                    "alternateExpression": "lastAccountingDateWithinPast12Months is equal to lastAccountingDateWithinPast12Months"
+                },
+                {
+                    "id": "RSBFBK3VJ1WK",
+                    "expression": "(=> hasRecentBankStatements\n    (>= bankStatementsMonthsCount\n        3))",
+                    "alternateExpression": "if hasRecentBankStatements is true, then bankStatementsMonthsCount is at least 3"
+                },
+                {
+                    "id": "YNE09FLYPZXZ",
+                    "expression": "(=> hasRecentBankStatements\n    (< mostRecentStatementAgeDays\n       90))",
+                    "alternateExpression": "if hasRecentBankStatements is true, then mostRecentStatementAgeDays is less than 90"
+                },
+                {
+                    "id": "GQYQ9OXCWMLT",
+                    "expression": "(=> (not hasRecentBankStatements)\n    (or (not (>= bankStatementsMonthsCount\n                 3))\n        (not (< mostRecentStatementAgeDays\n                90))))",
+                    "alternateExpression": "if hasRecentBankStatements is false, then bankStatementsMonthsCount is less than 3 or mostRecentStatementAgeDays is at least 90"
+                },
+                {
+                    "id": "M9YVHBUGV6Y4",
+                    "expression": "(=> isUKBased\n    isRegisteredInUK)",
+                    "alternateExpression": "if isUKBased is true, then isRegisteredInUK is true"
+                },
+                {
+                    "id": "FZGL62WHUHDN",
+                    "expression": "(=> isUKBased\n    hasUKAddress)",
+                    "alternateExpression": "if isUKBased is true, then hasUKAddress is true"
+                },
+                {
+                    "id": "ZLKE8EKJ6DYD",
+                    "expression": "(=> (not isUKBased)\n    (or (not isRegisteredInUK)\n        (not hasUKAddress)))",
+                    "alternateExpression": "if isUKBased is false, then isRegisteredInUK is false or hasUKAddress is false"
+                },
+                {
+                    "id": "V2IZ6IXFTCD8",
+                    "expression": "(=> hasCompaniesHouseMatch\n    isRegisteredInUK)",
+                    "alternateExpression": "if hasCompaniesHouseMatch is true, then isRegisteredInUK is true"
+                },
+                {
+                    "id": "JD13GDGJ9SGN",
+                    "expression": "(=> hasCompaniesHouseMatch\n    hasUKAddress)",
+                    "alternateExpression": "if hasCompaniesHouseMatch is true, then hasUKAddress is true"
+                },
+                {
+                    "id": "T6JEFEULY9UW",
+                    "expression": "(=> isEligibleBusinessType\n    (or (= businessType\n           BusinessType_LIMITED_COMPANY)\n        (= businessType\n           BusinessType_PARTNERSHIP)))",
+                    "alternateExpression": "if isEligibleBusinessType is true, then businessType is equal to BusinessType_LIMITED_COMPANY or businessType is equal to BusinessType_PARTNERSHIP"
+                },
+                {
+                    "id": "WBGUSD63BP9M",
+                    "expression": "(=> (not isEligibleBusinessType)\n    (not (= businessType\n            BusinessType_LIMITED_COMPANY)))",
+                    "alternateExpression": "if isEligibleBusinessType is false, then businessType is not equal to BusinessType_LIMITED_COMPANY"
+                },
+                {
+                    "id": "BJ3IAQ4CP9W8",
+                    "expression": "(=> (not isEligibleBusinessType)\n    (not (= businessType\n            BusinessType_PARTNERSHIP)))",
+                    "alternateExpression": "if isEligibleBusinessType is false, then businessType is not equal to BusinessType_PARTNERSHIP"
+                },
+                {
+                    "id": "QOF1TPOH1ME1",
+                    "expression": "(=> hasValidDirectorID\n    (or (= directorIDType\n           DirectorIDType_DRIVERS_LICENCE)\n        (= directorIDType\n           DirectorIDType_PASSPORT)))",
+                    "alternateExpression": "if hasValidDirectorID is true, then directorIDType is equal to DirectorIDType_DRIVERS_LICENCE or directorIDType is equal to DirectorIDType_PASSPORT"
+                },
+                {
+                    "id": "N4B9U9JUNAWQ",
+                    "expression": "(=> (not hasValidDirectorID)\n    (not (= directorIDType\n            DirectorIDType_DRIVERS_LICENCE)))",
+                    "alternateExpression": "if hasValidDirectorID is false, then directorIDType is not equal to DirectorIDType_DRIVERS_LICENCE"
+                },
+                {
+                    "id": "EUEMC5WI6NOV",
+                    "expression": "(=> (not hasValidDirectorID)\n    (not (= directorIDType\n            DirectorIDType_PASSPORT)))",
+                    "alternateExpression": "if hasValidDirectorID is false, then directorIDType is not equal to DirectorIDType_PASSPORT"
+                },
+                {
+                    "id": "I13DZZRSPONX",
+                    "expression": "(=> isApplicantAgeEligible\n    (>= applicantAge 18))",
+                    "alternateExpression": "if isApplicantAgeEligible is true, then applicantAge is at least 18"
+                },
+                {
+                    "id": "RK1NXE1LKM2A",
+                    "expression": "(=> (not isApplicantAgeEligible)\n    (not (>= applicantAge 18)))",
+                    "alternateExpression": "if isApplicantAgeEligible is false, then applicantAge is less than 18"
+                },
+                {
+                    "id": "OHXKXFGX72L8",
+                    "expression": "(=> loanAmountInRange\n    (>= loanAmount 25000))",
+                    "alternateExpression": "if loanAmountInRange is true, then loanAmount is at least 25000"
+                },
+                {
+                    "id": "ZX8H4UY0G3QT",
+                    "expression": "(=> loanAmountInRange\n    (<= loanAmount 20000000))",
+                    "alternateExpression": "if loanAmountInRange is true, then loanAmount is no more than 20000000"
+                },
+                {
+                    "id": "QBT85F2E5QZT",
+                    "expression": "(=> (not loanAmountInRange)\n    (or (not (>= loanAmount 25000))\n        (not (<= loanAmount 20000000))))",
+                    "alternateExpression": "if loanAmountInRange is false, then loanAmount is less than 25000 or loanAmount is greater than 20000000"
+                },
+                {
+                    "id": "NIED1284YPBU",
+                    "expression": "(>= loanTermMonths 12)",
+                    "alternateExpression": "loanTermMonths is at least 12"
+                },
+                {
+                    "id": "DMNO4WFQA5KV",
+                    "expression": "(<= loanTermMonths 72)",
+                    "alternateExpression": "loanTermMonths is no more than 72"
+                },
+                {
+                    "id": "WLMYRO86G9TR",
+                    "expression": "(=> hasRequiredDocuments\n    hasRecentBankStatements)",
+                    "alternateExpression": "if hasRequiredDocuments is true, then hasRecentBankStatements is true"
+                },
+                {
+                    "id": "C7GT1UKQNT3O",
+                    "expression": "(=> hasRequiredDocuments\n    hasAnnualAccounts)",
+                    "alternateExpression": "if hasRequiredDocuments is true, then hasAnnualAccounts is true"
+                },
+                {
+                    "id": "I3P745PQN0JT",
+                    "expression": "(=> hasRequiredDocuments\n    hasProofOfCollateralOwnershipValuation)",
+                    "alternateExpression": "if hasRequiredDocuments is true, then hasProofOfCollateralOwnershipValuation is true"
+                },
+                {
+                    "id": "Q9UEF181XOTE",
+                    "expression": "(=> (not hasRequiredDocuments)\n    (or (not hasRecentBankStatements)\n        (not hasAnnualAccounts)\n        (not hasProofOfCollateralOwnershipValuation)))",
+                    "alternateExpression": "if hasRequiredDocuments is false, then at least one of the following 3 statements is true: 1) hasRecentBankStatements is false; 2) hasAnnualAccounts is false; 3) hasProofOfCollateralOwnershipValuation is false"
+                },
+                {
+                    "id": "UM74ITM61U6R",
+                    "expression": "(=> hasSecurityAsset\n    (or (= collateralAssetType\n           CollateralAssetType_PROPERTY)\n        (= collateralAssetType\n           CollateralAssetType_EQUIPMENT)\n        (= collateralAssetType\n           CollateralAssetType_VEHICLES)\n        (= collateralAssetType\n           CollateralAssetType_INVOICES)\n        (= collateralAssetType\n           CollateralAssetType_INTANGIBLE_ASSETS)))",
+                    "alternateExpression": "if hasSecurityAsset is true, then at least one of the following 5 statements is true: 1) collateralAssetType is equal to CollateralAssetType_PROPERTY; 2) collateralAssetType is equal to CollateralAssetType_EQUIPMENT; 3) collateralAssetType is equal to CollateralAssetType_VEHICLES; 4) collateralAssetType is equal to CollateralAssetType_INVOICES; 5) collateralAssetType is equal to CollateralAssetType_INTANGIBLE_ASSETS"
+                },
+                {
+                    "id": "AM5RBW2F4MN0",
+                    "expression": "(=> (not hasSecurityAsset)\n    (not (= collateralAssetType\n            CollateralAssetType_PROPERTY)))",
+                    "alternateExpression": "if hasSecurityAsset is false, then collateralAssetType is not equal to CollateralAssetType_PROPERTY"
+                },
+                {
+                    "id": "FHF5Q4BS1SCF",
+                    "expression": "(=> (not hasSecurityAsset)\n    (not (= collateralAssetType\n            CollateralAssetType_EQUIPMENT)))",
+                    "alternateExpression": "if hasSecurityAsset is false, then collateralAssetType is not equal to CollateralAssetType_EQUIPMENT"
+                },
+                {
+                    "id": "CJLYG3M0QLK4",
+                    "expression": "(=> (not hasSecurityAsset)\n    (not (= collateralAssetType\n            CollateralAssetType_VEHICLES)))",
+                    "alternateExpression": "if hasSecurityAsset is false, then collateralAssetType is not equal to CollateralAssetType_VEHICLES"
+                },
+                {
+                    "id": "ONAGA7UVH4KQ",
+                    "expression": "(=> (not hasSecurityAsset)\n    (not (= collateralAssetType\n            CollateralAssetType_INVOICES)))",
+                    "alternateExpression": "if hasSecurityAsset is false, then collateralAssetType is not equal to CollateralAssetType_INVOICES"
+                },
+                {
+                    "id": "FOOD17W0HFUU",
+                    "expression": "(=> (not hasSecurityAsset)\n    (not (= collateralAssetType\n            CollateralAssetType_INTANGIBLE_ASSETS)))",
+                    "alternateExpression": "if hasSecurityAsset is false, then collateralAssetType is not equal to CollateralAssetType_INTANGIBLE_ASSETS"
+                },
+                {
+                    "id": "JRV00Z9WNEML",
+                    "expression": "(=> meetsMinimumTradingHistory\n    (>= tradingHistoryMonths\n        12))",
+                    "alternateExpression": "if meetsMinimumTradingHistory is true, then tradingHistoryMonths is at least 12"
+                },
+                {
+                    "id": "ZNG71WAKL3LH",
+                    "expression": "(=> (not meetsMinimumTradingHistory)\n    (not (>= tradingHistoryMonths\n             12)))",
+                    "alternateExpression": "if meetsMinimumTradingHistory is false, then tradingHistoryMonths is less than 12"
+                },
+                {
+                    "id": "FB29SFUYOI80",
+                    "expression": "(=> isSubstantivelyEligible\n    isUKBased)",
+                    "alternateExpression": "if isSubstantivelyEligible is true, then isUKBased is true"
+                },
+                {
+                    "id": "D39IY6I7PUWI",
+                    "expression": "(=> isSubstantivelyEligible\n    isEligibleBusinessType)",
+                    "alternateExpression": "if isSubstantivelyEligible is true, then isEligibleBusinessType is true"
+                },
+                {
+                    "id": "TQVBQRYP3WLH",
+                    "expression": "(=> isSubstantivelyEligible\n    hasValidDirectorID)",
+                    "alternateExpression": "if isSubstantivelyEligible is true, then hasValidDirectorID is true"
+                },
+                {
+                    "id": "JWJLSU8FJSSL",
+                    "expression": "(=> isSubstantivelyEligible\n    isApplicantAgeEligible)",
+                    "alternateExpression": "if isSubstantivelyEligible is true, then isApplicantAgeEligible is true"
+                },
+                {
+                    "id": "JV5N7OFDRSTZ",
+                    "expression": "(=> isSubstantivelyEligible\n    loanAmountInRange)",
+                    "alternateExpression": "if isSubstantivelyEligible is true, then loanAmountInRange is true"
+                },
+                {
+                    "id": "VTMC17WTG2YE",
+                    "expression": "(=> isSubstantivelyEligible\n    (>= loanTermMonths 12))",
+                    "alternateExpression": "if isSubstantivelyEligible is true, then loanTermMonths is at least 12"
+                },
+                {
+                    "id": "HT043I7GDX9J",
+                    "expression": "(=> isSubstantivelyEligible\n    (<= loanTermMonths 72))",
+                    "alternateExpression": "if isSubstantivelyEligible is true, then loanTermMonths is no more than 72"
+                },
+                {
+                    "id": "US8IHMVB8867",
+                    "expression": "(=> isSubstantivelyEligible\n    hasSecurityAsset)",
+                    "alternateExpression": "if isSubstantivelyEligible is true, then hasSecurityAsset is true"
+                },
+                {
+                    "id": "WDKAOEXBB5L7",
+                    "expression": "(=> isSubstantivelyEligible\n    meetsMinimumTradingHistory)",
+                    "alternateExpression": "if isSubstantivelyEligible is true, then meetsMinimumTradingHistory is true"
+                },
+                {
+                    "id": "A98L7Q22RUMY",
+                    "expression": "(=> (not isSubstantivelyEligible)\n    (or (not isUKBased)\n        (not isEligibleBusinessType)\n        (not hasValidDirectorID)\n        (not isApplicantAgeEligible)\n        (not loanAmountInRange)\n        (not (>= loanTermMonths 12))\n        (not (<= loanTermMonths 72))\n        (not hasSecurityAsset)\n        (not meetsMinimumTradingHistory)))",
+                    "alternateExpression": "if isSubstantivelyEligible is false, then at least one of the following 9 statements is true: 1) isUKBased is false; 2) isEligibleBusinessType is false; 3) hasValidDirectorID is false; 4) isApplicantAgeEligible is false; 5) loanAmountInRange is false; 6) loanTermMonths is less than 12; 7) loanTermMonths is greater than 72; 8) hasSecurityAsset is false; 9) meetsMinimumTradingHistory is false"
+                },
+                {
+                    "id": "OXWN01SYA41D",
+                    "expression": "(=> isUnconditionallyApproved\n    isSubstantivelyEligible)",
+                    "alternateExpression": "if isUnconditionallyApproved is true, then isSubstantivelyEligible is true"
+                },
+                {
+                    "id": "PSE4ONZJ9AX4",
+                    "expression": "(=> isUnconditionallyApproved\n    hasRequiredDocuments)",
+                    "alternateExpression": "if isUnconditionallyApproved is true, then hasRequiredDocuments is true"
+                },
+                {
+                    "id": "R1NITODNHGLE",
+                    "expression": "(=> (not isUnconditionallyApproved)\n    (or (not isSubstantivelyEligible)\n        (not hasRequiredDocuments)))",
+                    "alternateExpression": "if isUnconditionallyApproved is false, then isSubstantivelyEligible is false or hasRequiredDocuments is false"
+                }
+            ],
+            "variables": [
+                {
+                    "name": "bankStatementsMonthsCount",
+                    "type": "INT",
+                    "description": "The number of months of bank statements supplied by the applicant. Policy requires at least 3 months."
+                },
+                {
+                    "name": "mostRecentStatementAgeDays",
+                    "type": "INT",
+                    "description": "The age, in days, of the most recent bank statement measured from the date of application. Policy requires this to be less than 90 days."
+                },
+                {
+                    "name": "hasRecentBankStatements",
+                    "type": "BOOL",
+                    "description": "True if the supplied bank statements meet the recency/sufficiency rule: at least 3 months of statements and the most recent statement is less than 90 days old on the date of application. Determined deterministically by the check_bank_statements_recent_and_sufficient tool."
+                },
+                {
+                    "name": "isRegisteredInUK",
+                    "type": "BOOL",
+                    "description": "True if the business is registered in the UK (i.e. has a UK registration)."
+                },
+                {
+                    "name": "hasUKAddress",
+                    "type": "BOOL",
+                    "description": "True if the business has a UK address."
+                },
+                {
+                    "name": "isUKBased",
+                    "type": "BOOL",
+                    "description": "True if the business is UK-based, meaning it is registered in the UK and has a UK address."
+                },
+                {
+                    "name": "hasCompaniesHouseMatch",
+                    "type": "BOOL",
+                    "description": "True if there is a confirmed Companies House match for the business (via the check_companies_house check). A confirmed match is itself proof that the business is both registered in the UK and has a UK address."
+                },
+                {
+                    "name": "businessType",
+                    "type": "BusinessType",
+                    "description": "The legal structure of the applicant business. Must be a limited company or partnership (not a sole trader) to be eligible."
+                },
+                {
+                    "name": "isEligibleBusinessType",
+                    "type": "BOOL",
+                    "description": "True if the business is an eligible business type: a limited company or a partnership (not a sole trader)."
+                },
+                {
+                    "name": "lastAccountingDateWithinPast12Months",
+                    "type": "BOOL",
+                    "description": "True if the last accounting date of the filed accounts (accounting statements or annual reports) is within the past 12 months from the date of application."
+                },
+                {
+                    "name": "directorIDType",
+                    "type": "DirectorIDType",
+                    "description": "The type of identification document supplied as Director ID. Valid Director ID is a driver's licence or a passport."
+                },
+                {
+                    "name": "hasValidDirectorID",
+                    "type": "BOOL",
+                    "description": "True if a valid Director ID (a driver's licence or a passport) has been supplied."
+                },
+                {
+                    "name": "applicantAge",
+                    "type": "INT",
+                    "description": "The age of the applicant in years. Must be 18 or older to be eligible."
+                },
+                {
+                    "name": "isApplicantAgeEligible",
+                    "type": "BOOL",
+                    "description": "True if the applicant is aged 18 or older."
+                },
+                {
+                    "name": "loanAmount",
+                    "type": "NUMBER",
+                    "description": "The requested secured business loan amount in GBP. Must be between £25,000 and £20,000,000 inclusive."
+                },
+                {
+                    "name": "loanAmountInRange",
+                    "type": "BOOL",
+                    "description": "True if the requested loan amount falls within the £25,000–£20,000,000 range. Determined deterministically by the check_secured_business_loan_amount_in_range tool."
+                },
+                {
+                    "name": "loanTermMonths",
+                    "type": "INT",
+                    "description": "The requested loan term in months for a secured business loan. Must be between 12 and 72 months inclusive."
+                },
+                {
+                    "name": "hasAnnualAccounts",
+                    "type": "BOOL",
+                    "description": "True if the applicant has supplied annual accounts as required for a secured business loan."
+                },
+                {
+                    "name": "hasProofOfCollateralOwnershipValuation",
+                    "type": "BOOL",
+                    "description": "True if the applicant has supplied proof of ownership/valuation of the collateral asset."
+                },
+                {
+                    "name": "hasRequiredDocuments",
+                    "type": "BOOL",
+                    "description": "True if all required documents for a secured business loan are supplied: recent/sufficient bank statements, annual accounts, and proof of ownership/valuation of the collateral asset."
+                },
+                {
+                    "name": "collateralAssetType",
+                    "type": "CollateralAssetType",
+                    "description": "The type of asset provided as security for the secured business loan. Must be property, equipment, vehicles, invoices, or intangible assets."
+                },
+                {
+                    "name": "hasSecurityAsset",
+                    "type": "BOOL",
+                    "description": "True if the applicant provides a valid asset as security (property, equipment, vehicles, invoices, or intangible assets)."
+                },
+                {
+                    "name": "tradingHistoryMonths",
+                    "type": "INT",
+                    "description": "The number of months of trading history of the business. A secured business loan requires a minimum of 12 months trading history."
+                },
+                {
+                    "name": "meetsMinimumTradingHistory",
+                    "type": "BOOL",
+                    "description": "True if the business has at least 12 months of trading history."
+                },
+                {
+                    "name": "isSubstantivelyEligible",
+                    "type": "BOOL",
+                    "description": "True if the applicant meets all substantive (non-document) eligibility requirements for a secured business loan: UK-based, eligible business type, valid director ID, age-eligible, loan amount in range, loan term in range, has a valid security asset, and meets the minimum 12 months trading history."
+                },
+                {
+                    "name": "isUnconditionallyApproved",
+                    "type": "BOOL",
+                    "description": "True if the secured business loan is unconditionally approved. Unconditional approval requires both substantive eligibility and completeness of all required documents."
+                }
+            ]
+        }
+    }
+}
