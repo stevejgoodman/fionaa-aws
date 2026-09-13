@@ -1,6 +1,6 @@
 name: deepeval-ci
 
-# PR-time run of fionaa/agentcore/deepeval_evals/ against real Bedrock and
+# PR-time run of fionaa/evals/node/ against real Bedrock and
 # the real AgentCore Gateway -- "Path 1" in deepeval_evals/README.md's CI
 # plan. Deliberately advisory (continue-on-error), not a merge gate: even
 # after loosening assertions_metric's threshold to 0.7, this is an
@@ -21,12 +21,12 @@ name: deepeval-ci
 on:
   pull_request:
     paths:
-      - "fionaa/app/fionaa/**.py"
-      - "fionaa/app/fionaa/policies/**"
-      - "fionaa/app/fionaa/pyproject.toml"
-      - "fionaa/app/fionaa/uv.lock"
-      - "fionaa/agentcore/deepeval_evals/**"
-      - "fionaa/agentcore/datasets/fionaa_eval_dataset.jsonl"
+      - "fionaa/app/**.py"
+      - "fionaa/app/src/fionaa/policies/**"
+      - "fionaa/app/pyproject.toml"
+      - "fionaa/app/uv.lock"
+      - "fionaa/evals/node/**"
+      - "fionaa/evals/datasets/fionaa_eval_dataset.jsonl"
       - ".github/workflows/deepeval-ci.yml"
   workflow_dispatch: {}
 
@@ -73,7 +73,7 @@ jobs:
           EOF
 
       - name: Install dependencies
-        working-directory: fionaa/app/fionaa
+        working-directory: fionaa/app
         run: uv sync --group dev
 
       # One file at a time, not a matrix/parallel step -- deepeval_evals/README.md's
@@ -96,7 +96,7 @@ jobs:
             # dev-only deps (deepeval itself included) that the "Install
             # dependencies" step above explicitly synced with --group dev.
             # Invoking that venv's binary directly is deterministic instead.
-            ../app/fionaa/.venv/bin/deepeval test run "deepeval_evals/$f" 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+            ../app/.venv/bin/deepeval test run "../evals/node/$f" 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
             rc=${PIPESTATUS[0]}
             echo '```' >> "$GITHUB_STEP_SUMMARY"
             if [ "$rc" -ne 0 ]; then overall=1; fi

@@ -11,7 +11,7 @@ Live on `claimsagent-claimsgateway-glrrsnaalt`:
   `McpGatewayClaimsGatewayRoleDefaultPolicy...` — kept as its own named
   policy so a redeploy of the ClaimsAgent stack doesn't silently drop it
   (that stack's CDK only manages the policy names it created).
-- Verified: `pytest --run-live tests/test_live_companies_house.py -k london-vs-ruislip` passes.
+- Verified: `uv run pytest --run-live tests/test_live_companies_house.py -k london-vs-ruislip` passes.
 
 **The matching rule actually shipped is distance-based, not hierarchy**, despite the
 plan below — live testing against `geo-places` showed Ruislip's `SubRegion`
@@ -34,7 +34,7 @@ Do not run these commands from memory. Confirm the exact API shape (service
 name, parameter names, `toolSchema` format) against current AWS docs first —
 run `aws___read_documentation` / `aws___search_documentation` for
 `bedrock-agentcore CreateGatewayTarget` before executing, per the AWS
-guidance in `app/fionaa/CLAUDE.md`. The steps below are the intended shape,
+guidance in `app/claude.md`. The steps below are the intended shape,
 not a verified final command.
 
 ## Steps
@@ -91,16 +91,16 @@ not a verified final command.
    This makes the tool available to the agent as `geo-target___CheckSameArea`
    (same `<target>___<tool>` naming the existing `CompaniesHouse___*` and
    `websearch-target___WebSearch` tools already use — see
-   `app/fionaa/prompts.py`).
+   `app/src/fionaa/prompts.py`).
 
 4. **Verify**: re-run
-   `pytest --run-live tests/test_live_companies_house.py -k london-vs-ruislip`
-   from `fionaa/app/fionaa`. It should now pass.
+   `uv run pytest --run-live tests/test_live_companies_house.py -k london-vs-ruislip`
+   from `fionaa/app`. It should now pass.
 
 ## Local testing without the Gateway
 
 ```
-python fionaa/agentcore/lambda/geo_area_match/handler.py "Manor Road, London" "Manor Road, Ruislip"
+fionaa/app/.venv/bin/python fionaa/agentcore/lambda/geo_area_match/handler.py "Manor Road, London" "Manor Road, Ruislip"
 ```
 prints the match verdict directly — useful for testing the geocoding/matching
 logic before wiring up the Gateway Target.

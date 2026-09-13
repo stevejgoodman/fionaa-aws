@@ -1,5 +1,14 @@
 # Offline evals for fionaa
 
+Evaluation code and datasets moved to [../evals/](../evals/README.md).
+Historical references below to `deepeval_evals/`, `agentcore/datasets/`, and
+`agentcore/eval_path2_*.py` now correspond to `evals/node/`, `evals/datasets/`,
+and `evals/runtime/`. Keep running AgentCore CLI commands from `agentcore/`.
+
+The application package also moved: historical references below to
+`app/fionaa/` now correspond to `app/src/fionaa/` (application code) or
+`app/tests/` (test files) — see [../app/README.md](../app/README.md).
+
 ## Runtime Automated Reasoning integration (2026-09-12)
 
 All five loan types now have versioned standalone guardrails and concrete
@@ -9,7 +18,7 @@ minimums, personal guarantees strictly above GBP25,000, conditional revolving
 security documents, invoice turnover thresholds and 70–90% advances, strict
 89/90-day recency, missing documents and invalid approval claims. Failures
 must include an actual `invalid` finding; an API error cannot pass a negative
-case. Results are in `automated-reasoning/product-live-results.json`.
+case. Results are in `../evals/automated_reasoning/product-live-results.json`.
 
 The user confirmed a minimum 6-month contract for both invoice products;
 both Markdown policies and formal definitions now reflect that. Local tests:
@@ -22,7 +31,7 @@ Deployed smoke test (2026-09-12): runtime 34 returned HTTP 200 for a disposable
 unsecured-loan application. The standalone check consumed 3 Automated Reasoning
 units and returned `tooComplex`; the graph referred the application before final
 validation. This verifies runtime permissions and fail-closed enforcement, not a
-successful approval path. Evidence: `automated-reasoning/activation-results.json`. Simplifying the
+successful approval path. Evidence: `../evals/automated_reasoning/activation-results.json`. Simplifying the
 validation evidence and evaluating translation coverage remain follow-up work.
 The initial smoke test exposed missing cross-region profile permissions; these
 were corrected and six binding/IAM regression tests passed.
