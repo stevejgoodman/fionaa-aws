@@ -111,8 +111,8 @@ Storage constructors accept explicit bucket/KMS configuration; the entrypoint
 supplies it from the invocation's settings. Legacy callers can still load these
 values from the environment at construction time.
 
-The configuration/workflow separation and domain-model extraction are complete. The AgentCore entrypoint and file layout,
-evaluations now live under `fionaa/evals/` (node runners, runtime runners and
+The configuration/workflow separation and domain-model extraction are complete.
+Evaluations now live under `fionaa/evals/` (node runners, runtime runners and
 a shared dataset). CI paths and the AgentCore dataset location follow that move.
 The application is installed from `src/fionaa`; tests and evaluations use
 package-qualified imports, with shared helpers in `fionaa.testing`.
@@ -139,6 +139,6 @@ Calibration runs from `fionaa/` using
 `app/.venv/bin/python -m evals.node.calibrate_judges`.
 
 AgentCore evaluator definitions remain infrastructure configuration. The
-`agentcore/automated-reasoning/` directory still contains deployment definitions,
-resource bindings and live-test artifacts; separating those artifacts is a
-follow-up cleanup, not part of this packaging change.
+`agentcore/automated-reasoning/` directory contains deployment definitions and
+resource bindings. Live ARC runners and recorded results are under
+`evals/automated_reasoning/`.

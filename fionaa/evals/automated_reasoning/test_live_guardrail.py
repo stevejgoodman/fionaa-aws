@@ -1,7 +1,7 @@
 """Explicit live smoke runner, outside the unit-test directory.
 
 Run from the project root with AWS_PROFILE=AIOps and AWS_DEFAULT_REGION=us-east-1:
-  app/fionaa/.venv/bin/python agentcore/automated-reasoning/test_live_guardrail.py
+  app/.venv/bin/python evals/automated_reasoning/test_live_guardrail.py
 Uses synthetic facts only. Charges ApplyGuardrail requests. Does not deploy.
 """
 import asyncio
@@ -9,13 +9,13 @@ import json
 import sys
 from pathlib import Path
 
-APP = Path(__file__).resolve().parents[2] / "app" / "fionaa"
+RESULTS_DIR = Path(__file__).resolve().parent
+POLICY_DIR = RESULTS_DIR.parents[1] / "agentcore" / "automated-reasoning"
 from fionaa.policy_consistency import PolicyConsistencyChecker, policy_digest
 
 
 async def main():
-    root = Path(__file__).resolve().parent
-    text = (root / "secured-business-loans.txt").read_text()
+    text = (POLICY_DIR / "secured-business-loans.txt").read_text()
     checker = PolicyConsistencyChecker({"secured-business-loans": {
         "guardrail_id": "bwcgqb1tsa07", "guardrail_version": "1",
         "policy_sha256": policy_digest(text),
@@ -43,7 +43,7 @@ async def main():
         result = await checker.check("secured-business-loans", text, facts, claim)
         results.append({"case": name, "expected_pass": expected, **result})
         print(name, "expected", expected, "actual", result["passed"], result["status"], flush=True)
-        (root / "live-results.json").write_text(json.dumps(results, indent=2) + "\n")
+        (RESULTS_DIR / "live-results.json").write_text(json.dumps(results, indent=2) + "\n")
     return 0 if all(r["passed"] == r["expected_pass"] for r in results) else 1
 
 

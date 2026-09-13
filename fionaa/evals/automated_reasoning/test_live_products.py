@@ -8,7 +8,8 @@ import json
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
+RESULTS_DIR = Path(__file__).resolve().parent
+POLICY_DIR = RESULTS_DIR.parents[1] / "agentcore" / "automated-reasoning"
 from fionaa.policy_consistency import PolicyConsistencyChecker
 
 
@@ -68,11 +69,11 @@ def cases(product):
 
 
 async def main():
-    bindings = json.loads((ROOT / "runtime-bindings.json").read_text())
+    bindings = json.loads((POLICY_DIR / "runtime-bindings.json").read_text())
     checker = PolicyConsistencyChecker(bindings)
     results = []
     for product in ("unsecured-business-loans", "revolving-credit-facility", "invoice-discounting", "invoice-factoring"):
-        source = (ROOT / f"{product}.txt").read_text()
+        source = (POLICY_DIR / f"{product}.txt").read_text()
         for name, facts, claim, expected in cases(product):
             result = await checker.check(product, source, facts, claim)
             kinds = [next(iter(f)) for f in result["findings"]]
@@ -80,7 +81,7 @@ async def main():
             row = {"product": product, "case": name, "facts": facts, "claim": claim,
                    "expected": expected, "matched": bool(matched), **result}
             results.append(row)
-            (ROOT / "product-live-results.json").write_text(json.dumps(results, indent=2) + "\n")
+            (RESULTS_DIR / "product-live-results.json").write_text(json.dumps(results, indent=2) + "\n")
             print(product, name, expected, kinds, "PASS" if matched else "FAIL", flush=True)
     return 0 if all(r["matched"] for r in results) else 1
 

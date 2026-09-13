@@ -3,6 +3,7 @@
 Both evaluation paths share `datasets/fionaa_eval_dataset.jsonl`:
 
 - `node/`: DeepEval node assessments, metrics and judge calibration.
+- `automated_reasoning/`: standalone ARC boundary runners and recorded results.
 - `runtime/`: stage disposable applications, invoke the deployed runtime,
   build ground truth and check batch evaluation results.
 
