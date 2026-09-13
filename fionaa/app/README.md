@@ -99,7 +99,13 @@ the graph does not read deployment settings or construct a model client.
 - `schemas.py`: compatibility exports of business models only; new callers use
   the domain modules directly. State/context are imported from `workflow.state`.
 - `workflow/state.py`: checkpointed state and immutable invocation context.
-- `workflow/nodes.py`: assessment nodes and evidence persistence.
+- `workflow/loading.py`: application and document loading.
+- `workflow/policy.py`, `companies_house.py`, `financial.py`, `web_search.py`:
+  individual assessment stages and evidence persistence.
+- `workflow/decision.py`: final synthesis and no-company rejection.
+- `workflow/validation.py`: ARC validation and referral.
+- `workflow/common.py`: shared tool selection.
+- `workflow/nodes.py`: compatibility exports for existing callers.
 - `graph.py`: graph topology, routing, and compatibility exports used by runners.
 - `integrations/checkpointing.py`: customer-scoped AgentCore checkpoint setup.
 - `config.py`: explicit runtime settings and required-environment validation.

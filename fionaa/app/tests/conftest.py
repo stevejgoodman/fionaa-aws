@@ -61,5 +61,7 @@ def pytest_collection_modifyitems(config, items):
 def fake_node_model(request, monkeypatch):
     if request.node.get_closest_marker("live"):
         return
-    from fionaa.workflow import nodes
-    monkeypatch.setattr(nodes, "load_model", lambda: object())
+    from fionaa.workflow import loading, validation
+    from fionaa.workflow import policy as policy_stage, companies_house as company_stage, financial as financial_stage, web_search as web_stage, decision as decision_stage
+    for stage in (policy_stage, company_stage, financial_stage, web_stage, decision_stage):
+        monkeypatch.setattr(stage, "load_model", lambda: object())
