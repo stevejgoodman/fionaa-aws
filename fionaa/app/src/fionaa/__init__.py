@@ -1,0 +1,1 @@
+"""FIONAA lending assessment application."""

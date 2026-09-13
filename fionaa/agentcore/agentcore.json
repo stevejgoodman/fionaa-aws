@@ -12,7 +12,7 @@
       "name": "fionaa",
       "build": "CodeZip",
       "entrypoint": "main.py",
-      "codeLocation": "app/fionaa/",
+      "codeLocation": "app/",
       "runtimeVersion": "PYTHON_3_13",
       "networkMode": "PUBLIC",
       "protocol": "HTTP",
@@ -111,7 +111,7 @@
       "description": "Offline regression eval scenarios for the fionaa loan-application graph (policy check, Companies House verification, web search, security scope)",
       "config": {
         "managed": {
-          "location": "datasets/fionaa_eval_dataset.jsonl"
+          "location": "../evals/datasets/fionaa_eval_dataset.jsonl"
         }
       }
     }

@@ -2,12 +2,12 @@
 
 Why this exists
 ----------------
-`check_companies_house` (see app/fionaa/graph.py) rejects applications where
+`check_companies_house` (see app/src/fionaa/workflow/companies_house.py) rejects applications where
 the applicant-supplied address doesn't look like the Companies House address
 on file. A plain string compare fails for correct-but-loose input — e.g. an
 applicant writes "London" for an address that Companies House lists as
 "Ruislip", which is true (Ruislip is part of Greater London) but not a
-string match. See fionaa/app/fionaa/tests/test_live_companies_house.py,
+string match. See fionaa/app/tests/test_live_companies_house.py,
 case id="goodai-consulting-london-vs-ruislip".
 
 What it does
