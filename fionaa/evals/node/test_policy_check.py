@@ -26,7 +26,7 @@ figure lands) would be a firmer check than a text-based judge call.
 
 Usage:
     cd fionaa/agentcore
-    AWS_PROFILE=AIOps deepeval test run deepeval_evals/test_policy_check.py
+    AWS_PROFILE=AIOps deepeval test run ../evals/node/test_policy_check.py
 """
 
 from __future__ import annotations

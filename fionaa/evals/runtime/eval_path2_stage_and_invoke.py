@@ -46,7 +46,7 @@ that companies_house will never find).
 
 Usage:
     cd fionaa/agentcore
-    AWS_PROFILE=AIOps ../app/fionaa/.venv/bin/python3 eval_path2_stage_and_invoke.py \\
+    AWS_PROFILE=AIOps ../app/fionaa/.venv/bin/python3 ../evals/runtime/eval_path2_stage_and_invoke.py \\
         --output .cli/path2-session-map.json
 """
 
@@ -77,8 +77,8 @@ EVAL_CREDENTIALS_SECRET_ID = "fionaa/eval-harness-cognito-credentials"
 COGNITO_USER_POOL_ID = "us-east-1_XXXXXXXXX"
 COGNITO_CLIENT_ID = "xxxxxxxxxxxxxxxxxxxxxxxxxx"
 
-DATASET_PATH = Path(__file__).resolve().parent / "datasets" / "fionaa_eval_dataset.jsonl"
-DEPLOYED_STATE_PATH = Path(__file__).resolve().parent / ".cli" / "deployed-state.json"
+DATASET_PATH = Path(__file__).resolve().parents[1] / "datasets" / "fionaa_eval_dataset.jsonl"
+DEPLOYED_STATE_PATH = Path(__file__).resolve().parents[2] / "agentcore" / ".cli" / "deployed-state.json"
 
 # Session header must be >=33 chars (agentcore_deploy_gotchas #12); a
 # scenario_id this short would need padding, but every current fullapp-*

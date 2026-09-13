@@ -34,8 +34,8 @@ on:
       - "fionaa/app/fionaa/uv.lock"
       - "fionaa/agentcore/agentcore.json"
       - "fionaa/agentcore/evaluators/**"
-      - "fionaa/agentcore/datasets/fionaa_eval_dataset.jsonl"
-      - "fionaa/agentcore/eval_path2_*.py"
+      - "fionaa/evals/datasets/fionaa_eval_dataset.jsonl"
+      - "fionaa/evals/runtime/**"
       - ".github/workflows/evals-path2-batch-eval.yml"
   workflow_dispatch: {}
 
@@ -116,13 +116,13 @@ jobs:
       - name: Stage applications + invoke the real Runtime
         working-directory: fionaa/agentcore
         run: |
-          ../app/fionaa/.venv/bin/python3 eval_path2_stage_and_invoke.py \
+          ../app/fionaa/.venv/bin/python3 ../evals/runtime/eval_path2_stage_and_invoke.py \
             --output .cli/path2-session-map.json
 
       - name: Build ground-truth mapping
         working-directory: fionaa/agentcore
         run: |
-          ../app/fionaa/.venv/bin/python3 eval_path2_build_ground_truth.py \
+          ../app/fionaa/.venv/bin/python3 ../evals/runtime/eval_path2_build_ground_truth.py \
             --session-map .cli/path2-session-map.json \
             --output .cli/path2-ground-truth.json
 
@@ -207,7 +207,7 @@ jobs:
         working-directory: fionaa/agentcore
         run: |
           echo '```' >> "$GITHUB_STEP_SUMMARY"
-          ../app/fionaa/.venv/bin/python3 eval_path2_check_gate.py .cli/path2-batch-eval-result.json | tee -a "$GITHUB_STEP_SUMMARY"
+          ../app/fionaa/.venv/bin/python3 ../evals/runtime/eval_path2_check_gate.py .cli/path2-batch-eval-result.json | tee -a "$GITHUB_STEP_SUMMARY"
           rc=${PIPESTATUS[0]}
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           exit $rc

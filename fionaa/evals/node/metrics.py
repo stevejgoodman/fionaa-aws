@@ -16,7 +16,7 @@ rubric -- the one piece run_node_evals.py did that nothing else here
 originally covered. That JSON file itself stays in use independently (it's
 a real, deployed AgentCore evaluator resource -- see .cli/deployed-state.json
 -- for the separate native `agentcore run batch-evaluation` path documented
-in ../EVALS.md), this is just the same rubric text applied as a GEval metric
+in ../../agentcore/EVALS.md), this is just the same rubric text applied as a GEval metric
 for this harness's own runs.
 """
 

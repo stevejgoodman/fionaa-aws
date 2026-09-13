@@ -1,5 +1,10 @@
 # Offline evals for fionaa
 
+Evaluation code and datasets moved to [../evals/](../evals/README.md).
+Historical references below to `deepeval_evals/`, `agentcore/datasets/`, and
+`agentcore/eval_path2_*.py` now correspond to `evals/node/`, `evals/datasets/`,
+and `evals/runtime/`. Keep running AgentCore CLI commands from `agentcore/`.
+
 ## Runtime Automated Reasoning integration (2026-09-12)
 
 All five loan types now have versioned standalone guardrails and concrete

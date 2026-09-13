@@ -27,7 +27,7 @@ Per-evaluator thresholds and why:
   scored, but low enough to catch an actual leakage regression.
 
 Usage:
-    python3 eval_path2_check_gate.py path2-batch-eval-result.json
+    python3 ../evals/runtime/eval_path2_check_gate.py path2-batch-eval-result.json
 """
 
 from __future__ import annotations

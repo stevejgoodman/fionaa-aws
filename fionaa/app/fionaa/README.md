@@ -112,9 +112,9 @@ supplies it from the invocation's settings. Legacy callers can still load these
 values from the environment at construction time.
 
 The configuration/workflow separation and domain-model extraction are complete. The AgentCore entrypoint and file layout,
-evaluation datasets and runner locations remain compatible. A subsequent
-migration can introduce an installable `src/fionaa` package and a shared `evals/`
-directory, with deployment packaging and CI paths updated together.
+evaluations now live under `fionaa/evals/` (node runners, runtime runners and
+a shared dataset). CI paths and the AgentCore dataset location follow that move.
+An installable `src/fionaa` package remains a subsequent packaging migration.
 
 Validation: 171 local tests passed, including import isolation and current graph
 routing/referral tests; 10 live tests were skipped. No AWS deployment was performed

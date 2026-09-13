@@ -8,12 +8,12 @@ Those are AWS's own reimplementation of a fixed DeepEval-inspired metric set
 (`TaskCompletion`, `ToolUse`, `Bias`, `PIILeakage`, ...), hosted natively as
 `Builtin`-style evaluator resources, TRACE-level only, runnable only against
 a real deployed-runtime session (same constraint documented in
-`../EVALS.md`'s trace/session-semantics section). This harness is the
+`../../agentcore/EVALS.md`'s trace/session-semantics section). This harness is the
 opposite: the actual `deepeval` package, calling `graph.py` node functions
 directly with fully custom criteria (`assertions_metric`, `correctness_metric`
 below) and a fully custom no-LLM metric (`ToolPrefixCorrectness`) that has no
 equivalent in AWS's fixed catalog. The two are complementary, not
-alternatives -- see `../EVALS.md` for where the AgentCore-native evaluators
+alternatives -- see `../../agentcore/EVALS.md` for where the AgentCore-native evaluators
 (including any `ThirdParty.*` ones worth adding) fit into the batch-evaluation
 path against a deployed runtime.
 
@@ -21,7 +21,7 @@ call `graph.py`'s node logicdirectly (real Bedrock model, real AgentCore Gateway
 storage) rather than through `main.py`'s entrypoint, since that entrypoint
 takes `{"application_id": ...}` + a JWT and fetches from S3 -- not a chat
 message -- so AgentCore's native `--dataset` eval runners can't drive it
-directly. See `../EVALS.md` for the full reasoning.
+directly. See `../../agentcore/EVALS.md` for the full reasoning.
 
 ## Layout
 
@@ -41,7 +41,7 @@ directly. See `../EVALS.md` for the full reasoning.
   as input. That JSON file itself stays in independent use too: it's a real,
   deployed AgentCore evaluator resource (see `../.cli/deployed-state.json`)
   for the separate native `agentcore run batch-evaluation` path documented
-  in `../EVALS.md` -- porting its rubric here doesn't replace that.
+  in `../../agentcore/EVALS.md` -- porting its rubric here doesn't replace that.
 - `test_companies_house.py` -- validated against real Bedrock/Gateway.
   Rebuilds the same agent call `check_companies_house` makes, but also reads
   `response["messages"]` for the `ToolMessage`s the node itself discards, so
@@ -222,10 +222,10 @@ directly. See `../EVALS.md` for the full reasoning.
 
 ```
 cd fionaa/agentcore
-AWS_PROFILE=AIOps deepeval test run deepeval_evals/test_companies_house.py
+AWS_PROFILE=AIOps deepeval test run ../evals/node/test_companies_house.py
 ```
 
-Or all files at once: `deepeval test run deepeval_evals/` (run one file at a
+Or all files at once: `deepeval test run ../evals/node/` (run one file at a
 time if you hit Bedrock throttling -- see "Known gaps" above).
 
 Requires `fionaa/agentcore/.env.local` (real Gateway OAuth config) -- same

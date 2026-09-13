@@ -24,7 +24,7 @@ financial_assessment is skipped -- its dataset has zero scenarios currently
 
 Usage:
     cd fionaa/agentcore
-    AWS_PROFILE=AIOps ../app/fionaa/.venv/bin/python deepeval_evals/calibrate_judges.py
+    AWS_PROFILE=AIOps ../app/fionaa/.venv/bin/python ../evals/node/calibrate_judges.py
 
 Costs real Bedrock calls: one live agent run per scenario (Sonnet, same as
 the real suite), plus two judge calls per GEval metric per scenario (old +
