@@ -9,8 +9,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-sys.path.insert(0, str(ROOT.parents[1] / "app" / "fionaa"))
-from policy_consistency import PolicyConsistencyChecker
+from fionaa.policy_consistency import PolicyConsistencyChecker
 
 
 def cases(product):

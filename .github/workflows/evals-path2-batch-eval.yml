@@ -28,10 +28,10 @@ on:
   push:
     branches: [master]
     paths:
-      - "fionaa/app/fionaa/**.py"
-      - "fionaa/app/fionaa/policies/**"
-      - "fionaa/app/fionaa/pyproject.toml"
-      - "fionaa/app/fionaa/uv.lock"
+      - "fionaa/app/**.py"
+      - "fionaa/app/src/fionaa/policies/**"
+      - "fionaa/app/pyproject.toml"
+      - "fionaa/app/uv.lock"
       - "fionaa/agentcore/agentcore.json"
       - "fionaa/agentcore/evaluators/**"
       - "fionaa/evals/datasets/fionaa_eval_dataset.jsonl"
@@ -88,7 +88,7 @@ jobs:
           aws-region: us-east-1
 
       - name: Install Python dependencies
-        working-directory: fionaa/app/fionaa
+        working-directory: fionaa/app
         run: uv sync
 
       # `agentcore deploy`/`agentcore run` must run from the project root
@@ -116,20 +116,20 @@ jobs:
       - name: Stage applications + invoke the real Runtime
         working-directory: fionaa/agentcore
         run: |
-          ../app/fionaa/.venv/bin/python3 ../evals/runtime/eval_path2_stage_and_invoke.py \
+          ../app/.venv/bin/python3 ../evals/runtime/eval_path2_stage_and_invoke.py \
             --output .cli/path2-session-map.json
 
       - name: Build ground-truth mapping
         working-directory: fionaa/agentcore
         run: |
-          ../app/fionaa/.venv/bin/python3 ../evals/runtime/eval_path2_build_ground_truth.py \
+          ../app/.venv/bin/python3 ../evals/runtime/eval_path2_build_ground_truth.py \
             --session-map .cli/path2-session-map.json \
             --output .cli/path2-ground-truth.json
 
       - name: Run batch-evaluation
         working-directory: fionaa
         run: |
-          SESSION_IDS=$(app/fionaa/.venv/bin/python3 -c "
+          SESSION_IDS=$(app/.venv/bin/python3 -c "
           import json
           m = json.load(open('agentcore/.cli/path2-session-map.json'))
           print(' '.join(r['session_id'] for r in m.values()))
@@ -175,7 +175,7 @@ jobs:
           echo "$START_OUTPUT"
           if [ "$rc" -ne 0 ]; then exit $rc; fi
 
-          BATCH_EVAL_ID=$(echo "$START_OUTPUT" | app/fionaa/.venv/bin/python3 -c "
+          BATCH_EVAL_ID=$(echo "$START_OUTPUT" | app/.venv/bin/python3 -c "
           import json, sys
           print(json.load(sys.stdin)['id'])
           ")
@@ -185,7 +185,7 @@ jobs:
             VIEW_OUTPUT=$(agentcore view batch-evaluation "$BATCH_EVAL_ID" --json)
             rc=$?
             if [ "$rc" -ne 0 ]; then echo "$VIEW_OUTPUT"; exit $rc; fi
-            STATUS=$(echo "$VIEW_OUTPUT" | app/fionaa/.venv/bin/python3 -c "
+            STATUS=$(echo "$VIEW_OUTPUT" | app/.venv/bin/python3 -c "
           import json, sys
           print(json.load(sys.stdin).get('status'))
           ")
@@ -207,7 +207,7 @@ jobs:
         working-directory: fionaa/agentcore
         run: |
           echo '```' >> "$GITHUB_STEP_SUMMARY"
-          ../app/fionaa/.venv/bin/python3 ../evals/runtime/eval_path2_check_gate.py .cli/path2-batch-eval-result.json | tee -a "$GITHUB_STEP_SUMMARY"
+          ../app/.venv/bin/python3 ../evals/runtime/eval_path2_check_gate.py .cli/path2-batch-eval-result.json | tee -a "$GITHUB_STEP_SUMMARY"
           rc=${PIPESTATUS[0]}
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           exit $rc

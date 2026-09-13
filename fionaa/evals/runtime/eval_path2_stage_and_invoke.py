@@ -16,7 +16,7 @@ design and the constraints this implements:
   AnnualAccountsSchema/BankStatementSchema exactly, staged the same way
   under input/annual_accounts_<n>.json / input/bank_statement_<n>.json so
   load_application's DOCUMENT_SPECS prefix match (graph.py) picks them up.
-  Mirrors app/fionaa/tests/document_fixtures.py's GoodAI/Goodman's fixtures
+  Mirrors app/src/fionaa/testing/document_fixtures.py's GoodAI/Goodman's fixtures
   (not imported directly -- every eval_path2_*.py script here is
   self-contained against the dataset file alone, see
   eval_path2_build_ground_truth.py for the same convention).
@@ -46,7 +46,7 @@ that companies_house will never find).
 
 Usage:
     cd fionaa/agentcore
-    AWS_PROFILE=AIOps ../app/fionaa/.venv/bin/python3 ../evals/runtime/eval_path2_stage_and_invoke.py \\
+    AWS_PROFILE=AIOps ../app/.venv/bin/python3 ../evals/runtime/eval_path2_stage_and_invoke.py \\
         --output .cli/path2-session-map.json
 """
 

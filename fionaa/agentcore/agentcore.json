@@ -12,7 +12,7 @@
       "name": "fionaa",
       "build": "CodeZip",
       "entrypoint": "main.py",
-      "codeLocation": "app/fionaa/",
+      "codeLocation": "app/",
       "runtimeVersion": "PYTHON_3_13",
       "networkMode": "PUBLIC",
       "protocol": "HTTP",

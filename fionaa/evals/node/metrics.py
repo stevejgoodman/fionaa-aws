@@ -26,7 +26,7 @@ from deepeval.metrics import BaseMetric, GEval
 from deepeval.models import AmazonBedrockModel
 from deepeval.test_case import LLMTestCase, LLMTestCaseParams
 
-from model.load import MODEL_ID
+from fionaa.model.load import MODEL_ID
 
 # GEval defaults to an OpenAI judge model (OPENAI_API_KEY), which fionaa has
 # no use for -- it runs entirely on Bedrock (model/load.py). Point GEval's
