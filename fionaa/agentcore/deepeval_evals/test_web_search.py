@@ -45,6 +45,7 @@ from langchain.messages import HumanMessage, ToolMessage  # noqa: E402
 from deepeval import assert_test  # noqa: E402
 from deepeval.test_case import LLMTestCase, ToolCall  # noqa: E402
 
+from model.load import load_model
 import graph as g  # noqa: E402
 from live_helpers import real_gateway_tools  # noqa: E402
 
@@ -61,7 +62,7 @@ GOLDENS = load_goldens(prefix="web-search-")
 
 async def _run_web_search(company_name: str, tools: list) -> tuple[str, list[ToolCall]]:
     agent = create_agent(
-        model=g.model,
+        model=load_model(),
         tools=g.tools_for(tools, "websearch-target___WebSearch"),
         system_prompt=g.WEB_SEARCH_PROMPT,
     )

@@ -5,7 +5,9 @@ from gateway import load_gateway_tools
 from policy_consistency import PolicyConsistencyChecker
 from graph import AgentContext, build_checkpointer, build_graph, checkpoint_config
 from security import identity_from_request_context, scoped_boto_session
-from storage import APPLICATIONS_BUCKET, ApplicationStore, PolicyDocStore
+from storage import ApplicationStore, PolicyDocStore
+from config import RuntimeSettings
+from model.load import load_model
 
 LangchainInstrumentor().instrument()
 
@@ -23,12 +25,13 @@ async def invoke(payload, context):
     """
     log.info("Invoking Agent.....")
 
+    settings = RuntimeSettings.from_environment()
     identity = identity_from_request_context(
         context=context,
         application_id=payload["application_id"],
     )
-    session = scoped_boto_session(identity)
-    checkpointer = build_checkpointer(session)
+    session = scoped_boto_session(identity, role_arn=settings.data_access_role_arn)
+    checkpointer = build_checkpointer(session, memory_id=settings.checkpoint_memory_id)
     graph = build_graph(checkpointer=checkpointer)
 
     # Gateway OAuth token is short-lived, so tools are loaded fresh per
@@ -40,15 +43,16 @@ async def invoke(payload, context):
     config = checkpoint_config(identity)
 
     agent_context = AgentContext(
-        store=ApplicationStore(identity, session),
-        policy_docs=PolicyDocStore(session),
+        store=ApplicationStore(identity, session, bucket=settings.applications_bucket, kms_key_arn=settings.kms_key_arn),
+        policy_docs=PolicyDocStore(session, bucket=settings.policy_docs_bucket),
         tools=tools,
+        model=load_model(),
         policy_checker=PolicyConsistencyChecker.from_environment(),
     )
     # no msg as context contains the relevant info
     final_state = await graph.ainvoke({}, config, context=agent_context)
 
-    prefix = f"s3://{APPLICATIONS_BUCKET}/{identity.customer_id}/{identity.application_id}"
+    prefix = f"s3://{settings.applications_bucket}/{identity.customer_id}/{identity.application_id}"
     result = {
         "application_id": identity.application_id,
         "outcome": final_state["final_decision"]["outcome"],

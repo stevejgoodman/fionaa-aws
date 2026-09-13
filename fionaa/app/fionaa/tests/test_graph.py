@@ -14,6 +14,7 @@ from langchain.messages import ToolMessage
 from langgraph.checkpoint.memory import MemorySaver
 
 import graph as g
+from workflow import nodes
 import security as sec
 
 from fakes import FakeMessage, FakePolicyDocs, FakeRuntime, FakeStore, FakeTool, make_fake_create_agent
@@ -126,7 +127,7 @@ def test_load_application_skips_document_types_that_dont_apply(monkeypatch):
         g.AnnualAccountsSchema,  # any schema stands in here -- unreachable, applies_to is False
         applies_to=lambda app: app["loan_type"] == "secured-business-loans",
     )
-    monkeypatch.setattr(g, "DOCUMENT_SPECS", g.DOCUMENT_SPECS + [conditional_spec])
+    monkeypatch.setattr(nodes, "DOCUMENT_SPECS", g.DOCUMENT_SPECS + [conditional_spec])
 
     result = g.load_application({}, runtime)
 
@@ -175,7 +176,7 @@ async def test_check_against_policy_persists_and_returns_result(monkeypatch):
     }
     calls = []
 
-    monkeypatch.setattr(g, "create_agent", make_fake_create_agent(fake_result, calls))
+    monkeypatch.setattr(nodes, "create_agent", make_fake_create_agent(fake_result, calls))
 
     result = await g.check_against_policy(state, runtime)
 
@@ -214,7 +215,7 @@ async def test_check_against_policy_scopes_check_tools_by_loan_type(monkeypatch)
     runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
     calls = []
 
-    monkeypatch.setattr(g, "create_agent", make_fake_create_agent("passed", calls))
+    monkeypatch.setattr(nodes, "create_agent", make_fake_create_agent("passed", calls))
 
     await g.check_against_policy(state, runtime)
 
@@ -240,7 +241,7 @@ async def test_check_against_policy_passes_bank_statement_end_dates(monkeypatch)
     runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
     calls = []
 
-    monkeypatch.setattr(g, "create_agent", make_fake_create_agent("passed", calls))
+    monkeypatch.setattr(nodes, "create_agent", make_fake_create_agent("passed", calls))
 
     await g.check_against_policy(state, runtime)
 
@@ -279,7 +280,7 @@ async def test_check_against_policy_persists_tool_calls_as_evidence(monkeypatch)
                 "structured_response": g.PolicyCheckResult(**fake_result),
             }
 
-    monkeypatch.setattr(g, "create_agent", lambda **kwargs: FakeAgentWithToolCall())
+    monkeypatch.setattr(nodes, "create_agent", lambda **kwargs: FakeAgentWithToolCall())
 
     result = await g.check_against_policy(state, runtime)
 
@@ -315,7 +316,7 @@ async def test_check_companies_house_calls_gateway_and_persists(monkeypatch):
     }
     calls = []
 
-    monkeypatch.setattr(g, "create_agent", make_fake_create_agent(fake_result, calls))
+    monkeypatch.setattr(nodes, "create_agent", make_fake_create_agent(fake_result, calls))
 
     result = await g.check_companies_house(state, runtime)
 
@@ -365,7 +366,7 @@ async def test_check_companies_house_persists_tool_calls_as_evidence(monkeypatch
                 "structured_response": g.CompaniesHouseResult(**fake_result),
             }
 
-    monkeypatch.setattr(g, "create_agent", lambda **kwargs: FakeAgentWithToolCall())
+    monkeypatch.setattr(nodes, "create_agent", lambda **kwargs: FakeAgentWithToolCall())
 
     result = await g.check_companies_house(state, runtime)
 
@@ -412,7 +413,7 @@ async def test_check_companies_house_redacts_address_lines_in_persisted_tool_cal
                 "structured_response": g.CompaniesHouseResult(**fake_result),
             }
 
-    monkeypatch.setattr(g, "create_agent", lambda **kwargs: FakeAgentWithToolCall())
+    monkeypatch.setattr(nodes, "create_agent", lambda **kwargs: FakeAgentWithToolCall())
 
     await g.check_companies_house(state, runtime)
 
@@ -441,7 +442,7 @@ async def test_check_companies_house_overrides_ungrounded_found_true_with_no_too
                 "structured_response": g.CompaniesHouseResult(**fake_result),
             }
 
-    monkeypatch.setattr(g, "create_agent", lambda **kwargs: FakeAgentNoToolCalls())
+    monkeypatch.setattr(nodes, "create_agent", lambda **kwargs: FakeAgentNoToolCalls())
 
     result = await g.check_companies_house(state, runtime)
 
@@ -480,7 +481,7 @@ async def test_check_companies_house_overrides_ungrounded_found_true_with_wrong_
                 "structured_response": g.CompaniesHouseResult(**fake_result),
             }
 
-    monkeypatch.setattr(g, "create_agent", lambda **kwargs: FakeAgentWrongCompany())
+    monkeypatch.setattr(nodes, "create_agent", lambda **kwargs: FakeAgentWrongCompany())
 
     result = await g.check_companies_house(state, runtime)
 
@@ -498,7 +499,7 @@ async def test_check_companies_house_routes_to_reject_when_not_found(monkeypatch
     fake_result = {"found": False, "confidence": "low", "summary": "no matching company"}
     calls = []
 
-    monkeypatch.setattr(g, "create_agent", make_fake_create_agent(fake_result, calls))
+    monkeypatch.setattr(nodes, "create_agent", make_fake_create_agent(fake_result, calls))
 
     result = await g.check_companies_house(state, runtime)
 
@@ -548,7 +549,7 @@ async def test_check_financial_assessment_persists_and_returns_result(monkeypatc
     }
     calls = []
 
-    monkeypatch.setattr(g, "create_agent", make_fake_create_agent(fake_result, calls))
+    monkeypatch.setattr(nodes, "create_agent", make_fake_create_agent(fake_result, calls))
 
     result = await g.check_financial_assessment(state, runtime)
 
@@ -599,7 +600,7 @@ async def test_check_financial_assessment_passes_annual_accounts_and_bank_statem
         "summary": "turnover mismatch",
     }
 
-    monkeypatch.setattr(g, "create_agent", make_fake_create_agent(fake_result, calls))
+    monkeypatch.setattr(nodes, "create_agent", make_fake_create_agent(fake_result, calls))
 
     await g.check_financial_assessment(state, runtime)
 
@@ -644,7 +645,7 @@ async def test_check_financial_assessment_persists_tool_calls_as_evidence(monkey
                 "structured_response": g.FinancialAssessmentResult(**fake_result),
             }
 
-    monkeypatch.setattr(g, "create_agent", lambda **kwargs: FakeAgentWithToolCall())
+    monkeypatch.setattr(nodes, "create_agent", lambda **kwargs: FakeAgentWithToolCall())
 
     result = await g.check_financial_assessment(state, runtime)
 
@@ -673,7 +674,7 @@ async def test_search_web_builds_query_from_company_name(monkeypatch):
     fake_result = "no adverse findings"
     calls = []
 
-    monkeypatch.setattr(g, "create_agent", make_fake_create_agent(fake_result, calls))
+    monkeypatch.setattr(nodes, "create_agent", make_fake_create_agent(fake_result, calls))
 
     result = await g.search_web(state, runtime)
 
@@ -715,7 +716,7 @@ async def test_search_web_persists_tool_calls_as_evidence(monkeypatch):
                 ]
             }
 
-    monkeypatch.setattr(g, "create_agent", lambda **kwargs: FakeAgentWithToolCall())
+    monkeypatch.setattr(nodes, "create_agent", lambda **kwargs: FakeAgentWithToolCall())
 
     result = await g.search_web(state, runtime)
 
@@ -755,7 +756,7 @@ async def test_synthesize_decision_persists_and_returns_result(monkeypatch):
     fake_result = {"outcome": "approved", "reason": "all four assessments clean", "rationale": "no issues found"}
     calls = []
 
-    monkeypatch.setattr(g, "create_agent", make_fake_create_agent(fake_result, calls))
+    monkeypatch.setattr(nodes, "create_agent", make_fake_create_agent(fake_result, calls))
 
     result = await g.synthesize_decision(state, runtime)
 
@@ -793,7 +794,7 @@ async def test_synthesize_decision_can_reject(monkeypatch):
     fake_result = {"outcome": "rejected", "reason": "policy_check found ineligible", "rationale": "fails core eligibility"}
     calls = []
 
-    monkeypatch.setattr(g, "create_agent", make_fake_create_agent(fake_result, calls))
+    monkeypatch.setattr(nodes, "create_agent", make_fake_create_agent(fake_result, calls))
 
     result = await g.synthesize_decision(state, runtime)
 
@@ -806,10 +807,10 @@ async def test_synthesize_decision_can_reject(monkeypatch):
 
 def _patch_all_integration_points(monkeypatch, agent_response="ok"):
     calls = []
-    monkeypatch.setattr(g, "create_agent", make_fake_create_agent(agent_response, calls))
+    monkeypatch.setattr(nodes, "create_agent", make_fake_create_agent(agent_response, calls))
     async def valid(*args):
         return {"passed": True, "status": "valid"}
-    monkeypatch.setattr(g, "_validate_assessment", valid)
+    monkeypatch.setattr(nodes, "_validate_assessment", valid)
     return calls
 
 
