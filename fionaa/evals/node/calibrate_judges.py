@@ -23,8 +23,8 @@ financial_assessment is skipped -- its dataset has zero scenarios currently
 (see deepeval-ci.yml), so there's nothing to calibrate against yet.
 
 Usage:
-    cd fionaa/agentcore
-    AWS_PROFILE=AIOps ../app/fionaa/.venv/bin/python ../evals/node/calibrate_judges.py
+    cd fionaa
+    AWS_PROFILE=AIOps app/.venv/bin/python -m evals.node.calibrate_judges
 
 Costs real Bedrock calls: one live agent run per scenario (Sonnet, same as
 the real suite), plus two judge calls per GEval metric per scenario (old +
@@ -47,19 +47,15 @@ os.environ.setdefault("FIONAA_DATA_ACCESS_ROLE_ARN", "arn:aws:iam::000000000000:
 os.environ.setdefault("FIONAA_CHECKPOINT_MEMORY_ID", "eval-harness-unused")
 os.environ.setdefault("AWS_DEFAULT_REGION", "us-east-1")
 
-APP_DIR = Path(__file__).resolve().parent.parent.parent / "app" / "fionaa"
-sys.path.insert(0, str(APP_DIR))
-sys.path.insert(0, str(APP_DIR / "tests"))
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from deepeval.metrics import GEval  # noqa: E402
 from deepeval.test_case import LLMTestCase, ToolCall  # noqa: E402
 
-from live_helpers import real_gateway_tools  # noqa: E402
-from fakes import FakePolicyDocs, FakeRuntime, FakeStore  # noqa: E402
-import graph as g  # noqa: E402
+from fionaa.testing.live_helpers import real_gateway_tools  # noqa: E402
+from fionaa.testing.fakes import FakePolicyDocs, FakeRuntime, FakeStore  # noqa: E402
+from fionaa import graph as g  # noqa: E402
 
-from metrics import (  # noqa: E402
+from .metrics import (  # noqa: E402
     ToolPrefixCorrectness,
     _LEGACY_SONNET_JUDGE_MODEL,
     assertions_metric,

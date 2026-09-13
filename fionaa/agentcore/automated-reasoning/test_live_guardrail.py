@@ -10,8 +10,7 @@ import sys
 from pathlib import Path
 
 APP = Path(__file__).resolve().parents[2] / "app" / "fionaa"
-sys.path.insert(0, str(APP))
-from policy_consistency import PolicyConsistencyChecker, policy_digest
+from fionaa.policy_consistency import PolicyConsistencyChecker, policy_digest
 
 
 async def main():

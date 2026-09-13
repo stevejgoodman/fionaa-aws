@@ -10,8 +10,8 @@ Infrastructure and deployment state remain in `../agentcore/`. Run CLI commands
 from `fionaa/agentcore` so AgentCore finds the project and `.cli` output paths:
 
 ```sh
-../app/fionaa/.venv/bin/deepeval test run ../evals/node/test_policy_check.py
-../app/fionaa/.venv/bin/python ../evals/runtime/eval_path2_stage_and_invoke.py --help
+../app/.venv/bin/deepeval test run ../evals/node/test_policy_check.py
+../app/.venv/bin/python ../evals/runtime/eval_path2_stage_and_invoke.py --help
 ```
 
 Live evaluation execution requires the existing AWS/Gateway configuration and

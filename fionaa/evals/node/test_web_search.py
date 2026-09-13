@@ -34,10 +34,6 @@ os.environ.setdefault("FIONAA_DATA_ACCESS_ROLE_ARN", "arn:aws:iam::000000000000:
 os.environ.setdefault("FIONAA_CHECKPOINT_MEMORY_ID", "eval-harness-unused")
 os.environ.setdefault("AWS_DEFAULT_REGION", "us-east-1")
 
-APP_DIR = Path(__file__).resolve().parent.parent.parent / "app" / "fionaa"
-sys.path.insert(0, str(APP_DIR))
-sys.path.insert(0, str(APP_DIR / "tests"))
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import pytest  # noqa: E402
 from langchain.agents import create_agent  # noqa: E402
@@ -45,12 +41,12 @@ from langchain.messages import HumanMessage, ToolMessage  # noqa: E402
 from deepeval import assert_test  # noqa: E402
 from deepeval.test_case import LLMTestCase, ToolCall  # noqa: E402
 
-from model.load import load_model
-import graph as g  # noqa: E402
-from live_helpers import real_gateway_tools  # noqa: E402
+from fionaa.model.load import load_model
+from fionaa import graph as g  # noqa: E402
+from fionaa.testing.live_helpers import real_gateway_tools  # noqa: E402
 
-from dataset import load_goldens  # noqa: E402
-from metrics import (  # noqa: E402
+from .dataset import load_goldens  # noqa: E402
+from .metrics import (  # noqa: E402
     ToolPrefixCorrectness,
     assertions_metric,
     correctness_metric,
