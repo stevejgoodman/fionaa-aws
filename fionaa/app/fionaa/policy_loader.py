@@ -12,7 +12,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from schemas import LoanType
+from domain.applications import LoanType
 
 POLICIES_DIR = Path(__file__).parent / "policies"
 

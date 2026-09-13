@@ -6,7 +6,7 @@ import pytest
 
 from policy_consistency import policy_digest
 from policy_loader import load_policy_text
-from schemas import LoanType
+from domain.applications import LoanType
 
 ROOT = Path(__file__).resolve().parents[3] / "agentcore" / "automated-reasoning"
 

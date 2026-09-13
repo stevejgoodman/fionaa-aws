@@ -16,7 +16,8 @@ from datetime import date
 import pytest
 
 import graph as g
-from schemas import ApplicationFormSchema, AnnualAccountsSchema, BankStatementSchema
+from domain.applications import ApplicationFormSchema
+from domain.documents import AnnualAccountsSchema, BankStatementSchema
 
 import document_fixtures as fx
 from fakes import FakePolicyDocs, FakeRuntime, FakeStore

@@ -10,7 +10,8 @@ from document_fixtures import (
     GOODAI_APPLICATION,
     GOODAI_BANK_STATEMENTS_RECENT,
 )
-from schemas import AnnualAccountsSchema, ApplicationFormSchema, BankStatementSchema
+from domain.documents import AnnualAccountsSchema, BankStatementSchema
+from domain.applications import ApplicationFormSchema
 
 
 def test_goodai_application_fixture_still_validates():

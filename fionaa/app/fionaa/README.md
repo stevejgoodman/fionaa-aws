@@ -93,8 +93,11 @@ customer-scoped storage/session/checkpointing, gateway tools, the model and ARC
 checker. Settings are read at invocation time; importing schemas or constructing
 the graph does not read deployment settings or construct a model client.
 
-- `schemas.py`: business input and assessment models. Existing state/context
-  imports remain available as compatibility exports.
+- `domain/applications.py`: loan types and application models.
+- `domain/documents.py`: bank statements, annual accounts and document types.
+- `domain/assessments.py`: policy, company, financial and final-decision models.
+- `schemas.py`: compatibility exports of business models only; new callers use
+  the domain modules directly. State/context are imported from `workflow.state`.
 - `workflow/state.py`: checkpointed state and immutable invocation context.
 - `workflow/nodes.py`: assessment nodes and evidence persistence.
 - `graph.py`: graph topology, routing, and compatibility exports used by runners.
@@ -108,7 +111,7 @@ Storage constructors accept explicit bucket/KMS configuration; the entrypoint
 supplies it from the invocation's settings. Legacy callers can still load these
 values from the environment at construction time.
 
-This is the first refactoring stage. The AgentCore entrypoint and file layout,
+The configuration/workflow separation and domain-model extraction are complete. The AgentCore entrypoint and file layout,
 evaluation datasets and runner locations remain compatible. A subsequent
 migration can introduce an installable `src/fionaa` package and a shared `evals/`
 directory, with deployment packaging and CI paths updated together.

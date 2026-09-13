@@ -1,7 +1,7 @@
 """Unit tests for policy_loader.py."""
 
 import policy_loader as pl
-from schemas import LoanType
+from domain.applications import LoanType
 
 
 def test_load_check_tool_names_for_invoice_factoring():
