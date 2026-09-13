@@ -60,7 +60,7 @@ def _session_with(monkeypatch, fake_client):
 
 def test_get_json_scopes_key_to_identity_prefix(monkeypatch, identity):
     body = json.dumps({"ok": True}).encode()
-    fake_client = FakeS3Client({(st.APPLICATIONS_BUCKET, f"{identity.customer_id}/{identity.application_id}/input/application.json"): body})
+    fake_client = FakeS3Client({("test-applications-bucket", f"{identity.customer_id}/{identity.application_id}/input/application.json"): body})
     store = st.ApplicationStore(identity, _session_with(monkeypatch, fake_client))
 
     assert store.get_json("input/application.json") == {"ok": True}
@@ -81,20 +81,20 @@ def test_put_json_writes_kms_encryption_context_matching_customer_id(monkeypatch
     assert call["Key"] == f"{identity.customer_id}/{identity.application_id}/policy_check/result.json"
     context = json.loads(base64.b64decode(call["SSEKMSEncryptionContext"]))
     assert context == {"customer_id": identity.customer_id}
-    assert uri == f"s3://{st.APPLICATIONS_BUCKET}/{identity.customer_id}/{identity.application_id}/policy_check/result.json"
+    assert uri == f"s3://test-applications-bucket/{identity.customer_id}/{identity.application_id}/policy_check/result.json"
 
 
 def test_list_keys_scopes_prefix_to_identity_and_strips_it(monkeypatch, identity):
     prefix = f"{identity.customer_id}/{identity.application_id}"
     fake_client = FakeS3Client(
         {
-            (st.APPLICATIONS_BUCKET, f"{prefix}/input/annual_accounts_2023.json"): b"{}",
-            (st.APPLICATIONS_BUCKET, f"{prefix}/input/annual_accounts_2024.json"): b"{}",
+            ("test-applications-bucket", f"{prefix}/input/annual_accounts_2023.json"): b"{}",
+            ("test-applications-bucket", f"{prefix}/input/annual_accounts_2024.json"): b"{}",
             # Same filename prefix, different identity -- must not leak across
             # customers just because "input/annual_accounts" also matches.
             ("other-bucket", f"{prefix}/input/annual_accounts_2025.json"): b"{}",
-            (st.APPLICATIONS_BUCKET, f"{prefix}/input/bank_statement_jan.json"): b"{}",
-            (st.APPLICATIONS_BUCKET, f"{prefix}/input/application.json"): b"{}",
+            ("test-applications-bucket", f"{prefix}/input/bank_statement_jan.json"): b"{}",
+            ("test-applications-bucket", f"{prefix}/input/application.json"): b"{}",
         }
     )
     store = st.ApplicationStore(identity, _session_with(monkeypatch, fake_client))
@@ -110,7 +110,7 @@ def test_list_keys_returns_empty_when_nothing_matches(monkeypatch, identity):
 
 
 def test_policy_doc_store_reads_from_shared_bucket(monkeypatch):
-    fake_client = FakeS3Client({(st.POLICY_DOCS_BUCKET, "lending/v7.md"): b"policy text"})
+    fake_client = FakeS3Client({("test-policy-docs-bucket", "lending/v7.md"): b"policy text"})
     store = st.PolicyDocStore(_session_with(monkeypatch, fake_client))
 
     assert store.load("lending/v7.md") == b"policy text"

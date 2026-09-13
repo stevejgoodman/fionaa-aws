@@ -20,7 +20,6 @@ from __future__ import annotations
 
 import hashlib
 import logging
-import os
 import re
 from dataclasses import dataclass
 from typing import Any
@@ -30,9 +29,9 @@ import jwt
 from botocore.credentials import DeferredRefreshableCredentials
 from botocore.session import get_session as get_botocore_session
 
-log = logging.getLogger("fionaa")
+from config import required_env
 
-DATA_ACCESS_ROLE_ARN = os.environ["FIONAA_DATA_ACCESS_ROLE_ARN"]
+log = logging.getLogger("fionaa")
 
 # STS session tag values allow [\w+=,.@-]. Reject anything else *before* it
 # reaches the tag, so a malformed identity can never widen the S3 prefix.
@@ -98,7 +97,7 @@ def identity_from_request_context(context: Any, application_id: str) -> Customer
     return CustomerIdentity(customer_id=_hash_customer_id(email), application_id=application_id)
 
 
-def scoped_boto_session(identity: CustomerIdentity) -> boto3.Session:
+def scoped_boto_session(identity: CustomerIdentity, role_arn: str | None = None) -> boto3.Session:
     """A boto3 Session whose credentials are tagged with this customer_id.
 
     Uses DeferredRefreshableCredentials so long-running graphs transparently
@@ -106,11 +105,12 @@ def scoped_boto_session(identity: CustomerIdentity) -> boto3.Session:
     later nodes in the chain may run well after the first node acquired
     credentials.
     """
+    role_arn = role_arn or required_env("FIONAA_DATA_ACCESS_ROLE_ARN")
     sts = boto3.client("sts")
 
     def _refresh() -> dict[str, str]:
         resp = sts.assume_role(
-            RoleArn=DATA_ACCESS_ROLE_ARN,
+            RoleArn=role_arn,
             # Session name lands in CloudTrail — make it traceable per application.
             RoleSessionName=f"fionaa-{identity.customer_id}-{identity.application_id}"[:64],
             Tags=[

@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-# security.py/storage.py read these at import time. Tests never touch AWS,
-# so the values just need to be present, not real.
+# Defaults for tests that construct runtime dependencies. Imports themselves
+# do not require these values; test_configuration.py verifies that boundary.
 os.environ.setdefault("FIONAA_APPLICATIONS_BUCKET", "test-applications-bucket")
 os.environ.setdefault("FIONAA_POLICY_DOCS_BUCKET", "test-policy-docs-bucket")
 os.environ.setdefault("FIONAA_KMS_KEY_ARN", "alias/aws/s3")
@@ -56,3 +56,11 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if "live" in item.keywords:
             item.add_marker(skip_live)
+
+
+@pytest.fixture(autouse=True)
+def fake_node_model(request, monkeypatch):
+    if request.node.get_closest_marker("live"):
+        return
+    from workflow import nodes
+    monkeypatch.setattr(nodes, "load_model", lambda: object())

@@ -11,7 +11,7 @@ from __future__ import annotations
 import base64
 import json
 import logging
-import os
+from config import required_env
 from typing import Any, Optional
 
 import boto3
@@ -21,14 +21,14 @@ from security import CustomerIdentity
 
 log = logging.getLogger("fionaa")
 
-APPLICATIONS_BUCKET = os.environ["FIONAA_APPLICATIONS_BUCKET"]
-POLICY_DOCS_BUCKET = os.environ["FIONAA_POLICY_DOCS_BUCKET"]
 
 
 class ApplicationStore:
     """All keys are built from the identity, never from caller input."""
 
-    def __init__(self, identity: CustomerIdentity, session: boto3.Session) -> None:
+    def __init__(self, identity: CustomerIdentity, session: boto3.Session, *, bucket: str | None = None, kms_key_arn: str | None = None) -> None:
+        self._bucket = bucket or required_env("FIONAA_APPLICATIONS_BUCKET")
+        self._kms_key_arn = kms_key_arn or required_env("FIONAA_KMS_KEY_ARN")
         self._identity = identity
         self._s3 = session.client("s3")
 
@@ -39,7 +39,7 @@ class ApplicationStore:
     def get_json(self, relative_key: str) -> Optional[dict[str, Any]]:
         key = f"{self._prefix}/{relative_key}"
         try:
-            obj = self._s3.get_object(Bucket=APPLICATIONS_BUCKET, Key=key)
+            obj = self._s3.get_object(Bucket=self._bucket, Key=key)
         except ClientError as exc:
             code = exc.response["Error"]["Code"]
             if code in ("NoSuchKey", "404"):
@@ -55,12 +55,12 @@ class ApplicationStore:
     def put_json(self, relative_key: str, payload: dict[str, Any]) -> str:
         key = f"{self._prefix}/{relative_key}"
         self._s3.put_object(
-            Bucket=APPLICATIONS_BUCKET,
+            Bucket=self._bucket,
             Key=key,
             Body=json.dumps(payload, indent=2).encode(),
             ContentType="application/json",
             ServerSideEncryption="aws:kms",
-            SSEKMSKeyId=os.environ["FIONAA_KMS_KEY_ARN"],
+            SSEKMSKeyId=self._kms_key_arn,
             # Must match the kms:EncryptionContext:customer_id condition on
             # FionaaDataAccessRole's KMS grant (fionaa_iam_policies.md Section 3) —
             # without this, GetObject's server-side decrypt uses S3's default
@@ -70,7 +70,7 @@ class ApplicationStore:
                 json.dumps({"customer_id": self._identity.customer_id}).encode()
             ).decode(),
         )
-        return f"s3://{APPLICATIONS_BUCKET}/{key}"
+        return f"s3://{self._bucket}/{key}"
 
     def list_keys(self, key_prefix: str) -> list[str]:
         """Lists this application's own JSON documents whose key starts with
@@ -84,7 +84,7 @@ class ApplicationStore:
         prefix = f"{self._prefix}/{key_prefix}"
         paginator = self._s3.get_paginator("list_objects_v2")
         keys = []
-        for page in paginator.paginate(Bucket=APPLICATIONS_BUCKET, Prefix=prefix):
+        for page in paginator.paginate(Bucket=self._bucket, Prefix=prefix):
             for obj in page.get("Contents", []):
                 keys.append(obj["Key"][len(self._prefix) + 1:])
         return keys
@@ -92,15 +92,16 @@ class ApplicationStore:
     def get_document_bytes(self, filename: str) -> bytes:
         """Large blobs (application PDFs) live under the same enforced prefix."""
         key = f"{self._prefix}/input/documents/{filename}"
-        return self._s3.get_object(Bucket=APPLICATIONS_BUCKET, Key=key)["Body"].read()
+        return self._s3.get_object(Bucket=self._bucket, Key=key)["Body"].read()
 
 
 class PolicyDocStore:
     """Bank policy documents are shared and read-only — separate bucket, and the
     data-access role only holds s3:GetObject on it with no prefix condition."""
 
-    def __init__(self, session: boto3.Session) -> None:
+    def __init__(self, session: boto3.Session, *, bucket: str | None = None) -> None:
+        self._bucket = bucket or required_env("FIONAA_POLICY_DOCS_BUCKET")
         self._s3 = session.client("s3")
 
     def load(self, doc_key: str) -> bytes:
-        return self._s3.get_object(Bucket=POLICY_DOCS_BUCKET, Key=doc_key)["Body"].read()
+        return self._s3.get_object(Bucket=self._bucket, Key=doc_key)["Body"].read()

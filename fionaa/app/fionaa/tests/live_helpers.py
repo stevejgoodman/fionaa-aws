@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
 import gateway
+from model.load import load_model
 import graph as g
 
 from fakes import FakePolicyDocs, FakeRuntime, FakeStore
@@ -85,7 +86,7 @@ async def judge_evidence_found(company_name: str, search_result_text: str) -> _E
     """Classifies whether `search_web`'s output actually cites evidence for
     `company_name`, using the same Bedrock model as the graph rather than
     fragile keyword matching against free-text prose."""
-    judge = g.model.with_structured_output(_EvidenceVerdict)
+    judge = load_model().with_structured_output(_EvidenceVerdict)
     prompt = (
         f"A web-research agent was asked to find evidence online (company "
         f"websites, LinkedIn pages, etc.) for the company '{company_name}'. "

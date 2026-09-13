@@ -51,6 +51,7 @@ from langchain.messages import HumanMessage, ToolMessage  # noqa: E402
 from deepeval import assert_test  # noqa: E402
 from deepeval.test_case import LLMTestCase, ToolCall  # noqa: E402
 
+from model.load import load_model
 import graph as g  # noqa: E402
 from live_helpers import real_gateway_tools  # noqa: E402
 
@@ -71,7 +72,7 @@ async def _run_companies_house(application: dict, tools: list) -> tuple[str, lis
     response["messages"] -- and the ToolMessages in it -- stays reachable.
     The node itself discards that list once it reads structured_response."""
     agent = create_agent(
-        model=g.model,
+        model=load_model(),
         tools=g.tools_for(tools, "CompaniesHouse___", "geo-target___CheckSameArea"),
         system_prompt=g.COMPANIES_HOUSE_PROMPT,
         response_format=g.CompaniesHouseResult,

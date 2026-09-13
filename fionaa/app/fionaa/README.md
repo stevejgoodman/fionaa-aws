@@ -85,3 +85,34 @@ See `fionaa_iam_policies.md` for the matching trust/permission policies.
 - `prompts.py` — node system prompts.
 - `redaction.py` — PII-minimization helpers (street-level address, phone, bank account number) shared by `graph.py`'s S3 evidence writes and the job dashboard's `fetch_run.py`.
 - `main.py` — the AgentCore Runtime entrypoint (see `agentcore.json`); imports directly from the modules above.
+
+# Code organisation
+
+`main.py` composes per-invocation dependencies: validated `RuntimeSettings`,
+customer-scoped storage/session/checkpointing, gateway tools, the model and ARC
+checker. Settings are read at invocation time; importing schemas or constructing
+the graph does not read deployment settings or construct a model client.
+
+- `schemas.py`: business input and assessment models. Existing state/context
+  imports remain available as compatibility exports.
+- `workflow/state.py`: checkpointed state and immutable invocation context.
+- `workflow/nodes.py`: assessment nodes and evidence persistence.
+- `graph.py`: graph topology, routing, and compatibility exports used by runners.
+- `integrations/checkpointing.py`: customer-scoped AgentCore checkpoint setup.
+- `config.py`: explicit runtime settings and required-environment validation.
+- `storage.py`, `security.py`, `gateway.py`: AWS and identity boundaries.
+
+Pass a model through `AgentContext.model` to reuse it across nodes. Standalone
+node callers may omit it; a model is then constructed when the node runs.
+Storage constructors accept explicit bucket/KMS configuration; the entrypoint
+supplies it from the invocation's settings. Legacy callers can still load these
+values from the environment at construction time.
+
+This is the first refactoring stage. The AgentCore entrypoint and file layout,
+evaluation datasets and runner locations remain compatible. A subsequent
+migration can introduce an installable `src/fionaa` package and a shared `evals/`
+directory, with deployment packaging and CI paths updated together.
+
+Validation: 171 local tests passed, including import isolation and current graph
+routing/referral tests; 10 live tests were skipped. No AWS deployment was performed
+for this refactor.
