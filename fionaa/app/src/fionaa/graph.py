@@ -9,20 +9,14 @@ from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.graph import END, START, StateGraph
 from fionaa.workflow.state import AgentContext, ApplicationState
 from fionaa.integrations.checkpointing import build_checkpointer, checkpoint_config
-from fionaa.workflow.nodes import (
-    load_application,
-    check_against_policy,
-    validate_policy_assessment,
-    validate_final_decision,
-    check_companies_house,
-    reject_no_company,
-    check_financial_assessment,
-    search_web,
-    synthesize_decision,
-    tools_for,
-    DocumentSpec,
-    DOCUMENT_SPECS
-)
+from fionaa.workflow.common import tools_for
+from fionaa.workflow.loading import DocumentSpec, DOCUMENT_SPECS, load_application
+from fionaa.workflow.policy import check_against_policy
+from fionaa.workflow.companies_house import check_companies_house
+from fionaa.workflow.financial import check_financial_assessment
+from fionaa.workflow.web_search import search_web
+from fionaa.workflow.decision import reject_no_company, synthesize_decision
+from fionaa.workflow.validation import validate_policy_assessment, validate_final_decision
 
 def build_graph(checkpointer: Optional[BaseCheckpointSaver] = None):
     """Compiled per invocation, not once at module load. The checkpointer (if

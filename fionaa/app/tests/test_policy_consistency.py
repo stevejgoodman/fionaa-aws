@@ -117,8 +117,10 @@ async def test_final_publication_requires_both_checks(passed, upstream):
 @pytest.mark.asyncio
 async def test_unconfigured_full_graph_refers_before_external_research(monkeypatch):
     calls = []
-    from fionaa.workflow import nodes
-    monkeypatch.setattr(nodes, "create_agent", make_fake_create_agent("candidate assessment", calls))
+    from fionaa.workflow import loading, validation
+    from fionaa.workflow import policy as policy_stage, companies_house as company_stage, financial as financial_stage, web_search as web_stage, decision as decision_stage
+    for stage in (policy_stage, company_stage, financial_stage, web_stage, decision_stage):
+        monkeypatch.setattr(stage, "create_agent", make_fake_create_agent("candidate assessment", calls))
     store = FakeStore({"input/application.json": {"loan_type": "secured-business-loans"}})
     context = g.AgentContext(store, FakePolicyDocs(), [], PolicyConsistencyChecker({}))
     result = await g.build_graph().ainvoke({}, context=context)
