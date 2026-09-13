@@ -27,11 +27,17 @@ def valid_response():
 @pytest.mark.parametrize("kind", ["valid", "invalid", "satisfiable", "impossible",
                                   "translationAmbiguous", "tooComplex", "noTranslations"])
 async def test_findings_are_enforced(kind):
+    # `invalid` is the only finding type that's an actual proven
+    # contradiction of the policy -- it fails closed. Every other non-valid
+    # kind means Automated Reasoning couldn't fully confirm the claim (a
+    # translation/tooling limitation, not evidence the claim is wrong), so
+    # it's `inconclusive` and allowed to proceed rather than referred.
     response = valid_response()
     response["assessments"][0]["automatedReasoningPolicy"]["findings"] = [{kind: {}}]
     instance = checker(response)
     result = await instance.check("secured-business-loans", "policy", {"loan_amount": 40000}, {"eligible": "eligible"})
-    assert result["passed"] is (kind == "valid")
+    assert result["passed"] is (kind != "invalid")
+    assert result["status"] == {"valid": "valid", "invalid": "not_validated"}.get(kind, "inconclusive")
     request = instance.client.apply_guardrail.call_args.kwargs
     assert request["source"] == "OUTPUT"
     assert request["content"][0]["text"]["qualifiers"] == ["query"]

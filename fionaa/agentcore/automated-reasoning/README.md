@@ -35,10 +35,17 @@ these policy-boundary tests.
 
 `app/src/fionaa/policy_consistency.py` uses standalone Bedrock `ApplyGuardrail`
 after the policy assessment and after final-decision synthesis. The graph
-requires nonempty, exclusively `valid` findings, positive Automated Reasoning
-usage, and no guardrail intervention. Missing configuration, stale policy
-digests, ambiguous/invalid/incomplete findings and AWS failures cause referral.
-Validation failure never means the applicant is automatically rejected.
+requires nonempty findings, positive Automated Reasoning usage, no guardrail
+intervention, and no `invalid` finding (a proven contradiction of the policy
+given the facts) -- that combination is the only thing that fails closed and
+refers. A non-`valid`, non-`invalid` finding (`tooComplex`,
+`translationAmbiguous`, `satisfiable`, `impossible`, `noTranslations`) means
+the checker couldn't fully confirm the claim -- a translation/tooling
+limitation, not evidence the claim is wrong -- so it's recorded as
+`inconclusive` in `status` and the graph proceeds rather than referring.
+Missing configuration, stale policy digests, and AWS failures still cause
+referral. Validation failure never means the applicant is automatically
+rejected.
 
 The proposed final decision is stored at `decision/proposed.json`. Only the
 validation stage publishes `decision/result.json`. The existing no-company
