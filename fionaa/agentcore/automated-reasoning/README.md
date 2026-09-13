@@ -8,8 +8,8 @@ separate from the existing PII-Redaction guardrail. Runtime version 34 is deploy
 `runtime-bindings.json` contains all five concrete environment bindings;
 `runtime-iam-policy.json` contains the scoped permissions installed on the
 runtime role as inline policy `FionaaRuntimePolicyConsistency`. `REVIEW.md` documents corrections to AWS's generated rules.
-`test_live_guardrail.py` exercises the real standalone checker on synthetic
-boundary cases; `live-results.json` records its latest findings. These smoke
+[test_live_guardrail.py](../../evals/automated_reasoning/test_live_guardrail.py) exercises the real standalone checker on synthetic
+boundary cases; [live-results.json](../../evals/automated_reasoning/live-results.json) records its latest findings. These smoke
 tests do not replace full application evaluation or policy coverage review.
 
 | Loan type | Guardrail ID | Version |
@@ -24,16 +24,16 @@ The additional product definitions are in `<loan-type>-definition.json`,
 with matching source snapshots in `<loan-type>.txt`. `product-resources.json`
 records AWS resource creation. `create_product_guardrails.py` can resume a
 partially completed creation run; it refuses changed definitions rather than
-silently repointing a reviewed binding. Run `test_live_products.py` explicitly
+silently repointing a reviewed binding. Run [test_live_products.py](../../evals/automated_reasoning/test_live_products.py) explicitly
 for the additional product boundary checks; findings are saved in
-`product-live-results.json`.
+[product-live-results.json](../../evals/automated_reasoning/product-live-results.json).
 
 Latest verification: 48/48 additional-product live boundary cases passed,
 alongside 133 local unit tests. The original secured pilot previously passed
 8/8 live cases. Full deployed-application evaluation remains separate from
 these policy-boundary tests.
 
-`app/fionaa/policy_consistency.py` uses standalone Bedrock `ApplyGuardrail`
+`app/src/fionaa/policy_consistency.py` uses standalone Bedrock `ApplyGuardrail`
 after the policy assessment and after final-decision synthesis. The graph
 requires nonempty, exclusively `valid` findings, positive Automated Reasoning
 usage, and no guardrail intervention. Missing configuration, stale policy
@@ -50,7 +50,7 @@ Deployed smoke test (2026-09-12): runtime 34 returned HTTP 200 for a disposable
 unsecured-loan application. The standalone check consumed 3 Automated Reasoning
 units and returned `tooComplex`; the graph referred the application before final
 validation. This verifies runtime permissions and fail-closed enforcement, not a
-successful approval path. Evidence: `activation-results.json`. Simplifying the
+successful approval path. Evidence: [activation-results.json](../../evals/automated_reasoning/activation-results.json). Simplifying the
 validation evidence and evaluating translation coverage remain follow-up work.
 The initial smoke test exposed missing cross-region profile permissions; these
 were corrected and six binding/IAM regression tests passed.
