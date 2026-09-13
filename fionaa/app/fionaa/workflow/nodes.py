@@ -29,18 +29,10 @@ from prompts import (
     WEB_SEARCH_PROMPT,
 )
 
-from schemas import (
-    LoanType,
-    ApplicationState,
-    AgentContext,
-    AnnualAccountsSchema,
-    BankStatementSchema,
-    CompaniesHouseResult,
-    FinalDecisionResult,
-    FinancialAssessmentResult,
-    FinancialCrossCheckSummary,
-    PolicyCheckResult,
-)
+from domain.applications import LoanType
+from workflow.state import ApplicationState, AgentContext
+from domain.documents import AnnualAccountsSchema, BankStatementSchema
+from domain.assessments import CompaniesHouseResult, FinalDecisionResult, FinancialAssessmentResult, FinancialCrossCheckSummary, PolicyCheckResult
 
 from storage import ApplicationStore
 

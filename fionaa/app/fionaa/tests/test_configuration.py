@@ -17,6 +17,13 @@ from unittest.mock import patch
 with patch.object(boto3, "client", side_effect=AssertionError("client during import")):
     import schemas
     assert "storage" not in __import__("sys").modules
+    assert "workflow.state" not in __import__("sys").modules
+    from domain.applications import ApplicationFormSchema
+    from domain.documents import BankStatementSchema
+    from domain.assessments import FinalDecisionResult
+    assert schemas.ApplicationFormSchema is ApplicationFormSchema
+    assert schemas.BankStatementSchema is BankStatementSchema
+    assert schemas.FinalDecisionResult is FinalDecisionResult
     import model.load
     with patch.object(model.load, "load_model", side_effect=AssertionError("model during import")):
         import graph

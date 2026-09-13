@@ -1,6 +1,7 @@
 """Graph topology and compatibility exports for existing runners."""
-from schemas import (LoanType, AnnualAccountsSchema, CompaniesHouseResult,
-                     FinancialAssessmentResult, PolicyCheckResult)
+from domain.applications import LoanType
+from domain.documents import AnnualAccountsSchema
+from domain.assessments import CompaniesHouseResult, FinancialAssessmentResult, PolicyCheckResult
 from policy_loader import load_policy_text
 from prompts import COMPANIES_HOUSE_PROMPT, WEB_SEARCH_PROMPT
 from typing import Optional
