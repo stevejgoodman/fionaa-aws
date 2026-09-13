@@ -33,7 +33,7 @@ GEval judge.
 
 Usage:
     cd fionaa/agentcore
-    AWS_PROFILE=AIOps deepeval test run deepeval_evals/test_financial_assessment.py
+    AWS_PROFILE=AIOps deepeval test run ../evals/node/test_financial_assessment.py
 """
 
 from __future__ import annotations

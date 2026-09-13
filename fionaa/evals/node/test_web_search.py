@@ -18,7 +18,7 @@ isolation, not the full graph's companies_house -> web_search handoff.
 
 Usage:
     cd fionaa/agentcore
-    AWS_PROFILE=AIOps deepeval test run deepeval_evals/test_web_search.py
+    AWS_PROFILE=AIOps deepeval test run ../evals/node/test_web_search.py
 """
 
 from __future__ import annotations

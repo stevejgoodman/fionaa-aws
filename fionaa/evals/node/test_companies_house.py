@@ -6,7 +6,7 @@ Still calls the real Bedrock model + real AgentCore Gateway tools directly,
 not through main.py's entrypoint -- fionaa's entrypoint takes
 {"application_id": ...} + a JWT and fetches application data from S3, not a
 chat message, so there's no dataset-driven payload that can feed it directly
-(see run_node_evals.py's docstring and ../EVALS.md for the full reasoning).
+(see run_node_evals.py's docstring and ../../agentcore/EVALS.md for the full reasoning).
 That mismatch is the whole reason this harness exists rather than pointing
 `agentcore run batch-evaluation --dataset` at the deployed runtime.
 
@@ -20,7 +20,7 @@ expected_trajectory, no OTel trace or AgentCore instrumentation required.
 
 Usage:
     cd fionaa/agentcore
-    AWS_PROFILE=AIOps deepeval test run deepeval_evals/test_companies_house.py
+    AWS_PROFILE=AIOps deepeval test run ../evals/node/test_companies_house.py
 """
 
 from __future__ import annotations

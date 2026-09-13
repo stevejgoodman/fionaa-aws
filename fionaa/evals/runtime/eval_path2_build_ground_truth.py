@@ -28,7 +28,7 @@ straight through.
 
 Usage:
     cd fionaa/agentcore
-    python3 eval_path2_build_ground_truth.py \\
+    python3 ../evals/runtime/eval_path2_build_ground_truth.py \\
         --session-map .cli/path2-session-map.json \\
         --output .cli/path2-ground-truth.json
 """
@@ -40,7 +40,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-DATASET_PATH = Path(__file__).resolve().parent / "datasets" / "fionaa_eval_dataset.jsonl"
+DATASET_PATH = Path(__file__).resolve().parents[1] / "datasets" / "fionaa_eval_dataset.jsonl"
 
 
 def load_dataset_by_scenario_id() -> dict[str, dict[str, Any]]:

@@ -6,7 +6,7 @@ expect as message content -- see graph.py's HumanMessage(content=...) calls
 at the companies_house/policy_check/web_search nodes. No reshaping is needed
 going in, unlike AgentCore's native --dataset eval runners, which assume a
 chat-turn payload fionaa's actual entrypoint (main.py:invoke) doesn't accept
-(see ../EVALS.md).
+(see ../../agentcore/EVALS.md).
 
 This is meant to replace run_node_evals.py's dataset loading + custom
 LLM-as-judge scoring with DeepEval's own metrics (see metrics.py) -- the
