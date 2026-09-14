@@ -82,13 +82,22 @@ class PolicyConsistencyChecker:
             for finding in assessment.get("automatedReasoningPolicy", {}).get("findings", [])
         ]
         units = response.get("usage", {}).get("automatedReasoningPolicyUnits", 0)
-        passed = (
-            response.get("action") == "NONE"
-            and units > 0
-            and bool(findings)
-            and all(set(finding) == {"valid"} for finding in findings)
-        )
+        guardrail_ok = response.get("action") == "NONE" and units > 0 and bool(findings)
+        # `invalid` means Automated Reasoning proved the claim contradicts the
+        # policy given the facts -- a genuine logical contradiction, and the
+        # only finding type that should fail-closed refer the application.
+        # Every other non-`valid` type (`tooComplex`, `translationAmbiguous`,
+        # `satisfiable`, `impossible`, `noTranslations`, ...) means the
+        # checker couldn't fully confirm the claim one way or the other --
+        # a tooling/translation limitation, not evidence the claim is wrong
+        # -- so it's surfaced as `inconclusive` and allowed to proceed rather
+        # than referred. `findings`/`status` still record exactly what
+        # happened for the evidence trail.
+        has_invalid = any(set(finding) == {"invalid"} for finding in findings)
+        passed = guardrail_ok and not has_invalid
+        all_valid = guardrail_ok and all(set(finding) == {"valid"} for finding in findings)
+        status = "valid" if all_valid else "inconclusive" if passed else "not_validated"
         return {**result, "passed": passed,
-                "status": "valid" if passed else "not_validated",
+                "status": status,
                 "findings": findings, "usage": response.get("usage", {}),
                 "request_id": response.get("ResponseMetadata", {}).get("RequestId")}

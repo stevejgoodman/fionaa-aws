@@ -827,8 +827,12 @@ def _patch_all_integration_points(monkeypatch, agent_response="ok"):
     for stage in (policy_stage, company_stage, financial_stage, web_stage, decision_stage):
         monkeypatch.setattr(stage, "create_agent", make_fake_create_agent(agent_response, calls))
     async def valid(*args):
-        return {"passed": True, "status": "valid"}
-    monkeypatch.setattr(validation, "_validate_assessment", valid)
+        return {"passed": True, "status": "valid", "policy_sha256": "digest"}
+    # _check_claim is the shared single-claim primitive: validate_final_decision
+    # calls it directly, and _validate_policy_check fans out over it once per
+    # atomic policy_check claim -- patching it here makes both paths resolve
+    # to a clean "valid" without needing real Automated Reasoning calls.
+    monkeypatch.setattr(validation, "_check_claim", valid)
     return calls
 
 
