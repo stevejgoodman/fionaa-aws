@@ -193,9 +193,9 @@ async def test_check_against_policy_persists_and_returns_result(monkeypatch):
     ]
     # No "bank_statements" key in state -- state.get(..., []) defaults to
     # empty, same as load_application would return when none were staged.
-    # today computed here, not frozen -- see graph.py's check_against_policy,
-    # which computes it fresh per invocation rather than reusing prompts.py's
-    # stale, import-time-frozen TODAYS_DATE.
+    # today computed here, not frozen -- see check_against_policy, which
+    # computes it fresh per invocation so it can't go stale in a
+    # long-lived process.
     expected_content = (
         f"POLICY:\n{g.load_policy_text(g.LoanType.unsecured_business_loans)}\n\n"
         f"APPLICATION:\n{json.dumps(application)}\n\n"
