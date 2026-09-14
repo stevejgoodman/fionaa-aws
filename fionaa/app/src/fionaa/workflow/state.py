@@ -26,7 +26,6 @@ class ApplicationState(TypedDict, total=False):
     # LLM string -- check_against_policy forces structured output the same
     # way check_companies_house already does for companies_house.
     policy_check: Annotated[dict[str, Any], _last_write_wins]
-    policy_validation: Annotated[dict[str, Any], _last_write_wins]
     companies_house: Annotated[dict[str, Any], _last_write_wins]
     companies_house_found: Annotated[bool, _last_write_wins]
     # A dict conforming to FinancialAssessmentResult's shape (see below), not

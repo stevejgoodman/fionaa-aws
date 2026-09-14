@@ -8,8 +8,8 @@ records what each tool actually returned, but nothing reads it back to
 check the model's claim against it -- it's an audit trail, not a check.
 This module closes that gap for the one place it matters most:
 `check_companies_house`'s `found` field gates the entire downstream graph
-(financial_assessment/web_search/synthesize_decision all only run when
-`found=True`), so a fabricated match here is the single highest-leverage
+(policy_check/financial_assessment/web_search/synthesize_decision all only
+run when `found=True`), so a fabricated match here is the single highest-leverage
 hallucination this agent could produce -- letting an unverified company
 through, not just describing it wrong in a narrative field.
 
