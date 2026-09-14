@@ -43,9 +43,8 @@ async def check_against_policy(state: ApplicationState, runtime: Runtime[AgentCo
         response_format=PolicyCheckResult,
     )
 
-    # Computed fresh per invocation, not at module import time -- see
-    # prompts.py's unused module-level TODAYS_DATE, which is frozen at
-    # first import and would silently go stale in a long-lived process.
+    # Computed fresh per invocation, not at module import time, so it can't
+    # go stale in a long-lived process.
     today = date.today().isoformat()
 
     response = await agent.ainvoke(
