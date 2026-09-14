@@ -18,7 +18,7 @@ from .common import tools_for
 
 async def check_companies_house(
     state: ApplicationState, runtime: Runtime[AgentContext]
-) -> Command[Literal["financial_assessment", "reject_no_company"]]:
+) -> Command[Literal["policy_check", "reject_no_company"]]:
     application = state["application"]
 
     agent = create_agent(
@@ -64,9 +64,9 @@ async def check_companies_house(
     ]
 
     # Runtime groundedness check: found=True gates the entire downstream
-    # graph (financial_assessment/web_search/synthesize_decision all only
-    # run on this branch), so a fabricated match here is the highest-
-    # leverage hallucination this agent could produce. Checked against the
+    # graph (policy_check/financial_assessment/web_search/synthesize_decision
+    # all only run on this branch), so a fabricated match here is the
+    # highest-leverage hallucination this agent could produce. Checked against the
     # raw tool calls -- company_number isn't touched by redact_tool_calls
     # below, but this runs first regardless -- see groundedness.py's
     # docstring for exactly what is and isn't checked, and why this only
@@ -107,5 +107,5 @@ async def check_companies_house(
     found = companies_house_result["found"]
     return Command(
         update={"companies_house": companies_house_result, "companies_house_found": found},
-        goto="financial_assessment" if found else "reject_no_company",
+        goto="policy_check" if found else "reject_no_company",
     )

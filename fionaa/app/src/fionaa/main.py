@@ -58,7 +58,7 @@ async def invoke(payload, context):
         "outcome": final_state["final_decision"]["outcome"],
         "decision_uri": f"{prefix}/decision/result.json",
     }
-    for stage in ("policy_check", "companies_house", "financial_assessment", "web_search"):
+    for stage in ("companies_house", "policy_check", "financial_assessment", "web_search"):
         if stage in final_state:
             result[f"{stage}_uri"] = f"{prefix}/{stage}/result.json"
     log.info(f"Agent output: {result}")

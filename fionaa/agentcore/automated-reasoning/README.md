@@ -33,24 +33,46 @@ alongside 133 local unit tests. The original secured pilot previously passed
 8/8 live cases. Full deployed-application evaluation remains separate from
 these policy-boundary tests.
 
-`app/src/fionaa/policy_consistency.py` uses standalone Bedrock `ApplyGuardrail`
-after the policy assessment and after final-decision synthesis. The graph
-requires nonempty findings, positive Automated Reasoning usage, no guardrail
-intervention, and no `invalid` finding (a proven contradiction of the policy
-given the facts) -- that combination is the only thing that fails closed and
-refers. A non-`valid`, non-`invalid` finding (`tooComplex`,
-`translationAmbiguous`, `satisfiable`, `impossible`, `noTranslations`) means
-the checker couldn't fully confirm the claim -- a translation/tooling
-limitation, not evidence the claim is wrong -- so it's recorded as
-`inconclusive` in `status` and the graph proceeds rather than referring.
-Missing configuration, stale policy digests, and AWS failures still cause
-referral. Validation failure never means the applicant is automatically
-rejected.
+`app/src/fionaa/policy_consistency.py` uses standalone Bedrock `ApplyGuardrail`,
+called via `workflow/validation.py`'s `validate_final_decision` -- the last
+node before `END`, run once the graph has already produced companies_house,
+policy_check, financial_assessment, web_search, and a proposed final
+decision. This used to be split into two gates (one right after policy_check,
+one at the end); it's now a single comprehensive check, because the early
+gate could never actually confirm most of its claims -- companies_house/
+financial_assessment evidence didn't exist yet at that point in the graph, so
+clauses depending on it reliably came back inconclusive for lack of evidence,
+not because anything was wrong, and there was no real fail-fast cost saving
+to weigh against that (the graph runs to completion regardless, except on
+the companies_house not-found branch, which never reaches validation at
+all). `validate_final_decision` fans every atomic assertion -- each
+policy_check `clause_finding`/`documentation_gap`, the `eligible` verdict,
+and the proposed decision's own `outcome`/`reason`/`rationale` -- out into
+its own `ApplyGuardrail` call (concurrently), since bundling many
+independent assertions into one call is what produces `tooComplex`/
+`translationAmbiguous`: every boundary case that's ever cleanly resolved
+valid/invalid checks exactly one claim against a small fact set.
 
-The proposed final decision is stored at `decision/proposed.json`. Only the
-validation stage publishes `decision/result.json`. The existing no-company
-rejection branch is unchanged. Evidence includes validation findings under
-`policy_check/validation.json` and `decision/validation.json` where executed.
+The graph requires nonempty findings, positive Automated Reasoning usage, no
+guardrail intervention, and no `invalid` finding (a proven contradiction of
+the policy given the facts) on any single claim -- that combination is the
+only thing that fails closed and refers. A non-`valid`, non-`invalid` finding
+(`tooComplex`, `translationAmbiguous`, `satisfiable`, `impossible`,
+`noTranslations`) means the checker couldn't fully confirm that one claim --
+a translation/tooling limitation, not evidence the claim is wrong -- so it's
+recorded as `inconclusive` in `status` and the check proceeds rather than
+referring. Missing configuration, stale policy digests, and AWS failures
+still cause referral. Validation failure never means the applicant is
+automatically rejected.
+
+The proposed final decision is stored at `decision/proposed.json`. Only
+`validate_final_decision` publishes `decision/result.json`. The existing
+no-company rejection branch is unchanged -- it runs before policy_check now
+(companies_house moved ahead of policy_check in graph.py, since identity
+verification gates everything else and doesn't depend on policy_check's
+result) and never reaches validation at all. Evidence -- a `claims` list,
+one entry per atomic assertion, tagged `source: policy_check` or
+`source: final_decision` -- is stored at `decision/validation.json`.
 
 
 Deployed smoke test (2026-09-12): runtime 34 returned HTTP 200 for a disposable
