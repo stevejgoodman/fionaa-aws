@@ -326,7 +326,7 @@ async def test_check_companies_house_calls_gateway_and_persists(monkeypatch):
     result = await g.check_companies_house(state, runtime)
 
     assert result.update == {"companies_house": fake_result, "companies_house_found": True}
-    assert result.goto == "financial_assessment"
+    assert result.goto == "policy_check"
     # tool_calls is added to the S3 evidence artifact only -- companies_house
     # state (asserted above) keeps the plain CompaniesHouseResult shape so
     # downstream prompts are unaffected. make_fake_create_agent auto-emits a
@@ -828,10 +828,11 @@ def _patch_all_integration_points(monkeypatch, agent_response="ok"):
         monkeypatch.setattr(stage, "create_agent", make_fake_create_agent(agent_response, calls))
     async def valid(*args):
         return {"passed": True, "status": "valid", "policy_sha256": "digest"}
-    # _check_claim is the shared single-claim primitive: validate_final_decision
-    # calls it directly, and _validate_policy_check fans out over it once per
-    # atomic policy_check claim -- patching it here makes both paths resolve
-    # to a clean "valid" without needing real Automated Reasoning calls.
+    # _check_claim is the shared single-claim primitive: _validate_decision
+    # fans out over it once per atomic claim (both the policy_check clauses
+    # and the final decision's own outcome/reason/rationale) -- patching it
+    # here makes every one of those resolve to a clean "valid" without
+    # needing real Automated Reasoning calls.
     monkeypatch.setattr(validation, "_check_claim", valid)
     return calls
 
@@ -880,7 +881,6 @@ async def test_build_graph_runs_all_nodes_in_order(monkeypatch, identity):
         "decision/result.json",
         "decision/proposed.json",
         "decision/validation.json",
-        "policy_check/validation.json",
     }
 
 
