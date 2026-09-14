@@ -14,14 +14,13 @@ from fionaa.domain.assessments import FinalDecisionResult
 
 def reject_no_company(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict[str, Any]:
     """Terminal node for the companies_house branch that found no matching
-    company. Writes a single artifact recording why the run stopped early —
-    including the policy_check outcome gathered before this point, so a
-    reviewer doesn't have to reconstruct the reasoning from separate
-    per-node artifacts."""
+    company. companies_house runs first in graph.py (before policy_check),
+    so there's no policy_check result yet to include here -- an
+    unidentified company makes the rest of the assessment moot, so nothing
+    downstream (including policy_check) ever runs on this branch."""
     final_decision = {
         "outcome": "rejected",
         "reason": "companies_house_no_match",
-        "policy_check": state.get("policy_check"),
         "companies_house": state.get("companies_house"),
     }
     runtime.context.store.put_json("decision/result.json", final_decision)

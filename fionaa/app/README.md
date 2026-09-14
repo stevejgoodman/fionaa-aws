@@ -42,9 +42,13 @@ Use `agentcore invoke` to invoke your deployed agent.
 All five loan-type bindings and scoped guardrail IAM permissions are active
 on runtime version 34 (2026-09-12).
 
-Policy assessments and proposed final decisions now pass through standalone
-Bedrock Automated Reasoning checks before the graph continues or publishes
-the decision. Incomplete checks cause referral. Configure reviewed, numbered
+The proposed final decision -- and, folded into the same check, every
+individual policy_check clause -- passes through a standalone Bedrock
+Automated Reasoning check before the graph publishes the decision. This runs
+once, as the last node before END, rather than as a separate early gate
+right after policy_check: an early gate can't yet see companies_house/
+financial_assessment evidence, so it can only ever check with incomplete
+information. A failed check causes referral. Configure reviewed, numbered
 guardrail versions through `FIONAA_AR_GUARDRAILS`; without bindings, policy
 validation refers every application. See
 [setup and activation](../../agentcore/automated-reasoning/README.md).
@@ -105,7 +109,6 @@ the graph does not read deployment settings or construct a model client.
 - `workflow/decision.py`: final synthesis and no-company rejection.
 - `workflow/validation.py`: ARC validation and referral.
 - `workflow/common.py`: shared tool selection.
-- `workflow/nodes.py`: compatibility exports for existing callers.
 - `graph.py`: graph topology, routing, and compatibility exports used by runners.
 - `integrations/checkpointing.py`: customer-scoped AgentCore checkpoint setup.
 - `config.py`: explicit runtime settings and required-environment validation.
@@ -123,9 +126,8 @@ a shared dataset). CI paths and the AgentCore dataset location follow that move.
 The application is installed from `src/fionaa`; tests and evaluations use
 package-qualified imports, with shared helpers in `fionaa.testing`.
 
-Validation: 171 local tests passed, including import isolation and current graph
-routing/referral tests; 10 live tests were skipped. No AWS deployment was performed
-for this refactor.
+Validation: 172 local tests passed, including import isolation and current graph
+routing/referral tests; 10 live tests were skipped.
 
 ## Package installation and deployment
 
