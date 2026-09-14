@@ -27,11 +27,17 @@ def valid_response():
 @pytest.mark.parametrize("kind", ["valid", "invalid", "satisfiable", "impossible",
                                   "translationAmbiguous", "tooComplex", "noTranslations"])
 async def test_findings_are_enforced(kind):
+    # `invalid` is the only finding type that's an actual proven
+    # contradiction of the policy -- it fails closed. Every other non-valid
+    # kind means Automated Reasoning couldn't fully confirm the claim (a
+    # translation/tooling limitation, not evidence the claim is wrong), so
+    # it's `inconclusive` and allowed to proceed rather than referred.
     response = valid_response()
     response["assessments"][0]["automatedReasoningPolicy"]["findings"] = [{kind: {}}]
     instance = checker(response)
     result = await instance.check("secured-business-loans", "policy", {"loan_amount": 40000}, {"eligible": "eligible"})
-    assert result["passed"] is (kind == "valid")
+    assert result["passed"] is (kind != "invalid")
+    assert result["status"] == {"valid": "valid", "invalid": "not_validated"}.get(kind, "inconclusive")
     request = instance.client.apply_guardrail.call_args.kwargs
     assert request["source"] == "OUTPUT"
     assert request["content"][0]["text"]["qualifiers"] == ["query"]
@@ -82,7 +88,22 @@ class FakeChecker:
         self.passed = passed
 
     async def check(self, *args):
-        return {"passed": self.passed, "status": "valid" if self.passed else "not_validated"}
+        return {"passed": self.passed, "status": "valid" if self.passed else "not_validated",
+                "policy_sha256": "digest"}
+
+
+class SequencedFakeChecker:
+    """Returns one canned result per call, in call order -- lets a test
+    control exactly which atomic claim (of several fanned out by
+    _validate_policy_check) gets which Automated Reasoning outcome."""
+
+    def __init__(self, results):
+        self.results = list(results)
+        self.claims_seen = []
+
+    async def check(self, loan_type, policy_text, facts, claim):
+        self.claims_seen.append(claim)
+        return self.results[len(self.claims_seen) - 1]
 
 
 @pytest.mark.asyncio
@@ -112,6 +133,81 @@ async def test_final_publication_requires_both_checks(passed, upstream):
     assert result["final_decision"]["outcome"] == ("approved" if passed and upstream else "referred")
     assert proposed == original
     assert store.data["decision/result.json"] == result["final_decision"]
+
+
+@pytest.mark.asyncio
+async def test_policy_check_claims_are_checked_individually():
+    """_validate_policy_check must fan the compound PolicyCheckResult claim
+    out into one atomic check per assertion (eligible verdict + each
+    clause_finding + each documentation_gap) -- bundling them into one
+    ApplyGuardrail call is what produced tooComplex/translationAmbiguous on
+    every real application (PR #47's investigation)."""
+    store = FakeStore()
+    checker = SequencedFakeChecker([
+        {"passed": True, "status": "valid", "policy_sha256": "digest"},
+        {"passed": True, "status": "valid", "policy_sha256": "digest"},
+        {"passed": True, "status": "valid", "policy_sha256": "digest"},
+    ])
+    runtime = FakeRuntime(g.AgentContext(store, FakePolicyDocs(), [], checker))
+    command = await g.validate_policy_assessment({
+        "application": {"loan_type": "secured-business-loans"},
+        "policy_check": {
+            "eligible": "eligible",
+            "clause_findings": ["Loan amount is in range."],
+            "documentation_gaps": ["Bank statements missing."],
+        },
+    }, runtime)
+    assert len(checker.claims_seen) == 3
+    assert any("Loan amount is in range." in c["summary"] for c in checker.claims_seen)
+    assert any("Bank statements missing." in c["summary"] for c in checker.claims_seen)
+    assert command.goto == "companies_house"
+    validation = store.data["policy_check/validation.json"]
+    assert validation["passed"] and validation["status"] == "valid"
+    assert len(validation["claims"]) == 3
+
+
+@pytest.mark.asyncio
+async def test_policy_check_one_invalid_claim_still_fails_closed():
+    """An `invalid` finding on a single clause among several must still
+    refer the whole application -- decomposition must not silently let a
+    genuine contradiction on one clause slip through because its siblings
+    passed."""
+    store = FakeStore()
+    checker = SequencedFakeChecker([
+        {"passed": True, "status": "valid", "policy_sha256": "digest"},
+        {"passed": False, "status": "not_validated", "policy_sha256": "digest"},
+    ])
+    runtime = FakeRuntime(g.AgentContext(store, FakePolicyDocs(), [], checker))
+    command = await g.validate_policy_assessment({
+        "application": {"loan_type": "secured-business-loans"},
+        "policy_check": {"eligible": "eligible", "clause_findings": ["A contradicted clause."]},
+    }, runtime)
+    assert command.goto == g.END
+    validation = store.data["policy_check/validation.json"]
+    assert not validation["passed"]
+    assert validation["status"] == "not_validated"
+
+
+@pytest.mark.asyncio
+async def test_policy_check_inconclusive_claim_proceeds_but_is_flagged():
+    """A non-invalid, non-valid finding (tooComplex/translationAmbiguous/...)
+    on one clause must not block the graph -- see PolicyConsistencyChecker's
+    own passed=True-for-inconclusive contract -- but the aggregate status
+    must still surface as 'inconclusive', not silently 'valid'."""
+    store = FakeStore()
+    checker = SequencedFakeChecker([
+        {"passed": True, "status": "valid", "policy_sha256": "digest"},
+        {"passed": True, "status": "inconclusive", "policy_sha256": "digest"},
+    ])
+    runtime = FakeRuntime(g.AgentContext(store, FakePolicyDocs(), [], checker))
+    command = await g.validate_policy_assessment({
+        "application": {"loan_type": "secured-business-loans"},
+        "policy_check": {"eligible": "eligible", "clause_findings": ["A tooComplex clause."]},
+    }, runtime)
+    assert command.goto == "companies_house"
+    validation = store.data["policy_check/validation.json"]
+    assert validation["passed"]
+    assert validation["status"] == "inconclusive"
 
 
 @pytest.mark.asyncio
