@@ -26,13 +26,14 @@ import sys
 import time
 from pathlib import Path
 
-FIONAA_APP_DIR = Path(__file__).resolve().parents[2] / "fionaa"
+FIONAA_APP_DIR = Path(__file__).resolve().parents[2] / "src" / "fionaa"
 
 # Required at import time by graph.py/storage.py/security.py -- values only
 # need to be *present*; the ones that matter (bucket, memory id) are set from
 # real CLI args below. See those modules' module-level os.environ[...] reads.
 os.environ.setdefault("FIONAA_DATA_ACCESS_ROLE_ARN", "arn:aws:iam::000000000000:role/unused-for-reads")
 os.environ.setdefault("FIONAA_POLICY_DOCS_BUCKET", "unused-for-this-script")
+os.environ.setdefault("FIONAA_KMS_KEY_ARN", "alias/aws/s3")  # only put_json uses this; get_json doesn't
 os.environ.setdefault("AWS_DEFAULT_REGION", "us-east-1")
 
 sys.path.insert(0, str(FIONAA_APP_DIR))
