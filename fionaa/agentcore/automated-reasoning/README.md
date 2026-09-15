@@ -33,46 +33,42 @@ alongside 133 local unit tests. The original secured pilot previously passed
 8/8 live cases. Full deployed-application evaluation remains separate from
 these policy-boundary tests.
 
-`app/src/fionaa/policy_consistency.py` uses standalone Bedrock `ApplyGuardrail`,
-called via `workflow/validation.py`'s `validate_final_decision` -- the last
-node before `END`, run once the graph has already produced companies_house,
-policy_check, financial_assessment, web_search, and a proposed final
-decision. This used to be split into two gates (one right after policy_check,
-one at the end); it's now a single comprehensive check, because the early
-gate could never actually confirm most of its claims -- companies_house/
-financial_assessment evidence didn't exist yet at that point in the graph, so
-clauses depending on it reliably came back inconclusive for lack of evidence,
-not because anything was wrong, and there was no real fail-fast cost saving
-to weigh against that (the graph runs to completion regardless, except on
-the companies_house not-found branch, which never reaches validation at
-all). `validate_final_decision` fans every atomic assertion -- each
-policy_check `clause_finding`/`documentation_gap`, the `eligible` verdict,
-and the proposed decision's own `outcome`/`reason`/`rationale` -- out into
-its own `ApplyGuardrail` call (concurrently), since bundling many
-independent assertions into one call is what produces `tooComplex`/
-`translationAmbiguous`: every boundary case that's ever cleanly resolved
-valid/invalid checks exactly one claim against a small fact set.
+## Human review report
 
-The graph requires nonempty findings, positive Automated Reasoning usage, no
-guardrail intervention, and no `invalid` finding (a proven contradiction of
-the policy given the facts) on any single claim -- that combination is the
-only thing that fails closed and refers. A non-`valid`, non-`invalid` finding
-(`tooComplex`, `translationAmbiguous`, `satisfiable`, `impossible`,
-`noTranslations`) means the checker couldn't fully confirm that one claim --
-a translation/tooling limitation, not evidence the claim is wrong -- so it's
-recorded as `inconclusive` in `status` and the check proceeds rather than
-referring. Missing configuration, stale policy digests, and AWS failures
-still cause referral. Validation failure never means the applicant is
-automatically rejected.
+`validate_final_decision` checks the policy assessment and AI recommendation
+at the end of the workflow. Each eligibility verdict, clause finding,
+documentation gap, policy summary, recommendation outcome, reason and rationale
+gets its own standalone `ApplyGuardrail` request. A free-text field may contain
+multiple assertions; its raw findings are retained rather than assuming it is
+one indivisible statement.
 
-The proposed final decision is stored at `decision/proposed.json`. Only
-`validate_final_decision` publishes `decision/result.json`. The existing
-no-company rejection branch is unchanged -- it runs before policy_check now
-(companies_house moved ahead of policy_check in graph.py, since identity
-verification gates everything else and doesn't depend on policy_check's
-result) and never reaches validation at all. Evidence -- a `claims` list,
-one entry per atomic assertion, tagged `source: policy_check` or
-`source: final_decision` -- is stored at `decision/validation.json`.
+Every application ends with `outcome: pending_human_review`. Only a human
+makes the loan decision. The AI's suggested approved/rejected/referred outcome,
+reason and rationale are explicitly labelled `ai_recommendation` in
+`decision/result.json`. Validation never replaces that recommendation.
+The no-company branch also produces a pending review report, with a referral
+recommendation and validation marked not checked; it skips later assessments.
+
+`decision/validation.json` (also embedded in the report) contains:
+
+- `claims`: the text, `source`, and `source_path` (a JSON pointer into the report),
+  together with each checker's findings and request metadata.
+- Per-claim `status`: `valid`, `invalid`, `inconclusive`, or `not_checked`.
+  For unavailable checks, `check_status` preserves the underlying configuration,
+  policy-version, service-error or unusable-response status.
+- `counts`: totals for those four statuses, with no overall pass/fail gate.
+- `evidence`: the shared input snapshot supplied to the checker. This records
+  the available inputs, not which individual sources proved a given claim.
+
+Valid means supported under the configured policy and supplied facts; it does
+not authenticate the underlying documents. Invalid means a policy contradiction
+was found. Inconclusive means the checker could not establish validity.
+The checker's legacy `passed` flag remains for existing standalone clients;
+the workflow ignores it and omits it from report annotations.
+
+The scope remains policy consistency of the listed assessment fields. It does
+not independently validate every statement in source documents or web results.
+A policy version mismatch or unavailable service is never labelled invalid.
 
 
 Deployed smoke test (2026-09-12): runtime 34 returned HTTP 200 for a disposable
