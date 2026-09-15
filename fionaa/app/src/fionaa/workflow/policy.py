@@ -47,13 +47,30 @@ async def check_against_policy(state: ApplicationState, runtime: Runtime[AgentCo
     # go stale in a long-lived process.
     today = date.today().isoformat()
 
+    # Explicit cachePoint after POLICY, separate from load_model()'s
+    # cache_control (which only ever sees this as one message and would
+    # place its own cachePoint at the very end -- after the never-repeated
+    # application/bank-statement/date tail, caching nothing useful). This
+    # cachePoint instead ends right after policy_text, which is identical
+    # for every application of this loan_type, so it gets reused across
+    # requests independently of the dynamic tail that follows it.
     response = await agent.ainvoke(
         {
             "messages": [
                 HumanMessage(
-                    content=f"POLICY:\n{policy_text}\n\nAPPLICATION:\n{json.dumps(application)}\n\n"
-                    f"BANK STATEMENT END DATES:\n{json.dumps([s['end_date'] for s in bank_statements])}\n\n"
-                    f"TODAY'S DATE: {today}"
+                    content=[
+                        {"type": "text", "text": f"POLICY:\n{policy_text}"},
+                        {"cachePoint": {"type": "default"}},
+                        {
+                            "type": "text",
+                            "text": (
+                                f"\n\nAPPLICATION:\n{json.dumps(application)}\n\n"
+                                f"BANK STATEMENT END DATES:\n"
+                                f"{json.dumps([s['end_date'] for s in bank_statements])}\n\n"
+                                f"TODAY'S DATE: {today}"
+                            ),
+                        },
+                    ]
                 )
             ]
         }

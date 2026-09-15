@@ -196,12 +196,21 @@ async def test_check_against_policy_persists_and_returns_result(monkeypatch):
     # today computed here, not frozen -- see check_against_policy, which
     # computes it fresh per invocation so it can't go stale in a
     # long-lived process.
-    expected_content = (
-        f"POLICY:\n{g.load_policy_text(g.LoanType.unsecured_business_loans)}\n\n"
-        f"APPLICATION:\n{json.dumps(application)}\n\n"
-        f"BANK STATEMENT END DATES:\n[]\n\n"
-        f"TODAY'S DATE: {date.today().isoformat()}"
-    )
+    # Two blocks, not one string -- check_against_policy puts an explicit
+    # cachePoint after POLICY so Bedrock caches it independently of the
+    # per-application tail (see workflow/policy.py).
+    expected_content = [
+        {"type": "text", "text": f"POLICY:\n{g.load_policy_text(g.LoanType.unsecured_business_loans)}"},
+        {"cachePoint": {"type": "default"}},
+        {
+            "type": "text",
+            "text": (
+                f"\n\nAPPLICATION:\n{json.dumps(application)}\n\n"
+                f"BANK STATEMENT END DATES:\n[]\n\n"
+                f"TODAY'S DATE: {date.today().isoformat()}"
+            ),
+        },
+    ]
     assert calls[1]["message_content"] == expected_content
 
 
@@ -248,7 +257,9 @@ async def test_check_against_policy_passes_bank_statement_end_dates(monkeypatch)
 
     await g.check_against_policy(state, runtime)
 
-    assert '"2026-06-30", "2026-07-31", "2026-08-25"' in calls[1]["message_content"]
+    # message_content is now a list of blocks (see the cachePoint split in
+    # workflow/policy.py) -- the dates live in the second, dynamic block.
+    assert '"2026-06-30", "2026-07-31", "2026-08-25"' in calls[1]["message_content"][2]["text"]
 
 
 @pytest.mark.asyncio
