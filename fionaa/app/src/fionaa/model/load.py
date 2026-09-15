@@ -3,10 +3,15 @@ import os
 from langchain_aws import ChatBedrockConverse
 from langchain_core.runnables import Runnable
 
-# Uses cross-region inference profile for Claude Sonnet 5 -- newer and
-# cheaper per-token on Bedrock than the Sonnet 4.5 profile it replaces.
+# Uses cross-region inference profile for Claude Sonnet 4.5. Sonnet 5 is
+# cheaper per-token and was tried here, but real Converse calls returned
+# AccessDeniedException ("not available for this account") in every
+# constituent region even after accepting the model-access agreement and
+# get-foundation-model-availability reporting AVAILABLE -- looks like a
+# gated release needing AWS Sales-mediated access, not something self-service
+# agreement acceptance unlocks. Revisit once that's confirmed granted.
 # https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles-support.html
-MODEL_ID = "us.anthropic.claude-sonnet-5"
+MODEL_ID = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
 
 
 def load_model() -> Runnable:
