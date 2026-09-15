@@ -42,20 +42,28 @@ Use `agentcore invoke` to invoke your deployed agent.
 All five loan-type bindings and scoped guardrail IAM permissions are active
 on runtime version 34 (2026-09-12).
 
-The proposed final decision -- and, folded into the same check, every
-individual policy_check clause -- passes through a standalone Bedrock
-Automated Reasoning check before the graph publishes the decision. This runs
-once, as the last node before END, rather than as a separate early gate
-right after policy_check: an early gate can't yet see companies_house/
-financial_assessment evidence, so it can only ever check with incomplete
-information. A failed check causes referral. Configure reviewed, numbered
-guardrail versions through `FIONAA_AR_GUARDRAILS`; without bindings, policy
-validation refers every application. See
+The app never decides a loan itself -- every application ends with
+`outcome: pending_human_review`. The AI's suggested outcome, reason and
+rationale are carried as an explicitly labelled `ai_recommendation`, never as
+the top-level outcome.
+
+The proposed decision's outcome/reason/rationale -- and, alongside them, every
+individual policy_check clause, documentation gap and summary -- each pass
+through their own standalone Bedrock Automated Reasoning check before the
+graph publishes the report. This runs once, as the last node before END,
+rather than as a separate early gate right after policy_check: an early gate
+can't yet see companies_house/financial_assessment evidence, so it can only
+ever check with incomplete information. There is no overall pass/fail gate --
+Automated Reasoning findings annotate each claim as `valid`, `invalid`,
+`inconclusive` or `not_checked` and never change the outcome or block
+publication. Configure reviewed, numbered guardrail versions through
+`FIONAA_AR_GUARDRAILS`; without bindings, every claim is annotated
+`not_checked`, but the report is still produced. See
 [setup and activation](../../agentcore/automated-reasoning/README.md).
 
 The response includes `outcome`, `decision_uri`, and evidence URIs for stages
 present in the final graph state. Proposed decisions are stored separately
-from published decisions.
+from the published human-review report.
 
 # Security model
 
@@ -107,7 +115,7 @@ the graph does not read deployment settings or construct a model client.
 - `workflow/policy.py`, `companies_house.py`, `financial.py`, `web_search.py`:
   individual assessment stages and evidence persistence.
 - `workflow/decision.py`: final synthesis and no-company rejection.
-- `workflow/validation.py`: ARC validation and referral.
+- `workflow/validation.py`: per-claim Automated Reasoning annotation and the pending-human-review report.
 - `workflow/common.py`: shared tool selection.
 - `graph.py`: graph topology, routing, and compatibility exports used by runners.
 - `integrations/checkpointing.py`: customer-scoped AgentCore checkpoint setup.
@@ -126,8 +134,8 @@ a shared dataset). CI paths and the AgentCore dataset location follow that move.
 The application is installed from `src/fionaa`; tests and evaluations use
 package-qualified imports, with shared helpers in `fionaa.testing`.
 
-Validation: 172 local tests passed, including import isolation and current graph
-routing/referral tests; 10 live tests were skipped.
+Validation: 189 local tests passed, including import isolation and current graph
+routing and human-review-report tests; 10 live tests were skipped.
 
 ## Package installation and deployment
 
