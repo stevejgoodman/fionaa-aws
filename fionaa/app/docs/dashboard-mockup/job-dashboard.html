@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>Fionaa</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
@@ -227,6 +228,48 @@
   .prose li{ margin:3px 0; }
   .prose p{ margin:8px 0; }
 
+  .verdict-badge{
+    display:inline-block; padding:4px 11px; border-radius:100px;
+    font-size:11px; font-weight:700; letter-spacing:0.03em; text-transform:uppercase;
+  }
+  .verdict-badge.good{ color:var(--sage); background:var(--sage-bg); }
+  .verdict-badge.bad{ color:var(--rust); background:var(--rust-bg); }
+
+  .finding-list{ list-style:none; margin:8px 0 0; padding:0; display:flex; flex-direction:column; gap:7px; }
+  .finding-list li{
+    display:flex; flex-wrap:wrap; align-items:baseline; gap:6px;
+    font-size:12.5px; line-height:1.55;
+    padding:8px 10px; background:var(--paper-raised);
+    border:1px solid var(--line); border-radius:6px;
+  }
+  .finding-tag{
+    font-family:"IBM Plex Mono", monospace; font-size:10px; font-weight:700;
+    letter-spacing:0.04em; padding:2px 6px; border-radius:4px; flex-shrink:0;
+  }
+  .finding-tag.pass{ color:var(--sage); background:var(--sage-bg); }
+  .finding-tag.fail{ color:var(--rust); background:var(--rust-bg); }
+  .finding-tag.inconclusive{ color:var(--slate); background:var(--slate-bg); }
+  .finding-label{ font-weight:600; color:var(--text); }
+  .finding-detail{ color:var(--text-dim); flex:1 1 100%; }
+  .finding-source{ flex:1 1 100%; font-family:"IBM Plex Mono", monospace; font-size:10px; color:var(--text-faint); }
+
+  .ar-explainer{ font-size:11.5px; color:var(--text-faint); line-height:1.55; margin:6px 0 12px; }
+  .ar-summary{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+  .ar-count{
+    font-size:11px; font-weight:600; padding:3px 10px; border-radius:100px;
+    background:var(--paper-raised); border:1px solid var(--line); color:var(--text-dim);
+  }
+  .ar-count.valid{ color:var(--sage); }
+  .ar-count.invalid{ color:var(--rust); }
+  .ar-tag{
+    margin-left:auto; font-family:"IBM Plex Mono", monospace; font-size:9.5px; font-weight:700;
+    letter-spacing:0.03em; padding:2px 7px; border-radius:4px; white-space:nowrap;
+    flex-shrink:0; text-transform:uppercase;
+  }
+  .ar-tag.ar-valid{ color:var(--sage); background:var(--sage-bg); }
+  .ar-tag.ar-invalid{ color:var(--rust); background:var(--rust-bg); }
+  .ar-tag.ar-neutral{ color:var(--text-faint); background:var(--paper-raised); border:1px solid var(--line); }
+
   .toolcall{
     font-family:"IBM Plex Mono", monospace; font-size:11.5px;
     background:var(--paper-raised); border:1px solid var(--line); border-radius:6px;
@@ -352,6 +395,27 @@
   function escapeHtml(s){
     return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   }
+  // Some agent narratives come back as one unbroken paragraph with no "\n\n"
+  // breaks at all -- split those into sentence-grouped paragraphs (~2
+  // sentences or ~260 chars per paragraph) so they don't render as a single
+  // wall of text. Real paragraph/bullet/heading breaks from the source are
+  // always respected first; this only kicks in for a lone long line.
+  function autoParagraphs(line){
+    if (line.length <= 220) return [line];
+    const sentences = line.match(/[^.!?]+[.!?]+(?:\s+|$)/g) || [line];
+    const paras = [];
+    let cur = "";
+    for (const sent of sentences){
+      if (cur && (cur.length + sent.length > 260)){
+        paras.push(cur.trim());
+        cur = sent;
+      } else {
+        cur += sent;
+      }
+    }
+    if (cur.trim()) paras.push(cur.trim());
+    return paras.length ? paras : [line];
+  }
   function renderProse(text){
     if (!text) return "<p>&mdash;</p>";
     const lines = escapeHtml(text).split("\n");
@@ -370,11 +434,66 @@
         html += `<li>${bullet[1].replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")}</li>`;
       } else {
         closeList();
-        html += `<p>${line.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")}</p>`;
+        for (const para of autoParagraphs(line)){
+          html += `<p>${para.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")}</p>`;
+        }
       }
     }
     closeList();
     return html;
+  }
+
+  // Renders a list of plain-text findings (documentation_gaps, clause_findings,
+  // discrepancies from policy_check/financial_assessment evidence) as cards,
+  // pulling out a leading "<label>: PASS/FAIL/INCONCLUSIVE — <detail>" tag
+  // where the source text has one so it reads as a scan result rather than
+  // an unbroken paragraph.
+  function renderFindingList(items){
+    if (!items || !items.length) return `<div class="prose" style="color:var(--text-faint)">None recorded.</div>`;
+    return `<ul class="finding-list">` + items.map(raw => {
+      const text = escapeHtml(String(raw));
+      const m = text.match(/^(.*?):\s*(PASS|FAIL|INCONCLUSIVE)\b\s*[—\-:]*\s*(.*)$/i);
+      if (m){
+        const tag = m[2].toUpperCase();
+        const cls = tag === "PASS" ? "pass" : tag === "FAIL" ? "fail" : "inconclusive";
+        return `<li><span class="finding-tag ${cls}">${tag}</span><span class="finding-label">${m[1]}</span><span class="finding-detail">${m[3]}</span></li>`;
+      }
+      return `<li><span class="finding-detail">${text}</span></li>`;
+    }).join("") + `</ul>`;
+  }
+
+  // `c.status` (valid/inconclusive/invalid/not_checked) is Bedrock Automated
+  // Reasoning's verdict on whether it could mathematically verify *that one
+  // claim* against the policy logic -- it is NOT the policy finding itself.
+  // The policy finding (PASS/FAIL/SATISFIED/etc) is embedded in the claim's
+  // own text. Rendering them as "status — text" reads as if they're the
+  // same axis and contradict each other; keep them visually separate.
+  function arTagClass(status){
+    const s = (status || "").toLowerCase();
+    if (s === "valid") return "ar-valid";
+    if (s === "invalid") return "ar-invalid";
+    return "ar-neutral";
+  }
+  function renderClaimList(claims){
+    if (!claims || !claims.length) return `<div class="prose" style="color:var(--text-faint)">No claim checks available.</div>`;
+    return `<ul class="finding-list">` + claims.map(c => {
+      const summary = escapeHtml(c.claim?.summary || "");
+      const m = summary.match(/^(.*?):\s*(PASS|FAIL|INCONCLUSIVE|SATISFIED|NOT APPLICABLE)\b\s*[—\-:]*\s*(.*)$/i);
+      let tagHtml = "", labelHtml = "", detail = summary;
+      if (m){
+        const tag = m[2].toUpperCase();
+        const cls = /PASS|SATISFIED/.test(tag) ? "pass" : /FAIL/.test(tag) ? "fail" : "inconclusive";
+        tagHtml = `<span class="finding-tag ${cls}">${tag}</span>`;
+        labelHtml = `<span class="finding-label">${m[1]}</span>`;
+        detail = m[3];
+      }
+      const source = escapeHtml(c.source_path || c.source || "");
+      return `<li>
+        ${tagHtml}${labelHtml}<span class="finding-detail">${detail}</span>
+        <span class="ar-tag ${arTagClass(c.status)}" title="Bedrock Automated Reasoning's verification status for this specific claim -- separate from the policy finding above">AR: ${escapeHtml(c.status || "unknown")}</span>
+        ${source ? `<span class="finding-source">${source}</span>` : ""}
+      </li>`;
+    }).join("") + `</ul>`;
   }
 
   function fmtDuration(ms){
@@ -450,9 +569,15 @@
     showVerdict();
   }
 
+  const ICON_CHECK = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 8.5 6.5 12 13 4"></polyline></svg>';
+  const ICON_CROSS = '<svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><line x1="2" y1="2" x2="12" y2="12"></line><line x1="12" y1="2" x2="2" y2="12"></line></svg>';
+
   function iconFor(nodeId, status){
-    if (status === "done") return "✓";
-    if (status === "rejected") return "✕";
+    // Inline SVG rather than the ✓/✕ Unicode glyphs -- IBM Plex Mono doesn't
+    // reliably cover those codepoints, which rendered as tofu/mismatched
+    // fallback glyphs once a stage completed.
+    if (status === "done") return ICON_CHECK;
+    if (status === "rejected") return ICON_CROSS;
     if (status === "running") return "";
     return STAGE_META[nodeId].short;
   }
@@ -545,15 +670,42 @@
             : `<div class="prose" style="color:var(--text-faint)">No tool calls recorded for this run.</div>`}
         </div>
       </div>`;
-    } else if (openDetail === "policy_check" || openDetail === "financial_assessment"){
+    } else if (openDetail === "policy_check"){
       const ev = step?.evidence || {};
+      const eligible = (ev.eligible || "").toLowerCase();
       body = `<div class="detail-cols">
         <div class="detail-col">
-          <h3>Assessment</h3>
-          <div class="prose">${renderProse(ev.result)}</div>
+          <h3>Eligibility</h3>
+          <span class="verdict-badge ${eligible === "eligible" ? "good" : "bad"}">${escapeHtml(ev.eligible || "unknown")}</span>
+          ${ev.documentation_gaps?.length ? `<h3 style="margin-top:16px">Documentation gaps</h3>${renderFindingList(ev.documentation_gaps)}` : ""}
+          ${ev.clause_findings?.length ? `<h3 style="margin-top:16px">Clause findings</h3>${renderFindingList(ev.clause_findings)}` : ""}
         </div>
         <div class="detail-col">
-          <h3>Tool calls</h3>
+          <h3>Narrative summary</h3>
+          <div class="prose">${renderProse(ev.summary)}</div>
+          <h3 style="margin-top:16px">Tool calls</h3>
+          ${(ev.tool_calls||[]).length
+            ? ev.tool_calls.map(t => `<div class="toolcall">${escapeHtml(t.tool)}(...)\n→ ${escapeHtml(t.result)}</div>`).join("")
+            : `<div class="prose" style="color:var(--text-faint)">No deterministic tool calls on this run.</div>`}
+        </div>
+      </div>`;
+    } else if (openDetail === "financial_assessment"){
+      const ev = step?.evidence || {};
+      const verdict = (ev.verdict || "").toLowerCase();
+      body = `<div class="detail-cols">
+        <div class="detail-col">
+          <h3>Verdict</h3>
+          <span class="verdict-badge ${verdict === "consistent" ? "good" : "bad"}">${escapeHtml(ev.verdict || "unknown")}</span>
+          <div class="kv" style="margin-top:12px"><span class="k">Monthly repayment</span><span class="v">${fmtMoney(ev.monthly_repayment)}</span></div>
+          <div class="kv"><span class="k">Affordability basis</span><span class="v">${escapeHtml((ev.affordability_basis || "—").replace(/_/g," "))}</span></div>
+          ${ev.discrepancies?.length ? `<h3 style="margin-top:16px">Discrepancies</h3>${renderFindingList(ev.discrepancies)}` : ""}
+        </div>
+        <div class="detail-col">
+          <h3>Affordability assessment</h3>
+          <div class="prose">${renderProse(ev.affordability_verdict)}</div>
+          <h3 style="margin-top:16px">Narrative summary</h3>
+          <div class="prose">${renderProse(ev.summary)}</div>
+          <h3 style="margin-top:16px">Tool calls</h3>
           ${(ev.tool_calls||[]).length
             ? ev.tool_calls.map(t => `<div class="toolcall">${escapeHtml(t.tool)}(...)\n→ ${escapeHtml(t.result)}</div>`).join("")
             : `<div class="prose" style="color:var(--text-faint)">No deterministic tool calls on this run.</div>`}
@@ -609,7 +761,19 @@
       <div class="verdict-reason"><b>AI recommendation</b>${escapeHtml(recommendation.outcome || "Unavailable")}</div>
       <div class="verdict-reason"><b>Reason</b>${renderProse(recommendation.reason)}</div>
       <div class="verdict-reason"><b>Rationale</b>${renderProse(recommendation.rationale)}</div>
-      <div class="verdict-reason"><b>Claim checks</b>${(decision.validation?.claims || []).map(c => `<p><strong>${escapeHtml(c.status)}</strong> — ${escapeHtml(c.claim?.summary || "")}<br><small>${escapeHtml(c.source_path || c.source || "")}${c.check_status ? " · " + escapeHtml(c.check_status) : ""}</small></p>`).join("") || "No claim checks available."}</div>
+      <div class="verdict-reason"><b>Claim checks</b>
+        <div class="ar-explainer">Each finding below is the policy check's own result (pass/fail/etc, left). The small <span class="ar-tag ar-neutral" style="margin-left:0">AR</span> tag on the right is Bedrock Automated Reasoning's separate attempt to mathematically verify that specific claim -- "inconclusive" means AR couldn't decide either way, it does not mean the finding is wrong.</div>
+        ${(() => {
+          const counts = decision.validation?.counts;
+          return counts ? `<div class="ar-summary">
+            <span class="ar-count valid">${counts.valid||0} valid</span>
+            <span class="ar-count inconclusive">${counts.inconclusive||0} inconclusive</span>
+            <span class="ar-count invalid">${counts.invalid||0} invalid</span>
+            ${counts.not_checked ? `<span class="ar-count neutral">${counts.not_checked} not checked</span>` : ""}
+          </div>` : "";
+        })()}
+        ${renderClaimList(decision.validation?.claims)}
+      </div>
     `;
     verdictWrap.style.display = "flex";
     requestAnimationFrame(() => requestAnimationFrame(() => verdictEl.classList.add("show")));
