@@ -26,6 +26,15 @@ new GitHubOidcStack(app, 'FionaaGitHubOidcCi', {
     'arn:aws:bedrock:us-east-2::foundation-model/anthropic.claude-sonnet-4-5-20250929-v1:0',
     'arn:aws:bedrock:us-west-2::foundation-model/anthropic.claude-sonnet-4-5-20250929-v1:0',
   ],
+  // metrics.py's _JUDGE_MODEL -- deliberately Haiku 4.5, not the Sonnet 4.5
+  // above. Same ARNs as Path2BatchEvalStack's judgeModel* below (same judge
+  // model, same account/regions).
+  judgeModelInferenceProfileArn: `arn:aws:bedrock:${region}:${account}:inference-profile/us.anthropic.claude-haiku-4-5-20251001-v1:0`,
+  judgeModelFoundationModelArns: [
+    'arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0',
+    'arn:aws:bedrock:us-east-2::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0',
+    'arn:aws:bedrock:us-west-2::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0',
+  ],
   gatewayClientSecretArn:
     'arn:aws:secretsmanager:us-east-1:123456789012:secret:fionaa/agentcore-gateway-client-secret-ZuXvPz',
 });

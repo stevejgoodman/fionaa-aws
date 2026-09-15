@@ -14,10 +14,27 @@ export interface GitHubOidcStackProps extends StackProps {
   readonly githubOwnerId: number;
   readonly githubRepoName: string;
   readonly githubRepoId: number;
-  /** ARN of the AmazonBedrockModel judge / graph.py model's cross-region inference profile. */
+  /** ARN of graph.py's own model (Sonnet 4.5)'s cross-region inference profile. */
   readonly bedrockInferenceProfileArn: string;
   /** Underlying foundation-model ARN(s) the inference profile can route to (region-wildcarded). */
   readonly bedrockFoundationModelArns: string[];
+  /**
+   * ARN of metrics.py's _JUDGE_MODEL (Haiku 4.5) cross-region inference
+   * profile -- deliberately NOT the same model as bedrockInferenceProfileArn
+   * above (see metrics.py's block comment on _JUDGE_MODEL for why). Without
+   * this grant, every deepeval_evals/ node-eval test whose GEval metric
+   * calls the judge (correctness_metric, injection_resistance_metric, ...)
+   * fails closed with AccessDeniedException on the Converse operation --
+   * confirmed from CI logs on runs 34878048597 (PR #49) and 34957367920
+   * (PR #50): "not authorized to perform: bedrock:InvokeModel on resource:
+   * .../inference-profile/us.anthropic.claude-haiku-4-5-20251001-v1:0".
+   * This job is advisory (see deepeval-ci.yml), so the failures never
+   * blocked a merge -- but every GEval-scored node eval since the judge
+   * moved to Haiku has been silently producing no real scores.
+   */
+  readonly judgeModelInferenceProfileArn: string;
+  /** Underlying foundation-model ARN(s) the judge inference profile can route to (region-wildcarded). */
+  readonly judgeModelFoundationModelArns: string[];
   /** Gateway OAuth client secret this CI role needs to read (AGENTCORE_GATEWAY_CLIENT_SECRET_ARN). */
   readonly gatewayClientSecretArn: string;
 }
@@ -32,9 +49,10 @@ export interface GitHubOidcStackProps extends StackProps {
  * deploy`), not a place to hand-add unrelated CI infrastructure.
  *
  * Scope is intentionally narrow: this role can invoke Bedrock (to run the
- * eval harness's model calls and its GEval judge, both pinned to the same
- * model -- see model/load.py and metrics.py's _JUDGE_MODEL) and read the
- * one Gateway OAuth client secret gateway.py resolves at runtime. It has
+ * eval harness's own model calls -- model/load.py's Sonnet 4.5 -- and,
+ * separately, metrics.py's GEval judge -- Haiku 4.5, deliberately a
+ * different, cheaper model -- see _JUDGE_MODEL's block comment there) and
+ * read the one Gateway OAuth client secret gateway.py resolves at runtime. It has
  * no S3, no write access, and no access to the deployed AgentCore Runtime
  * itself -- deepeval_evals/ calls graph.py's node functions directly with
  * FakeStore/FakePolicyDocs (see test_policy_check.py), it never touches
@@ -91,6 +109,14 @@ export class GitHubOidcStack extends Stack {
         sid: 'InvokeBedrockModel',
         actions: ['bedrock:InvokeModel', 'bedrock:InvokeModelWithResponseStream', 'bedrock:Converse', 'bedrock:ConverseStream'],
         resources: [props.bedrockInferenceProfileArn, ...props.bedrockFoundationModelArns],
+      }),
+    );
+
+    this.ciRole.addToPolicy(
+      new iam.PolicyStatement({
+        sid: 'InvokeJudgeModel',
+        actions: ['bedrock:InvokeModel', 'bedrock:InvokeModelWithResponseStream', 'bedrock:Converse', 'bedrock:ConverseStream'],
+        resources: [props.judgeModelInferenceProfileArn, ...props.judgeModelFoundationModelArns],
       }),
     );
 
