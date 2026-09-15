@@ -381,7 +381,7 @@ export class Path2BatchEvalStack extends Stack {
     // per the third-party-evaluators doc), which is why only these two
     // failed while the other three succeeded. Same grant pattern
     // GitHubOidcStack already uses for Path 1's judge model, just a
-    // different one (Haiku 4.5, not Sonnet 4.5).
+    // different one (Haiku 4.5, not Sonnet 5).
     this.ciRole.addToPolicy(
       new iam.PolicyStatement({
         sid: 'InvokeCustomEvaluatorJudgeModel',
