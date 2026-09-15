@@ -232,3 +232,7 @@ class ToolPrefixCorrectness(BaseMetric):
     @property
     def __name__(self) -> str:
         return "ToolPrefixCorrectness"
+
+
+# No-op touch to re-trigger deepeval-ci's pull_request path filter and
+# verify PR #51's judge-model IAM grant against a real OIDC-trusted run.
