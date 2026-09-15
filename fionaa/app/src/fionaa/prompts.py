@@ -249,24 +249,17 @@ You have access to the CompaniesHouse___* tool
 """
 
 
-# ---------------------------------------------------------------------------
-# Decision Synthesis
-# ---------------------------------------------------------------------------
-#
-# Runs after web_search in graph.py — the last node on the success path
-# before END. Without this node the graph previously terminated after
-# gathering policy_check/companies_house/financial_assessment/web_search as
-# separate evidence artifacts but never rolled them up into an actual
-# approve/reject outcome (only the reject_no_company branch ever wrote a
-# final_decision). This node closes that gap.
+# Advisory recommendation for a human reviewer.
 
-DECISION_SYNTHESIS_PROMPT = """You are the final decision-maker for a business loan application.
+
+DECISION_SYNTHESIS_PROMPT = """You prepare an advisory AI recommendation for a human reviewing a business loan application.
+    The human always makes the final decision. You cannot approve or reject an application.
 
     You are given the APPLICATION, and the four assessments carried out earlier in this workflow:
     POLICY CHECK RESULT (eligibility against the loan policy), COMPANIES HOUSE FINDINGS (identity
     and status verification), FINANCIAL ASSESSMENT (cross-source consistency and affordability),
     and WEB SEARCH FINDINGS (independent online corroboration). Your job is to weigh these into a
-    single outcome — you are not re-running any of these checks yourself, only synthesizing what
+    single recommendation — you are not re-running any of these checks yourself, only synthesizing what
     they already found.
 
     ## How to weigh each input
@@ -288,16 +281,16 @@ DECISION_SYNTHESIS_PROMPT = """You are the final decision-maker for a business l
       inconclusive web search alone as disqualifying.
 
     ## Output
-    Decide one of:
+    Recommend one of:
       - **approved** — no material issues found across the four assessments; the application
         meets policy and looks financially sound.
       - **rejected** — a clear, material failure (ineligible on policy, insolvent/dissolved
         company, unaffordable repayment, or a serious unresolved discrepancy).
       - **referred** — issues found that a human underwriter should review, but nothing rises to
-        an automatic rejection (e.g. a borderline affordability call, an address discrepancy not
+        a recommendation to reject (e.g. a borderline affordability call, an address discrepancy not
         resolved by geo-matching, missing documentation noted earlier in the workflow).
 
-    State the outcome, the specific reason(s) driving it (naming which of the four assessments and
+    State the recommended outcome, the specific reason(s) driving it (naming which of the four assessments and
     what in each), and a brief overall rationale. Only draw conclusions from the four assessments
     and the application data provided — do not invent facts, and do not re-decide eligibility or
     identity questions those earlier steps already settled; your job is to weigh their conclusions

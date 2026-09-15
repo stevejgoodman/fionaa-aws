@@ -108,16 +108,13 @@ class FinancialAssessmentResult(BaseModel):
 
 
 class FinalDecisionResult(BaseModel):
-    """Forced structured output for `synthesize_decision` — the success-path
-    counterpart to `reject_no_company`'s hand-written `final_decision` dict.
-    Constrains the model to an actual outcome rather than a free-text
-    write-up that never resolves to approve/reject/refer."""
+    """Advisory AI recommendation. A human always makes the final decision."""
 
     outcome: Literal["approved", "rejected", "referred"] = Field(
-        description="approved: no material issues across the four assessments. rejected: a clear, "
+        description="Advisory recommendation only; never a final decision. approved: no material issues across the four assessments. rejected: a clear, "
         "material failure (ineligible on policy, insolvent/dissolved company, unaffordable "
         "repayment, serious unresolved discrepancy). referred: issues a human underwriter should "
-        "review, but nothing rising to automatic rejection."
+        "review, but nothing warranting a recommendation to reject."
     )
     reason: str = Field(
         description="Which of the four assessments (policy_check/companies_house/"

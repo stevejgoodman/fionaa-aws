@@ -531,8 +531,10 @@ def test_reject_no_company_persists_final_decision():
 
     result = g.reject_no_company(state, runtime)
 
-    assert result["final_decision"]["outcome"] == "rejected"
-    assert result["final_decision"]["reason"] == "companies_house_no_match"
+    assert result["final_decision"]["outcome"] == "pending_human_review"
+    assert result["final_decision"]["ai_recommendation"]["reason"] == "companies_house_no_match"
+    assert result["final_decision"]["ai_recommendation"]["outcome"] == "referred"
+    assert result["final_decision"]["validation"]["status"] == "not_checked"
     assert store.data["decision/result.json"] == result["final_decision"]
 
 
@@ -828,12 +830,8 @@ def _patch_all_integration_points(monkeypatch, agent_response="ok"):
         monkeypatch.setattr(stage, "create_agent", make_fake_create_agent(agent_response, calls))
     async def valid(*args):
         return {"passed": True, "status": "valid", "policy_sha256": "digest"}
-    # _check_claim is the shared single-claim primitive: _validate_decision
-    # fans out over it once per atomic claim (both the policy_check clauses
-    # and the final decision's own outcome/reason/rationale) -- patching it
-    # here makes every one of those resolve to a clean "valid" without
-    # needing real Automated Reasoning calls.
-    monkeypatch.setattr(validation, "_check_claim", valid)
+    # Mock the external checker while exercising real claim annotation.
+    monkeypatch.setattr(validation.PolicyConsistencyChecker, "check", valid)
     return calls
 
 
@@ -871,7 +869,7 @@ async def test_build_graph_runs_all_nodes_in_order(monkeypatch, identity):
     # synthesize_decision also forces structured output — the fake wraps
     # "ok" into a generic passing FinalDecisionResult the same way it does
     # CompaniesHouseResult above (see _generic_structured_fields).
-    assert final_state["final_decision"]["outcome"] == "approved"
+    assert final_state["final_decision"]["outcome"] == "pending_human_review"
     assert set(store.data) == {
         "input/application.json",
         "policy_check/result.json",
@@ -920,4 +918,4 @@ async def test_build_graph_checkpoints_successfully_with_deps_in_context(monkeyp
     assert saved.values["policy_check"]["eligible"] == "eligible"
     assert saved.values["financial_assessment"]["verdict"] == "consistent"
     assert saved.values["web_search"] == "ok"
-    assert saved.values["final_decision"]["outcome"] == "approved"
+    assert saved.values["final_decision"]["outcome"] == "pending_human_review"
