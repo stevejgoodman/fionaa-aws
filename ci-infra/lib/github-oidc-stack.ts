@@ -14,7 +14,7 @@ export interface GitHubOidcStackProps extends StackProps {
   readonly githubOwnerId: number;
   readonly githubRepoName: string;
   readonly githubRepoId: number;
-  /** ARN of graph.py's own model (Sonnet 5)'s cross-region inference profile. */
+  /** ARN of graph.py's own model (Sonnet 4.5)'s cross-region inference profile. */
   readonly bedrockInferenceProfileArn: string;
   /** Underlying foundation-model ARN(s) the inference profile can route to (region-wildcarded). */
   readonly bedrockFoundationModelArns: string[];
@@ -49,7 +49,7 @@ export interface GitHubOidcStackProps extends StackProps {
  * deploy`), not a place to hand-add unrelated CI infrastructure.
  *
  * Scope is intentionally narrow: this role can invoke Bedrock (to run the
- * eval harness's own model calls -- model/load.py's Sonnet 5 -- and,
+ * eval harness's own model calls -- model/load.py's Sonnet 4.5 -- and,
  * separately, metrics.py's GEval judge -- Haiku 4.5, deliberately a
  * different, cheaper model -- see _JUDGE_MODEL's block comment there) and
  * read the one Gateway OAuth client secret gateway.py resolves at runtime. It has

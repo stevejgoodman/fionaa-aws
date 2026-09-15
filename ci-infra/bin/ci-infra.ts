@@ -18,13 +18,13 @@ new GitHubOidcStack(app, 'FionaaGitHubOidcCi', {
   githubRepoId: 1307842866,
   // Same cross-region inference profile model/load.py's MODEL_ID and
   // metrics.py's _JUDGE_MODEL both resolve to -- see fionaa/app/fionaa/model/load.py.
-  bedrockInferenceProfileArn: `arn:aws:bedrock:${region}:${account}:inference-profile/us.anthropic.claude-sonnet-5`,
+  bedrockInferenceProfileArn: `arn:aws:bedrock:${region}:${account}:inference-profile/us.anthropic.claude-sonnet-4-5-20250929-v1:0`,
   // Foundation-model ARNs are AWS-owned (no account ID); a "us." cross-region
   // profile can route to any of these constituent regions.
   bedrockFoundationModelArns: [
-    'arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-5',
-    'arn:aws:bedrock:us-east-2::foundation-model/anthropic.claude-sonnet-5',
-    'arn:aws:bedrock:us-west-2::foundation-model/anthropic.claude-sonnet-5',
+    'arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-4-5-20250929-v1:0',
+    'arn:aws:bedrock:us-east-2::foundation-model/anthropic.claude-sonnet-4-5-20250929-v1:0',
+    'arn:aws:bedrock:us-west-2::foundation-model/anthropic.claude-sonnet-4-5-20250929-v1:0',
   ],
   // metrics.py's _JUDGE_MODEL -- deliberately Haiku 4.5, not the Sonnet 4.5
   // above. Same ARNs as Path2BatchEvalStack's judgeModel* below (same judge
