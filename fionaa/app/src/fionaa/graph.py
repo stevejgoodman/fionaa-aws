@@ -50,22 +50,10 @@ def build_graph(checkpointer: Optional[BaseCheckpointSaver] = None):
     # edge to either is declared here.
     g.add_edge("load_application", "companies_house")
     g.add_edge("reject_no_company", END)
-    # policy_check deliberately does not short-circuit: a failed policy check
-    # is a business outcome, not a dead end. Its result is already carried in
-    # state (`policy_check`), so it flows into whichever artifact ends up
-    # documenting the run's outcome instead of only living in
-    # policy_check/result.json. No separate Automated Reasoning gate sits
-    # between policy_check and financial_assessment any more -- see
-    # validate_final_decision's docstring for why that check moved to run
-    # once, at the very end, instead of being split across an early stage
-    # that could never see companies_house/financial_assessment evidence.
+    # Complete the evidence before annotating policy claims for the reviewer.
     g.add_edge("policy_check", "financial_assessment")
     g.add_edge("financial_assessment", "web_search")
-    # web_search used to go straight to END, leaving policy_check/
-    # companies_house/financial_assessment/web_search as separate evidence
-    # artifacts with no rolled-up outcome on the success path — only
-    # reject_no_company ever wrote a final_decision. synthesize_decision
-    # closes that gap.
+    # Synthesis supplies an advisory recommendation; validation adds claim checks.
     g.add_edge("web_search", "synthesize_decision")
     g.add_edge("synthesize_decision", "validate_final_decision")
     g.add_edge("validate_final_decision", END)

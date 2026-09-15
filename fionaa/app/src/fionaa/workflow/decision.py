@@ -12,6 +12,19 @@ from fionaa.workflow.state import ApplicationState, AgentContext
 from fionaa.domain.assessments import FinalDecisionResult
 
 
+def human_review_report(proposed: dict, validation: dict | None = None) -> dict:
+    """The workflow supplies a recommendation; only a human determines the outcome."""
+    report = {
+        **{key: value for key, value in proposed.items()
+           if key not in {"outcome", "reason", "rationale"}},
+        "outcome": "pending_human_review",
+        "ai_recommendation": {key: proposed[key] for key in ("outcome", "reason", "rationale")},
+    }
+    if validation is not None:
+        report["validation"] = validation
+    return report
+
+
 def reject_no_company(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict[str, Any]:
     """Terminal node for the companies_house branch that found no matching
     company. companies_house runs first in graph.py (before policy_check),
@@ -19,22 +32,20 @@ def reject_no_company(state: ApplicationState, runtime: Runtime[AgentContext]) -
     unidentified company makes the rest of the assessment moot, so nothing
     downstream (including policy_check) ever runs on this branch."""
     final_decision = {
-        "outcome": "rejected",
+        "outcome": "referred",
         "reason": "companies_house_no_match",
+        "rationale": "Company identity could not be confirmed; human review is required.",
         "companies_house": state.get("companies_house"),
     }
+    final_decision = human_review_report(final_decision, {
+        "status": "not_checked", "check_status": "company_not_confirmed", "claims": [],
+    })
     runtime.context.store.put_json("decision/result.json", final_decision)
     return {"final_decision": final_decision}
 
 
 async def synthesize_decision(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict[str, Any]:
-    """Last node on the success path, after web_search. Without this node the
-    graph terminated at END having gathered policy_check/companies_house/
-    financial_assessment/web_search as separate evidence artifacts but never
-    rolled them up into an outcome — only reject_no_company ever wrote a
-    final_decision. This node closes that gap by weighing all four earlier
-    findings (already in state; nothing is re-fetched or re-assessed here)
-    into a single approved/rejected/referred verdict."""
+    """Combine the four assessments into an advisory AI recommendation."""
     application = state["application"]
     policy_check = state.get("policy_check")
     companies_house = state.get("companies_house")

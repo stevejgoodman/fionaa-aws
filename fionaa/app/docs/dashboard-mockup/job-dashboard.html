@@ -577,8 +577,10 @@
         </div>
       </div>`;
     } else if (openDetail === "synthesize_decision"){
-      const ev = step?.evidence || RUN.final_decision || {};
+      const evidence = step?.evidence || RUN.final_decision || {};
+      const ev = evidence.ai_recommendation || evidence;
       body = `<div class="detail-col" style="max-width:760px">
+        <h3>AI recommendation — human decision required</h3>
         <div class="verdict-reason"><b>Reason</b>${renderProse(ev.reason)}</div>
         <div class="verdict-reason"><b>Rationale</b>${renderProse(ev.rationale)}</div>
       </div>`;
@@ -597,14 +599,17 @@
 
   function showVerdict(){
     const decision = RUN.final_decision || {};
-    const label = decision.outcome === "approved" ? "Approved" : decision.outcome === "referred" ? "Referred" : "Rejected";
-    const cls = decision.outcome === "approved" ? "approved" : decision.outcome === "referred" ? "referred" : "rejected";
+    const recommendation = decision.ai_recommendation || decision;
+    const label = decision.outcome === "pending_human_review" ? "Pending human review" : decision.outcome === "approved" ? "Approved" : decision.outcome === "referred" ? "Referred" : "Rejected";
+    const cls = decision.outcome === "pending_human_review" ? "referred" : decision.outcome === "approved" ? "approved" : decision.outcome === "referred" ? "referred" : "rejected";
     const app = RUN.application || {};
     verdictEl.innerHTML = `
       <div class="verdict-seal ${cls}">${label}</div>
       <div class="verdict-meta">${app.company_name || ""} &nbsp;·&nbsp; ${fmtMoney(app.requested_amount)} ${(app.loan_type||"").replace(/-/g," ")} &nbsp;·&nbsp; <span class="mono">${RUN.application_id}</span></div>
-      <div class="verdict-reason"><b>Reason</b>${renderProse(decision.reason)}</div>
-      <div class="verdict-reason"><b>Rationale</b>${renderProse(decision.rationale)}</div>
+      <div class="verdict-reason"><b>AI recommendation</b>${escapeHtml(recommendation.outcome || "Unavailable")}</div>
+      <div class="verdict-reason"><b>Reason</b>${renderProse(recommendation.reason)}</div>
+      <div class="verdict-reason"><b>Rationale</b>${renderProse(recommendation.rationale)}</div>
+      <div class="verdict-reason"><b>Claim checks</b>${(decision.validation?.claims || []).map(c => `<p><strong>${escapeHtml(c.status)}</strong> — ${escapeHtml(c.claim?.summary || "")}<br><small>${escapeHtml(c.source_path || c.source || "")}${c.check_status ? " · " + escapeHtml(c.check_status) : ""}</small></p>`).join("") || "No claim checks available."}</div>
     `;
     verdictWrap.style.display = "flex";
     requestAnimationFrame(() => requestAnimationFrame(() => verdictEl.classList.add("show")));

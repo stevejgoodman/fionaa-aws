@@ -27,17 +27,12 @@ def valid_response():
 @pytest.mark.parametrize("kind", ["valid", "invalid", "satisfiable", "impossible",
                                   "translationAmbiguous", "tooComplex", "noTranslations"])
 async def test_findings_are_enforced(kind):
-    # `invalid` is the only finding type that's an actual proven
-    # contradiction of the policy -- it fails closed. Every other non-valid
-    # kind means Automated Reasoning couldn't fully confirm the claim (a
-    # translation/tooling limitation, not evidence the claim is wrong), so
-    # it's `inconclusive` and allowed to proceed rather than referred.
     response = valid_response()
     response["assessments"][0]["automatedReasoningPolicy"]["findings"] = [{kind: {}}]
     instance = checker(response)
     result = await instance.check("secured-business-loans", "policy", {"loan_amount": 40000}, {"eligible": "eligible"})
     assert result["passed"] is (kind != "invalid")
-    assert result["status"] == {"valid": "valid", "invalid": "not_validated"}.get(kind, "inconclusive")
+    assert result["status"] == {"valid": "valid", "invalid": "invalid"}.get(kind, "inconclusive")
     request = instance.client.apply_guardrail.call_args.kwargs
     assert request["source"] == "OUTPUT"
     assert request["content"][0]["text"]["qualifiers"] == ["query"]
@@ -123,121 +118,73 @@ def _decision_state(**overrides):
 
 
 @pytest.mark.asyncio
-async def test_decision_failure_refers():
-    store = FakeStore()
-    runtime = FakeRuntime(g.AgentContext(store, FakePolicyDocs(), [], FakeChecker(False)))
-    result = await g.validate_final_decision(_decision_state(), runtime)
-    assert result["final_decision"]["outcome"] == "referred"
-    assert not store.data["decision/validation.json"]["passed"]
-    assert store.data["decision/result.json"] == result["final_decision"]
-
-
-@pytest.mark.asyncio
-async def test_decision_success_publishes_proposed_decision():
-    store = FakeStore()
-    runtime = FakeRuntime(g.AgentContext(store, FakePolicyDocs(), [], FakeChecker(True)))
-    proposed = {"outcome": "approved", "reason": "all clean", "rationale": "no issues found"}
-    original = copy.deepcopy(proposed)
-    result = await g.validate_final_decision(_decision_state(proposed_decision=proposed), runtime)
-    assert result["final_decision"]["outcome"] == "approved"
-    assert proposed == original  # not mutated
-    assert store.data["decision/result.json"] == result["final_decision"]
-
-
-@pytest.mark.asyncio
-async def test_decision_checks_policy_check_and_final_decision_claims_individually():
-    """_validate_decision must fan out over every atomic assertion from
-    BOTH the policy_check result (eligible verdict + each clause_finding +
-    each documentation_gap) AND the final decision's own
-    outcome/reason/rationale -- the collapsed design (see validation.py's
-    docstring) checks everything once, at the end, rather than splitting
-    across an early policy_check-stage gate and a final-decision-stage
-    gate that could never see full evidence."""
+@pytest.mark.parametrize("status", ["valid", "invalid", "inconclusive", "validation_error",
+                                    "not_configured", "policy_version_mismatch", "not_validated"])
+@pytest.mark.parametrize("outcome", ["approved", "rejected", "referred"])
+async def test_annotations_never_determine_the_human_outcome(status, outcome):
     store = FakeStore()
     checker = SequencedFakeChecker([
-        {"passed": True, "status": "valid", "policy_sha256": "digest"} for _ in range(5)
+        {"status": "valid", "policy_sha256": "digest", "findings": [{"valid": {}}]},
+        {"status": status, "policy_sha256": "digest", "findings": [], "error_type": "Example"},
+        {"status": "valid", "policy_sha256": "digest", "findings": [{"valid": {}}]},
+        {"status": "valid", "policy_sha256": "digest", "findings": [{"valid": {}}]},
+        {"status": "valid", "policy_sha256": "digest", "findings": [{"valid": {}}]},
     ])
     runtime = FakeRuntime(g.AgentContext(store, FakePolicyDocs(), [], checker))
     state = _decision_state(
         policy_check={"eligible": "eligible", "clause_findings": ["Loan amount is in range."]},
-        proposed_decision={"outcome": "approved", "reason": "clean", "rationale": "no issues"},
+        proposed_decision={"outcome": outcome, "reason": "clean", "rationale": "no issues"},
     )
-
+    original = copy.deepcopy(state)
     result = await g.validate_final_decision(state, runtime)
-
-    # eligible verdict + 1 clause_finding (policy_check) + outcome + reason +
-    # rationale (final decision) = 5 atomic claims.
-    assert len(checker.claims_seen) == 5
-    assert any("Loan amount is in range." in c["summary"] for c in checker.claims_seen)
-    assert any("approved" in c["summary"] for c in checker.claims_seen)
-    assert result["final_decision"]["outcome"] == "approved"
+    report = result["final_decision"]
+    assert report["outcome"] == "pending_human_review"
+    assert report["ai_recommendation"] == original["proposed_decision"]
+    assert state == original
     validation = store.data["decision/validation.json"]
-    assert validation["passed"] and validation["status"] == "valid"
-    assert len(validation["claims"]) == 5
-    assert {c["source"] for c in validation["claims"]} == {"policy_check", "final_decision"}
+    assert "passed" not in validation
+    annotation = validation["claims"][1]
+    expected = status if status in {"valid", "invalid", "inconclusive"} else "not_checked"
+    assert annotation["status"] == expected
+    assert annotation["source_path"] == "/policy_check/clause_findings/0"
+    assert annotation["claim"]["summary"] == "Loan amount is in range."
+    if expected == "not_checked":
+        assert annotation["check_status"] == status
+    assert sum(validation["counts"].values()) == 5
+    assert validation["counts"][expected] >= 1
+    assert report["validation"] == validation
+    assert store.data["decision/result.json"] == report
 
 
 @pytest.mark.asyncio
-async def test_decision_one_invalid_claim_among_many_still_fails_closed():
-    """An `invalid` finding on a single clause among several must still
-    refer the whole application -- fanning out into many atomic claims must
-    not let a genuine contradiction on one of them slip through because its
-    siblings passed."""
+async def test_all_claims_link_to_report_fields_and_keep_evidence():
     store = FakeStore()
     checker = SequencedFakeChecker([
-        {"passed": True, "status": "valid", "policy_sha256": "digest"},
-        {"passed": False, "status": "not_validated", "policy_sha256": "digest"},
-        {"passed": True, "status": "valid", "policy_sha256": "digest"},
-        {"passed": True, "status": "valid", "policy_sha256": "digest"},
-        {"passed": True, "status": "valid", "policy_sha256": "digest"},
+        {"status": "valid", "policy_sha256": "digest", "findings": [{"valid": {}}]}
+        for _ in range(8)
     ])
     runtime = FakeRuntime(g.AgentContext(store, FakePolicyDocs(), [], checker))
-    state = _decision_state(policy_check={"eligible": "eligible", "clause_findings": ["A contradicted clause."]})
-
-    result = await g.validate_final_decision(state, runtime)
-
-    assert result["final_decision"]["outcome"] == "referred"
-    validation = store.data["decision/validation.json"]
-    assert not validation["passed"]
-    assert validation["status"] == "not_validated"
+    policy = {"eligible": "eligible", "clause_findings": ["Amount fits.", "Term fits."],
+              "documentation_gaps": ["Bank statements missing."], "summary": "Criteria met."}
+    state = _decision_state(policy_check=policy, annual_accounts=[{"turnover": 50000}])
+    state["proposed_decision"]["policy_check"] = policy
+    report = (await g.validate_final_decision(state, runtime))["final_decision"]
+    validation = report["validation"]
+    assert len(validation["claims"]) == 8
+    for item in validation["claims"]:
+        value = report
+        for part in item["source_path"].strip("/").split("/"):
+            value = value[int(part)] if isinstance(value, list) else value[part]
+        assert value in item["claim"]["summary"]
+        assert item["findings"] == [{"valid": {}}]
+        assert "passed" not in item
+    assert validation["evidence"]["annual_accounts"] == state["annual_accounts"]
+    assert validation["evidence"]["application_self_reported"] == state["application"]
 
 
 @pytest.mark.asyncio
-async def test_decision_inconclusive_claim_does_not_block_publication():
-    """A non-invalid, non-valid finding (tooComplex/translationAmbiguous/...)
-    on one claim must not block publication -- see
-    PolicyConsistencyChecker's own passed=True-for-inconclusive contract --
-    but the aggregate status must still surface as 'inconclusive', not
-    silently 'valid'."""
-    store = FakeStore()
-    checker = SequencedFakeChecker([
-        {"passed": True, "status": "valid", "policy_sha256": "digest"},
-        {"passed": True, "status": "inconclusive", "policy_sha256": "digest"},
-        {"passed": True, "status": "valid", "policy_sha256": "digest"},
-        {"passed": True, "status": "valid", "policy_sha256": "digest"},
-        {"passed": True, "status": "valid", "policy_sha256": "digest"},
-    ])
-    runtime = FakeRuntime(g.AgentContext(store, FakePolicyDocs(), [], checker))
-    state = _decision_state(policy_check={"eligible": "eligible", "clause_findings": ["A tooComplex clause."]})
-
-    result = await g.validate_final_decision(state, runtime)
-
-    assert result["final_decision"]["outcome"] == "approved"
-    validation = store.data["decision/validation.json"]
-    assert validation["passed"]
-    assert validation["status"] == "inconclusive"
-
-
-@pytest.mark.asyncio
-async def test_unconfigured_full_graph_runs_to_completion_then_refers(monkeypatch):
-    """Without Automated Reasoning bindings configured,
-    PolicyConsistencyChecker.check() always fails closed (see
-    test_configuration_fails_closed_without_aws) -- but since validation now
-    runs only once, at the very end (see validation.py's collapse from a
-    two-stage design), there's no early gate left to short-circuit the
-    graph. companies_house -> policy_check -> financial_assessment ->
-    web_search -> synthesize_decision must all still run to completion;
-    only the final validate_final_decision step refers."""
+async def test_unconfigured_full_graph_produces_report_for_human_review(monkeypatch):
+    """Unavailable checks remain visible in the completed review report."""
     calls = []
     from fionaa.workflow import policy as policy_stage, companies_house as company_stage, financial as financial_stage, web_search as web_stage, decision as decision_stage
     for stage in (policy_stage, company_stage, financial_stage, web_stage, decision_stage):
@@ -251,11 +198,8 @@ async def test_unconfigured_full_graph_runs_to_completion_then_refers(monkeypatc
 
     result = await g.build_graph().ainvoke({}, context=context)
 
-    assert result["final_decision"]["outcome"] == "referred"
-    # Unlike the old two-stage design, an unconfigured checker no longer
-    # short-circuits the graph early -- every node still runs, and only the
-    # final validation step (which nothing downstream of it exists to skip)
-    # refers.
+    assert result["final_decision"]["outcome"] == "pending_human_review"
+    assert all(c["status"] == "not_checked" for c in result["final_decision"]["validation"]["claims"])
     assert "companies_house/result.json" in store.data
     assert "policy_check/result.json" in store.data
     assert "financial_assessment/result.json" in store.data
