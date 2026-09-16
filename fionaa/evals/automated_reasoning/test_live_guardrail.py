@@ -21,26 +21,26 @@ async def main():
         "policy_sha256": policy_digest(text),
     }})
     cases = [
-        ("amount_in_range", {"loan_amount": 40000},
-         {"summary": "The requested GBP 40000 is within the secured loan amount range."}, True),
-        ("amount_below_minimum", {"loan_amount": 24000},
-         {"summary": "The requested GBP 24000 is within the secured loan amount range."}, False),
+        ("amount_in_range", {"loanAmount": 40000},
+         "loanAmountInRange is true.", True),
+        ("amount_below_minimum", {"loanAmount": 24000},
+         "loanAmountInRange is true.", False),
         ("trading_12_months", {"tradingHistoryMonths": 12},
-         {"summary": "The business meets the minimum secured-loan trading history requirement."}, True),
+         "meetsMinimumTradingHistory is true.", True),
         ("trading_11_months", {"tradingHistoryMonths": 11},
-         {"summary": "The business meets the minimum secured-loan trading history requirement."}, False),
+         "meetsMinimumTradingHistory is true.", False),
         ("statements_89_days", {"bankStatementsMonthsCount": 3, "mostRecentStatementAgeDays": 89},
-         {"summary": "The supplied statements satisfy the policy's bank statement recency and coverage requirements."}, True),
+         "hasRecentBankStatements is true.", True),
         ("statements_90_days", {"bankStatementsMonthsCount": 3, "mostRecentStatementAgeDays": 90},
-         {"summary": "The supplied statements satisfy the policy's bank statement recency and coverage requirements."}, False),
-        ("invalid_term_approval", {"loan_amount": 40000, "loan_term": 84},
-         {"outcome": "approved", "reason": "This approval meets all covered secured lending policy requirements."}, False),
+         "hasRecentBankStatements is true.", False),
+        ("invalid_term_approval", {"loanAmount": 40000, "loanTermMonths": 84},
+         "approvalMeetsCoveredPolicy is true.", False),
         ("missing_collateral_approval", {"hasProofOfCollateralOwnershipValuation": False},
-         {"outcome": "approved", "reason": "This approval meets all covered secured lending policy requirements."}, False),
+         "approvalMeetsCoveredPolicy is true.", False),
     ]
     results = []
-    for name, facts, claim, expected in cases:
-        result = await checker.check("secured-business-loans", text, facts, claim)
+    for name, facts, assertion, expected in cases:
+        result = await checker.check("secured-business-loans", text, facts, assertion)
         results.append({"case": name, "expected_pass": expected, **result})
         print(name, "expected", expected, "actual", result["passed"], result["status"], flush=True)
         (RESULTS_DIR / "live-results.json").write_text(json.dumps(results, indent=2) + "\n")

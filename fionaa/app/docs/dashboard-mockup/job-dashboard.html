@@ -365,17 +365,21 @@
   // ---------------------------------------------------------------------
   // Stage metadata -- content itself comes entirely from RUN.steps
   // ---------------------------------------------------------------------
+  // Order matches graph.py's actual edges: companies_house runs first (it
+  // gates everything else and routes dynamically to policy_check or
+  // reject_no_company via Command), not the other way round -- see
+  // build_graph's comment in graph.py.
   const STAGE_META = {
-    load_application:    { short:"01", label:"Load application",    sub:"application.json + documents" },
-    policy_check:        { short:"02", label:"Policy check",        sub:"loan-type policy" },
-    companies_house:     { short:"03", label:"Companies House",     sub:"registry cross-check", branch:true },
-    reject_no_company:   { short:"×",  label:"Reject — no match",   sub:"terminal" },
-    financial_assessment:{ short:"04", label:"Financial assessment", sub:"accounts + statements" },
-    web_search:          { short:"05", label:"Web search",          sub:"presence & reputation" },
-    synthesize_decision: { short:"06", label:"Synthesize decision", sub:"final verdict" },
+    load_application:      { short:"01", label:"Load application",      sub:"application.json + documents" },
+    companies_house:       { short:"02", label:"Companies House",       sub:"registry cross-check", branch:true },
+    reject_no_company:     { short:"×",  label:"Reject — no match",     sub:"terminal" },
+    policy_check:          { short:"03", label:"Policy check",          sub:"loan-type policy" },
+    financial_assessment:  { short:"04", label:"Financial assessment",  sub:"accounts + statements" },
+    web_search:            { short:"05", label:"Web search",            sub:"presence & reputation" },
+    synthesize_decision:   { short:"06", label:"Synthesize decision",   sub:"final verdict" },
   };
   // Full canonical order, so branch-not-taken still renders (dimmed).
-  const CANONICAL = ["load_application","policy_check","companies_house","reject_no_company",
+  const CANONICAL = ["load_application","companies_house","reject_no_company","policy_check",
                       "financial_assessment","web_search","synthesize_decision"];
 
   const ranNodes = new Set(RUN.steps.map(s => s.node));
@@ -474,10 +478,37 @@
     if (s === "invalid") return "ar-invalid";
     return "ar-neutral";
   }
+  // Claim summaries are now code-generated, deterministic AR-policy-variable
+  // sentences (e.g. "isSubstantivelyEligible is true.") rather than
+  // LLM-authored PASS/FAIL prose -- see ar_claims.py. Give the three known
+  // variable names a human-readable label instead of falling through to the
+  // PASS/FAIL regex below, which won't match this phrasing at all.
+  const AR_ASSERTION_LABELS = {
+    isSubstantivelyEligible: { label: "Substantive eligibility", trueText: "SATISFIED", falseText: "NOT SATISFIED" },
+    hasRequiredDocuments: { label: "Required documentation", trueText: "SATISFIED", falseText: "NOT SATISFIED" },
+    approvalMeetsCoveredPolicy: { label: "Approval meets policy", trueText: "MET", falseText: "NOT MET" },
+  };
+  function friendlyAssertion(summary){
+    const m = summary.match(/^(\w+) is (true|false)\.$/);
+    if (!m) return null;
+    const meta = AR_ASSERTION_LABELS[m[1]];
+    if (!meta) return null;
+    const isTrue = m[2] === "true";
+    return { label: meta.label, tag: isTrue ? meta.trueText : meta.falseText, cls: isTrue ? "pass" : "fail" };
+  }
   function renderClaimList(claims){
     if (!claims || !claims.length) return `<div class="prose" style="color:var(--text-faint)">No claim checks available.</div>`;
     return `<ul class="finding-list">` + claims.map(c => {
       const summary = escapeHtml(c.claim?.summary || "");
+      const friendly = friendlyAssertion(summary);
+      if (friendly){
+        const source = escapeHtml(c.source_path || c.source || "");
+        return `<li>
+          <span class="finding-tag ${friendly.cls}">${friendly.tag}</span><span class="finding-label">${friendly.label}</span>
+          <span class="ar-tag ${arTagClass(c.status)}" title="Bedrock Automated Reasoning's verification status for this specific claim -- separate from the policy finding above">AR: ${escapeHtml(c.status || "unknown")}</span>
+          ${source ? `<span class="finding-source">${source}</span>` : ""}
+        </li>`;
+      }
       const m = summary.match(/^(.*?):\s*(PASS|FAIL|INCONCLUSIVE|SATISFIED|NOT APPLICABLE)\b\s*[—\-:]*\s*(.*)$/i);
       let tagHtml = "", labelHtml = "", detail = summary;
       if (m){
