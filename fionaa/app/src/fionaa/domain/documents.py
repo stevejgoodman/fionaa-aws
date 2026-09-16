@@ -12,6 +12,8 @@ class BankStatementSchema(BaseModel):
                            title="Bank Name")
     account_number: str = Field(description="The bank account number.",
                                 title="Account Number")
+    address: str = Field(description="The account owner's address as printed "
+                          "on the statement.", title="Address")
     start_date: str = Field(description="The start date for the statement.",
                           title="Start Date")
 

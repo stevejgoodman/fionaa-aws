@@ -134,16 +134,19 @@ GOODAI_ANNUAL_ACCOUNTS_TURNOVER_MISMATCH = {
 GOODAI_BANK_STATEMENTS_RECENT = [
     {
         "account_owner": "GoodAI Consulting", "bank_name": "Big Bank UK", "account_number": "40123456",
+        "address": "3 Manor Road, Ruislip, Middlesex",
         "start_date": "2026-06-01", "end_date": "2026-06-30",
         "balance": 18342.50, "payments_in": 22000.0, "payments_out": 19500.0,
     },
     {
         "account_owner": "GoodAI Consulting", "bank_name": "Big Bank UK", "account_number": "40123456",
+        "address": "3 Manor Road, Ruislip, Middlesex",
         "start_date": "2026-07-01", "end_date": "2026-07-31",
         "balance": 20811.75, "payments_in": 24500.0, "payments_out": 22000.0,
     },
     {
         "account_owner": "GoodAI Consulting", "bank_name": "Big Bank UK", "account_number": "40123456",
+        "address": "3 Manor Road, Ruislip, Middlesex",
         "start_date": "2026-08-01", "end_date": "2026-08-25",
         "balance": 23120.40, "payments_in": 19800.0, "payments_out": 17500.0,
     },
@@ -154,16 +157,19 @@ GOODAI_BANK_STATEMENTS_RECENT = [
 GOODAI_BANK_STATEMENTS_STALE = [
     {
         "account_owner": "GoodAI Consulting", "bank_name": "Big Bank UK", "account_number": "40123456",
+        "address": "3 Manor Road, Ruislip, Middlesex",
         "start_date": "2025-08-01", "end_date": "2025-08-31",
         "balance": 14500.00, "payments_in": 20500.0, "payments_out": 18200.0,
     },
     {
         "account_owner": "GoodAI Consulting", "bank_name": "Big Bank UK", "account_number": "40123456",
+        "address": "3 Manor Road, Ruislip, Middlesex",
         "start_date": "2025-09-01", "end_date": "2025-09-30",
         "balance": 16210.60, "payments_in": 21300.0, "payments_out": 19100.0,
     },
     {
         "account_owner": "GoodAI Consulting", "bank_name": "Big Bank UK", "account_number": "40123456",
+        "address": "3 Manor Road, Ruislip, Middlesex",
         "start_date": "2025-10-01", "end_date": "2025-10-31",
         "balance": 17890.25, "payments_in": 22100.0, "payments_out": 19700.0,
     },
@@ -180,14 +186,20 @@ GOODMANS_APPLICATION = {
     "applicant_name": "Steven Goodman",
     "year_of_birth": "1975",
     "company_name": "Goodman's Consulting Limited",
-    "company_address": "14 Oak Avenue, Uxbridge",
+    "company_address": "3 Manor Road, Ruislip",
     "loan_type": "unsecured-business-loans",
     "loan_purpose": "equipment purchase",
     "loan_amount": 15000,
     "loan_term": 24,
     "companies_house_registered": True,
     "industry": "Management consultancy",
-    "trading_start_date": "2010-03-01",
+    # Matches the real company's actual Companies House incorporation date
+    # (11 July 2012) -- a live companies_house run against the original
+    # "2010-03-01" surfaced that date as chronologically impossible (the
+    # applicant claiming to trade under this legal entity before it existed)
+    # and returned found=false, same class of issue GOODAI_ANNUAL_ACCOUNTS_HAPPY's
+    # own comment above documents for that scenario.
+    "trading_start_date": "2012-07-11",
     "annual_turnover": 180000,
     "annual_profit": 15000,
     "income_decrease_expected": True,
@@ -204,7 +216,7 @@ GOODMANS_APPLICATION = {
     "director_percentage_control": 100.0,
     "director_mobile_phone": "+44 7700 900456",
     "director_residential_status": "Owner With Mortgage",
-    "director_residential_address": "14 Oak Avenue, Uxbridge",
+    "director_residential_address": "3 Manor Road, Ruislip",
 }
 
 # Scenario 5: accounting_year (2016-12-31) predates GOODMANS_INSOLVENCY_DATE
@@ -213,7 +225,7 @@ GOODMANS_APPLICATION = {
 GOODMANS_ANNUAL_ACCOUNTS = {
     "company_name": "Goodman's Consulting Limited",
     "director": "Steven Goodman",
-    "registered_address": "14 Oak Avenue, Uxbridge",
+    "registered_address": "3 Manor Road, Ruislip",
     "registration_number": "08139267",
     "accounting_year": "2016-12-31",
     "turnover_current_year": 180000,
@@ -235,16 +247,19 @@ GOODMANS_ANNUAL_ACCOUNTS = {
 GOODMANS_BANK_STATEMENTS = [
     {
         "account_owner": "Goodman's Consulting Limited", "bank_name": "Big Bank UK", "account_number": "50987654",
+        "address": "3 Manor Road, Ruislip",
         "start_date": "2017-09-01", "end_date": "2017-09-30",
         "balance": 3210.40, "payments_in": 15200.0, "payments_out": 16100.0,
     },
     {
         "account_owner": "Goodman's Consulting Limited", "bank_name": "Big Bank UK", "account_number": "50987654",
+        "address": "3 Manor Road, Ruislip",
         "start_date": "2017-10-01", "end_date": "2017-10-31",
         "balance": 2450.10, "payments_in": 14800.0, "payments_out": 15560.0,
     },
     {
         "account_owner": "Goodman's Consulting Limited", "bank_name": "Big Bank UK", "account_number": "50987654",
+        "address": "3 Manor Road, Ruislip",
         "start_date": "2017-11-01", "end_date": "2017-11-30",
         "balance": 1875.65, "payments_in": 13900.0, "payments_out": 14475.0,
     },
