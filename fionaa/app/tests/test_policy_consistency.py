@@ -30,13 +30,16 @@ async def test_findings_are_enforced(kind):
     response = valid_response()
     response["assessments"][0]["automatedReasoningPolicy"]["findings"] = [{kind: {}}]
     instance = checker(response)
-    result = await instance.check("secured-business-loans", "policy", {"loan_amount": 40000}, {"eligible": "eligible"})
+    result = await instance.check("secured-business-loans", "policy", {"loanAmount": 40000},
+                                   "isSubstantivelyEligible is true.")
     assert result["passed"] is (kind != "invalid")
     assert result["status"] == {"valid": "valid", "invalid": "invalid"}.get(kind, "inconclusive")
     request = instance.client.apply_guardrail.call_args.kwargs
     assert request["source"] == "OUTPUT"
-    assert request["content"][0]["text"]["qualifiers"] == ["query"]
-    assert request["content"][1]["text"]["qualifiers"] == ["guard_content"]
+    # Every block is guard_content, including the facts -- a separate
+    # query-qualified block wasn't reliably used as translation premises.
+    assert all(block["text"]["qualifiers"] == ["guard_content"] for block in request["content"])
+    assert request["content"][-1]["text"]["text"] == "isSubstantivelyEligible is true."
 
 
 @pytest.mark.asyncio
@@ -51,7 +54,7 @@ async def test_no_partial_or_silent_success(change):
         response["assessments"][0]["automatedReasoningPolicy"]["findings"].append({"invalid": {}})
     else:
         response["action"] = "GUARDRAIL_INTERVENED"
-    assert not (await checker(response).check("secured-business-loans", "policy", {}, {}))["passed"]
+    assert not (await checker(response).check("secured-business-loans", "policy", {}, ""))["passed"]
 
 
 @pytest.mark.asyncio
@@ -64,7 +67,7 @@ async def test_configuration_fails_closed_without_aws(change):
         instance.bindings["secured-business-loans"]["guardrail_version"] = "DRAFT"
     else:
         instance.bindings["secured-business-loans"]["policy_sha256"] = "old"
-    assert not (await instance.check("secured-business-loans", "policy", {}, {}))["passed"]
+    assert not (await instance.check("secured-business-loans", "policy", {}, ""))["passed"]
     instance.client.apply_guardrail.assert_not_called()
 
 
@@ -73,7 +76,7 @@ async def test_service_failure_is_not_an_approval():
     instance = checker(valid_response())
     instance.client.apply_guardrail.side_effect = ClientError(
         {"Error": {"Code": "AccessDeniedException", "Message": "sensitive"}}, "ApplyGuardrail")
-    result = await instance.check("secured-business-loans", "policy", {}, {})
+    result = await instance.check("secured-business-loans", "policy", {}, "")
     assert result["status"] == "validation_error"
     assert "sensitive" not in str(result)
 
@@ -96,8 +99,8 @@ class SequencedFakeChecker:
         self.results = list(results)
         self.claims_seen = []
 
-    async def check(self, loan_type, policy_text, facts, claim):
-        self.claims_seen.append(claim)
+    async def check(self, loan_type, policy_text, facts, assertion):
+        self.claims_seen.append(assertion)
         return self.results[len(self.claims_seen) - 1]
 
 
@@ -122,17 +125,21 @@ def _decision_state(**overrides):
                                     "not_configured", "policy_version_mismatch", "not_validated"])
 @pytest.mark.parametrize("outcome", ["approved", "rejected", "referred"])
 async def test_annotations_never_determine_the_human_outcome(status, outcome):
+    """Candidate order is always [eligibility, documentation, approval] --
+    see _deterministic_claims. documentation is always assertable, so it's
+    always index 1; approval is omitted entirely (not "not_checked", just
+    never sent) when outcome == "referred", since a referral can be driven
+    by non-policy findings with no clean approvalMeetsCoveredPolicy boolean
+    to assert."""
     store = FakeStore()
     checker = SequencedFakeChecker([
         {"status": "valid", "policy_sha256": "digest", "findings": [{"valid": {}}]},
         {"status": status, "policy_sha256": "digest", "findings": [], "error_type": "Example"},
         {"status": "valid", "policy_sha256": "digest", "findings": [{"valid": {}}]},
-        {"status": "valid", "policy_sha256": "digest", "findings": [{"valid": {}}]},
-        {"status": "valid", "policy_sha256": "digest", "findings": [{"valid": {}}]},
     ])
     runtime = FakeRuntime(g.AgentContext(store, FakePolicyDocs(), [], checker))
     state = _decision_state(
-        policy_check={"eligible": "eligible", "clause_findings": ["Loan amount is in range."]},
+        policy_check={"eligible": "eligible", "documentation_gaps": ["Bank statements missing."]},
         proposed_decision={"outcome": outcome, "reason": "clean", "rationale": "no issues"},
     )
     original = copy.deepcopy(state)
@@ -146,11 +153,12 @@ async def test_annotations_never_determine_the_human_outcome(status, outcome):
     annotation = validation["claims"][1]
     expected = status if status in {"valid", "invalid", "inconclusive"} else "not_checked"
     assert annotation["status"] == expected
-    assert annotation["source_path"] == "/policy_check/clause_findings/0"
-    assert annotation["claim"]["summary"] == "Loan amount is in range."
+    assert annotation["source_path"] == "/policy_check/documentation_gaps"
+    assert "hasRequiredDocuments" in annotation["claim"]["summary"]
     if expected == "not_checked":
         assert annotation["check_status"] == status
-    assert sum(validation["counts"].values()) == 5
+    expected_claim_count = 2 if outcome == "referred" else 3
+    assert sum(validation["counts"].values()) == expected_claim_count
     assert validation["counts"][expected] >= 1
     assert report["validation"] == validation
     assert store.data["decision/result.json"] == report
@@ -161,7 +169,7 @@ async def test_all_claims_link_to_report_fields_and_keep_evidence():
     store = FakeStore()
     checker = SequencedFakeChecker([
         {"status": "valid", "policy_sha256": "digest", "findings": [{"valid": {}}]}
-        for _ in range(8)
+        for _ in range(3)
     ])
     runtime = FakeRuntime(g.AgentContext(store, FakePolicyDocs(), [], checker))
     policy = {"eligible": "eligible", "clause_findings": ["Amount fits.", "Term fits."],
@@ -170,12 +178,23 @@ async def test_all_claims_link_to_report_fields_and_keep_evidence():
     state["proposed_decision"]["policy_check"] = policy
     report = (await g.validate_final_decision(state, runtime))["final_decision"]
     validation = report["validation"]
-    assert len(validation["claims"]) == 8
+    # One deterministic assertion per source_path: eligible/documentation_gaps
+    # (policy_check) and outcome (ai_recommendation) -- see
+    # _deterministic_claims, not one per LLM-authored clause_finding string.
+    expected_variables = {
+        "/policy_check/eligible": "isSubstantivelyEligible",
+        "/policy_check/documentation_gaps": "hasRequiredDocuments",
+        "/ai_recommendation/outcome": "approvalMeetsCoveredPolicy",
+    }
+    assert len(validation["claims"]) == len(expected_variables)
     for item in validation["claims"]:
+        assert item["source_path"] in expected_variables
+        # source_path still resolves to a real field in the report.
         value = report
         for part in item["source_path"].strip("/").split("/"):
             value = value[int(part)] if isinstance(value, list) else value[part]
-        assert value in item["claim"]["summary"]
+        assert value is not None
+        assert expected_variables[item["source_path"]] in item["claim"]["summary"]
         assert item["findings"] == [{"valid": {}}]
         assert "passed" not in item
     assert validation["evidence"]["annual_accounts"] == state["annual_accounts"]

@@ -43,6 +43,37 @@ POLICY_CHECK_PROMPT = """You are a loan assessor.
     eligibility rejection — insufficient or stale bank statements are a documentation gap to flag,
     the same as any other missing supporting document.
 
+    ## Accounts/management information
+    You are given ANNUAL ACCOUNTS in the human message below (filed accounts documents; may be
+    empty if none were supplied). If at least one is present, treat "Accounts/management
+    information" as satisfied — do not report it as a documentation gap just because it wasn't
+    restated on the application form itself.
+
+    ## UK-based requirement
+    You are given COMPANIES HOUSE FINDINGS in the human message below — an identity check carried
+    out earlier in this workflow, already reconciling the applicant-supplied address against the
+    Companies House registered address (see general.md's UK-based clause for why a confirmed
+    match is itself proof of both halves: registration and UK address). If `found` is true, treat
+    UK-based as satisfied on that basis alone — do not mark it inconclusive for lack of a
+    separately-stated UK address, and do not re-derive the address match yourself.
+
+    ## Proof of address
+    You are given BANK STATEMENTS and ANNUAL ACCOUNTS in the human message below, each of which
+    may carry its own address (a bank statement's printed address, an annual accounts document's
+    registered address). If at least one of each is present and their addresses agree (allowing
+    for loose wording — same building/street, differently formatted), treat that mutual
+    reconciliation as sufficient proof of address; state which two sources you compared. If only
+    one source has an address, or the addresses disagree, treat proof of address as a
+    documentation gap instead — do not report it as satisfied on a single, uncorroborated source.
+
+    ## Business structure
+    General.md requires the business be a Limited Company or partnership, not a sole trader. A
+    company name ending in "Ltd"/"Limited", "LLP", or "plc" is a formal Companies House naming
+    convention, not a stylistic choice — a registered name carrying one of these suffixes is
+    sufficient evidence on its own that the business is the corresponding structure (limited
+    company, limited liability partnership, or public limited company respectively) — treat it as
+    satisfying this clause without needing a separate, explicitly-stated "legal structure" field.
+
     ## Output format
     Your response is schema-enforced: `eligible` (eligible / ineligible / inconclusive — the
     overall verdict against the policy's substantive criteria only), `clause_findings` (one entry
