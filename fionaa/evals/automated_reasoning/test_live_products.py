@@ -17,7 +17,7 @@ def cases(product):
     rows = []
 
     def add(name, facts, text, valid):
-        rows.append((name, facts, {"summary": text}, "valid" if valid else "invalid"))
+        rows.append((name, facts, text, "valid" if valid else "invalid"))
 
     for age in (89, 90):
         add(f"statement_age_{age}", {"bankStatementsMonthsCount": 3, "mostRecentStatementAgeDays": age},
@@ -64,7 +64,7 @@ def cases(product):
             "All required documentation has been supplied.", False)
     # A real approval claim must not be validated with missing required documents.
     rows.append(("approval_missing_documents", {"hasRequiredDocuments": False},
-                 {"outcome": "approved", "reason": "This approval meets all covered policy requirements."}, "invalid"))
+                 "approvalMeetsCoveredPolicy is true.", "invalid"))
     return rows
 
 

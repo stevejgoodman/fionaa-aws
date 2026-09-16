@@ -3,22 +3,40 @@ from __future__ import annotations
 
 import asyncio
 from collections import Counter
+from datetime import date
 
 from fionaa.policy_loader import load_policy_text
 from fionaa.policy_consistency import PolicyConsistencyChecker
+from fionaa.ar_facts import build_derived_facts
+from fionaa.ar_claims import (
+    approval_assertion,
+    documentation_assertion,
+    eligibility_assertion,
+    leaf_facts_for_loan_type,
+)
 from fionaa.domain.applications import LoanType
 from langgraph.runtime import Runtime
 from fionaa.workflow.state import ApplicationState, AgentContext
 from fionaa.workflow.decision import human_review_report
 
 
-def _facts(state: ApplicationState) -> dict:
-    # Keep self-reported inputs distinguishable from external findings.
+def _facts(state: ApplicationState, today: date) -> dict:
+    application = state["application"]
+    annual_accounts = state.get("annual_accounts", [])
+    bank_statements = state.get("bank_statements", [])
+    companies_house = state.get("companies_house")
     return {
-        "application_self_reported": state["application"],
-        "annual_accounts": state.get("annual_accounts", []),
-        "bank_statements": state.get("bank_statements", []),
-        "companies_house_findings": state.get("companies_house"),
+        # Precomputed in the Automated Reasoning policy's own variable
+        # names (loanAmount, isUKBased, tradingHistoryMonths, etc.) -- AR's
+        # NL-to-logic translator was coming back "inconclusive" on most
+        # claims when only given raw, differently-named self-reported JSON
+        # to derive these from itself. See ar_facts.py.
+        "derived_facts": build_derived_facts(application, annual_accounts, bank_statements, companies_house, today),
+        # Keep self-reported inputs distinguishable from external findings.
+        "application_self_reported": application,
+        "annual_accounts": annual_accounts,
+        "bank_statements": bank_statements,
+        "companies_house_findings": companies_house,
         "financial_assessment": state.get("financial_assessment"),
     }
 
@@ -31,25 +49,18 @@ def _claim(source: str, field: str, text: str) -> dict:
     }
 
 
-def _policy_check_claims(policy_check: dict) -> list[dict]:
-    claims = [_claim("policy_check", "eligible",
-                     "This application's overall eligibility under "
-                     f"the covered policy is: {policy_check['eligible']}.")]
-    for field in ("clause_findings", "documentation_gaps"):
-        claims.extend(_claim("policy_check", f"{field}/{index}", value)
-                      for index, value in enumerate(policy_check.get(field, [])))
-    if policy_check.get("summary"):
-        claims.append(_claim("policy_check", "summary", policy_check["summary"]))
-    return claims
-
-
-def _final_decision_claims(proposed: dict) -> list[dict]:
-    return [
-        _claim("ai_recommendation", "outcome",
-               f"The recommended outcome on this application is: {proposed['outcome']}."),
-        _claim("ai_recommendation", "reason", proposed["reason"]),
-        _claim("ai_recommendation", "rationale", proposed["rationale"]),
+def _deterministic_claims(policy_check: dict, proposed: dict) -> list[dict]:
+    """Code-generated, deterministic AR assertions -- never LLM prose. Each
+    entry pairs a source_path (a JSON pointer into decision/result.json, for
+    the dashboard) with one of ar_claims.py's templated sentences. A
+    candidate is omitted (None) when its source field has no clean boolean
+    to assert -- see each ar_claims.py function's docstring."""
+    candidates = [
+        ("policy_check", "eligible", eligibility_assertion(policy_check)),
+        ("policy_check", "documentation_gaps", documentation_assertion(policy_check)),
+        ("ai_recommendation", "outcome", approval_assertion(proposed)),
     ]
+    return [_claim(source, field, text) for source, field, text in candidates if text is not None]
 
 
 async def _validate_decision(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict:
@@ -57,17 +68,17 @@ async def _validate_decision(state: ApplicationState, runtime: Runtime[AgentCont
 
     source_path is a JSON pointer into decision/result.json. Evidence is the
     shared input snapshot, not a claim that the checker used every source.
-    Free-text fields can contain multiple assertions; raw findings retain the
-    checker's details for those assertions.
     """
-    claims = (_policy_check_claims(state["policy_check"])
-              + _final_decision_claims(state["proposed_decision"]))
+    claims = _deterministic_claims(state["policy_check"], state["proposed_decision"])
     loan_type = LoanType(state["application"]["loan_type"])
     checker = runtime.context.policy_checker or PolicyConsistencyChecker.from_environment()
     policy = load_policy_text(loan_type)
-    facts = _facts(state)
+    # Computed fresh per invocation, not frozen -- see check_against_policy,
+    # which does the same for the same reason.
+    facts = _facts(state, date.today())
+    leaf_facts = leaf_facts_for_loan_type(loan_type, facts["derived_facts"])
     results = await asyncio.gather(*(
-        checker.check(loan_type.value, policy, facts, item["claim"]) for item in claims
+        checker.check(loan_type.value, policy, leaf_facts, item["claim"]["summary"]) for item in claims
     ))
     annotations = []
     for claim, result in zip(claims, results):

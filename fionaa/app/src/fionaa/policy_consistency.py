@@ -17,6 +17,8 @@ import boto3
 from botocore.config import Config
 from botocore.exceptions import BotoCoreError, ClientError
 
+from fionaa.ar_claims import render_fact
+
 
 def policy_digest(text: str) -> str:
     return hashlib.sha256(text.encode()).hexdigest()
@@ -35,7 +37,7 @@ class PolicyConsistencyChecker:
             bindings = {}
         return cls(bindings if isinstance(bindings, dict) else {})
 
-    async def check(self, loan_type: str, policy_text: str, facts: dict, claim: dict) -> dict:
+    async def check(self, loan_type: str, policy_text: str, facts: dict, assertion: str) -> dict:
         digest = policy_digest(policy_text)
         binding = self.bindings.get(loan_type, {})
         result = {"passed": False, "policy_sha256": digest, "findings": []}
@@ -56,19 +58,21 @@ class PolicyConsistencyChecker:
                     config=Config(connect_timeout=5, read_timeout=60,
                                   retries={"mode": "standard", "total_max_attempts": 2}),
                 )
+            # Every block is guard_content, including the facts -- a
+            # separate query-qualified block was found not to be reliably
+            # used as translation premises by Bedrock's NL-to-logic
+            # translator, unlike guard_content (see ar_claims.py).
+            content = [
+                {"text": {"text": render_fact(name, value), "qualifiers": ["guard_content"]}}
+                for name, value in sorted(facts.items())
+            ]
+            content.append({"text": {"text": assertion, "qualifiers": ["guard_content"]}})
             return self.client.apply_guardrail(
                 guardrailIdentifier=identifier,
                 guardrailVersion=str(version),
                 source="OUTPUT",
                 outputScope="FULL",
-                content=[
-                    {"text": {"text": "Application evidence; absent values are unknown:\n"
-                              + json.dumps(facts, allow_nan=False, default=str),
-                              "qualifiers": ["query"]}},
-                    {"text": {"text": "Assessment to validate:\n"
-                              + json.dumps(claim, allow_nan=False, default=str),
-                              "qualifiers": ["guard_content"]}},
-                ],
+                content=content,
             )
 
         try:

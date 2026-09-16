@@ -208,6 +208,9 @@ async def test_check_against_policy_persists_and_returns_result(monkeypatch):
             "type": "text",
             "text": (
                 f"\n\nAPPLICATION:\n{json.dumps(application)}\n\n"
+                f"COMPANIES HOUSE FINDINGS:\n{json.dumps(None)}\n\n"
+                f"ANNUAL ACCOUNTS:\n[]\n\n"
+                f"BANK STATEMENTS:\n[]\n\n"
                 f"BANK STATEMENT END DATES:\n[]\n\n"
                 f"TODAY'S DATE: {date.today().isoformat()}"
             ),
