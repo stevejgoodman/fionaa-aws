@@ -42,7 +42,9 @@ from redaction import (  # noqa: E402  (needs sys.path insert above first)
     redact_annual_accounts,
     redact_application,
     redact_bank_statements,
+    redact_prose_values,
     redact_tool_calls,
+    sensitive_prose_values,
 )
 
 
@@ -65,7 +67,7 @@ ARTIFACT_BY_NODE = {
     "synthesize_decision": "decision/result.json",
 }
 
-def build_steps(history, store) -> list[dict]:
+def build_steps(history, store, sensitive_values: list[str]) -> list[dict]:
     """Turns a chronological list of LangGraph StateSnapshots into one entry
     per node that actually ran.
 
@@ -78,7 +80,13 @@ def build_steps(history, store) -> list[dict]:
 
     Node output text/tool_calls are backfilled from the node's own S3
     evidence artifact where one exists (policy_check/result.json etc) --
-    richer than the bare state value, which lacks tool_calls.
+    richer than the bare state value, which lacks tool_calls. That evidence
+    is LLM-authored prose (clause_findings, discrepancies, etc) which can
+    quote raw address/birth-year detail verbatim -- see
+    redaction.redact_prose_values -- so sensitive_values (computed once by
+    the caller from the run's own application/annual_accounts/
+    bank_statements) is scrubbed out of it here, on top of the
+    redact_application/etc. structured-field redaction below.
     """
     from datetime import datetime
 
@@ -101,6 +109,12 @@ def build_steps(history, store) -> list[dict]:
                 state_value["annual_accounts"] = redact_annual_accounts(state_value["annual_accounts"])
             if "bank_statements" in state_value:
                 state_value["bank_statements"] = redact_bank_statements(state_value["bank_statements"])
+        # Every subsequent node's state_value can carry LLM-authored prose
+        # that quotes address/birth-year detail verbatim (policy_check's
+        # clause_findings, companies_house's summary, financial_assessment's
+        # discrepancies, web_search's narrative) -- redact_application/etc.
+        # above only fix the structured load_application fields themselves.
+        state_value = redact_prose_values(state_value, sensitive_values)
 
         t0, t1 = parse(history[i].created_at), parse(history[i + 1].created_at)
         duration_ms = int((t1 - t0).total_seconds() * 1000) if t0 and t1 else None
@@ -116,6 +130,8 @@ def build_steps(history, store) -> list[dict]:
                 # (redacting already-redacted content changes nothing).
                 if evidence and "tool_calls" in evidence:
                     evidence["tool_calls"] = redact_tool_calls(evidence["tool_calls"])
+                if evidence:
+                    evidence = redact_prose_values(evidence, sensitive_values)
             except Exception as exc:  # pragma: no cover -- best-effort enrichment
                 evidence = {"_fetch_error": str(exc)}
 
@@ -155,9 +171,35 @@ async def _fetch(args) -> dict:
         return {"found": False}
 
     store = st.ApplicationStore(identity, session)
-    application = redact_application(store.get_json("input/application.json"))
-    steps = build_steps(history, store)
     final_values = history[-1].values
+    # Computed once from the run's own final state (application/
+    # annual_accounts/bank_statements persist unchanged in state once
+    # load_application sets them), then scrubbed out of every LLM-authored
+    # prose field below -- see redaction.sensitive_prose_values.
+    sensitive_values = sensitive_prose_values(
+        final_values.get("application"), final_values.get("annual_accounts"),
+        final_values.get("bank_statements"),
+    )
+    # redact_application leaves year_of_birth alone by design (see its
+    # docstring -- it's not sensitive as a standalone structured field), but
+    # the user-facing header/detail panel here is exactly the kind of
+    # display this run asked to have birth-year redacted from, so also
+    # apply the prose scrub (which does catch it, via sensitive_values).
+    application = redact_prose_values(redact_application(store.get_json("input/application.json")), sensitive_values)
+    steps = build_steps(history, store, sensitive_values)
+    final_decision = redact_prose_values(final_values.get("final_decision"), sensitive_values)
+    # validate_final_decision's own evidence blob (decision/result.json's
+    # validation.evidence) is the *raw* application/annual_accounts/
+    # bank_statements -- see workflow/validation.py's _facts() -- not the
+    # structurally-redacted copy build_steps already applied to
+    # load_application's state_value above. redact_prose_values' substring
+    # scrub catches address text inside it, but not e.g. a raw bank account
+    # number, so re-apply the structured redactors here too.
+    evidence = (final_decision or {}).get("validation", {}).get("evidence")
+    if evidence:
+        evidence["application_self_reported"] = redact_application(evidence.get("application_self_reported"))
+        evidence["annual_accounts"] = redact_annual_accounts(evidence.get("annual_accounts"))
+        evidence["bank_statements"] = redact_bank_statements(evidence.get("bank_statements"))
 
     return {
         "found": True,
@@ -166,7 +208,7 @@ async def _fetch(args) -> dict:
         "application_id": args.application_id,
         "application": application,
         "steps": steps,
-        "final_decision": final_values.get("final_decision"),
+        "final_decision": final_decision,
         "companies_house_found": final_values.get("companies_house_found"),
         "step_count": len(history),
     }

@@ -330,6 +330,7 @@
       <div class="meta-row">
         <div class="meta-item" id="meta-loan-type">Loan type: <b>&mdash;</b></div>
         <div class="meta-item" id="meta-amount">Requested: <b class="mono">&mdash;</b></div>
+        <div class="meta-item" id="meta-term">Term: <b class="mono">&mdash;</b></div>
         <div class="meta-item" id="meta-purpose">Purpose: <b>&mdash;</b></div>
       </div>
     </div>
@@ -564,7 +565,8 @@
     document.getElementById("app-id").textContent = RUN.application_id;
     document.getElementById("company-name").textContent = app.company_name || "Unknown applicant";
     document.getElementById("meta-loan-type").innerHTML = `Loan type: <b>${(app.loan_type||"—").replace(/-/g," ")}</b>`;
-    document.getElementById("meta-amount").innerHTML = `Requested: <b class="mono">${fmtMoney(app.requested_amount)}</b>`;
+    document.getElementById("meta-amount").innerHTML = `Requested: <b class="mono">${fmtMoney(app.loan_amount)}</b>`;
+    document.getElementById("meta-term").innerHTML = `Term: <b class="mono">${app.loan_term != null ? app.loan_term + " months" : "—"}</b>`;
     document.getElementById("meta-purpose").innerHTML = `Purpose: <b>${app.loan_purpose || "—"}</b>`;
   }
 
@@ -677,7 +679,9 @@
       const rows = [
         ["Company", app.company_name], ["Company number", app.company_number],
         ["Applicant", app.applicant_name], ["Loan type", app.loan_type],
-        ["Requested amount", fmtMoney(app.requested_amount)], ["Purpose", app.loan_purpose],
+        ["Requested amount", fmtMoney(app.loan_amount)],
+        ["Term", app.loan_term != null ? `${app.loan_term} months` : null],
+        ["Purpose", app.loan_purpose],
         ["Annual accounts", `${(step?.state_value?.annual_accounts||[]).length} document(s)`],
         ["Bank statements", `${(step?.state_value?.bank_statements||[]).length} document(s)`],
       ];
@@ -788,7 +792,7 @@
     const app = RUN.application || {};
     verdictEl.innerHTML = `
       <div class="verdict-seal ${cls}">${label}</div>
-      <div class="verdict-meta">${app.company_name || ""} &nbsp;·&nbsp; ${fmtMoney(app.requested_amount)} ${(app.loan_type||"").replace(/-/g," ")} &nbsp;·&nbsp; <span class="mono">${RUN.application_id}</span></div>
+      <div class="verdict-meta">${app.company_name || ""} &nbsp;·&nbsp; ${fmtMoney(app.loan_amount)}${app.loan_term != null ? ` / ${app.loan_term}mo` : ""} ${(app.loan_type||"").replace(/-/g," ")} &nbsp;·&nbsp; <span class="mono">${RUN.application_id}</span></div>
       <div class="verdict-reason"><b>AI recommendation</b>${escapeHtml(recommendation.outcome || "Unavailable")}</div>
       <div class="verdict-reason"><b>Reason</b>${renderProse(recommendation.reason)}</div>
       <div class="verdict-reason"><b>Rationale</b>${renderProse(recommendation.rationale)}</div>
