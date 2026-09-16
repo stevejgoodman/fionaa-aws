@@ -5,6 +5,7 @@ import json
 from typing import Any
 from langgraph.runtime import Runtime
 from langchain.agents import create_agent
+from langchain.agents.middleware import ToolCallLimitMiddleware
 from langchain.messages import HumanMessage, ToolMessage
 from fionaa.model.load import load_model
 from fionaa.redaction import redact_tool_calls
@@ -12,15 +13,47 @@ from fionaa.prompts import WEB_SEARCH_PROMPT
 from fionaa.workflow.state import ApplicationState, AgentContext
 from .common import tools_for
 
+WEBSEARCH_TOOL_NAME = "websearch-target___WebSearch"
+
+# Caps runaway searching for a thin-web-presence applicant (e.g. a common
+# name with no matching online profile) from turning into dozens of
+# ever-broader retries -- exit_behavior="continue" blocks further
+# WebSearch calls once the limit is hit but lets the model still produce a
+# final summary from whatever it already found, rather than erroring the
+# node out entirely.
+WEBSEARCH_RUN_LIMIT = 20
+
 
 async def search_web(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict[str, Any]:
-    company_name = state["application"]["company_name"]
+    application = state["application"]
+    company_name = application["company_name"]
     companies_house = state.get("companies_house")
+
+    # Application-form fields are self-reported and may differ from (or add
+    # detail missing from) Companies House's own records -- e.g. a director's
+    # current residential address vs. a company's registered office, or a
+    # trading name Companies House doesn't know about. Included as additional
+    # disambiguating context, not a replacement for the Companies House
+    # findings above. Pulled via .get() since not every stored application
+    # populates every optional field.
+    application_context = {
+        "applicant_name": application.get("applicant_name"),
+        "company_name": company_name,
+        "company_address": application.get("company_address"),
+        "director_residential_address": application.get("director_residential_address"),
+    }
 
     agent = create_agent(
         model=runtime.context.model if runtime.context.model is not None else load_model(),
-        tools=tools_for(runtime.context.tools, "websearch-target___WebSearch"),
+        tools=tools_for(runtime.context.tools, WEBSEARCH_TOOL_NAME),
         system_prompt=WEB_SEARCH_PROMPT,
+        middleware=[
+            ToolCallLimitMiddleware(
+                tool_name=WEBSEARCH_TOOL_NAME,
+                run_limit=WEBSEARCH_RUN_LIMIT,
+                exit_behavior="continue",
+            )
+        ],
     )
 
     response = await agent.ainvoke(
@@ -28,6 +61,7 @@ async def search_web(state: ApplicationState, runtime: Runtime[AgentContext]) ->
             "messages": [
                 HumanMessage(
                     content=f"Company: {company_name}\n\n"
+                    f"APPLICATION FORM DETAILS:\n{json.dumps(application_context)}\n\n"
                     f"COMPANIES HOUSE FINDINGS:\n{json.dumps(companies_house)}"
                 )
             ]
