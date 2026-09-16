@@ -34,6 +34,14 @@ def load_goldens(prefix: str | None = None) -> list[Golden]:
     fields, since DeepEval's built-in fields (expected_output, tools_called,
     etc.) get set on the LLMTestCase once a node has actually run -- a
     Golden only holds what's known ahead of time.
+
+    `application` is an optional top-level record field (only web-search-*
+    scenarios currently set it) carrying applicant_name/company_name/
+    company_address/director_residential_address -- the same self-reported
+    application-form fields graph.py's search_web (workflow/web_search.py)
+    passes alongside COMPANIES HOUSE FINDINGS. Rides along the same way, so
+    test_web_search.py can build the real APPLICATION FORM DETAILS context
+    rather than testing search_web with only a bare company name.
     """
     goldens = []
     with DATASET_PATH.open() as f:
@@ -52,6 +60,7 @@ def load_goldens(prefix: str | None = None) -> list[Golden]:
                         "scenario_id": record["scenario_id"],
                         "assertions": record.get("assertions") or [],
                         "expected_trajectory": record.get("expected_trajectory") or [],
+                        "application": record.get("application"),
                     },
                 )
             )

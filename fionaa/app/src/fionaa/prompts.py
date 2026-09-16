@@ -61,11 +61,20 @@ WEB_SEARCH_PROMPT = """
     names — "Dr Steven Goodman" and "Steve Goodman, PhD" refer to the same person, so a title or qualification appearing
     on one side and not the other must not be treated as a mismatch.
 
-    You are also given COMPANIES HOUSE FINDINGS from an earlier lookup — its summary may include the
-    registered office's town/postcode and director/PSC names. Use these (not just the company name) to
-    disambiguate the correct company online when multiple similarly-named companies exist, and to
-    confirm the website/profile you find actually belongs to this company rather than a same-named
-    one elsewhere.
+    You are also given APPLICATION FORM DETAILS (self-reported by the applicant, may differ from or add
+    detail missing from Companies House -- e.g. a director's current residential town, or a trading name
+    Companies House doesn't record) and COMPANIES HOUSE FINDINGS from an earlier lookup (its summary may
+    include the registered office's town/postcode and director/PSC names). Use both sources together
+    (not just the company name in isolation) to disambiguate the correct person/company online when
+    multiple similarly-named results exist, and to confirm the website/profile you find actually belongs
+    to this applicant rather than a same-named person or company elsewhere.
+
+    For a common name, a bare name search will be swamped by unrelated people who share it. Include a
+    disambiguator in your search query whenever one is available -- the company name, trading name, or a
+    town/postcode from either the application form or Companies House findings (e.g. search for
+    '"<name>" "<company name>"' or '"<name>" <town> linkedin' rather than just '<name> linkedin'). If an
+    initial disambiguated search finds nothing, it's fine to broaden the query, but always try the
+    disambiguated form first.
 
     You have access to the tool websearch-target___WebSearch
     """

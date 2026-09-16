@@ -10,6 +10,7 @@ import json
 from datetime import date
 
 import pytest
+from langchain.agents.middleware import ToolCallLimitMiddleware
 from langchain.messages import ToolMessage
 from langgraph.checkpoint.memory import MemorySaver
 
@@ -74,6 +75,7 @@ ANNUAL_ACCOUNTS_2023 = {
 
 BANK_STATEMENT_JAN = {
     "account_owner": "Acme Ltd", "bank_name": "Big Bank", "account_number": "12345678",
+    "address": "1 High St, London",
     "start_date": "2024-01-01", "end_date": "2024-01-31",
     "balance": 12345.67, "payments_in": 5000.0, "payments_out": 3200.0,
 }
@@ -695,7 +697,13 @@ async def test_search_web_builds_query_from_company_name(monkeypatch):
         "confidence": "high",
         "summary": "Registered office: 1 High St, London. Director: Jane Smith.",
     }
-    state = {"application": {"company_name": "Acme Ltd"}, "companies_house": companies_house}
+    application = {
+        "company_name": "Acme Ltd",
+        "applicant_name": "Jane Smith",
+        "company_address": "1 High St, London",
+        "director_residential_address": "2 Elm Rd, London",
+    }
+    state = {"application": application, "companies_house": companies_house}
     runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=fake_tools))
     fake_result = "no adverse findings"
     calls = []
@@ -712,11 +720,41 @@ async def test_search_web_builds_query_from_company_name(monkeypatch):
     # here; see test_search_web_persists_tool_calls_as_evidence below.
     assert store.data["web_search/result.json"] == {"result": fake_result, "tool_calls": [], "grounded": False}
     assert calls[0]["tools"] == fake_tools
+    application_context = {
+        "applicant_name": "Jane Smith",
+        "company_name": "Acme Ltd",
+        "company_address": "1 High St, London",
+        "director_residential_address": "2 Elm Rd, London",
+    }
     expected_content = (
         f"Company: Acme Ltd\n\n"
+        f"APPLICATION FORM DETAILS:\n{json.dumps(application_context)}\n\n"
         f"COMPANIES HOUSE FINDINGS:\n{json.dumps(companies_house)}"
     )
     assert calls[1]["message_content"] == expected_content
+
+
+@pytest.mark.asyncio
+async def test_search_web_caps_tool_calls_with_limit_middleware(monkeypatch):
+    """A thin-web-presence applicant (common name, no matching profile) can
+    otherwise send the model into ever-broader retries -- ToolCallLimitMiddleware
+    caps that at web_search.WEBSEARCH_RUN_LIMIT calls to websearch-target___WebSearch
+    specifically, per invocation."""
+    store = FakeStore()
+    state = {"application": {"company_name": "Acme Ltd"}, "companies_house": None}
+    runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
+    calls = []
+
+    for stage in (policy_stage, company_stage, financial_stage, web_stage, decision_stage):
+        monkeypatch.setattr(stage, "create_agent", make_fake_create_agent("no adverse findings", calls))
+
+    await g.search_web(state, runtime)
+
+    [limiter] = calls[0]["middleware"]
+    assert isinstance(limiter, ToolCallLimitMiddleware)
+    assert limiter.tool_name == web_stage.WEBSEARCH_TOOL_NAME
+    assert limiter.run_limit == web_stage.WEBSEARCH_RUN_LIMIT
+    assert limiter.exit_behavior == "continue"
 
 
 @pytest.mark.asyncio

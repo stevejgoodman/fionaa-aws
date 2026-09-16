@@ -5,7 +5,10 @@ Same shape as test_companies_house.py: search_web (graph.py:312) only reads
 response["messages"][-1].content, discarding the ToolMessages in
 response["messages"] -- so the agent call is rebuilt here rather than
 calling the node function, purely to keep that list reachable for
-ToolPrefixCorrectness.
+ToolPrefixCorrectness. _build_web_search_message mirrors
+workflow/web_search.py's search_web exactly (Company/APPLICATION FORM
+DETAILS/COMPANIES HOUSE FINDINGS blocks) so a change to that message shape
+doesn't silently drift from what this harness actually exercises.
 
 web-search scenarios have no `expected_response` in the dataset (free-text
 research prose has no single correct wording to match against) -- only
@@ -15,6 +18,11 @@ golden.expected_output is unset, same guard test_policy_check.py uses.
 `companies_house` findings are passed as None here, same as
 run_node_evals.py's run_web_search -- these scenarios test search_web in
 isolation, not the full graph's companies_house -> web_search handoff.
+`application` (dataset.py's optional record field) IS passed through,
+though, so the APPLICATION FORM DETAILS block search_web now builds from
+applicant_name/company_address/director_residential_address is exercised
+here too -- a scenario with no `application` field falls back to a
+company-name-only application dict, matching the previous behaviour.
 
 Usage:
     cd fionaa/agentcore
@@ -23,6 +31,7 @@ Usage:
 
 from __future__ import annotations
 
+import json
 import os
 import sys
 from pathlib import Path
@@ -56,18 +65,33 @@ from .metrics import (  # noqa: E402
 GOLDENS = load_goldens(prefix="web-search-")
 
 
-async def _run_web_search(company_name: str, tools: list) -> tuple[str, list[ToolCall]]:
+def _build_web_search_message(application: dict) -> str:
+    """Mirrors workflow/web_search.py's search_web message construction
+    exactly, including its application_context shape (applicant_name/
+    company_name/company_address/director_residential_address pulled via
+    .get()) -- see that module for why."""
+    company_name = application["company_name"]
+    application_context = {
+        "applicant_name": application.get("applicant_name"),
+        "company_name": company_name,
+        "company_address": application.get("company_address"),
+        "director_residential_address": application.get("director_residential_address"),
+    }
+    return (
+        f"Company: {company_name}\n\n"
+        f"APPLICATION FORM DETAILS:\n{json.dumps(application_context)}\n\n"
+        f"COMPANIES HOUSE FINDINGS:\nnull"
+    )
+
+
+async def _run_web_search(application: dict, tools: list) -> tuple[str, list[ToolCall]]:
     agent = create_agent(
         model=load_model(),
         tools=g.tools_for(tools, "websearch-target___WebSearch"),
         system_prompt=g.WEB_SEARCH_PROMPT,
     )
     response = await agent.ainvoke(
-        {
-            "messages": [
-                HumanMessage(content=f"Company: {company_name}\n\nCOMPANIES HOUSE FINDINGS:\nnull")
-            ]
-        }
+        {"messages": [HumanMessage(content=_build_web_search_message(application))]}
     )
     actual_output = response["messages"][-1].content
     tool_calls = [ToolCall(name=m.name) for m in response["messages"] if isinstance(m, ToolMessage)]
@@ -80,8 +104,12 @@ async def _run_web_search(company_name: str, tools: list) -> tuple[str, list[Too
 @pytest.mark.asyncio
 async def test_web_search_scenario(golden):
     company_name = golden.input.removeprefix("Company: ").strip()
+    # Falls back to a company-name-only application dict when the dataset
+    # record has no `application` field, matching the previous
+    # company-name-only behaviour for any scenario that doesn't opt in.
+    application = golden.additional_metadata.get("application") or {"company_name": company_name}
     tools = await real_gateway_tools()
-    actual_output, tool_calls = await _run_web_search(company_name, tools)
+    actual_output, tool_calls = await _run_web_search(application, tools)
 
     meta = golden.additional_metadata
     scenario_id = meta["scenario_id"]

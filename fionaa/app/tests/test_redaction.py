@@ -79,6 +79,16 @@ def test_redact_bank_statements_handles_none_and_empty():
     assert r.redact_bank_statements([]) == []
 
 
+def test_redact_bank_statements_redacts_address_first_line():
+    docs = [{"account_owner": "Steve Goodman", "account_number": "40123456",
+             "address": "3 Manor Road, Ruislip, Middlesex"}]
+
+    redacted = r.redact_bank_statements(docs)
+
+    assert redacted[0]["address"] == "[address redacted], Ruislip, Middlesex"
+    assert redacted[0]["account_owner"] == "Steve Goodman"
+
+
 def test_redact_companies_house_tool_result_strips_nested_address_lines():
     raw = json.dumps({
         "company_name": "GoodAI Consulting",
