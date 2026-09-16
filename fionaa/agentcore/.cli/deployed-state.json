@@ -29,7 +29,7 @@
           "fionaa_eval_dataset": {
             "datasetId": "fionaa_fionaa_eval_dataset-MBsNVJBQmZ",
             "datasetArn": "arn:aws:bedrock-agentcore:us-east-1:123456789012:dataset/fionaa_fionaa_eval_dataset-MBsNVJBQmZ",
-            "contentHash": "f36005e4fa45c3aeb280697d1586f8853645403ab4a466073795a4a281a6e9f6"
+            "contentHash": "49cd8caad9c4c58e7de28a8cf9a32a95f4418902dd3832900be2f19f03b9cfd7"
           }
         },
         "stackName": "AgentCore-fionaa-default",

@@ -19,9 +19,16 @@ from .common import tools_for
 
 
 async def check_against_policy(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict[str, Any]:
+    """Runs after companies_house (only reached on the `found` branch), so it
+    has the Companies House verdict, plus annual_accounts/bank_statements
+    (loaded by load_application) as cross-source evidence for UK-based,
+    proof-of-address, and business-structure clauses -- see
+    POLICY_CHECK_PROMPT."""
     application = state["application"]
     loan_type = LoanType(application["loan_type"])
     bank_statements = state.get("bank_statements", [])
+    annual_accounts = state.get("annual_accounts", [])
+    companies_house = state.get("companies_house")
 
     # loan_type is already known from the application — no KB search needed
     # to find "the correct loan policy document"; load it directly by key.
@@ -65,6 +72,9 @@ async def check_against_policy(state: ApplicationState, runtime: Runtime[AgentCo
                             "type": "text",
                             "text": (
                                 f"\n\nAPPLICATION:\n{json.dumps(application)}\n\n"
+                                f"COMPANIES HOUSE FINDINGS:\n{json.dumps(companies_house)}\n\n"
+                                f"ANNUAL ACCOUNTS:\n{json.dumps(annual_accounts)}\n\n"
+                                f"BANK STATEMENTS:\n{json.dumps(bank_statements)}\n\n"
                                 f"BANK STATEMENT END DATES:\n"
                                 f"{json.dumps([s['end_date'] for s in bank_statements])}\n\n"
                                 f"TODAY'S DATE: {today}"
