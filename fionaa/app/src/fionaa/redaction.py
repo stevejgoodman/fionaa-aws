@@ -24,6 +24,7 @@ address data is persisted, not just CompaniesHouseResult.summary.
 from __future__ import annotations
 
 import json
+import re
 
 REDACTED = "[redacted]"
 REDACTED_ADDRESS = "[address redacted]"
@@ -117,24 +118,103 @@ def _strip_companies_house_address_lines(value):
     return value
 
 
-def redact_companies_house_tool_result(result: str) -> str:
+def redact_companies_house_tool_result(result):
     """Best-effort redaction of a raw CompaniesHouse___* ToolMessage.content
-    string -- the audit-trail tool_calls capture in graph.py/fetch_run.py
-    bypasses COMPANIES_HOUSE_PROMPT's own "never write the street-level
-    address into your summary" instruction entirely, since it stores the
-    tool's raw return value, not the model's summary. This re-applies that
-    same constraint structurally.
+    -- the audit-trail tool_calls capture in graph.py/fetch_run.py bypasses
+    COMPANIES_HOUSE_PROMPT's own "never write the street-level address into
+    your summary" instruction entirely, since it stores the tool's raw
+    return value, not the model's summary. This re-applies that same
+    constraint structurally.
 
-    Only works when `result` is valid JSON (the Gateway tool's actual return
-    shape, in every case observed) -- non-JSON content is returned
+    Handles two shapes seen in practice: a bare JSON string (the Gateway
+    tool's documented return shape) and a list of LangChain content blocks
+    (`[{"type": "text", "text": "<json>"}]`, the shape a ToolMessage's own
+    .content sometimes takes instead) -- each block's own "text" string is
+    redacted the same way, recursively. Only works when the string found is
+    valid JSON -- non-JSON content, or any other shape, is returned
     unchanged. This is a known, accepted limitation: there is no general,
     reliable way to scrub an address out of arbitrary free text without a
     much heavier NER-style approach, which is out of scope here."""
+    if isinstance(result, list):
+        return [
+            {**block, "text": redact_companies_house_tool_result(block["text"])}
+            if isinstance(block, dict) and isinstance(block.get("text"), str)
+            else block
+            for block in result
+        ]
     try:
         parsed = json.loads(result)
     except (json.JSONDecodeError, TypeError):
         return result
     return json.dumps(_strip_companies_house_address_lines(parsed))
+
+
+def address_first_line(address: str | None) -> str | None:
+    """The building/street portion of an address string (before the first
+    comma, if any) -- the same portion redact_address_line masks. An
+    address with no comma has no town/postcode to separate out, so the
+    whole string is treated as the sensitive part, same as
+    redact_address_line's own no-comma behavior."""
+    if not address:
+        return None
+    first, _, _ = address.partition(",")
+    return first.strip() or None
+
+
+def sensitive_prose_values(application: dict | None, annual_accounts: list[dict] | None,
+                            bank_statements: list[dict] | None) -> list[str]:
+    """Raw values that must never appear verbatim in free-text LLM prose
+    (policy_check's clause_findings/documentation_gaps/summary,
+    financial_assessment's discrepancies, the AI recommendation's
+    reason/rationale, etc). Unlike the structured-field redaction above,
+    these can't be fixed by editing one known field -- an LLM narrating its
+    own reasoning can and does quote them verbatim inside a sentence (e.g.
+    "Steven Goodman born 1972..." or "Bank statements (3 Manor Road,
+    Ruislip)..."), so every occurrence has to be scrubbed out of whatever
+    text it landed in. Building/street address lines and the applicant's
+    birth year are the two values this covers -- see redact_prose_values."""
+    values = set()
+    application = application or {}
+    for field in ("company_address", "director_residential_address"):
+        line = address_first_line(application.get(field))
+        if line:
+            values.add(line)
+    if application.get("year_of_birth"):
+        values.add(str(application["year_of_birth"]))
+    for doc in annual_accounts or []:
+        line = address_first_line(doc.get("registered_address"))
+        if line:
+            values.add(line)
+    for doc in bank_statements or []:
+        line = address_first_line(doc.get("address"))
+        if line:
+            values.add(line)
+    # Guard against scrubbing something too short/generic to be meaningfully
+    # identifying on its own (e.g. a stray one- or two-character fragment).
+    return [value for value in values if len(value) >= 3]
+
+
+def redact_prose_values(value, sensitive_values: list[str]):
+    """Recursively walks value (str/dict/list/anything else), replacing
+    every case-insensitive occurrence of each sensitive_values entry found
+    inside any string -- the free-text counterpart to
+    redact_application/redact_annual_accounts/redact_bank_statements above,
+    for the LLM-authored prose fields those don't touch. A purely-numeric
+    sensitive value (e.g. a birth year) is only matched on a word boundary,
+    so it can't clip a digit out of an unrelated larger number."""
+    if isinstance(value, str):
+        redacted = value
+        for sensitive in sensitive_values:
+            pattern = re.escape(sensitive)
+            if sensitive.isdigit():
+                pattern = rf"\b{pattern}\b"
+            redacted = re.sub(pattern, REDACTED, redacted, flags=re.IGNORECASE)
+        return redacted
+    if isinstance(value, dict):
+        return {key: redact_prose_values(item, sensitive_values) for key, item in value.items()}
+    if isinstance(value, list):
+        return [redact_prose_values(item, sensitive_values) for item in value]
+    return value
 
 
 def redact_tool_calls(tool_calls: list[dict] | None) -> list[dict] | None:
