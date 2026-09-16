@@ -84,14 +84,21 @@ def redact_annual_accounts(docs: list[dict] | None) -> list[dict] | None:
 def redact_bank_statements(docs: list[dict] | None) -> list[dict] | None:
     """Fully redacts each bank statement's account_number (BankStatementSchema)
     -- a financial-instrument identifier no node's logic ever reads, and pure
-    fraud-exposure risk if it lands in the dashboard or S3 evidence unmasked.
-    account_owner (a name) is left as-is -- see module docstring."""
+    fraud-exposure risk if it lands in the dashboard or S3 evidence unmasked --
+    and first-line-redacts address, same as redact_application does for
+    company_address/director_residential_address. account_owner (a name) is
+    left as-is -- see module docstring."""
     if not docs:
         return docs
-    return [
-        {**doc, "account_number": REDACTED} if doc.get("account_number") else doc
-        for doc in docs
-    ]
+    redacted_docs = []
+    for doc in docs:
+        redacted = dict(doc)
+        if redacted.get("account_number"):
+            redacted["account_number"] = REDACTED
+        if "address" in redacted:
+            redacted["address"] = redact_address_line(redacted["address"])
+        redacted_docs.append(redacted)
+    return redacted_docs
 
 
 def _strip_companies_house_address_lines(value):

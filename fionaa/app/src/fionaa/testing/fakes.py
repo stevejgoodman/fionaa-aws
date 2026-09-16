@@ -106,10 +106,14 @@ def make_fake_create_agent(response_content, calls: list):
     harmless ToolMessage from it -- check_companies_house's runtime
     groundedness check (groundedness.py) requires at least one such tool
     call when the structured response claims found=True, which this generic
-    fake would otherwise never produce (it never actually calls a tool)."""
+    fake would otherwise never produce (it never actually calls a tool).
 
-    def fake_create_agent(*, model, tools, system_prompt, response_format=None):
-        calls.append({"tools": tools, "system_prompt": system_prompt})
+    `middleware=` (e.g. search_web's ToolCallLimitMiddleware) is accepted
+    and recorded but never applied -- this fake never calls a tool the
+    limit could actually trip, so there's nothing for it to enforce."""
+
+    def fake_create_agent(*, model, tools, system_prompt, response_format=None, middleware=None):
+        calls.append({"tools": tools, "system_prompt": system_prompt, "middleware": middleware})
 
         class FakeAgent:
             async def ainvoke(self, input):
