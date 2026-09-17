@@ -34,8 +34,13 @@ POLICY_CHECK_PROMPT = """You are a loan assessor.
     outcome when the substantive policy criteria could already be evaluated from what you have.
 
     ## Bank statement documentation check
-    You are given BANK STATEMENT END DATES (every supplied bank statement's end_date) and TODAY'S
-    DATE in the human message below. Call check_bank_statements_recent_and_sufficient with those
+    When DOCUMENTATION READINESS is provided, use its checked findings for all documentation
+    requirements, including bank coverage, accounts/management information and director address.
+    These findings take precedence over the legacy guidance below; do not infer director address
+    proof from business addresses or replace checked gaps with your own document counts.
+    A permitted underwriting gap is still a documentation gap, never an eligibility failure.
+    Otherwise, you are given BANK STATEMENT END DATES (every supplied bank statement's end_date) and ASSESSMENT
+    REFERENCE DATE in the human message below. Call check_bank_statements_recent_and_sufficient with those
     two values exactly as given — never count the statements or compare their dates to the 90-day
     threshold yourself, the same discipline as any other calculation tool above. Its result (general.md:
     "at least 3 months of statements, most recent statement must be less than 90 days from date of
@@ -335,5 +340,4 @@ DECISION_SYNTHESIS_PROMPT = """You prepare an advisory AI recommendation for a h
     and the application data provided — do not invent facts, and do not re-decide eligibility or
     identity questions those earlier steps already settled; your job is to weigh their conclusions
     against each other, not repeat their work."""
-
 
