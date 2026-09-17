@@ -12,8 +12,27 @@ from fionaa.redaction import redact_tool_calls
 from fionaa.prompts import WEB_SEARCH_PROMPT
 from fionaa.workflow.state import ApplicationState, AgentContext
 from .common import tools_for
+from .resilience import CircuitBreaker, ConcurrencyLimiter, TRANSIENT_ERRORS, ainvoke_resilient
 
 WEBSEARCH_TOOL_NAME = "websearch-target___WebSearch"
+
+# One breaker/limiter per process for this node's external dependency (the
+# websearch-target Gateway tool) -- see resilience.py's
+# CircuitBreaker/ConcurrencyLimiter docstrings for why neither needs to be
+# shared across workers. Capped lower than companies_house's default (5 vs
+# 10): a single web_search node run can itself issue up to
+# WEBSEARCH_RUN_LIMIT=20 sequential WebSearch calls, so it already puts more
+# sustained load on its dependency per concurrent application than a
+# companies_house lookup does.
+_BREAKER = CircuitBreaker(name="web_search")
+_LIMITER = ConcurrencyLimiter(name="web_search", env_var="FIONAA_WEB_SEARCH_MAX_CONCURRENT", default=5)
+
+# web_search never gates a hard routing decision the way companies_house's
+# `found` does (see the groundedness comment below), so on an unrecoverable
+# failure the node degrades to this string rather than failing the whole
+# graph run -- synthesize_decision/validate_final_decision still see a
+# web_search value, just one flagged as unavailable for a human reviewer.
+WEB_SEARCH_UNAVAILABLE = "Web search was unavailable; no online corroboration could be gathered."
 
 # Caps runaway searching for a thin-web-presence applicant (e.g. a common
 # name with no matching online profile) from turning into dozens of
@@ -56,17 +75,28 @@ async def search_web(state: ApplicationState, runtime: Runtime[AgentContext]) ->
         ],
     )
 
-    response = await agent.ainvoke(
-        {
-            "messages": [
-                HumanMessage(
-                    content=f"Company: {company_name}\n\n"
-                    f"APPLICATION FORM DETAILS:\n{json.dumps(application_context)}\n\n"
-                    f"COMPANIES HOUSE FINDINGS:\n{json.dumps(companies_house)}"
-                )
-            ]
-        }
-    )
+    try:
+        response = await ainvoke_resilient(
+            agent,
+            {
+                "messages": [
+                    HumanMessage(
+                        content=f"Company: {company_name}\n\n"
+                        f"APPLICATION FORM DETAILS:\n{json.dumps(application_context)}\n\n"
+                        f"COMPANIES HOUSE FINDINGS:\n{json.dumps(companies_house)}"
+                    )
+                ]
+            },
+            breaker=_BREAKER,
+            limiter=_LIMITER,
+        )
+    except TRANSIENT_ERRORS as exc:
+        runtime.context.store.put_json(
+            "web_search/result.json",
+            {"result": WEB_SEARCH_UNAVAILABLE, "tool_calls": [], "grounded": False,
+             "grounding_reasons": [f"lookup_unavailable: {exc}"]},
+        )
+        return {"web_search": WEB_SEARCH_UNAVAILABLE}
 
     web_search_result = response["messages"][-1].content
 
