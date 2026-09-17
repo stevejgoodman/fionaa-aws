@@ -14,6 +14,16 @@ from fionaa.prompts import COMPANIES_HOUSE_PROMPT
 from fionaa.workflow.state import ApplicationState, AgentContext
 from fionaa.domain.assessments import CompaniesHouseResult
 from .common import tools_for
+from .resilience import CircuitBreaker, ConcurrencyLimiter, TRANSIENT_ERRORS, ainvoke_resilient
+
+# One breaker/limiter per process for this node's external dependency
+# (Companies House, via the CompaniesHouse___* Gateway tools) -- see
+# resilience.py's CircuitBreaker/ConcurrencyLimiter docstrings for why
+# neither needs to be shared across workers.
+_BREAKER = CircuitBreaker(name="companies_house")
+_LIMITER = ConcurrencyLimiter(
+    name="companies_house", env_var="FIONAA_COMPANIES_HOUSE_MAX_CONCURRENT", default=10,
+)
 
 
 async def check_companies_house(
@@ -37,9 +47,21 @@ async def check_companies_house(
         response_format=CompaniesHouseResult,
     )
 
-    response = await agent.ainvoke(
-        {"messages": [HumanMessage(content=json.dumps(application))]}
-    )
+    try:
+        response = await ainvoke_resilient(
+            agent,
+            {"messages": [HumanMessage(content=json.dumps(application))]},
+            breaker=_BREAKER,
+            limiter=_LIMITER,
+        )
+    except TRANSIENT_ERRORS as exc:
+        unavailable = {"found": False, "confidence": "low", "summary": "Company lookup was unavailable; internal verification is required."}
+        runtime.context.store.put_json("companies_house/result.json", {
+            **unavailable, "tool_calls": [], "grounded": False,
+            "grounding_reasons": [f"lookup_unavailable: {exc}"],
+        })
+        return Command(update={"companies_house": unavailable, "companies_house_found": False,
+                               "company_lookup_failed": True}, goto="reject_no_company")
     result: CompaniesHouseResult = response["structured_response"]
     companies_house_result = result.model_dump()
 
@@ -97,6 +119,13 @@ async def check_companies_house(
     # constrains companies_house_result.summary, not this raw tool output).
     tool_calls = redact_tool_calls(raw_tool_calls)
 
+    lookup_failed = not grounding.grounded or any(
+        isinstance(message, ToolMessage) and message.name and message.name.startswith("CompaniesHouse___")
+        and message.status == "error" for message in response["messages"]
+    ) or not any(call["tool"].startswith("CompaniesHouse___") for call in raw_tool_calls)
+    if lookup_failed:
+        companies_house_result["found"] = False
+
     # save result back to application store
     runtime.context.store.put_json(
         "companies_house/result.json",
@@ -105,7 +134,10 @@ async def check_companies_house(
     )
 
     found = companies_house_result["found"]
+    update = {"companies_house": companies_house_result, "companies_house_found": found}
+    if lookup_failed:
+        update["company_lookup_failed"] = True
     return Command(
-        update={"companies_house": companies_house_result, "companies_house_found": found},
+        update=update,
         goto="policy_check" if found else "reject_no_company",
     )

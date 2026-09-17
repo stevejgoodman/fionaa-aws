@@ -212,7 +212,7 @@ async def test_check_against_policy_persists_and_returns_result(monkeypatch):
                 f"ANNUAL ACCOUNTS:\n[]\n\n"
                 f"BANK STATEMENTS:\n[]\n\n"
                 f"BANK STATEMENT END DATES:\n[]\n\n"
-                f"TODAY'S DATE: {date.today().isoformat()}"
+                f"ASSESSMENT REFERENCE DATE: {date.today().isoformat()}"
             ),
         },
     ]
@@ -537,7 +537,7 @@ async def test_check_companies_house_routes_to_reject_when_not_found(monkeypatch
 # Node: reject_no_company
 # ---------------------------------------------------------------------------
 
-def test_reject_no_company_persists_final_decision():
+def test_reject_no_company_prepares_report_for_triage():
     store = FakeStore()
     state = {
         "policy_check": "policy check passed",
@@ -551,7 +551,27 @@ def test_reject_no_company_persists_final_decision():
     assert result["final_decision"]["ai_recommendation"]["reason"] == "companies_house_no_match"
     assert result["final_decision"]["ai_recommendation"]["outcome"] == "referred"
     assert result["final_decision"]["validation"]["status"] == "not_checked"
-    assert store.data["decision/result.json"] == result["final_decision"]
+    assert "decision/result.json" not in store.data
+
+
+def test_reject_no_company_distinguishes_lookup_failure_from_no_match():
+    """company_lookup_failed=True means the lookup itself didn't complete
+    (throttled/timed out/circuit open) -- a different signal to a reviewer
+    than Companies House actually confirming no match, so this must not
+    collapse to the same companies_house_no_match reason as the test above."""
+    store = FakeStore()
+    state = {
+        "policy_check": "policy check passed",
+        "companies_house": {"found": False, "confidence": "low", "summary": "Company lookup was unavailable; internal verification is required."},
+        "company_lookup_failed": True,
+    }
+    runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
+
+    result = g.reject_no_company(state, runtime)
+
+    assert result["final_decision"]["ai_recommendation"]["reason"] == "companies_house_lookup_unavailable"
+    assert result["final_decision"]["ai_recommendation"]["outcome"] == "referred"
+    assert result["final_decision"]["validation"]["check_status"] == "lookup_unavailable"
 
 
 # ---------------------------------------------------------------------------
@@ -931,6 +951,7 @@ async def test_build_graph_runs_all_nodes_in_order(monkeypatch, identity):
         "decision/result.json",
         "decision/proposed.json",
         "decision/validation.json",
+        "decision/triage.json",
     }
 
 
