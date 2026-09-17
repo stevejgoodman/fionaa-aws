@@ -30,6 +30,9 @@ dependencies = [
     "httpx>=0.28.1",
     "langchain-openai>=1.4.1",
     "pyjwt>=2.13.0",
+    # Retry+backoff for workflow/resilience.py -- was already present
+    # transitively via langchain-core, now a direct import.
+    "tenacity>=9.0.0",
 ]
 
 [tool.hatch.build.targets.wheel]

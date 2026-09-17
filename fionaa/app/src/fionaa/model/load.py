@@ -1,7 +1,17 @@
 import os
 
+from botocore.config import Config
 from langchain_aws import ChatBedrockConverse
 from langchain_core.runnables import Runnable
+
+# Adaptive mode retries on ThrottlingException/capacity errors with
+# client-side rate limiting informed by the observed error rate, not just a
+# fixed backoff -- matters once dozens of concurrent AgentCore sessions are
+# drawing on the same account-level Bedrock quota. This only covers a single
+# Converse call; workflow/resilience.py's retry+circuit-breaker wraps the
+# whole agent.ainvoke (which can span several Converse calls plus Gateway
+# tool calls) for the coarser, node-level failure modes this can't see.
+BEDROCK_RETRY_CONFIG = Config(retries={"max_attempts": 5, "mode": "adaptive"})
 
 # Uses cross-region inference profile for Claude Sonnet 4.5. Sonnet 5 is
 # cheaper per-token and was tried here, but real Converse calls returned
@@ -43,7 +53,7 @@ def load_model() -> Runnable:
     -- .bind() forwards attribute access (model_id, guardrail_config) to the
     wrapped model via __getattr__, so existing callers/tests are unaffected.
     """
-    kwargs: dict = {"model_id": MODEL_ID}
+    kwargs: dict = {"model_id": MODEL_ID, "config": BEDROCK_RETRY_CONFIG}
     guardrail_id = os.environ.get("FIONAA_GUARDRAIL_ID")
     guardrail_version = os.environ.get("FIONAA_GUARDRAIL_VERSION")
     if guardrail_id and guardrail_version:
