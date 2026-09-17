@@ -921,6 +921,7 @@ dependencies = [
     { name = "mcp" },
     { name = "opentelemetry-instrumentation-langchain" },
     { name = "pyjwt" },
+    { name = "tenacity" },
 ]
 
 [package.dev-dependencies]
@@ -947,6 +948,7 @@ requires-dist = [
     { name = "mcp", specifier = ">=1.19.0,<2.0.0" },
     { name = "opentelemetry-instrumentation-langchain", specifier = ">=0.59.0" },
     { name = "pyjwt", specifier = ">=2.13.0" },
+    { name = "tenacity", specifier = ">=9.0.0" },
 ]
 
 [package.metadata.requires-dev]

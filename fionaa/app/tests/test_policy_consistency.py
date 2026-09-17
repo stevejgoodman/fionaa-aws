@@ -161,7 +161,7 @@ async def test_annotations_never_determine_the_human_outcome(status, outcome):
     assert sum(validation["counts"].values()) == expected_claim_count
     assert validation["counts"][expected] >= 1
     assert report["validation"] == validation
-    assert store.data["decision/result.json"] == report
+    assert "decision/result.json" not in store.data  # Final writer is triage.
 
 
 @pytest.mark.asyncio

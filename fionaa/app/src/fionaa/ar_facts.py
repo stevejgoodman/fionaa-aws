@@ -24,6 +24,7 @@ import re
 from datetime import date
 
 from fionaa.check_tools import check_bank_statements_recent_and_sufficient
+from fionaa.evidence_readiness import months_before
 
 
 def _business_type(company_name: str | None) -> str | None:
@@ -73,7 +74,7 @@ def _last_accounting_date_within_past_12_months(annual_accounts: list[dict], tod
         accounting_date = date.fromisoformat(str(most_recent["accounting_year"]))
     except ValueError:
         return None
-    return (today - accounting_date).days <= 365
+    return months_before(today, 12) <= accounting_date <= today
 
 
 def _addresses_reconcile(bank_statements: list[dict], annual_accounts: list[dict]) -> bool | None:

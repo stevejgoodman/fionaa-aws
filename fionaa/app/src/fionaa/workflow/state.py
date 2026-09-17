@@ -22,12 +22,20 @@ class ApplicationState(TypedDict, total=False):
     # (e.g. two years of annual accounts, several months of statements).
     annual_accounts: Annotated[list[dict[str, Any]], _last_write_wins]
     bank_statements: Annotated[list[dict[str, Any]], _last_write_wins]
+    management_information: Annotated[list[dict[str, Any]], _last_write_wins]
+    submission_manifest: dict[str, Any] | None
+    submission_date: str | None
+    ingested_documents: list[dict[str, Any]]
+    ingestion_errors: list[str]
+    triage: dict[str, Any]
+    readiness_assessment: dict[str, Any] | None
     # A dict conforming to PolicyCheckResult's shape (see below), not a bare
     # LLM string -- check_against_policy forces structured output the same
     # way check_companies_house already does for companies_house.
     policy_check: Annotated[dict[str, Any], _last_write_wins]
     companies_house: Annotated[dict[str, Any], _last_write_wins]
     companies_house_found: Annotated[bool, _last_write_wins]
+    company_lookup_failed: bool
     # A dict conforming to FinancialAssessmentResult's shape (see below), not
     # a bare LLM string -- see policy_check's comment above.
     financial_assessment: Annotated[dict[str, Any], _last_write_wins]
