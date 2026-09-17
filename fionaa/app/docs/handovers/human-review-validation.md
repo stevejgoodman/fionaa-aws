@@ -10,7 +10,15 @@ When asked whether to keep a recommendation, the user chose:
 
 > "Keep an explicitly labelled AI recommendation"
 
-The workflow produces a review report. It must not approve or reject loans, or decide whether human review is necessary. Human review is always necessary. Validation results annotate claims; they must not overwrite the AI recommendation or act as a loan-decision gate.
+The workflow produces a review report. It must not approve or reject loans. Every
+lending decision requires human review. Validation results annotate claims; they
+must not overwrite the AI recommendation or act as a loan-decision gate.
+
+The subsequently approved [readiness triage](readiness-triage.md) can return
+incomplete unsecured submissions for applicant correction before underwriting.
+It is separate from the lending recommendation and claim validation. Triage now
+writes the final report after either assessment ending, adding the documentation
+route without changing the lending outcome. PDF extraction remains future work.
 
 The user prefers simple English and clear distinctions between local tests and live evaluations.
 

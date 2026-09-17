@@ -17,6 +17,7 @@ from fionaa.workflow.financial import check_financial_assessment
 from fionaa.workflow.web_search import search_web
 from fionaa.workflow.decision import reject_no_company, synthesize_decision
 from fionaa.workflow.validation import validate_final_decision
+from fionaa.workflow.triage import triage_application, route_loaded_application, prepare_incomplete_review
 
 def build_graph(checkpointer: Optional[BaseCheckpointSaver] = None):
     """Compiled per invocation, not once at module load. The checkpointer (if
@@ -38,6 +39,8 @@ def build_graph(checkpointer: Optional[BaseCheckpointSaver] = None):
     g.add_node("web_search", search_web)
     g.add_node("synthesize_decision", synthesize_decision)
     g.add_node("validate_final_decision", validate_final_decision)
+    g.add_node("triage_application", triage_application)
+    g.add_node("prepare_incomplete_review", prepare_incomplete_review)
 
     g.add_edge(START, "load_application")
     # companies_house runs first, not policy_check: it only needs `application`
@@ -48,13 +51,17 @@ def build_graph(checkpointer: Optional[BaseCheckpointSaver] = None):
     # routes dynamically via the Command it returns -- "policy_check" if the
     # company was confirmed, "reject_no_company" otherwise -- so no static
     # edge to either is declared here.
-    g.add_edge("load_application", "companies_house")
-    g.add_edge("reject_no_company", END)
+    g.add_conditional_edges("load_application", route_loaded_application, {
+        "companies_house": "companies_house", "prepare_incomplete_review": "prepare_incomplete_review",
+    })
+    g.add_edge("prepare_incomplete_review", "triage_application")
+    g.add_edge("reject_no_company", "triage_application")
     # Complete the evidence before annotating policy claims for the reviewer.
     g.add_edge("policy_check", "financial_assessment")
     g.add_edge("financial_assessment", "web_search")
     # Synthesis supplies an advisory recommendation; validation adds claim checks.
     g.add_edge("web_search", "synthesize_decision")
     g.add_edge("synthesize_decision", "validate_final_decision")
-    g.add_edge("validate_final_decision", END)
+    g.add_edge("validate_final_decision", "triage_application")
+    g.add_edge("triage_application", END)
     return g.compile(checkpointer=checkpointer)

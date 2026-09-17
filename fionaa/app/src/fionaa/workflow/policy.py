@@ -50,9 +50,14 @@ async def check_against_policy(state: ApplicationState, runtime: Runtime[AgentCo
         response_format=PolicyCheckResult,
     )
 
-    # Computed fresh per invocation, not at module import time, so it can't
-    # go stale in a long-lived process.
-    today = date.today().isoformat()
+    # A manifest's submission date is stable across retries. Legacy inputs have
+    # no historical date; they retain the old reference and triage holds them.
+    reference_date = state.get("submission_date") or date.today().isoformat()
+    readiness = state.get("readiness_assessment")
+    readiness_context = (
+        f"\n\nDOCUMENTATION READINESS (authoritative checked findings):\n{json.dumps(readiness['findings'])}"
+        if readiness else ""
+    )
 
     # Explicit cachePoint after POLICY, separate from load_model()'s
     # cache_control (which only ever sees this as one message and would
@@ -77,7 +82,8 @@ async def check_against_policy(state: ApplicationState, runtime: Runtime[AgentCo
                                 f"BANK STATEMENTS:\n{json.dumps(bank_statements)}\n\n"
                                 f"BANK STATEMENT END DATES:\n"
                                 f"{json.dumps([s['end_date'] for s in bank_statements])}\n\n"
-                                f"TODAY'S DATE: {today}"
+                                f"ASSESSMENT REFERENCE DATE: {reference_date}"
+                                f"{readiness_context}"
                             ),
                         },
                     ]
@@ -88,6 +94,10 @@ async def check_against_policy(state: ApplicationState, runtime: Runtime[AgentCo
     messages = response["messages"]
     result: PolicyCheckResult = response["structured_response"]
     loan_result = result.model_dump()
+    if readiness:
+        loan_result["documentation_gaps"] = [
+            item["correction"] for item in readiness["findings"] if item.get("correction")
+        ]
 
     # Tool calls the agent made along the way are evidence too — captured
     # here (from the response) rather than by the tools themselves, so the
