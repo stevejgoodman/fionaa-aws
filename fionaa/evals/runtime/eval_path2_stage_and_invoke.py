@@ -147,13 +147,19 @@ def stage_application(session: boto3.Session, application: dict[str, Any]) -> st
 
 
 def stage_documents(session: boto3.Session, application_id: str, documents: dict[str, Any]) -> dict[str, int]:
-    """Writes each annual_accounts/bank_statements entry under
-    input/annual_accounts_<n>.json / input/bank_statement_<n>.json in the
+    """Writes each document entry under input/<prefix>_<n>.json in the
     same disposable prefix as stage_application -- same encryption context
     shape, same reasoning (FionaaDataAccessRole's KMS grant condition needs
     it to match on decrypt). Key prefix must match graph.py's DOCUMENT_SPECS
-    exactly ("input/annual_accounts", "input/bank_statement", note the
-    singular on the bank statement side) for store.list_keys to find these.
+    exactly (note the singular on the bank statement side) for
+    store.list_keys to find these.
+
+    director_id/proof_of_address are what the graph's final triage step
+    checks (workflow/triage.py). A scenario that omits them still exercises
+    every assessment node in full -- triage runs last, so the trajectory a
+    batch evaluation scores is unchanged -- but it will route to
+    return_to_applicant rather than to an underwriter, so a scenario meant to
+    reach the underwriter branch has to declare all four.
 
     Returns a dict of how many documents were staged per type, for the
     caller to log -- silent staging of zero documents when a scenario
@@ -161,7 +167,12 @@ def stage_documents(session: boto3.Session, application_id: str, documents: dict
     """
     s3 = session.client("s3", region_name=REGION)
     counts = {}
-    for doc_type, key_prefix in (("annual_accounts", "input/annual_accounts"), ("bank_statements", "input/bank_statement")):
+    for doc_type, key_prefix in (
+        ("annual_accounts", "input/annual_accounts"),
+        ("bank_statements", "input/bank_statement"),
+        ("director_id", "input/director_id"),
+        ("proof_of_address", "input/proof_of_address"),
+    ):
         docs = documents.get(doc_type, [])
         for i, doc in enumerate(docs):
             key = f"{EVAL_CUSTOMER_ID}/{application_id}/{key_prefix}_{i}.json"

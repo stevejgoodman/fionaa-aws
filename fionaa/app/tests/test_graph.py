@@ -7,7 +7,7 @@ calling a real model.
 """
 
 import json
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 from langchain.agents.middleware import ToolCallLimitMiddleware
@@ -48,10 +48,18 @@ def test_load_application_returns_stored_application():
 
     result = g.load_application({}, runtime)
 
-    # No documents staged -- annual_accounts/bank_statements are always
-    # present as (possibly empty) lists, not missing keys, since downstream
-    # nodes read them with state.get(...) expecting a list to iterate.
-    assert result == {"application": application, "annual_accounts": [], "bank_statements": []}
+    # No documents staged -- every document type is always present as a
+    # (possibly empty) list, not a missing key, since downstream nodes read
+    # them with state.get(...) expecting a list to iterate. An empty
+    # document_errors is likewise always present for triage to read.
+    assert result == {
+        "application": application,
+        "document_errors": [],
+        "annual_accounts": [],
+        "bank_statements": [],
+        "director_id": [],
+        "proof_of_address": [],
+    }
 
 
 def test_load_application_raises_when_missing():
@@ -137,10 +145,12 @@ def test_load_application_skips_document_types_that_dont_apply(monkeypatch):
     assert result["annual_accounts"] == [ANNUAL_ACCOUNTS_2023]
 
 
-def test_load_application_raises_on_invalid_document():
-    """A malformed document fails loudly rather than being silently dropped
-    -- these feed FINANCIAL_ASSESSMENT_PROMPT's numbers, so a bad document
-    should stop the run, not quietly disappear from the assessment."""
+def test_load_application_records_invalid_document_instead_of_raising():
+    """A malformed document is recorded in document_errors, not raised and not
+    silently dropped. It used to raise ValueError and abort the run; now that
+    the graph ends in triage, an unreadable upload is an applicant-fixable
+    submission defect, so it's surfaced as an `unreadable` triage finding that
+    routes the application back rather than as a 500."""
     application = {"company_name": "Acme Ltd"}
     invalid_accounts = {k: v for k, v in ANNUAL_ACCOUNTS_2023.items() if k != "turnover_current_year"}
     store = FakeStore(
@@ -151,8 +161,12 @@ def test_load_application_raises_on_invalid_document():
     )
     runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
 
-    with pytest.raises(ValueError, match="input/annual_accounts_2023.json"):
-        g.load_application({}, runtime)
+    result = g.load_application({}, runtime)
+
+    assert result["annual_accounts"] == []
+    assert result["document_errors"] == [
+        {"key": "input/annual_accounts_2023.json", "state_key": "annual_accounts"}
+    ]
 
 
 # ---------------------------------------------------------------------------
@@ -922,6 +936,11 @@ async def test_build_graph_runs_all_nodes_in_order(monkeypatch, identity):
     # "ok" into a generic passing FinalDecisionResult the same way it does
     # CompaniesHouseResult above (see _generic_structured_fields).
     assert final_state["final_decision"]["outcome"] == "pending_human_review"
+    # No documents were staged, so triage finds the submission incomplete and
+    # routes it back to the applicant -- the assessment still ran in full and
+    # still recorded every artifact, which is the point of triaging at the end
+    # rather than gating the graph at the front.
+    assert final_state["triage"]["route"] == "return_to_applicant"
     assert set(store.data) == {
         "input/application.json",
         "policy_check/result.json",
@@ -931,6 +950,8 @@ async def test_build_graph_runs_all_nodes_in_order(monkeypatch, identity):
         "decision/result.json",
         "decision/proposed.json",
         "decision/validation.json",
+        "decision/triage.json",
+        "decision/to_applicant.json",
     }
 
 
@@ -971,3 +992,160 @@ async def test_build_graph_checkpoints_successfully_with_deps_in_context(monkeyp
     assert saved.values["financial_assessment"]["verdict"] == "consistent"
     assert saved.values["web_search"] == "ok"
     assert saved.values["final_decision"]["outcome"] == "pending_human_review"
+
+
+# ---------------------------------------------------------------------------
+# Final branch: triage -> to_underwriter / return_to_applicant
+#
+# The routing rules themselves are tested in test_triage.py. These cover the
+# wiring: that both of the graph's endings reach triage, and that the
+# conditional edge lands on the right terminal node and writes the right
+# handoff artifact.
+# ---------------------------------------------------------------------------
+
+COMPLETE_APPLICATION = {
+    "company_name": "Acme Ltd", "company_number": "12345678",
+    "loan_type": "unsecured-business-loans",
+    "applicant_name": "Jane Smith", "year_of_birth": "1980",
+    "company_address": "1 High St, London", "loan_purpose": "Expansion",
+    "loan_amount": 50000, "loan_term": 24,
+    "director_first_name": "Jane", "director_surname": "Smith",
+    "director_residential_address": "14 Oak Avenue, Uxbridge, UB8 1AA",
+    "trading_start_date": "2018-01-01", "annual_turnover": 500000, "annual_profit": 60000,
+}
+
+
+def _complete_submission() -> dict:
+    """Store contents for a submission with nothing outstanding.
+
+    Dated relative to date.today(), not a fixed date: triage_application
+    computes staleness fresh per invocation (same as check_against_policy and
+    validate_final_decision), so fixed dates here would start failing as the
+    calendar moved past the 90-day thresholds.
+    """
+    today = date.today()
+    statements = {
+        f"input/bank_statement_{index}.json": {
+            "account_owner": "Acme Ltd", "bank_name": "Big Bank", "account_number": "12345678",
+            "address": "1 High St, London",
+            "start_date": (today - timedelta(days=30 * index + 29)).isoformat(),
+            "end_date": (today - timedelta(days=30 * index)).isoformat(),
+            "balance": 12000.0, "payments_in": 5000.0, "payments_out": 3200.0,
+        }
+        for index in range(3)
+    }
+    return {
+        "input/application.json": COMPLETE_APPLICATION,
+        **statements,
+        "input/annual_accounts_2023.json": {
+            **ANNUAL_ACCOUNTS_2023, "accounting_year": (today - timedelta(days=60)).isoformat(),
+        },
+        "input/director_id_passport.json": {
+            "document_kind": "passport", "holder_name": "Jane Smith",
+            "expiry_date": (today + timedelta(days=900)).isoformat(),
+        },
+        "input/proof_of_address_utility.json": {
+            "document_kind": "utility bill", "holder_name": "Jane Smith",
+            "address": "14 Oak Avenue, Uxbridge, UB8 1AA",
+            "issue_date": (today - timedelta(days=20)).isoformat(),
+        },
+    }
+
+
+@pytest.mark.asyncio
+async def test_complete_submission_routes_to_underwriter(monkeypatch, identity):
+    store = FakeStore(_complete_submission())
+    _patch_all_integration_points(monkeypatch, agent_response="ok")
+    graph = g.build_graph(checkpointer=None)
+    agent_context = g.AgentContext(
+        store=store, policy_docs=FakePolicyDocs(), tools=[FakeTool("CompaniesHouse___getCompanyProfile")]
+    )
+
+    final_state = await graph.ainvoke({}, g.checkpoint_config(identity), context=agent_context)
+
+    assert final_state["triage"]["route"] == "underwriter"
+    assert "decision/to_underwriter.json" in store.data
+    assert "decision/to_applicant.json" not in store.data
+    # The AI recommendation and the AR claim annotations travel with it as
+    # supporting material -- the underwriter weighs them, triage doesn't.
+    handoff = store.data["decision/to_underwriter.json"]
+    assert handoff["assessment"]["ai_recommendation"]["outcome"] == "approved"
+    assert handoff["assessment"]["validation"]["counts"]["valid"] > 0
+    # decision/result.json stays the single reviewer-facing artifact, now
+    # carrying the route.
+    assert store.data["decision/result.json"]["triage"]["route"] == "underwriter"
+
+
+@pytest.mark.asyncio
+async def test_missing_director_id_returns_to_applicant(monkeypatch, identity):
+    staged = {k: v for k, v in _complete_submission().items() if "director_id" not in k}
+    store = FakeStore(staged)
+    _patch_all_integration_points(monkeypatch, agent_response="ok")
+    graph = g.build_graph(checkpointer=None)
+    agent_context = g.AgentContext(
+        store=store, policy_docs=FakePolicyDocs(), tools=[FakeTool("CompaniesHouse___getCompanyProfile")]
+    )
+
+    final_state = await graph.ainvoke({}, g.checkpoint_config(identity), context=agent_context)
+
+    assert final_state["triage"]["route"] == "return_to_applicant"
+    assert "decision/to_applicant.json" in store.data
+    assert "decision/to_underwriter.json" not in store.data
+    applicant = store.data["decision/to_applicant.json"]
+    assert [item["requirement"] for item in applicant["outstanding"]] == ["director_id"]
+    assert "passport or driving licence" in applicant["applicant_note"]
+    # An applicant must never be shown the bank's internal credit view of them.
+    assert not {"assessment", "ai_recommendation", "policy_check", "companies_house"} & set(applicant)
+
+
+@pytest.mark.asyncio
+async def test_complete_submission_reaches_underwriter_despite_no_company_match(monkeypatch, identity):
+    """The reject_no_company ending routes through triage too. A company
+    Companies House couldn't find is a lookup a human investigates, not
+    something the applicant can fix by uploading another file -- so with
+    complete paperwork it still goes to the underwriter.
+
+    tools=[] leaves the model's found=True with no supporting tool call, which
+    the runtime groundedness check downgrades to found=False (see
+    test_check_companies_house_overrides_ungrounded_found_true_with_no_tool_calls).
+    """
+    store = FakeStore(_complete_submission())
+    _patch_all_integration_points(monkeypatch, agent_response="ok")
+    graph = g.build_graph(checkpointer=None)
+    agent_context = g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[])
+
+    final_state = await graph.ainvoke({}, g.checkpoint_config(identity), context=agent_context)
+
+    assert final_state["companies_house_found"] is False
+    # The assessment nodes never ran on this branch -- their state keys exist
+    # as empty channel defaults, so the artifacts they would have written are
+    # the reliable evidence that they were skipped.
+    assert not final_state["policy_check"]
+    assert "policy_check/result.json" not in store.data
+    # Complete paperwork, so it still reaches a human despite the failed lookup.
+    assert final_state["triage"]["route"] == "underwriter"
+    handoff = store.data["decision/to_underwriter.json"]
+    assert handoff["assessment"]["ai_recommendation"]["reason"] == "companies_house_no_match"
+
+
+@pytest.mark.asyncio
+async def test_unreadable_document_returns_to_applicant_instead_of_failing_the_run(monkeypatch, identity):
+    staged = _complete_submission()
+    staged["input/bank_statement_0.json"] = {"account_owner": "Acme Ltd"}  # fails BankStatementSchema
+    store = FakeStore(staged)
+    _patch_all_integration_points(monkeypatch, agent_response="ok")
+    graph = g.build_graph(checkpointer=None)
+    agent_context = g.AgentContext(
+        store=store, policy_docs=FakePolicyDocs(), tools=[FakeTool("CompaniesHouse___getCompanyProfile")]
+    )
+
+    final_state = await graph.ainvoke({}, g.checkpoint_config(identity), context=agent_context)
+
+    assert final_state["document_errors"] == [
+        {"key": "input/bank_statement_0.json", "state_key": "bank_statements"}
+    ]
+    assert final_state["triage"]["route"] == "return_to_applicant"
+    outstanding = store.data["decision/to_applicant.json"]["outstanding"]
+    assert [(item["requirement"], item["status"]) for item in outstanding] == [
+        ("bank_statements", "unreadable")
+    ]

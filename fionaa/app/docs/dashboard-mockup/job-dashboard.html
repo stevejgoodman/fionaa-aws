@@ -378,16 +378,27 @@
     financial_assessment:  { short:"04", label:"Financial assessment",  sub:"accounts + statements" },
     web_search:            { short:"05", label:"Web search",            sub:"presence & reputation" },
     synthesize_decision:   { short:"06", label:"Synthesize decision",   sub:"final verdict" },
+    triage:                { short:"07", label:"Triage",                sub:"documentation completeness", branch:true },
+    to_underwriter:        { short:"\u2713", label:"To underwriter",       sub:"terminal" },
+    return_to_applicant:   { short:"\u21a9", label:"Back to applicant",    sub:"terminal" },
   };
   // Full canonical order, so branch-not-taken still renders (dimmed).
+  // Both endings converge on triage, which then branches to one of two
+  // terminal nodes -- see build_graph's comment in graph.py.
   const CANONICAL = ["load_application","companies_house","reject_no_company","policy_check",
-                      "financial_assessment","web_search","synthesize_decision"];
+                      "financial_assessment","web_search","synthesize_decision",
+                      "triage","to_underwriter","return_to_applicant"];
 
   const ranNodes = new Set(RUN.steps.map(s => s.node));
   const companiesHouseFound = RUN.companies_house_found !== false;
+  const triageRoute = RUN.steps.find(s => s.node === "triage")?.state_value?.triage?.route || "underwriter";
   const stages = CANONICAL.filter(id => {
     if (id === "reject_no_company") return !companiesHouseFound;
     if (id === "financial_assessment") return companiesHouseFound;
+    // Only the branch triage actually took renders; the other stays hidden
+    // rather than dimmed, since the two are mutually exclusive outcomes.
+    if (id === "to_underwriter") return triageRoute !== "return_to_applicant";
+    if (id === "return_to_applicant") return triageRoute === "return_to_applicant";
     return true;
   });
 
@@ -591,7 +602,8 @@
   function jumpToEnd(){
     running = false;
     clearTimeout(timer);
-    stages.forEach(s => stageStatus[s] = (s === "reject_no_company" && !companiesHouseFound) ? "rejected" : "done");
+    stages.forEach(s => stageStatus[s] = ((s === "reject_no_company" && !companiesHouseFound)
+      || s === "return_to_applicant") ? "rejected" : "done");
     stepIndex = stages.length;
     openDetail = "synthesize_decision" in STAGE_META && stages.includes("synthesize_decision") ? "synthesize_decision" : stages[stages.length-1];
     statusPill.className = "status-pill " + (RUN.final_decision?.outcome === "rejected" ? "rejected" : "done");
