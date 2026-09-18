@@ -102,6 +102,31 @@ def redact_bank_statements(docs: list[dict] | None) -> list[dict] | None:
     return redacted_docs
 
 
+def redact_identity_documents(docs: list[dict] | None) -> list[dict] | None:
+    """First-line-redacts the `address` on each proof-of-address document
+    (ProofOfAddressSchema), same as redact_application does for
+    director_residential_address -- it is by construction the director's home
+    address, which is exactly what that function already masks.
+
+    `holder_name` is left as-is: it is the KYC identity signal triage actually
+    checks (does the ID belong to the director named on the application?), the
+    same reasoning that keeps applicant/director names and bank_statements'
+    account_owner unredacted -- see the module docstring. `document_kind`,
+    `expiry_date` and `issue_date` are not sensitive. There is no document
+    number to redact: DirectorIdSchema deliberately doesn't extract one.
+
+    Shared by DirectorIdSchema and ProofOfAddressSchema documents; a director
+    ID has no `address` field, so this is a no-op for those.
+    """
+    if not docs:
+        return docs
+    return [
+        {**doc, "address": redact_address_line(doc["address"])}
+        if "address" in doc else dict(doc)
+        for doc in docs
+    ]
+
+
 def _strip_companies_house_address_lines(value):
     """Recursively walks a parsed CompaniesHouse___* tool result, redacting
     any of _COMPANIES_HOUSE_ADDRESS_LINE_KEYS wherever they appear -- the
