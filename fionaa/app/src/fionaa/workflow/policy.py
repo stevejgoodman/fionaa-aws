@@ -50,9 +50,9 @@ async def check_against_policy(state: ApplicationState, runtime: Runtime[AgentCo
         response_format=PolicyCheckResult,
     )
 
-    # Computed fresh per invocation, not at module import time, so it can't
-    # go stale in a long-lived process.
-    today = date.today().isoformat()
+    # Computed fresh per invocation so it can't go stale in a long-lived
+    # process -- same reason validate_final_decision does it.
+    reference_date = date.today().isoformat()
 
     # Explicit cachePoint after POLICY, separate from load_model()'s
     # cache_control (which only ever sees this as one message and would
@@ -77,7 +77,7 @@ async def check_against_policy(state: ApplicationState, runtime: Runtime[AgentCo
                                 f"BANK STATEMENTS:\n{json.dumps(bank_statements)}\n\n"
                                 f"BANK STATEMENT END DATES:\n"
                                 f"{json.dumps([s['end_date'] for s in bank_statements])}\n\n"
-                                f"TODAY'S DATE: {today}"
+                                f"ASSESSMENT REFERENCE DATE: {reference_date}"
                             ),
                         },
                     ]

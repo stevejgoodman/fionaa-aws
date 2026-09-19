@@ -26,21 +26,40 @@ def human_review_report(proposed: dict, validation: dict | None = None) -> dict:
 
 
 def reject_no_company(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict[str, Any]:
-    """Terminal node for the companies_house branch that found no matching
+    """Prepare a review report for the companies_house branch with no matching
     company. companies_house runs first in graph.py (before policy_check),
     so there's no policy_check result yet to include here -- an
     unidentified company makes the rest of the assessment moot, so nothing
-    downstream (including policy_check) ever runs on this branch."""
+    assessment (including policy_check) runs on this branch. Documentation
+    triage still runs afterwards using the submission inventory.
+
+    graph.py routes here on found=False, which check_companies_house sets
+    for two very different reasons -- state["company_lookup_failed"]
+    distinguishes them: unset/False means the lookup actually ran and
+    Companies House confirmed no match (a real negative signal about the
+    company); True means the lookup itself didn't complete -- a
+    ThrottlingException, exhausted retries, an open circuit
+    (workflow/resilience.py), or the Gateway tool erroring -- so nothing
+    was actually learned about the company one way or the other. Reporting
+    both as "companies_house_no_match" would read a transient capacity/
+    outage blip as if it were a real finding, which is worse for a reviewer
+    than just saying the check couldn't be completed."""
+    lookup_failed = bool(state.get("company_lookup_failed"))
     final_decision = {
         "outcome": "referred",
-        "reason": "companies_house_no_match",
-        "rationale": "Company identity could not be confirmed; human review is required.",
+        "reason": "companies_house_lookup_unavailable" if lookup_failed else "companies_house_no_match",
+        "rationale": (
+            "Company lookup could not be completed; human review is required to verify company identity manually."
+            if lookup_failed else
+            "Company identity could not be confirmed; human review is required."
+        ),
         "companies_house": state.get("companies_house"),
     }
     final_decision = human_review_report(final_decision, {
-        "status": "not_checked", "check_status": "company_not_confirmed", "claims": [],
+        "status": "not_checked",
+        "check_status": "lookup_unavailable" if lookup_failed else "company_not_confirmed",
+        "claims": [],
     })
-    runtime.context.store.put_json("decision/result.json", final_decision)
     return {"final_decision": final_decision}
 
 

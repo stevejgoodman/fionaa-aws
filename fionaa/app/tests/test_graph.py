@@ -226,7 +226,7 @@ async def test_check_against_policy_persists_and_returns_result(monkeypatch):
                 f"ANNUAL ACCOUNTS:\n[]\n\n"
                 f"BANK STATEMENTS:\n[]\n\n"
                 f"BANK STATEMENT END DATES:\n[]\n\n"
-                f"TODAY'S DATE: {date.today().isoformat()}"
+                f"ASSESSMENT REFERENCE DATE: {date.today().isoformat()}"
             ),
         },
     ]
@@ -551,7 +551,7 @@ async def test_check_companies_house_routes_to_reject_when_not_found(monkeypatch
 # Node: reject_no_company
 # ---------------------------------------------------------------------------
 
-def test_reject_no_company_persists_final_decision():
+def test_reject_no_company_prepares_report_for_triage():
     store = FakeStore()
     state = {
         "policy_check": "policy check passed",
@@ -565,7 +565,27 @@ def test_reject_no_company_persists_final_decision():
     assert result["final_decision"]["ai_recommendation"]["reason"] == "companies_house_no_match"
     assert result["final_decision"]["ai_recommendation"]["outcome"] == "referred"
     assert result["final_decision"]["validation"]["status"] == "not_checked"
-    assert store.data["decision/result.json"] == result["final_decision"]
+    assert "decision/result.json" not in store.data
+
+
+def test_reject_no_company_distinguishes_lookup_failure_from_no_match():
+    """company_lookup_failed=True means the lookup itself didn't complete
+    (throttled/timed out/circuit open) -- a different signal to a reviewer
+    than Companies House actually confirming no match, so this must not
+    collapse to the same companies_house_no_match reason as the test above."""
+    store = FakeStore()
+    state = {
+        "policy_check": "policy check passed",
+        "companies_house": {"found": False, "confidence": "low", "summary": "Company lookup was unavailable; internal verification is required."},
+        "company_lookup_failed": True,
+    }
+    runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
+
+    result = g.reject_no_company(state, runtime)
+
+    assert result["final_decision"]["ai_recommendation"]["reason"] == "companies_house_lookup_unavailable"
+    assert result["final_decision"]["ai_recommendation"]["outcome"] == "referred"
+    assert result["final_decision"]["validation"]["check_status"] == "lookup_unavailable"
 
 
 # ---------------------------------------------------------------------------
@@ -1024,15 +1044,19 @@ def _complete_submission() -> dict:
     calendar moved past the 90-day thresholds.
     """
     today = date.today()
+    # Four contiguous ~monthly periods for one account. Coverage is measured
+    # in distinct days per account, so these have to actually span more than
+    # three calendar months -- three 30-day windows come to 90 days, which is
+    # a day or two short of three months and would read as `incomplete`.
     statements = {
         f"input/bank_statement_{index}.json": {
             "account_owner": "Acme Ltd", "bank_name": "Big Bank", "account_number": "12345678",
             "address": "1 High St, London",
-            "start_date": (today - timedelta(days=30 * index + 29)).isoformat(),
-            "end_date": (today - timedelta(days=30 * index)).isoformat(),
+            "start_date": (today - timedelta(days=31 * index + 30)).isoformat(),
+            "end_date": (today - timedelta(days=31 * index)).isoformat(),
             "balance": 12000.0, "payments_in": 5000.0, "payments_out": 3200.0,
         }
-        for index in range(3)
+        for index in range(4)
     }
     return {
         "input/application.json": COMPLETE_APPLICATION,
@@ -1107,7 +1131,10 @@ async def test_complete_submission_reaches_underwriter_despite_no_company_match(
 
     tools=[] leaves the model's found=True with no supporting tool call, which
     the runtime groundedness check downgrades to found=False (see
-    test_check_companies_house_overrides_ungrounded_found_true_with_no_tool_calls).
+    test_check_companies_house_overrides_ungrounded_found_true_with_no_tool_calls)
+    and which the resilience layer records as a lookup that never completed
+    rather than one that completed and found nothing -- either way it is the
+    reject_no_company ending, and either way triage decides the route.
     """
     store = FakeStore(_complete_submission())
     _patch_all_integration_points(monkeypatch, agent_response="ok")
@@ -1125,7 +1152,8 @@ async def test_complete_submission_reaches_underwriter_despite_no_company_match(
     # Complete paperwork, so it still reaches a human despite the failed lookup.
     assert final_state["triage"]["route"] == "underwriter"
     handoff = store.data["decision/to_underwriter.json"]
-    assert handoff["assessment"]["ai_recommendation"]["reason"] == "companies_house_no_match"
+    assert handoff["assessment"]["ai_recommendation"]["reason"] == "companies_house_lookup_unavailable"
+    assert final_state["company_lookup_failed"] is True
 
 
 @pytest.mark.asyncio

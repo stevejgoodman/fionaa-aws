@@ -25,13 +25,14 @@ def _facts(state: ApplicationState, today: date) -> dict:
     annual_accounts = state.get("annual_accounts", [])
     bank_statements = state.get("bank_statements", [])
     companies_house = state.get("companies_house")
-    return {
+    derived_facts = build_derived_facts(application, annual_accounts, bank_statements, companies_house, today)
+    facts = {
         # Precomputed in the Automated Reasoning policy's own variable
         # names (loanAmount, isUKBased, tradingHistoryMonths, etc.) -- AR's
         # NL-to-logic translator was coming back "inconclusive" on most
         # claims when only given raw, differently-named self-reported JSON
         # to derive these from itself. See ar_facts.py.
-        "derived_facts": build_derived_facts(application, annual_accounts, bank_statements, companies_house, today),
+        "derived_facts": derived_facts,
         # Keep self-reported inputs distinguishable from external findings.
         "application_self_reported": application,
         "annual_accounts": annual_accounts,
@@ -39,6 +40,7 @@ def _facts(state: ApplicationState, today: date) -> dict:
         "companies_house_findings": companies_house,
         "financial_assessment": state.get("financial_assessment"),
     }
+    return facts
 
 
 def _claim(source: str, field: str, text: str) -> dict:
@@ -73,9 +75,8 @@ async def _validate_decision(state: ApplicationState, runtime: Runtime[AgentCont
     loan_type = LoanType(state["application"]["loan_type"])
     checker = runtime.context.policy_checker or PolicyConsistencyChecker.from_environment()
     policy = load_policy_text(loan_type)
-    # Computed fresh per invocation, not frozen -- see check_against_policy,
-    # which does the same for the same reason.
-    facts = _facts(state, date.today())
+    reference_date = date.today()
+    facts = _facts(state, reference_date)
     leaf_facts = leaf_facts_for_loan_type(loan_type, facts["derived_facts"])
     results = await asyncio.gather(*(
         checker.check(loan_type.value, policy, leaf_facts, item["claim"]["summary"]) for item in claims
@@ -99,11 +100,10 @@ async def _validate_decision(state: ApplicationState, runtime: Runtime[AgentCont
 
 
 async def validate_final_decision(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict:
-    """Save the AI recommendation and claim annotations for human review."""
+    """Prepare the annotated report; triage persists the final result."""
     validation = await _validate_decision(state, runtime)
     runtime.context.store.put_json("decision/validation.json", validation)
     report = human_review_report(
         {**state["proposed_decision"], "policy_check": state["policy_check"]}, validation,
     )
-    runtime.context.store.put_json("decision/result.json", report)
     return {"final_decision": report}
