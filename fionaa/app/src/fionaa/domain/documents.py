@@ -1,6 +1,7 @@
 """Business models for documents."""
 from datetime import date
 from enum import Enum
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -72,9 +73,49 @@ class AnnualAccountsSchema(BaseModel):
     cash_at_bank_last_year: int | None  = Field(description="cash at band or in hand last year")
 
 
+class DirectorIdSchema(BaseModel):
+    """Extracted fields from a director's photo ID.
+
+    general.md: "Director ID means a Drivers licence or Passport" -- hence the
+    closed `document_kind`, so an extraction that produced something else fails
+    validation rather than silently satisfying the requirement.
+
+    The document *number* is deliberately not extracted. Triage only needs to
+    know the right kind of document exists, is in date, and belongs to the
+    director named on the application; a passport number would be checkpointed
+    and persisted for no gain, and not collecting it beats redacting it later
+    (see redaction.py's module docstring for the same reasoning applied to
+    bank account numbers).
+    """
+
+    document_kind: Literal["passport", "driving_licence"] = Field(
+        description="Which form of photo ID this is.", title="Document Kind")
+    holder_name: str = Field(description="Full name of the person the ID was issued to, "
+                             "as printed on the document.", title="Holder Name")
+    expiry_date: date = Field(description="The document's expiry date.", title="Expiry Date")
+
+
+class ProofOfAddressSchema(BaseModel):
+    """Extracted fields from a document evidencing the director's home address.
+
+    `issue_date` is what makes this checkable -- a utility bill from four years
+    ago evidences where someone used to live, so triage treats an old one as
+    stale rather than satisfied.
+    """
+
+    document_kind: str = Field(description="What the document is, e.g. utility bill, "
+                               "council tax statement, bank statement.", title="Document Kind")
+    holder_name: str = Field(description="Full name of the person the document is addressed to.",
+                             title="Holder Name")
+    address: str = Field(description="The address as printed on the document.", title="Address")
+    issue_date: date = Field(description="The date the document was issued.", title="Issue Date")
+
+
 class DocumentType(str, Enum):
     bank_statement = "bank_statement"
     annual_company_report = "annual_company_report"
+    director_id = "director_id"
+    proof_of_address = "proof_of_address"
 
     # Descriptions for each value
     def describe(self) -> str:
@@ -85,6 +126,13 @@ class DocumentType(str, Enum):
             "annual_company_report": "A company annual accounts or annual report "
             "showing income statement (or P&L statement) and "
             "balance sheet and other company information from the year such as a directors report ",
+
+            "director_id": "A director's photo identity document — a UK passport "
+            "or a driving licence — showing the holder's name and the document's expiry date.",
+
+            "proof_of_address": "A document evidencing the director's residential "
+            "address, such as a utility bill, council tax statement or personal bank "
+            "statement, showing the addressee's name, the address and an issue date.",
         }
         return descriptions[self.value]
 

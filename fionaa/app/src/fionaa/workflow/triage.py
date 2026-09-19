@@ -1,60 +1,98 @@
-"""Final documentation routing shared by both assessment endings."""
-from pydantic import ValidationError
+"""Final routing stage: forward to an underwriter, or return to the applicant.
+
+Both of the graph's assessment endings (`validate_final_decision` and
+`reject_no_company`) feed into `triage_application`, which branches on
+documentation completeness alone. A company Companies House couldn't find still
+goes to the underwriter if the paperwork is complete -- that lookup failure is
+something a human investigates, not something the applicant can fix by
+uploading another file.
+
+Each branch writes its own handoff artifact so a downstream app can watch one
+prefix and pick up only what's addressed to it, and neither ends up having to
+parse a route field out of a shared document to find out if it should act.
+"""
+from __future__ import annotations
+
+from datetime import date
+from typing import Any
+
 from langgraph.runtime import Runtime
 
-from fionaa.evidence_readiness import assess_submission, _application_finding
-from fionaa.workflow.decision import human_review_report
-from fionaa.workflow.state import ApplicationState, AgentContext
+from fionaa.evidence_checks import build_findings
+from fionaa.triage import assess
+from fionaa.workflow.state import AgentContext, ApplicationState
+
+UNDERWRITER_KEY = "decision/to_underwriter.json"
+APPLICANT_KEY = "decision/to_applicant.json"
 
 
-def route_loaded_application(state: ApplicationState):
-    if state["application"].get("loan_type") == "unsecured-business-loans" and (
-        state.get("ingestion_errors") or (state.get("readiness_assessment") or {}).get("route") == "internal_hold" or (
-            state.get("submission_manifest") and _application_finding(state["application"]).status != "satisfied"
-        )
-    ):
-        return "prepare_incomplete_review"
-    return "companies_house"
+def triage_application(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict[str, Any]:
+    """Assess submission completeness and record it, without routing yet.
+
+    Computed fresh per invocation rather than against a frozen date -- same as
+    check_against_policy and validate_final_decision, which both call
+    date.today() for the same reason: staleness is relative to when the
+    assessment actually runs.
+    """
+    result = assess(build_findings(dict(state), date.today())).model_dump(mode="json")
+    runtime.context.store.put_json("decision/triage.json", result)
+    return {"triage": result}
 
 
-def prepare_incomplete_review(state: ApplicationState):
-    """Avoid asking assessment agents to reason over invalid or missing inputs."""
-    report = human_review_report({
-        "outcome": "referred", "reason": "assessment_not_completed",
-        "rationale": "Application details or evidence processing need attention before assessment.",
-    }, {"status": "not_checked", "check_status": "assessment_not_completed", "claims": []})
+def route_by_triage(state: ApplicationState) -> str:
+    """The graph's only conditional edge. Deliberately a lookup and nothing
+    more: every rule that decides the route lives in triage.assess, where it
+    can be tested without building a graph."""
+    return state["triage"]["route"]
+
+
+def _reviewer_report(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict[str, Any]:
+    """decision/result.json stays the single reviewer-facing artifact; the
+    upstream node already wrote it, and this rewrites it with `triage` merged
+    in so the route is visible without opening a second file."""
+    report = {**state["final_decision"], "triage": state["triage"]}
+    runtime.context.store.put_json("decision/result.json", report)
+    return report
+
+
+def forward_to_underwriter(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict[str, Any]:
+    """Terminal node: the submission is complete enough for human underwriting.
+
+    This says nothing about whether the loan should be granted -- the AI
+    recommendation and the Automated Reasoning claim annotations travel with it
+    as supporting material for the underwriter to weigh, exactly as they do
+    today.
+    """
+    report = _reviewer_report(state, runtime)
+    runtime.context.store.put_json(UNDERWRITER_KEY, {
+        "route": "underwriter",
+        "reason": state["triage"]["reason"],
+        "triage": state["triage"],
+        "assessment": report,
+    })
     return {"final_decision": report}
 
 
-def triage_application(state: ApplicationState, runtime: Runtime[AgentContext]):
-    application = state["application"]
-    if application.get("loan_type") != "unsecured-business-loans":
-        # Only the unsecured checklist has been approved. Other products retain
-        # their existing human-review path.
-        runtime.context.store.put_json("decision/result.json", state["final_decision"])
-        return {}
-    manifest = state.get("submission_manifest")
-    if not manifest:
-        triage = {"rules_version": "unsecured-readiness-v1", "route": "internal_hold",
-                  "submission_date": None, "findings": [],
-                  "reason": "A valid, complete submission inventory and submission date are required."}
-    else:
-        try:
-            triage = dict(state["readiness_assessment"]) if state.get("readiness_assessment") else assess_submission(
-                application, manifest, state.get("ingested_documents", []),
-            ).model_dump(mode="json")
-        except (ValidationError, ValueError, TypeError, KeyError):
-            # Dates or extraction fields can be schema-shaped but uninterpretable.
-            # Do not expose exception text (which can contain sensitive inputs).
-            triage = {"rules_version": "unsecured-readiness-v1", "route": "internal_hold",
-                      "submission_date": manifest["submission_date"], "findings": [],
-                      "reason": "Readiness inputs need internal verification."}
-        triage["submission_id"] = manifest["submission_id"]
-    if state.get("ingestion_errors"):
-        triage.update(route="internal_hold", reason="Evidence processing requires internal attention.")
-    if state.get("company_lookup_failed"):
-        triage.update(route="internal_hold", reason="Company verification requires internal attention.")
-    report = {**state["final_decision"], "triage": triage}
-    runtime.context.store.put_json("decision/triage.json", triage)
-    runtime.context.store.put_json("decision/result.json", report)
-    return {"triage": triage, "final_decision": report}
+def return_to_applicant(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict[str, Any]:
+    """Terminal node: required documentation is missing, stale or unreadable.
+
+    The applicant artifact carries the checklist and nothing else. No AI
+    recommendation, no policy check, no financial assessment, no Companies
+    House findings -- an applicant must not be shown the bank's internal credit
+    view of them, and an incomplete submission hasn't been assessed on its
+    merits anyway. `outstanding` is the machine-readable form of the same
+    information in `applicant_note`, for a downstream app that would rather
+    render its own wording than show the note verbatim.
+    """
+    report = _reviewer_report(state, runtime)
+    triage = state["triage"]
+    runtime.context.store.put_json(APPLICANT_KEY, {
+        "route": "return_to_applicant",
+        "reason": triage["reason"],
+        "applicant_note": triage["applicant_note"],
+        "outstanding": [
+            {"requirement": item["requirement"], "status": item["status"], "action": item["correction"]}
+            for item in triage["findings"] if item["status"] != "satisfied"
+        ],
+    })
+    return {"final_decision": report}

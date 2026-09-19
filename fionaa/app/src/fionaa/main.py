@@ -53,10 +53,18 @@ async def invoke(payload, context):
     final_state = await graph.ainvoke({}, config, context=agent_context)
 
     prefix = f"s3://{settings.applications_bucket}/{identity.customer_id}/{identity.application_id}"
+    # `route` is where the application goes next; `outcome` stays what it has
+    # always been (pending_human_review) -- they answer different questions and
+    # existing consumers (the Path-2 eval gate, the job dashboard) read outcome.
+    route = final_state["triage"]["route"]
+    handoff = "to_underwriter" if route == "underwriter" else "to_applicant"
     result = {
         "application_id": identity.application_id,
         "outcome": final_state["final_decision"]["outcome"],
+        "route": route,
         "decision_uri": f"{prefix}/decision/result.json",
+        "triage_uri": f"{prefix}/decision/triage.json",
+        "handoff_uri": f"{prefix}/decision/{handoff}.json",
     }
     for stage in ("companies_house", "policy_check", "financial_assessment", "web_search"):
         if stage in final_state:

@@ -239,3 +239,38 @@ def test_redact_prose_values_walks_nested_structures():
 def test_redact_prose_values_passes_through_non_string_leaves():
     assert r.redact_prose_values(42, ["1972"]) == 42
     assert r.redact_prose_values(None, ["1972"]) is None
+
+
+def test_redact_identity_documents_redacts_address_first_line_keeps_holder():
+    """holder_name survives: it is the KYC signal triage checks (does the ID
+    belong to the director named on the application?), the same reasoning that
+    keeps bank_statements' account_owner unredacted."""
+    docs = [{"document_kind": "utility bill", "holder_name": "Steve Goodman",
+             "address": "3 Manor Road, Ruislip, Middlesex", "issue_date": "2026-08-01"}]
+
+    redacted = r.redact_identity_documents(docs)
+
+    assert redacted[0]["address"] == "[address redacted], Ruislip, Middlesex"
+    assert redacted[0]["holder_name"] == "Steve Goodman"
+    assert redacted[0]["issue_date"] == "2026-08-01"
+
+
+def test_redact_identity_documents_leaves_director_id_alone():
+    """A DirectorIdSchema document has no address field -- and deliberately no
+    document number to redact either (see DirectorIdSchema's docstring)."""
+    docs = [{"document_kind": "passport", "holder_name": "Steve Goodman", "expiry_date": "2030-01-01"}]
+
+    assert r.redact_identity_documents(docs) == docs
+
+
+def test_redact_identity_documents_handles_none_and_empty():
+    assert r.redact_identity_documents(None) is None
+    assert r.redact_identity_documents([]) == []
+
+
+def test_redact_identity_documents_does_not_mutate_input():
+    docs = [{"holder_name": "Steve Goodman", "address": "3 Manor Road, Ruislip"}]
+
+    r.redact_identity_documents(docs)
+
+    assert docs[0]["address"] == "3 Manor Road, Ruislip"

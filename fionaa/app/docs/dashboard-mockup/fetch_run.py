@@ -42,6 +42,7 @@ from redaction import (  # noqa: E402  (needs sys.path insert above first)
     redact_annual_accounts,
     redact_application,
     redact_bank_statements,
+    redact_identity_documents,
     redact_prose_values,
     redact_tool_calls,
     sensitive_prose_values,
@@ -49,13 +50,19 @@ from redaction import (  # noqa: E402  (needs sys.path insert above first)
 
 
 STATE_KEYS_BY_NODE = {
-    "load_application": ["application", "annual_accounts", "bank_statements"],
+    "load_application": [
+        "application", "annual_accounts", "bank_statements",
+        "director_id", "proof_of_address", "document_errors",
+    ],
     "policy_check": ["policy_check"],
     "companies_house": ["companies_house", "companies_house_found"],
     "financial_assessment": ["financial_assessment"],
     "web_search": ["web_search"],
     "reject_no_company": ["final_decision"],
     "synthesize_decision": ["final_decision"],
+    "triage": ["triage"],
+    "to_underwriter": ["final_decision"],
+    "return_to_applicant": ["final_decision"],
 }
 
 ARTIFACT_BY_NODE = {
@@ -65,6 +72,9 @@ ARTIFACT_BY_NODE = {
     "web_search": "web_search/result.json",
     "reject_no_company": "decision/result.json",
     "synthesize_decision": "decision/result.json",
+    "triage": "decision/triage.json",
+    "to_underwriter": "decision/to_underwriter.json",
+    "return_to_applicant": "decision/to_applicant.json",
 }
 
 def build_steps(history, store, sensitive_values: list[str]) -> list[dict]:
@@ -109,6 +119,11 @@ def build_steps(history, store, sensitive_values: list[str]) -> list[dict]:
                 state_value["annual_accounts"] = redact_annual_accounts(state_value["annual_accounts"])
             if "bank_statements" in state_value:
                 state_value["bank_statements"] = redact_bank_statements(state_value["bank_statements"])
+            # Identity evidence carries the director's home address, the same
+            # field redact_application already masks on the application itself.
+            for key in ("director_id", "proof_of_address"):
+                if key in state_value:
+                    state_value[key] = redact_identity_documents(state_value[key])
         # Every subsequent node's state_value can carry LLM-authored prose
         # that quotes address/birth-year detail verbatim (policy_check's
         # clause_findings, companies_house's summary, financial_assessment's

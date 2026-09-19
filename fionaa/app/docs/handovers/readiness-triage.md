@@ -1,3 +1,18 @@
+> **Status (19 September 2026): superseded implementation, checklist still current.**
+>
+> The approved checklist below stands as a record of what was agreed on
+> 17 September 2026. The *implementation* it describes -- a `SubmissionManifest`
+> ingestion pipeline, an `internal_hold` route and a front-of-graph router --
+> was replaced by the triage step in `src/fionaa/triage.py`, which routes on
+> documentation completeness at the end of the graph to one of two outcomes.
+>
+> That replacement ships a narrower checklist: application details, director ID,
+> proof of address, bank statements and annual accounts, applied to every loan
+> type. Four items approved below are **not** yet enforced -- existing borrowing,
+> VAT returns, the over-£25,000 personal guarantee, and management information
+> as an alternative to stale filed accounts. Closing that gap is outstanding
+> work, tracked separately from this document.
+
 # Readiness triage: approved rules and implementation increments
 
 The user approved the unsecured-business-loan checklist on 17 September 2026.
