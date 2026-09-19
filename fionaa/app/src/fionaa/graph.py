@@ -17,7 +17,12 @@ from fionaa.workflow.financial import check_financial_assessment
 from fionaa.workflow.web_search import search_web
 from fionaa.workflow.decision import reject_no_company, synthesize_decision
 from fionaa.workflow.validation import validate_final_decision
-from fionaa.workflow.triage import triage_application, route_loaded_application, prepare_incomplete_review
+from fionaa.workflow.triage import (
+    forward_to_underwriter,
+    return_to_applicant,
+    route_by_triage,
+    triage_application,
+)
 
 def build_graph(checkpointer: Optional[BaseCheckpointSaver] = None):
     """Compiled per invocation, not once at module load. The checkpointer (if
@@ -39,8 +44,9 @@ def build_graph(checkpointer: Optional[BaseCheckpointSaver] = None):
     g.add_node("web_search", search_web)
     g.add_node("synthesize_decision", synthesize_decision)
     g.add_node("validate_final_decision", validate_final_decision)
-    g.add_node("triage_application", triage_application)
-    g.add_node("prepare_incomplete_review", prepare_incomplete_review)
+    g.add_node("triage", triage_application)
+    g.add_node("to_underwriter", forward_to_underwriter)
+    g.add_node("return_to_applicant", return_to_applicant)
 
     g.add_edge(START, "load_application")
     # companies_house runs first, not policy_check: it only needs `application`
@@ -51,17 +57,35 @@ def build_graph(checkpointer: Optional[BaseCheckpointSaver] = None):
     # routes dynamically via the Command it returns -- "policy_check" if the
     # company was confirmed, "reject_no_company" otherwise -- so no static
     # edge to either is declared here.
-    g.add_conditional_edges("load_application", route_loaded_application, {
-        "companies_house": "companies_house", "prepare_incomplete_review": "prepare_incomplete_review",
-    })
-    g.add_edge("prepare_incomplete_review", "triage_application")
-    g.add_edge("reject_no_company", "triage_application")
+    g.add_edge("load_application", "companies_house")
     # Complete the evidence before annotating policy claims for the reviewer.
     g.add_edge("policy_check", "financial_assessment")
     g.add_edge("financial_assessment", "web_search")
     # Synthesis supplies an advisory recommendation; validation adds claim checks.
     g.add_edge("web_search", "synthesize_decision")
     g.add_edge("synthesize_decision", "validate_final_decision")
-    g.add_edge("validate_final_decision", "triage_application")
-    g.add_edge("triage_application", END)
+
+    # Both endings converge on triage, which asks a question neither of them
+    # answers: does this submission have enough usable documentation for a
+    # human underwriter to work on? reject_no_company arrives here too because
+    # a company Companies House couldn't find is a lookup a human investigates,
+    # not something the applicant can fix by uploading another file -- with
+    # complete paperwork it still goes to the underwriter.
+    g.add_edge("reject_no_company", "triage")
+    g.add_edge("validate_final_decision", "triage")
+    # The graph's only conditional edge. companies_house branches via the
+    # Command it returns instead, because there the routing fact falls out of
+    # the node's own LLM work; here it's a pure function of state
+    # (route_by_triage is a one-line lookup), so a conditional edge keeps the
+    # branch visible in the compiled graph rather than buried in a node.
+    g.add_conditional_edges("triage", route_by_triage, {
+        "underwriter": "to_underwriter",
+        "return_to_applicant": "return_to_applicant",
+    })
+    # Two terminal nodes, not one node with an if: each writes its own handoff
+    # artifact (decision/to_underwriter.json, decision/to_applicant.json) so a
+    # downstream app watches one key and never has to read a route field out of
+    # a shared document to learn whether it should act.
+    g.add_edge("to_underwriter", END)
+    g.add_edge("return_to_applicant", END)
     return g.compile(checkpointer=checkpointer)

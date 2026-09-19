@@ -24,7 +24,7 @@ import re
 from datetime import date
 
 from fionaa.check_tools import check_bank_statements_recent_and_sufficient
-from fionaa.evidence_readiness import months_before
+from fionaa.evidence_checks import months_before
 
 
 def _business_type(company_name: str | None) -> str | None:

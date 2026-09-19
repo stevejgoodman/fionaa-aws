@@ -1,48 +1,69 @@
-"""Documentation readiness, independent of eligibility and AI recommendations.
+"""Submission-completeness triage: underwriter, or back to the applicant.
 
-Inputs are checked findings from a trusted evidence assessment, not applicant
-assertions or a list of uploaded filenames. Missing assessments mean an internal
-hold; only an explicit missing finding means an applicant omitted evidence.
+This answers one narrow question -- *is there enough usable documentation for a
+human underwriter to work on?* -- and deliberately says nothing about whether
+the loan is likely to be approved. An application with complete paperwork goes
+to the underwriter even when every assessment upstream looks unfavourable;
+that judgement is the underwriter's, not this module's.
+
+It is a pure rules engine: no LLM, no store, no `Runtime`. The graph-facing
+layer lives in `fionaa/workflow/triage.py`, and the state-to-findings mapping
+in `fionaa/evidence_checks.py`, so this module stays trivially testable and the
+routing rule stays readable as a rule rather than as prose an agent produced.
 """
-from datetime import date
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+RULES_VERSION = "submission-readiness-v1"
 
 Requirement = Literal[
-    "application_details", "director_id", "proof_of_address", "bank_statements",
-    "accounts_or_management_information", "vat_returns", "existing_borrowing",
-    "personal_guarantee",
-]
-Status = Literal[
-    "satisfied", "missing", "incomplete", "stale", "unreadable",
-    "not_applicable", "unable_to_verify",
+    "application_details",
+    "director_id",
+    "proof_of_address",
+    "bank_statements",
+    "annual_accounts",
 ]
 
-# Requirement text is separate from the approved readiness classification.
-CHECKLIST: dict[str, tuple[bool, str]] = {
-    "application_details": (True, "Complete the applicant details, requested loan amount and term."),
-    "director_id": (True, "Supply the director's passport or driving licence."),
-    "proof_of_address": (True, "Supply proof of the director's address."),
-    "bank_statements": (True, "Supply at least three months of business bank statements, with the latest less than 90 days old at submission."),
-    "accounts_or_management_information": (True, "Supply accounts or management information; filed accounts must have an accounting date within the 12 months before submission."),
-    "vat_returns": (False, "Supply VAT returns if the business is VAT registered."),
-    "existing_borrowing": (True, "Supply details of the business's existing borrowing."),
-    "personal_guarantee": (False, "Arrange the required personal guarantee during underwriting for a loan over £25,000."),
+# `missing` means the applicant never supplied it; the other three defects mean
+# something was supplied but can't be relied on. All four route the same way --
+# the distinction exists so the applicant-facing note can say something more
+# useful than "missing", and so a reviewer can tell the cases apart.
+Status = Literal["satisfied", "missing", "incomplete", "stale", "unreadable"]
+
+Route = Literal["underwriter", "return_to_applicant"]
+
+# Applicant-facing text. Every string here is read by the applicant verbatim,
+# so it names documents, never state keys, schema field names or node names.
+CHECKLIST: dict[str, str] = {
+    "application_details": "Complete the applicant details, requested loan amount and term.",
+    "director_id": "Supply the director's passport or driving licence.",
+    "proof_of_address": "Supply proof of the director's residential address.",
+    "bank_statements": "Supply at least three months of business bank statements, "
+                       "with the most recent statement less than 90 days old.",
+    "annual_accounts": "Supply filed annual accounts with an accounting date within the last 12 months.",
 }
 
 
 class EvidenceFinding(BaseModel):
+    """One requirement's assessed state, as produced by `evidence_checks`."""
+
     model_config = ConfigDict(extra="forbid")
 
     status: Status
     evidence_refs: list[str] = Field(default_factory=list)
+    # Internal, for the reviewer's artifact -- may name documents and dates but
+    # is never shown to the applicant. `correction` is the applicant-facing half.
     explanation: str = Field(min_length=1)
     correction: str | None = None
 
     @model_validator(mode="after")
     def require_support(self):
+        """A satisfied finding has to point at the evidence that satisfied it,
+        and a defect in a document that *was* supplied has to say what would
+        fix it -- otherwise the applicant note would just say "there's a
+        problem with your bank statements" with no action attached. `missing`
+        is exempt: `assess` fills its correction from CHECKLIST."""
         if self.status == "satisfied" and not self.evidence_refs:
             raise ValueError("Satisfied findings require evidence references")
         if self.status in {"incomplete", "stale", "unreadable"} and not self.correction:
@@ -50,79 +71,64 @@ class EvidenceFinding(BaseModel):
         return self
 
 
-class ReadinessInput(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    loan_type: Literal["unsecured-business-loans"]
-    submission_date: date
-    loan_amount: int | None = Field(default=None, strict=True)
-    vat_registered: bool | None = Field(default=None, strict=True)
-    has_existing_borrowing: bool | None = Field(default=None, strict=True)
-    findings: dict[Requirement, EvidenceFinding] = Field(default_factory=dict)
-
-
 class RequirementFinding(EvidenceFinding):
     requirement: Requirement
-    blocks_underwriting: bool
-    policy_ref: str
 
 
 class TriageResult(BaseModel):
-    rules_version: str = "unsecured-readiness-v1"
-    submission_date: date
-    route: Literal["underwriter", "return_to_applicant", "internal_hold"]
+    rules_version: str = RULES_VERSION
+    route: Route
     reason: str
     findings: list[RequirementFinding]
+    # Rendered from the outstanding `correction` strings only. Downstream apps
+    # can show this to the applicant as-is.
+    applicant_note: str = ""
 
 
-def assess_readiness(inputs: ReadinessInput) -> TriageResult:
-    """Apply the approved essential/supporting checklist without deciding a loan.
+def assess(findings: dict[str, EvidenceFinding]) -> TriageResult:
+    """Route on documentation completeness alone.
 
-    Evidence producers must check coverage/freshness against submission_date.
-    In particular, a count of three files is not proof of three months' coverage.
-    Unknown conditional applicability is an applicant clarification; missing
-    assessment capability or failed verification is an internal exception.
+    Every requirement in CHECKLIST is essential, so the rule is simply: all
+    satisfied -> underwriter, anything else -> back to the applicant. A
+    requirement with no finding supplied is treated as `missing` rather than
+    passing by omission -- a checklist that silently skips what it couldn't
+    assess is worse than useless here.
     """
-    findings = []
-    applicability = {
-        "vat_returns": inputs.vat_registered,
-        "existing_borrowing": inputs.has_existing_borrowing,
-        "personal_guarantee": None if inputs.loan_amount is None else inputs.loan_amount > 25_000,
-    }
-    clarifications = {
-        "vat_returns": "Confirm whether the business is VAT registered.",
-        "existing_borrowing": "Confirm whether the business has existing borrowing.",
-        "personal_guarantee": "Provide the requested loan amount.",
-    }
-    for requirement, (essential, action) in CHECKLIST.items():
-        finding = inputs.findings.get(requirement)
-        if requirement in applicability and applicability[requirement] is False:
-            finding = EvidenceFinding(status="not_applicable", explanation="Not required for the declared application details.")
-        elif requirement in applicability and applicability[requirement] is None:
-            essential = True
-            finding = EvidenceFinding(status="incomplete", explanation="Applicability has not been established.", correction=clarifications[requirement])
-        elif finding is None or finding.status == "not_applicable":
-            finding = EvidenceFinding(status="unable_to_verify", explanation="No applicable evidence assessment is available.")
-
-        correction = finding.correction
-        if finding.status == "missing":
-            correction = correction or action
-        if finding.status in {"satisfied", "not_applicable", "unable_to_verify"}:
-            correction = None
-        findings.append(RequirementFinding(
-            **{**finding.model_dump(), "correction": correction},
+    assessed: list[RequirementFinding] = []
+    for requirement, action in CHECKLIST.items():
+        finding = findings.get(requirement) or EvidenceFinding(
+            status="missing", explanation="No assessment was produced for this requirement."
+        )
+        correction = finding.correction or (action if finding.status != "satisfied" else None)
+        assessed.append(RequirementFinding(
+            **{**finding.model_dump(), "correction": None if finding.status == "satisfied" else correction},
             requirement=requirement,
-            blocks_underwriting=essential and finding.status not in {"satisfied", "not_applicable"},
-            policy_ref="policies/unsecured-business-loans/policy.md"
-                       + ("; policies/general.md" if requirement in {"director_id", "bank_statements", "accounts_or_management_information"} else ""),
         ))
 
-    # Hold takes precedence to avoid sending an incomplete correction report
-    # when any assessment failed, including supporting documentation checks.
-    if any(item.status == "unable_to_verify" for item in findings):
-        route, reason = "internal_hold", "Evidence assessment requires internal attention."
-    elif any(item.blocks_underwriting for item in findings):
-        route, reason = "return_to_applicant", "Essential information or documentation needs completion."
-    else:
-        route, reason = "underwriter", "Essential documentation is ready for human underwriting."
-    return TriageResult(submission_date=inputs.submission_date, route=route, reason=reason, findings=findings)
+    outstanding = [item for item in assessed if item.status != "satisfied"]
+    if not outstanding:
+        return TriageResult(
+            route="underwriter",
+            reason="Required documentation is present and usable.",
+            findings=assessed,
+        )
+    return TriageResult(
+        route="return_to_applicant",
+        reason="Required documentation is incomplete.",
+        findings=assessed,
+        applicant_note=render_applicant_note(outstanding),
+    )
+
+
+def render_applicant_note(outstanding: list[RequirementFinding]) -> str:
+    """Plain-English note listing what the applicant needs to supply.
+
+    Built only from `correction` strings, which come from CHECKLIST or from
+    `evidence_checks`' own applicant-safe wording -- never from `explanation`,
+    an exception message, or anything the assessment nodes produced.
+    """
+    lines = "\n".join(f"- {item.correction}" for item in outstanding if item.correction)
+    return (
+        "We can't assess your application yet. Please supply the following, "
+        f"then resubmit:\n{lines}"
+    )

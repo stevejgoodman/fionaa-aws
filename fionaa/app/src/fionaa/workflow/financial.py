@@ -35,10 +35,6 @@ async def check_financial_assessment(state: ApplicationState, runtime: Runtime[A
     policy_check = state.get("policy_check")
     annual_accounts = state.get("annual_accounts", [])
     bank_statements = state.get("bank_statements", [])
-    management_context = (
-        f"\n\nMANAGEMENT INFORMATION (supporting evidence, not filed accounts):\n{json.dumps(state['management_information'])}"
-        if state.get("management_information") else ""
-    )
 
     # Deterministic turnover/profit comparison, computed here rather than
     # left to the model's own arithmetic-over-prose reasoning — see
@@ -67,7 +63,7 @@ async def check_financial_assessment(state: ApplicationState, runtime: Runtime[A
                     f"POLICY CHECK RESULT:\n{json.dumps(policy_check)}\n\n"
                     f"ANNUAL ACCOUNTS:\n{json.dumps(annual_accounts)}\n\n"
                     f"BANK STATEMENTS:\n{json.dumps(bank_statements)}\n\n"
-                    f"CROSS-CHECK RESULT:\n{json.dumps(cross_check_payload)}{management_context}"
+                    f"CROSS-CHECK RESULT:\n{json.dumps(cross_check_payload)}"
                 )
             ]
         }
