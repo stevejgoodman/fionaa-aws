@@ -37,6 +37,10 @@ class ApplicationState(TypedDict, total=False):
     policy_check: Annotated[dict[str, Any], _last_write_wins]
     companies_house: Annotated[dict[str, Any], _last_write_wins]
     companies_house_found: Annotated[bool, _last_write_wins]
+    # Distinguishes "the lookup itself didn't complete" (timeout, circuit
+    # breaker open -- see workflow/resilience.py) from "the lookup completed
+    # and found no match". Only the latter is evidence about the company.
+    company_lookup_failed: bool
     # A dict conforming to FinancialAssessmentResult's shape (see below), not
     # a bare LLM string -- see policy_check's comment above.
     financial_assessment: Annotated[dict[str, Any], _last_write_wins]

@@ -14,6 +14,8 @@ class LoanType(str, Enum):
 
 
 class ApplicationFormSchema(BaseModel):
+    vat_registered: bool | None = Field(default=None, strict=True, description="Explicit declaration of VAT registration; unknown is not no.")
+    has_existing_borrowing: bool | None = Field(default=None, strict=True, description="Explicit declaration of existing business borrowing; unknown is not no.")
     applicant_name: str = Field(description="Name of person applying- should be person with sigificant control")
     year_of_birth: str = Field(description="applicant birth year")
     company_name: str = Field(description="Comany registered name")

@@ -9,7 +9,7 @@ Graph wiring -- that both endings reach triage and that the conditional edge
 lands on the right terminal node -- is covered in test_graph.py.
 """
 
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 
@@ -140,9 +140,15 @@ def test_too_few_bank_statements_is_incomplete():
 
 
 def test_old_bank_statements_are_stale():
-    """general.md: most recent statement must be less than 90 days old. The
-    newest here ends 2023-12-31, 153 days before TODAY."""
-    stale = [{**statement, "end_date": "2023-12-31"} for statement in BANK_STATEMENTS]
+    """general.md: most recent statement must be less than 90 days old. Three
+    months of perfectly good coverage, just all of it too long ago -- the
+    newest ends 2023-12-31, 153 days before TODAY."""
+    stale = [
+        {**statement, "start_date": start, "end_date": end}
+        for statement, (start, end) in zip(BANK_STATEMENTS, (
+            ("2023-10-01", "2023-10-31"), ("2023-11-01", "2023-11-30"), ("2023-12-01", "2023-12-31"),
+        ))
+    ]
 
     result = triage(bank_statements=stale)
 
@@ -281,3 +287,80 @@ def test_missing_finding_falls_back_to_the_checklist_action():
 
     correction = next(item.correction for item in result.findings if item.requirement == "director_id")
     assert correction == CHECKLIST["director_id"]
+
+
+# ---------------------------------------------------------------------------
+# Statement coverage maths
+#
+# Carried over from the manifest-based readiness workflow this replaced --
+# the arithmetic is the reason the bank-statement check counts distinct days
+# of coverage per account rather than counting files.
+# ---------------------------------------------------------------------------
+
+def _statement(start, end, account="12345678", bank="Big Bank"):
+    return {"account_owner": "Acme Ltd", "bank_name": bank, "account_number": account,
+            "address": ADDRESS, "start_date": start, "end_date": end,
+            "balance": 12000.0, "payments_in": 5000.0, "payments_out": 3200.0}
+
+
+def test_duplicate_statements_do_not_manufacture_coverage():
+    """Three uploads of the same month are one month of history. Counting
+    files here would let an applicant satisfy the three-month rule by
+    uploading the same statement three times."""
+    result = triage(bank_statements=[_statement("2024-05-01", "2024-05-31")] * 3)
+
+    assert status_of(result, "bank_statements") == "incomplete"
+    assert "duplicate and overlapping periods count only once" in result.applicant_note
+
+
+def test_overlapping_statements_do_not_manufacture_coverage():
+    result = triage(bank_statements=[
+        _statement("2024-05-01", "2024-05-31"),
+        _statement("2024-05-15", "2024-06-01"),
+        _statement("2024-05-20", "2024-06-01"),
+    ])
+
+    assert status_of(result, "bank_statements") == "incomplete"
+
+
+def test_separate_accounts_cannot_be_added_together():
+    """A month each from three different accounts is not three months of
+    history for any one account."""
+    result = triage(bank_statements=[
+        _statement("2024-03-01", "2024-03-31", account="11111111"),
+        _statement("2024-04-01", "2024-04-30", account="22222222"),
+        _statement("2024-05-01", "2024-05-31", account="33333333"),
+    ])
+
+    assert status_of(result, "bank_statements") == "incomplete"
+
+
+def test_blank_account_details_cannot_establish_coverage():
+    result = triage(bank_statements=[
+        _statement("2024-03-01", "2024-03-31", account="  "),
+        _statement("2024-04-01", "2024-04-30", account="  "),
+        _statement("2024-05-01", "2024-05-31", account="  "),
+    ])
+
+    assert status_of(result, "bank_statements") == "unreadable"
+
+
+def test_statement_ending_after_today_is_unreadable():
+    """A period that hasn't finished yet is a dating error, not evidence."""
+    result = triage(bank_statements=BANK_STATEMENTS + [_statement("2024-06-01", "2024-12-31")])
+
+    assert status_of(result, "bank_statements") == "unreadable"
+
+
+@pytest.mark.parametrize("end,expected", [
+    ("2024-05-31", "satisfied"),   # 1 day old
+    ("2024-03-04", "satisfied"),   # 89 days old -- inside the 90-day rule
+    ("2024-03-03", "stale"),       # 90 days old -- outside it
+])
+def test_bank_recency_boundary(end, expected):
+    """general.md: "most recent statement must be less than 90 days from date
+    of application" -- 90 days exactly is already too old."""
+    start = date.fromisoformat(end) - timedelta(days=120)
+    result = triage(bank_statements=[_statement(start.isoformat(), end)])
+
+    assert status_of(result, "bank_statements") == expected

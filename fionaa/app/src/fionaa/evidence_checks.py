@@ -13,14 +13,12 @@ never name a state key, a document key or a schema field.
 """
 from __future__ import annotations
 
-from datetime import date
+from calendar import monthrange
+from collections import defaultdict
+from datetime import date, timedelta
 from typing import Any
 
-from fionaa.check_tools import (
-    BANK_STATEMENT_MAX_AGE_DAYS,
-    BANK_STATEMENT_MIN_COUNT,
-    check_bank_statements_recent_and_sufficient,
-)
+from fionaa.check_tools import BANK_STATEMENT_MAX_AGE_DAYS, BANK_STATEMENT_MIN_COUNT
 from fionaa.triage import CHECKLIST, EvidenceFinding
 
 # general.md: "Filed accounts are accounting statements or annual reports - the
@@ -46,6 +44,58 @@ REQUIRED_APPLICATION_FIELDS = (
     "trading_start_date", "annual_turnover", "annual_profit",
 )
 
+
+# ---------------------------------------------------------------------------
+# Statement coverage maths, carried over from the evidence_readiness module
+# that the manifest-based readiness workflow used before this replaced it.
+# `months_before` is also used by ar_facts.py's filed-accounts recency fact.
+# ---------------------------------------------------------------------------
+
+def months_before(day: date, months: int) -> date:
+    index = day.year * 12 + day.month - 1 - months
+    year, month = divmod(index, 12)
+    return date(year, month + 1, min(day.day, monthrange(year, month + 1)[1]))
+
+
+def statement_coverage_facts(statements: list[dict], submission_date: date) -> dict:
+    """Count distinct covered days per account, never duplicate/overlapping files.
+
+    Three calendar months are measured backwards from the latest statement's
+    inclusive end date. Coverage can span several statements; separate accounts
+    cannot be added together to manufacture three months of history.
+    """
+    if not statements:
+        return {"months": 0, "age_days": None, "sufficient": False}
+    accounts = defaultdict(list)
+    for data in statements:
+        if not data["bank_name"].strip() or not data["account_number"].strip():
+            raise ValueError("Statement account details are incomplete")
+        start, end = date.fromisoformat(data["start_date"]), date.fromisoformat(data["end_date"])
+        if start > end or end > submission_date:
+            raise ValueError("Statement dates conflict with the submission timeline")
+        accounts[(data["bank_name"].strip().casefold(), data["account_number"].replace(" ", ""))].append((start, end))
+    coverage = []
+    for intervals in accounts.values():
+        intervals.sort()
+        merged = []
+        for start, end in intervals:
+            if merged and start <= merged[-1][1] + timedelta(days=1):
+                merged[-1] = (merged[-1][0], max(end, merged[-1][1]))
+            else:
+                merged.append((start, end))
+        end = merged[-1][1]
+        covered_days = sum((b - a).days + 1 for a, b in merged)
+        boundary = end + timedelta(days=1)
+        months = 0
+        while months < (boundary.year - 1) * 12 + boundary.month - 1 and (
+            boundary - months_before(boundary, months + 1)
+        ).days <= covered_days:
+            months += 1
+        age = (submission_date - end).days
+        coverage.append({"months": months, "age_days": age, "sufficient": months >= 3 and age < 90})
+    # Use a single account's count and age together. Prefer a recent account;
+    # an old large history cannot supply the count for a different new account.
+    return max(coverage, key=lambda item: (item["age_days"] < 90, item["months"], -item["age_days"]))
 
 def _finding(status: str, explanation: str, refs=(), correction: str | None = None) -> EvidenceFinding:
     return EvidenceFinding(
@@ -91,38 +141,38 @@ def application_details(application: dict) -> EvidenceFinding:
 def bank_statements(documents: list[dict], refs: list[str], today: date) -> EvidenceFinding:
     """general.md: at least 3 months of statements, most recent < 90 days old.
 
-    The counting and the date comparison are delegated to
-    `check_bank_statements_recent_and_sufficient`, the same deterministic tool
-    the policy-check agent is required to call, so triage and policy_check can
-    never disagree about whether the same statements pass the same rule.
+    "3 months" is measured as distinct days of coverage per account, not as a
+    count of files -- three copies of the same month, or three overlapping
+    periods, are one month of history, and two different accounts cannot be
+    added together to manufacture a third. `statement_coverage_facts` does
+    that arithmetic; counting files here would let an applicant satisfy the
+    rule by uploading the same statement three times.
     """
     if not documents:
         return _finding("missing", "No business bank statements were supplied.")
     try:
-        end_dates = [str(doc["end_date"]) for doc in documents]
-        result = check_bank_statements_recent_and_sufficient.func(
-            statement_end_dates=end_dates, reference_date=today.isoformat()
-        )
-    except (KeyError, TypeError, ValueError):
+        coverage = statement_coverage_facts(documents, today)
+    except (KeyError, TypeError, ValueError, OverflowError, AttributeError):
         return _finding(
-            "unreadable", "Statement period dates could not be read.", refs,
-            "Supply business bank statements that clearly show the period each one covers.",
+            "unreadable", "Statement dates or account details could not be read.", refs,
+            "Supply business bank statements that clearly show the account and the period each covers.",
         )
-    if not result["recent_enough"]:
+    if coverage["age_days"] >= BANK_STATEMENT_MAX_AGE_DAYS:
         return _finding(
-            "stale",
-            f"Most recent statement is {result['days_since_most_recent_statement']} days old.", refs,
+            "stale", f"Most recent statement is {coverage['age_days']} days old.", refs,
             f"Supply a business bank statement less than {BANK_STATEMENT_MAX_AGE_DAYS} days old.",
         )
-    if not result["count_sufficient"]:
+    if coverage["months"] < BANK_STATEMENT_MIN_COUNT:
         return _finding(
-            "incomplete", f"Only {result['statement_count']} statement(s) supplied.", refs,
-            f"Supply at least {BANK_STATEMENT_MIN_COUNT} months of business bank statements.",
+            "incomplete",
+            f"Only {coverage['months']} month(s) of distinct coverage for any one account.", refs,
+            f"Supply at least {BANK_STATEMENT_MIN_COUNT} months of business bank statement "
+            "coverage; duplicate and overlapping periods count only once.",
         )
     return _finding(
         "satisfied",
-        f"{result['statement_count']} statements, most recent "
-        f"{result['days_since_most_recent_statement']} days old.", refs,
+        f"{coverage['months']} months of coverage, most recent "
+        f"{coverage['age_days']} days old.", refs,
     )
 
 
