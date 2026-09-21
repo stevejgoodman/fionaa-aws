@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { AgentCoreStack, type HarnessConfig } from '../lib/cdk-stack';
+import { SecurityFoundationsStack } from '../lib/security-foundations-stack';
 import { ConfigIO, HarnessSpecSchema, type AwsDeploymentTarget } from '@aws/agentcore-cdk';
 import { App, type Environment } from 'aws-cdk-lib';
 import * as path from 'path';
@@ -120,6 +121,19 @@ async function main() {
   }
 
   const app = new App();
+
+  // Account/region-level security foundations (CloudTrail, Inspector, cost
+  // alarms/budgets, Macie) are singletons, not per-AgentCore-target
+  // resources -- deploy once per distinct (account, region), not once per
+  // entry in aws-targets.json. Today there's exactly one target; if more are
+  // ever added in different accounts/regions, dedupe by `${account}/${region}`
+  // here before instantiating another SecurityFoundationsStack.
+  const firstTarget = targets[0];
+  new SecurityFoundationsStack(app, `AgentCore-${sanitize(spec.name)}-security-foundations`, {
+    env: toEnvironment(firstTarget),
+    description: `Account-level security foundations (CloudTrail, Inspector, Bedrock cost/consumption alarms, Macie) for ${spec.name}`,
+    notificationEmail: process.env.FIONAA_SECURITY_ALERTS_EMAIL,
+  });
 
   for (const target of targets) {
     const env = toEnvironment(target);
