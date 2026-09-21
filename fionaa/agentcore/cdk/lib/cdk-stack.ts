@@ -8,13 +8,17 @@ import {
   type CustomJWTAuthorizerConfig,
   type HarnessDeploymentConfig,
 } from '@aws/agentcore-cdk';
-import { CfnOutput, Duration, Stack, type StackProps } from 'aws-cdk-lib';
+import { CfnOutput, Duration, RemovalPolicy, Stack, type StackProps } from 'aws-cdk-lib';
 import * as bedrock from 'aws-cdk-lib/aws-bedrock';
+import * as bedrockagentcore from 'aws-cdk-lib/aws-bedrockagentcore';
+import * as logs from 'aws-cdk-lib/aws-logs';
+import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as kms from 'aws-cdk-lib/aws-kms';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
+import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import * as path from 'path';
 
@@ -148,6 +152,125 @@ export class AgentCoreStack extends Stack {
         enableKeyRotation: true,
       });
 
+      // Let the AgentCore Memory service encrypt/decrypt checkpoint data at
+      // rest with this account's own key rather than a service-owned one
+      // (AWS security scan findings AC-07, AG-19).
+      tenantKey.grant(
+        new iam.ServicePrincipal('bedrock-agentcore.amazonaws.com', {
+          conditions: { StringEquals: { 'aws:SourceAccount': this.account } },
+        }),
+        'kms:Decrypt',
+        'kms:GenerateDataKey',
+        'kms:DescribeKey'
+      );
+
+      // AgentCoreMemory's L1 CfnMemory resource is always synthesized with
+      // logical id 'Resource' directly under the memory construct, so it
+      // resolves as the construct's default child -- see
+      // @aws/agentcore-cdk's AgentCoreMemory.js. The v2 schema/CDK props
+      // don't yet expose encryptionKeyArn end-to-end (agentcore.json can
+      // only hold a static string, and this key's ARN isn't known until
+      // synth), so wire it in directly on the L1 resource instead.
+      (checkpointMemory.node.defaultChild as bedrockagentcore.CfnMemory).encryptionKeyArn = tenantKey.keyArn;
+
+      // Bedrock model invocation logging -- CloudFormation has no native
+      // resource for PutModelInvocationLoggingConfiguration (it's a
+      // per-region account setting, not a discrete resource), so wire it via
+      // a custom resource (AWS security scan findings BR-04, AG-07, OW-01/07,
+      // FS-43).
+      const modelInvocationLogGroupName = '/aws/bedrock/fionaa-model-invocations';
+      const modelInvocationLogGroup = new logs.LogGroup(this, 'FionaaModelInvocationLogs', {
+        logGroupName: modelInvocationLogGroupName,
+        retention: logs.RetentionDays.ONE_YEAR,
+        encryptionKey: tenantKey,
+        // CDK's default (RETAIN) leaves this behind on any failed
+        // deploy/rollback, which then blocks the next attempt with
+        // "already exists" -- DESTROY so that self-heals. Trade-off: an
+        // intentional stack deletion or resource replacement also deletes
+        // these logs rather than keeping them.
+        removalPolicy: RemovalPolicy.DESTROY,
+      });
+      // Built from the (literal, static) log group name rather than
+      // modelInvocationLogGroup.logGroupArn -- that Fn::GetAtt would make the
+      // key's own policy depend on the log group, while the log group's
+      // `encryptionKey: tenantKey` above already makes it depend on the key.
+      // Together that's a genuine circular dependency (CloudFormation:
+      // "Circular dependency between resources"), not a false positive.
+      const modelInvocationLogGroupArn = `arn:aws:logs:${this.region}:${this.account}:log-group:${modelInvocationLogGroupName}`;
+      tenantKey.grant(
+        new iam.ServicePrincipal('logs.amazonaws.com', {
+          conditions: { ArnLike: { 'kms:EncryptionContext:aws:logs:arn': modelInvocationLogGroupArn } },
+        }),
+        'kms:Encrypt*',
+        'kms:Decrypt*',
+        'kms:ReEncrypt*',
+        'kms:GenerateDataKey*',
+        'kms:Describe*'
+      );
+
+      // Role Bedrock assumes to deliver invocation logs into the log group above.
+      const modelInvocationLoggingRole = new iam.Role(this, 'FionaaModelInvocationLoggingRole', {
+        assumedBy: new iam.ServicePrincipal('bedrock.amazonaws.com', {
+          conditions: {
+            StringEquals: { 'aws:SourceAccount': this.account },
+            ArnLike: { 'aws:SourceArn': `arn:aws:bedrock:${this.region}:${this.account}:*` },
+          },
+        }),
+      });
+      modelInvocationLoggingRole.addToPolicy(
+        new iam.PolicyStatement({
+          actions: ['logs:CreateLogStream', 'logs:PutLogEvents'],
+          resources: [modelInvocationLogGroup.logGroupArn, `${modelInvocationLogGroup.logGroupArn}:*`],
+        })
+      );
+
+      const modelInvocationLoggingParams = {
+        loggingConfig: {
+          cloudWatchConfig: {
+            logGroupName: modelInvocationLogGroup.logGroupName,
+            roleArn: modelInvocationLoggingRole.roleArn,
+          },
+          textDataDeliveryEnabled: true,
+        },
+      };
+      const modelInvocationLoggingConfig = new AwsCustomResource(this, 'ModelInvocationLoggingConfig', {
+        onCreate: {
+          service: 'bedrock',
+          action: 'PutModelInvocationLoggingConfiguration',
+          parameters: modelInvocationLoggingParams,
+          physicalResourceId: PhysicalResourceId.of('fionaa-model-invocation-logging'),
+        },
+        onUpdate: {
+          service: 'bedrock',
+          action: 'PutModelInvocationLoggingConfiguration',
+          parameters: modelInvocationLoggingParams,
+          physicalResourceId: PhysicalResourceId.of('fionaa-model-invocation-logging'),
+        },
+        onDelete: {
+          service: 'bedrock',
+          action: 'DeleteModelInvocationLoggingConfiguration',
+        },
+        policy: AwsCustomResourcePolicy.fromSdkCalls({ resources: AwsCustomResourcePolicy.ANY_RESOURCE }),
+      });
+      modelInvocationLoggingConfig.node.addDependency(modelInvocationLogGroup, modelInvocationLoggingRole);
+      // PutModelInvocationLoggingConfiguration hands Bedrock a role ARN to
+      // assume -- fromSdkCalls only grants the API action itself, not the
+      // separate iam:PassRole permission the caller needs whenever a call
+      // passes a role ARN for another service to assume.
+      const passRoleGrant = modelInvocationLoggingConfig.grantPrincipal.addToPrincipalPolicy(
+        new iam.PolicyStatement({
+          actions: ['iam:PassRole'],
+          resources: [modelInvocationLoggingRole.roleArn],
+        })
+      );
+      // addToPrincipalPolicy creates a new IAM::Policy resource, but nothing
+      // otherwise ties it to this custom resource's invocation order --
+      // without this, CloudFormation can (and did) invoke the Lambda before
+      // that policy attaches, failing with AccessDenied on iam:PassRole.
+      if (passRoleGrant.policyDependable) {
+        modelInvocationLoggingConfig.node.addDependency(passRoleGrant.policyDependable);
+      }
+
       // Model-invocation guardrail -- see app/fionaa/model/load.py, which
       // reads FIONAA_GUARDRAIL_ID/FIONAA_GUARDRAIL_VERSION (set below) and
       // attaches them via ChatBedrockConverse's guardrail_config. Deliberately
@@ -165,7 +288,14 @@ export class AgentCoreStack extends Stack {
         description: 'Prompt-attack/content filtering + non-business-PII masking for the fionaa loan agent',
         blockedInputMessaging: 'This request could not be processed.',
         blockedOutputsMessaging: 'This response could not be processed.',
+        // STANDARD content-filter tier requires cross-Region inference.
+        crossRegionConfig: {
+          guardrailProfileArn: `arn:aws:bedrock:${this.region}:${this.account}:guardrail-profile/us.guardrail.v1:0`,
+        },
         contentPolicyConfig: {
+          // STANDARD tier adds prompt-leakage detection on top of the
+          // PROMPT_ATTACK filter below (see AWS security scan finding BR-16).
+          contentFiltersTierConfig: { tierName: 'STANDARD' },
           filtersConfig: [
             // PROMPT_ATTACK is input-only -- outputStrength must be NONE.
             { type: 'PROMPT_ATTACK', inputStrength: 'HIGH', outputStrength: 'NONE' },
@@ -174,6 +304,16 @@ export class AgentCoreStack extends Stack {
             { type: 'SEXUAL', inputStrength: 'MEDIUM', outputStrength: 'MEDIUM' },
             { type: 'VIOLENCE', inputStrength: 'MEDIUM', outputStrength: 'MEDIUM' },
             { type: 'MISCONDUCT', inputStrength: 'MEDIUM', outputStrength: 'MEDIUM' },
+          ],
+        },
+        // Guards against hallucinated/ungrounded responses and off-topic
+        // answers in RAG-backed nodes (BR-27, OW-04/09). Only takes effect on
+        // calls that pass grounding-source content through ApplyGuardrail --
+        // harmless no-op otherwise.
+        contextualGroundingPolicyConfig: {
+          filtersConfig: [
+            { type: 'GROUNDING', threshold: 0.7 },
+            { type: 'RELEVANCE', threshold: 0.7 },
           ],
         },
         sensitiveInformationPolicyConfig: {
@@ -187,7 +327,7 @@ export class AgentCoreStack extends Stack {
             'PIN',
             'AWS_ACCESS_KEY',
             'AWS_SECRET_KEY',
-          ].map((type) => ({ type, action: 'ANONYMIZE', inputEnabled: true, outputEnabled: true })),
+          ].map(type => ({ type, action: 'ANONYMIZE', inputEnabled: true, outputEnabled: true })),
         },
       });
 
@@ -296,6 +436,48 @@ export class AgentCoreStack extends Stack {
 
       fionaaEnv.runtime.addEnvironmentVariable('FIONAA_GUARDRAIL_ID', guardrail.attrGuardrailId);
       fionaaEnv.runtime.addEnvironmentVariable('FIONAA_GUARDRAIL_VERSION', guardrailVersion.attrVersion);
+
+      // Automated Reasoning guardrail bindings (per-loan-type guardrail
+      // id/version/policy-digest, see policy_consistency.py) used to live
+      // as the raw JSON in agentcore.json's envVars -- moved to SSM
+      // Parameter Store because AgentCore Runtime now rejects any update
+      // once total environment-variable payload exceeds 1024 bytes, and
+      // this JSON alone was ~700+ of the runtime's 1762 bytes. Not secret
+      // data (guardrail ids + SHA256 digests of policy documents, no
+      // credentials), so Parameter Store rather than Secrets Manager.
+      const arGuardrailBindings = {
+        'secured-business-loans': {
+          guardrail_id: 'bwcgqb1tsa07',
+          guardrail_version: '1',
+          policy_sha256: '1f2eed9854fd54bae05b1bdeadb9b1f4bc967cf8e51f183a811cc152d6e4eea6',
+        },
+        'unsecured-business-loans': {
+          guardrail_id: '5h5yunnkf895',
+          guardrail_version: '1',
+          policy_sha256: '59192d6b3c4bb7a00ce0a4b26deb12633fa8970c4bc761ff2d1023962840c62c',
+        },
+        'revolving-credit-facility': {
+          guardrail_id: 'cdue92mr0ap4',
+          guardrail_version: '1',
+          policy_sha256: '8ffafa54cbf8f826f4742477eee12561f34e6c30bbe7386e0315fe938910337e',
+        },
+        'invoice-discounting': {
+          guardrail_id: '7kbeqj127jvv',
+          guardrail_version: '1',
+          policy_sha256: 'b1a79c82f543519da507b71aef7981671acea6dac2c57c0acfdbd40bdea26d63',
+        },
+        'invoice-factoring': {
+          guardrail_id: 'me18qejox6li',
+          guardrail_version: '1',
+          policy_sha256: 'bbe4bc64b1596806088fdafb12c07c974db53cf43f89be344d738b29829cdeee',
+        },
+      };
+      const arGuardrailBindingsParam = new ssm.StringParameter(this, 'FionaaArGuardrailBindings', {
+        parameterName: '/fionaa/ar-guardrails',
+        stringValue: JSON.stringify(arGuardrailBindings),
+      });
+      arGuardrailBindingsParam.grantRead(fionaaEnv.runtime.role);
+      fionaaEnv.runtime.addEnvironmentVariable('FIONAA_AR_GUARDRAILS_PARAM', arGuardrailBindingsParam.parameterName);
       fionaaEnv.runtime.addToPolicy(
         new iam.PolicyStatement({
           sid: 'ApplyFionaaGuardrail',
@@ -350,6 +532,14 @@ export class AgentCoreStack extends Stack {
         code: lambda.Code.fromAsset(path.resolve(process.cwd(), '../lambda/geo_area_match')),
         timeout: Duration.seconds(10),
         memorySize: 128,
+        // FS-09 (cap concurrent executions so a runaway agent loop can't
+        // exhaust account-wide Lambda concurrency) is currently NOT
+        // enforced here: this account's total Lambda concurrency limit is
+        // only 10 (AWS's default floor), and AWS requires >=10 to stay
+        // unreserved at all times, so any reservedConcurrentExecutions
+        // value here is rejected by the service. Request a Service Quotas
+        // increase for Lambda concurrent executions, then reinstate
+        // reservedConcurrentExecutions (was 5).
       });
 
       geoAreaMatchFn.addToRolePolicy(
@@ -367,6 +557,16 @@ export class AgentCoreStack extends Stack {
           'Lambda ARN to register as an MCP Gateway Target on claimsagent-claimsgateway (manual step, see lambda/geo_area_match/README.md)',
         value: geoAreaMatchFn.functionArn,
       });
+
+      // NOTE: platformVersion V2 (elastic, faster cold starts -- see
+      // https://aws.amazon.com/blogs/machine-learning/the-new-agentcore-runtime-elastic-optimized-and-consistently-fast-starts/)
+      // was attempted here via a direct UpdateAgentRuntime custom resource
+      // (CloudFormation doesn't expose this field yet), but V2 caps total
+      // environment-variable payload at 1024 bytes and this runtime's env
+      // vars total ~1762 bytes (mostly FIONAA_AR_GUARDRAILS). The update was
+      // reverted rather than shrinking env vars blindly -- revisit once
+      // FIONAA_AR_GUARDRAILS (or similar) moves out of environment
+      // variables (e.g. into Secrets Manager, fetched at startup).
     }
 
     // Create payment infrastructure via CFN constructs

@@ -31,8 +31,18 @@ class PolicyConsistencyChecker:
 
     @classmethod
     def from_environment(cls):
+        # FIONAA_AR_GUARDRAILS_PARAM (an SSM Parameter Store name) is the
+        # deployed path -- AgentCore Runtime rejects updates once total
+        # environment-variable payload exceeds 1024 bytes, so this JSON
+        # lives in Parameter Store instead. FIONAA_AR_GUARDRAILS (the raw
+        # JSON inline) is kept as a fallback for local/test use.
+        param_name = os.environ.get("FIONAA_AR_GUARDRAILS_PARAM")
+        if param_name:
+            raw = boto3.client("ssm").get_parameter(Name=param_name)["Parameter"]["Value"]
+        else:
+            raw = os.environ.get("FIONAA_AR_GUARDRAILS", "{}")
         try:
-            bindings = json.loads(os.environ.get("FIONAA_AR_GUARDRAILS", "{}"))
+            bindings = json.loads(raw)
         except json.JSONDecodeError:
             bindings = {}
         return cls(bindings if isinstance(bindings, dict) else {})
