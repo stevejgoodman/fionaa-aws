@@ -3,9 +3,6 @@ type: testing guide
 title: Unit tests and boundary fakes
 description: Focused unit tests that pin module boundaries for storage, security, graph routing, persistence, and agent-scoped helpers.
 tags: [testing, unit-tests, fakes, storage, security, graph]
-verified:
-  - by: openwiki/0.5.1
-    at: 2026-09-12T16:18:14.763Z
 sources:
   - id: openwiki-source-6a3998da098be404b24d8add
     resource: repo://fionaa/app/fionaa/tests/fakes.py

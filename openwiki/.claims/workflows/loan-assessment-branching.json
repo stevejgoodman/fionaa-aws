@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:81d456ab804b57e90cc08b00ecc7955c1c46b58288b057bb0d191f6c9750868d",
+  "claims": [
+    {
+      "id": "claim_af8d15cca242473bb3a6be694618dde0",
+      "statement": "The loan-assessment workflow loads the application from `input/application.json`, validates staged annual accounts and bank statements by prefix, and fails fast on missing or malformed input documents rather than silently skipping them.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/loading.py#L14-L75",
+          "version": "repo-lines-v1:sha256:1a8379966823a0ca30e4221ddc8da670320a45670b35464765a21600d97a3ca4:eyJzZWxlY3RlZExpbmVDb3VudCI6NjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2OWExMzk3NWMyNTZlYzgzMjBlMjAxNjA4M2M5NmRmNjM3Y2EzZDM1YmViZGUyMzE0YmVlM2E0NzExYjU2Y2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUzYmZiZGNkNmQxODMxNGQ4YTgxYTE3YWU1NGJmMjFkYmRiNzA5YmUwYmY0YWQ1MjE0YTQ0NDczNDdhNDVkNmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg4ZGUzMWI0NjE0MDE2MDFkMmM3YjZlNjcyMmQwMDU4NzM3NDAyMGZlNzc2OGE1N2ZmMzcxNzU5MTMxNDAyOTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/tests/test_graph.py#L43-L154",
+          "version": "repo-lines-v1:sha256:8c95aa9c1824c49970384e383d01e61ac032d26748b90f039171eed666964177:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJmZTQ1MWU3YWM2MGY2MWQzNzhiODJhZTllNWYyNjRhMzBlYjJjMWM0MTQ4ODU2YjlkZWViMTBjNTlhNjVmNWZlIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwMWJhNDcxOWM4MGI2ZmU5MTFiMDkxYTdjMDUxMjRiNjRlZWVjZTk2NGUwOWMwNThlZjhmOTgwNWRhY2E1NDZiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJkNzRiZmQxMTI2NzRiMTY3MTc1NTM3MjUyYjBkYzk4MjVhMDA0M2FjMTNhZDc4YTE0NTgyZjlmMTc1OWJlNWNmIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIwMjY1NTY5YjIyOTM5YmNlNTYyYWZjZjQxN2VhY2VhZDA4MmRhMDkyNDU4MGZhNTEzNzRjNGQ2YThiOTJlYTEwIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_e8cbb8d6d3234ba78ad5af80fd1f8ac4",
+      "statement": "`check_companies_house` is the workflow's branch gate: it persists Companies House evidence, performs a runtime groundedness check over raw tool calls, and routes to `policy_check` only when the company is confirmed; otherwise it routes to `reject_no_company` and stops later assessment stages from running.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/graph.py#L42-L59",
+          "version": "repo-lines-v1:sha256:13fcb6d082ca6fa52b7753f9c847324366519ef9884cb8dc6f3ae5daf058e608:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ2Yzk5ZDMwZWM5YzY5NDE4MmQwNmRjMTYxODA3ZWRmNDI1NTZmMjAyOTU5N2M1MTA5MWY2NDU3NzI3NjZhZWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlhM2MxYmExOTRhN2UwNDQyYmI2NDM3OWJjYjNiYzIzZTk4NDU0Y2QwNzMzMjFhNDYxYzZjMGEzYWY3YjBhMzMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ3ZTIyNTU0ZDdiOTM0MGM2ZThlOGUyMTVlZmY5NWEzYmJmMTk1ZDJkMDAzZDc5MzYxYjEyYTg3MmE4ZmYzYTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI2YjdiOGQ1Y2I1NWI0YzZlMWFlOTc4ZTUyMTg5MWJiM2JmZTA2YzAyODlkNjdhNWUyNzEzYTlmZjNiMjQyYTYifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/companies_house.py#L19-L111",
+          "version": "repo-lines-v1:sha256:d63462dc2a42739296ec2108bc777ce1c028949f27e609495569ef72acc17864:eyJzZWxlY3RlZExpbmVDb3VudCI6OTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBhZTA2YTNkMmJmY2IxMGQ2YThjMTc4NWNiZTQ5OTlmNTEzZjMzN2IzZGE4NGM0YzIwMzNjYWFkZGQ5NGM4Y2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNlNTExMGE4ZGJlMjQ1ZmYwOWQ1NDBhMmRkNDYwYmMwOGEwOWRiNWNlYmFlNzgyN2FiZWUwMjgyOTZhMmU5NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/decision.py#L28-L44",
+          "version": "repo-lines-v1:sha256:666ed00fae7d4d0dd7194925cf8c157aeb1eca102322e83ffc7a23e91bddf5ee:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM3MDBkMTM4ODgxZDQ2OThmZGUwNmY5ZGMxNDUxZTgwNzNlM2YwNGU3ZWRiODJiYmM4N2VkNTYxNmVjN2FlMzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc1ZjM5YzU1OTIwM2Q2YzAyYjU1MGFkOTliZTY2ZTRiNzg2NDdiNzg4NmI1YTlkZjhkNzZlM2JmYmJkMWUwMWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY0OWQ5NTBlYWZiMDYxYzQxYjcyZjQ5ZDg1MzcyM2Q3ODQ2NTI2N2ZmNzA1NThlZTJlODlhMmI4Mjc4YmZkMzQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFkYWJiZWExMGNhZGYyMjQ5Nzk0MjcyN2VkZDA2YzFlYTU4YzA0MWQyYWU1MmFiMjUyZTNhMTk0MTYzMTg5YWQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0f68f923cc814d578f50b66103f85052",
+      "statement": "The workflow separates gateway/MCP tools from local deterministic check tools: `tools_for` filters tool sets by prefix, Companies House and web search use runtime gateway tools, while policy and financial assessment use `CHECK_TOOLS_POOL`-backed local checks declared or selected from policy text.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/common.py#L1-L9",
+          "version": "repo-lines-v1:sha256:6e44330ef8205c2fbf1e65e1be4e4d827978cfb95e8b2e4b6a2833feff14d4c1:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTRhMDMxMGJhYmNjZTI5MWRiYjgzMzVmYWQyMDkyMTlkMDYwNWM5MDZiYmExMDIyZmY5NzQ3Y2I2MzdhMjZiZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMzllNTE4M2RkYWMzNjEyNDI3ZWI3YjIzZDA1M2ZlYmI1Yjk1MWZiMGYxYjkxOTA4MTM0ZjU1ZGM2Y2VkMTcwMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/companies_house.py#L24-L38",
+          "version": "repo-lines-v1:sha256:4754baa2c201316361399aaa5848cd99f0ee8de64ab4602f06d7fe974983f848:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZiZWNmZDJkZDRmMGJiNmI1NWM3MDA3ZWU3MGZjMjA0NGE3OGU0ZjdkMjg3ZTM0YmRhMTJhYjY2NTEzOWQyNmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjliZDJmODQ3NWRlY2NmOTJhNWQ5ZDFmYjcwODlhODEwZDhiNTBkMTE2OTgwMjg3YmE1ZTM3MDliZGRjNjE1ZWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFjZTBhZWEyN2ZkZTEzMjkzY2VhMjQ1YmVkYzM2NjQ4OGM2ZDYyOGQ5MzA1ZmM2OGFhYWM0MzRlYzA0OWEyY2YifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/financial.py#L18-L55",
+          "version": "repo-lines-v1:sha256:d5db6f7bc4e91525cd520153347603de5dd24dd4150cfdc952f50dab45068cef:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM5MGRlNTZiYjg3MmNmM2YzNmI2MzBlMmU1Y2YyZmZjZGU2MmE4ZWFiYjQ1NGU2NWIwZTQ3MGQ2MjU2NWFkNjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNlNTExMGE4ZGJlMjQ1ZmYwOWQ1NDBhMmRkNDYwYmMwOGEwOWRiNWNlYmFlNzgyN2FiZWUwMjgyOTZhMmU5NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM3N2UyOWQxZTdjNjAxOGM0Yjk0YjNlNzBhM2JhYTQxMmM4YmE4NGVlZGYyNGQyOWIzZDJkZWJhNjhiM2Y2MWMifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/policy.py#L21-L45",
+          "version": "repo-lines-v1:sha256:8d78b5d616d6aa83df690d9caac6300f00a508e48b344287ef1f148834b8e6a7:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM4OTVhODUwZjk2YWIyNzNjMTJlNmM5ZDcxMTNkNmQ2NWM3NGVkNTQzYTJkZDAyYmRhZWYyYjM4ODNmZDUxMTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNlNTExMGE4ZGJlMjQ1ZmYwOWQ1NDBhMmRkNDYwYmMwOGEwOWRiNWNlYmFlNzgyN2FiZWUwMjgyOTZhMmU5NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFkOWJlMThiMGIyZWVhMzc1OTliZTRlNDljYTU0MzY3NmRhMzBlNTY2M2FhODY2NjdmNmIyMTBiYzRjMjhkYjMifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/web_search.py#L16-L24",
+          "version": "repo-lines-v1:sha256:2cfbed1cc75d1ad468b499e6f1edd532f1526d844a1ea8da1f7cf7e556a7fb09:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTRkODFkOWIwMDFhMjU4ZGVmMDZiNjZkN2QzNjYzMGQ4ZmMwYjlhMzY0ZTViNWFkZmU0MWRmYjNmNmYzZjllNiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMzBjMWYxODhmMTQyZWQ3YTgyNDY4MGIyMDcxNzJjNTUxOWJjNjE0YTQ4ZmRhN2NmMTY3ZWRiOGRkZjc5OTU2YyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiY2U1MTEwYThkYmUyNDVmZjA5ZDU0MGEyZGQ0NjBiYzA4YTA5ZGI1Y2ViYWU3ODI3YWJlZTAyODI5NmEyZTk1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzc3ZTI5ZDFlN2M2MDE4YzRiOTRiM2U3MGEzYmFhNDEyYzhiYTg0ZWVkZjI0ZDI5YjNkMmRlYmE2OGIzZjYxYyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_916a6590391f4715a91d02a87e070463",
+      "statement": "`check_against_policy` loads policy text directly by loan type, injects the application and bank-statement end dates into the prompt, scopes the local check-tool pool from policy-declared tool names, and persists the structured policy result together with redacted tool-call evidence.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/policy.py#L21-L77",
+          "version": "repo-lines-v1:sha256:ebfa3bb23425eb9f41baac1adf4f6e6ec69cc5a864dbc709e3e4544199f53f84:eyJzZWxlY3RlZExpbmVDb3VudCI6NTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM4OTVhODUwZjk2YWIyNzNjMTJlNmM5ZDcxMTNkNmQ2NWM3NGVkNTQzYTJkZDAyYmRhZWYyYjM4ODNmZDUxMTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZkOGRiODIxYTNmNzg4ZTA3ZGFkYjgyMDc1MzQ3NGU3MDFhOGI4YmIxMTUwYTg2MjFlYzU3NTkyMDMzNGY0ZDYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNlNTExMGE4ZGJlMjQ1ZmYwOWQ1NDBhMmRkNDYwYmMwOGEwOWRiNWNlYmFlNzgyN2FiZWUwMjgyOTZhMmU5NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/tests/test_graph.py#L160-L252",
+          "version": "repo-lines-v1:sha256:ba54f11f6da0e314237e9054db39770dd4a0740c74cbea6111db62b56aab1bc1:eyJzZWxlY3RlZExpbmVDb3VudCI6OTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJkOTk0MmRlYjdkYmFiYzExNGIxYzQ4ZDAyZGE0NjM4NmU5YWNhNTE1YTUyZmI3YjNjNDEyZGM2Mjc5MjFiMDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc1NDVkMTg3NzJjMTM2ODFlZmEzYTg0ZjBmNmI5MjMzYTVmZjI5OGYwMDU2MWQzNzg2YjRjZmRjMDlhOWZlMjEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQyYmQyMDJlMGMyMzVlOGQwOTQyZTNkYzhmYzVjMGNmMDVkMDc5ZmNhYWJjMzY2ZmIxMDZlMGQ1N2Y4N2NjN2YifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f44ccf6a040140be93a6f08912365a4b",
+      "statement": "`check_financial_assessment` only runs after a confirmed Companies House match and combines application data, Companies House findings, annual accounts, bank statements, a deterministic cross-check, and a local repayment tool before persisting its assessment evidence.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/graph.py#L51-L59",
+          "version": "repo-lines-v1:sha256:3fcfd0bb2648e10638428a67725dc7b78e8f37bf382ad4df70efa8fa8c7070f0:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzcxZGU5YjkwNmNhZDQwNTA4NzNmZTJjNGE3NzQyZDFkYTFkODNjZTUyOThkZjc0NjUxMWY0MWQwOTM1NWZlZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOWEzYzFiYTE5NGE3ZTA0NDJiYjY0Mzc5YmNiM2JjMjNlOTg0NTRjZDA3MzMyMWE0NjFjNmMwYTNhZjdiMGEzMyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTBjMTc4OTlkODcyNmU5OTIwZTkxZWEzZGM3NDcwMjcwOTc0OWUyNzFiMjUzNWYxNjA0NTUyMjVjZTA1NGQzMSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjEsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjZiN2I4ZDVjYjU1YjRjNmUxYWU5NzhlNTIxODkxYmIzYmZlMDZjMDI4OWQ2N2E1ZTI3MTNhOWZmM2IyNDJhNiJ9"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/financial.py#L18-L85",
+          "version": "repo-lines-v1:sha256:7724ba97fdbe335fd5bdd1ab6b6dc06b68fa4bc5efbf9b9bdb53bd93d4b9644f:eyJzZWxlY3RlZExpbmVDb3VudCI6NjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM5MGRlNTZiYjg3MmNmM2YzNmI2MzBlMmU1Y2YyZmZjZGU2MmE4ZWFiYjQ1NGU2NWIwZTQ3MGQ2MjU2NWFkNjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQyMmZlN2JkYTA5MGJhZmUzYjRjYWJhYTNhY2EyYzIzNDIxYTQ3MTBlNjFiYTc2MDJjMDhiNDY2Y2U0MDFkMTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNlNTExMGE4ZGJlMjQ1ZmYwOWQ1NDBhMmRkNDYwYmMwOGEwOWRiNWNlYmFlNzgyN2FiZWUwMjgyOTZhMmU5NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8f968e83bf0344058d139977530e3435",
+      "statement": "`search_web` uses the company name plus Companies House findings as search context, stores the resulting free-text summary and redacted tool-call evidence, and treats groundedness as audit-only rather than a routing guard.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/web_search.py#L16-L60",
+          "version": "repo-lines-v1:sha256:c366b1bfada2e3b4785655c94b2a1e7e427c089df28aa9b6d5c29e228b12fb91:eyJzZWxlY3RlZExpbmVDb3VudCI6NDUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU0ZDgxZDliMDAxYTI1OGRlZjA2YjY2ZDdkMzY2MzBkOGZjMGI5YTM2NGU1YjVhZGZlNDFkZmIzZjZmM2Y5ZTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFhMzM0Yzk0YmI2ZmIzZmRmYzIyMWRiOTdiYTIzN2ZlYjVlNDAzYjJiYjBjYWMxZWQ4YTM4NmY1NjJjZGVkMWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNlNTExMGE4ZGJlMjQ1ZmYwOWQ1NDBhMmRkNDYwYmMwOGEwOWRiNWNlYmFlNzgyN2FiZWUwMjgyOTZhMmU5NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_692c1a726b9f4cb58f2fce1f87c99d00",
+      "statement": "The graph order is load application → Companies House → policy check → financial assessment → web search → decision synthesis → validation, and the Companies House branch is the only hard control-flow fork that determines whether the later stages execute.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/graph.py#L21-L60",
+          "version": "repo-lines-v1:sha256:1efacf851aef2c43a708a31be3e2f18d98c8a734e1fe77df88e6c2c557e09d76:eyJzZWxlY3RlZExpbmVDb3VudCI6NDAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU1MWZlN2QzMGE2OTczYzM1ZDA0ZTJmMWU2MTY0ZjNiM2I0YjlkZjUxYjIwNzBhNWM0MTgxZWFjYmYzOTRhMjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI2YjdiOGQ1Y2I1NWI0YzZlMWFlOTc4ZTUyMTg5MWJiM2JmZTA2YzAyODlkNjdhNWUyNzEzYTlmZjNiMjQyYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNkODIxYzhlYTE0ZGZjMjBkNjgwZTAwOWEwZTkyNTg1ZWI0NTVkYjRjYTljNTBhYjI4NjJmNzNhNTcwMDA1NjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/decision.py#L47-L88",
+          "version": "repo-lines-v1:sha256:7b19280c06452b151c3f2a81c5ae6753a6c8e2d2a15371887b1e13edb8e53f5f:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM5ZjczN2QwZTYxZGQyZWRkNDY2MTM5MDlmZjI4MzIwYjliMGEyYTllOWNhMWE5NTY4M2JlZjI0NzU3YTU4NTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVlMzBiMTNjYWU3YTAyZDRjMmQ2Y2ZmMjhiZmZlZTZlZjFiYThiMGM3ZDE3ZDI1ZTIyZGYxM2NhNjdkMjgyNWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImExYjJhZGMyZjg5MTFkZTk4MjNiNTY2MzUyNzU3ZjY0MDk2ZjUxOWQ1YWUwY2FhMWJmNWRmYWY0OGQ5MDQyMzUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a52f65c9da9c41a68c80b456e72c983f",
+      "statement": "Each assessment stage writes a stage-specific evidence artifact into the application store so the final recommendation can be audited without reconstructing the run from transient agent messages.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/companies_house.py#L100-L105",
+          "version": "repo-lines-v1:sha256:923577d6e9884d29c45ca9dac51df4de40fd6fed8069251cf642b2513de32b18:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjYzMTUxZDU1Y2JjYWQ3NTRiYTJlMWIwNWQyYTQzMjY0MTlkNTgxNTZjZmRmODYxMjc0ZTY5NTFiNGQyNTNlYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMzBjMWYxODhmMTQyZWQ3YTgyNDY4MGIyMDcxNzJjNTUxOWJjNjE0YTQ4ZmRhN2NmMTY3ZWRiOGRkZjc5OTU2YyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZGZjYzUxYTdlYmI0MWNlN2NkYWE0N2JmOGFiN2MwZDUyZGRlZTkzOGNkZTU4ZjMwODE3NzU1YzE0NmMzMWMwYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTVkMmU1ZmNhYWU5ZjkyN2Y4ZjQwMzI3OGJmMDc4NmM0MGQwNjgzOWFlODQzYTY1ZjQ3ZmE3NzNiMTQxMTMyMCJ9"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/decision.py#L77-L88",
+          "version": "repo-lines-v1:sha256:3e77fc8c58c032731ed7027a0a43de05f6056ae128f742db482da6aeaabff5ae:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQxMDBjNjliZDkyMzhkYzExYmVhODVhNTJlYzJlMzU5YWMzMmRlNzE0ZTY5YzM4YTg4ODExNDRlNjVlZjYyMDAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVlMzBiMTNjYWU3YTAyZDRjMmQ2Y2ZmMjhiZmZlZTZlZjFiYThiMGM3ZDE3ZDI1ZTIyZGYxM2NhNjdkMjgyNWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc2YTQ5MmIzYTYzYmQzMWRjOGM3ODAwMDcwMjliMjM2ZGY5NmI0MmQ1NWNkNzQ1MTRkODUzYzY3MGIwZTUxMDgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/financial.py#L81-L85",
+          "version": "repo-lines-v1:sha256:407996e89b2172522dc5bcd00b2ce2d89ee74701138fad5e15efbd19d108a95d:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMTQ1ZTkwNDIzMzM4N2RlMWQ3ZTY4M2VkNTRiYTAwNzA5NTZkMWMyN2I5MjlkNzZlOThkYmZiN2NhN2VkMWEwYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZDIyZmU3YmRhMDkwYmFmZTNiNGNhYmFhM2FjYTJjMjM0MjFhNDcxMGU2MWJhNzYwMmMwOGI0NjZjZTQwMWQxMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzA4NmI5Y2RkOGZlYjcyOWQ0OWYyMTQ3NjZiZjljYmYwMDA5Yzk3OGY3MDIxM2I1NmEyYTcyYzdiZGUzMjU4MiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/policy.py#L74-L77",
+          "version": "repo-lines-v1:sha256:ed8bffa96f23ec09985347d84c28cf114b51c3f02d387b00de9c887ab86d976d:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMTQ1ZTkwNDIzMzM4N2RlMWQ3ZTY4M2VkNTRiYTAwNzA5NTZkMWMyN2I5MjlkNzZlOThkYmZiN2NhN2VkMWEwYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmQ4ZGI4MjFhM2Y3ODhlMDdkYWRiODIwNzUzNDc0ZTcwMWE4YjhiYjExNTBhODYyMWVjNTc1OTIwMzM0ZjRkNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzA4NmI5Y2RkOGZlYjcyOWQ0OWYyMTQ3NjZiZjljYmYwMDA5Yzk3OGY3MDIxM2I1NmEyYTcyYzdiZGUzMjU4MiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/web_search.py#L56-L60",
+          "version": "repo-lines-v1:sha256:6aa7d9a4e9108171a62dc7c8ee161f38819b1f51bfa018c73b6680c5d5697d79:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMTQ1ZTkwNDIzMzM4N2RlMWQ3ZTY4M2VkNTRiYTAwNzA5NTZkMWMyN2I5MjlkNzZlOThkYmZiN2NhN2VkMWEwYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMWEzMzRjOTRiYjZmYjNmZGZjMjIxZGI5N2JhMjM3ZmViNWU0MDNiMmJiMGNhYzFlZDhhMzg2ZjU2MmNkZWQxZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTAxZjI3YzIzNTMxOTA4N2JmZDM5MjBmNTE1NzZkOGU3MjM1MGE4MzgxZTBhMThjY2M5YmU5ZTY0ZGI2OWIyMSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.5.1",
+    "at": "2026-09-15T10:28:44.889Z"
+  }
+}

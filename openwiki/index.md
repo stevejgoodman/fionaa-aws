@@ -4,7 +4,7 @@ okf_version: "0.2"
 
 # Files
 
-- [Quickstart](quickstart.md) - Start the app locally, then follow the architecture, security, deployment, and test pages for the graph, storage, runtime, and evaluation flow.
+- [Quickstart](quickstart.md) - Top-level routing hub for the repo; start here to reach the runtime entrypoints, graph wiring, security boundaries, deployment and eval operations, and unit tests that own implementation detail.
 
 # Directories
 
@@ -13,3 +13,4 @@ okf_version: "0.2"
 - [integrations](integrations/)
 - [operations](operations/)
 - [testing](testing/)
+- [workflows](workflows/)
