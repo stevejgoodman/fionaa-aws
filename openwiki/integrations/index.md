@@ -1,3 +1,3 @@
 # Files
 
-- [AgentCore runtime and gateway integrations](agentcore-runtime-and-gateway.md) - How the FIONAA service enters through Bedrock AgentCore, builds customer-scoped checkpointing, and loads MCP gateway tools fresh for each invocation.
+- [AgentCore runtime, gateway, and model integrations](agentcore-runtime-and-gateway.md) - Bedrock AgentCore entrypoint, runtime-scoped tools, checkpointing, and model loading for FIONAA.

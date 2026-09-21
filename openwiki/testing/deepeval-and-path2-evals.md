@@ -3,9 +3,6 @@ type: testing-evaluation-harness
 title: DeepEval and Path 2 evaluation flows
 description: Overview of the Path 1 DeepEval node harness and the Path 2 deployed-runtime evaluation flow for fionaa, including dataset assumptions, tool-call reconstruction, and operational constraints.
 tags: [testing, evals, deepeval, agentcore, runtime]
-verified:
-  - by: openwiki/0.5.1
-    at: 2026-09-12T16:18:14.763Z
 sources:
   - id: openwiki-source-5f32ce5fba6091f4b54b06c0
     resource: repo://fionaa/agentcore/deepeval_evals/dataset.py

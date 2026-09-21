@@ -1,4 +1,4 @@
 # Files
 
-- [Graph workflow and node responsibilities](graph-workflow.md) - LangGraph state, runtime context, branching, persistence artifacts, and terminal decision behavior for the FIONAA application workflow.
-- [Runtime entrypoint and invocation flow](runtime-entrypoint.md) - End-to-end AgentCore startup, identity derivation, scoped AWS session creation, fresh gateway tool loading, checkpointed graph invocation, and response URIs for the FIONAA runtime.
+- [Graph workflow and stage sequencing](graph-workflow.md) - LangGraph state, runtime context, routing, persistence artifacts, and validation behavior for the FIONAA loan-assessment workflow.
+- [Runtime entrypoint and invocation assembly](runtime-entrypoint.md) - How an AgentCore request becomes a customer-scoped graph invocation with verified identity, scoped AWS credentials, checkpointing, fresh gateway tools, and S3-backed result URIs.

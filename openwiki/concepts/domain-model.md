@@ -3,9 +3,6 @@ type: architecture concept
 title: Domain model and runtime data shapes
 description: Canonical application, document, result, and decision shapes in the FIONAA graph, including which fields are validated, checkpointed, and persisted as evidence artifacts.
 tags: [domain-model, schemas, runtime-state, persistence, langgraph]
-verified:
-  - by: openwiki/0.5.1
-    at: 2026-09-12T16:18:14.763Z
 sources:
   - id: openwiki-source-9c608fd4e7b4544481481d22
     resource: repo://fionaa/app/fionaa/graph.py
