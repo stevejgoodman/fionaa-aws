@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:39014c1e9d19616c586089e028455f2225eebfdd4cae2eb041da6a05ece6326e",
+  "claims": [
+    {
+      "id": "claim_0006fdf6e9ac42dc9be90e30274448f3",
+      "statement": "The workflow produces a proposed advisory decision in `decision/proposed.json` by combining the upstream policy check, Companies House, financial assessment, and web search outputs, and it persists the proposed payload separately from the final report.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/decision.py#L47-L88",
+          "version": "repo-lines-v1:sha256:7b19280c06452b151c3f2a81c5ae6753a6c8e2d2a15371887b1e13edb8e53f5f:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM5ZjczN2QwZTYxZGQyZWRkNDY2MTM5MDlmZjI4MzIwYjliMGEyYTllOWNhMWE5NTY4M2JlZjI0NzU3YTU4NTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVlMzBiMTNjYWU3YTAyZDRjMmQ2Y2ZmMjhiZmZlZTZlZjFiYThiMGM3ZDE3ZDI1ZTIyZGYxM2NhNjdkMjgyNWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImExYjJhZGMyZjg5MTFkZTk4MjNiNTY2MzUyNzU3ZjY0MDk2ZjUxOWQ1YWUwY2FhMWJmNWRmYWY0OGQ5MDQyMzUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_dc7c267f0f5d46728bdd20386038e834",
+      "statement": "`human_review_report()` converts the proposed decision into a reviewer-facing report by moving `outcome`, `reason`, and `rationale` under `ai_recommendation`, forcing the top-level outcome to `pending_human_review`, and optionally attaching validation data.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/decision.py#L15-L25",
+          "version": "repo-lines-v1:sha256:247a07045705308f5b8e6fc51b63ab7fc203a0e89c463ffaf010c312bf434ab7:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM5MGZiYjUzYmFiZTJiY2U1OWVhMGFhYmY4NDM5ZWNhM2M5ZDI2MDQwMjQ0M2IyYzRhYTNmYWQ5ZGJmOTNlNDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ1ZTFhMTczZDViMTRhMTM5MTdhYzA4ZDhlMTFiNjViNmQ5MGQ5NTRhZTI0NjRlYmI3ZDE2MzczZTE1NDc5OGUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU4ZjZjNjUzN2Y0YWY4ZGNiZjRhNDNhOGE4ZTE3YTM2YWVkNGJlYjY0YTcwM2FkMWRmNTc5NjUzZWJiMTM2MmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhiOTk4NDIzOWMyYzMyZTgyZGM3MWJlOGIzNTViMWZlMjE0YzYyYmUzNGJiYzRiNjY2ODczYjA4MjBmZGI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0e47b48261ee44e087d030933ee9ec03",
+      "statement": "`validate_final_decision()` writes `decision/validation.json` before it republishes `decision/result.json`, and validation is described as annotating the decision without changing the loan outcome.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/decision.py#L15-L25",
+          "version": "repo-lines-v1:sha256:247a07045705308f5b8e6fc51b63ab7fc203a0e89c463ffaf010c312bf434ab7:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM5MGZiYjUzYmFiZTJiY2U1OWVhMGFhYmY4NDM5ZWNhM2M5ZDI2MDQwMjQ0M2IyYzRhYTNmYWQ5ZGJmOTNlNDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ1ZTFhMTczZDViMTRhMTM5MTdhYzA4ZDhlMTFiNjViNmQ5MGQ5NTRhZTI0NjRlYmI3ZDE2MzczZTE1NDc5OGUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU4ZjZjNjUzN2Y0YWY4ZGNiZjRhNDNhOGE4ZTE3YTM2YWVkNGJlYjY0YTcwM2FkMWRmNTc5NjUzZWJiMTM2MmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhiOTk4NDIzOWMyYzMyZTgyZGM3MWJlOGIzNTViMWZlMjE0YzYyYmUzNGJiYzRiNjY2ODczYjA4MjBmZGI4NTUifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/validation.py#L102-L109",
+          "version": "repo-lines-v1:sha256:507eead045d547cb4fff06df39020dab83dceebc797727688a8aa57e109c3e59:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMTZhYzBhMmI5YjIxMjM5YTRiOTIwOTAxMzZmNmIyNDM4MjZhY2E0MGU3ZTYwNzZhM2FmMDVlZjAyOWY5ODZjOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmFmYzdjYTUyZTNkZWJlMGM2Y2U3YTRlOWE5NTJkMmIxMzAyZTY5ZWNjMTIwMzQxMzE0MjUxZGQ0ZGRjMjJkNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNGZiZDAwOTMxNGJjMjcwODQxNjczNGEwMmFlNWZmMzlhMWU0OGEwNTBiZTkxZjQzYjJmYWE5MjAwMmM2MmJmYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_294a0d1cc43f445b8a257242c5ce6357",
+      "statement": "Validation operates at claim granularity: it builds separate claims for policy eligibility, documentation gaps, and the AI recommendation outcome, and each claim records a source and a JSON-pointer-like `source_path` into `decision/result.json`.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/validation.py#L46-L65",
+          "version": "repo-lines-v1:sha256:5e0829e49b56542fb0fee6b9b825847d28b7b51d1b5fbe9a69c32ceb66356dca:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI0MTA1ZTIyYmVhZTI3ZmY3NWMxNjY0NDZhNzM5MTU5ZWYzMDVlMTM0ZmJjYzYxYzEyOWNhOTI1YzNkOGY2NTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhODRhMjExNmIxMjdkMWQzZWJmMDQxNjQ1MTk3ZGE5M2EwYjE1YWFiNGM4ODA5NzNhOWQzZGM2ZTEyZGIzNDAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA0MGFkMTg4MzI5ZWM2YTRiZTU3Zjk1ZjZkYWI5YTM3NDQ2YTliZjhmMDg2MGExNDI3NjhlYWQ2OGZkMWUwZTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk0MDEyOWZhNWUxOGZkM2M2ODBmNmViM2VmZDQ2ZjBkZTlhMDM5ODk1NThmYjk0NmQ5YzIwMmEyMjk2ODc0MDEifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/validation.py#L68-L99",
+          "version": "repo-lines-v1:sha256:bc5d1f143bacce46f77f52ea61096c47777e79de1b3741e5cfa19093400e3c56:eyJzZWxlY3RlZExpbmVDb3VudCI6MzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg2ZDM2OTcxY2UyZDgzNzFmNzI0Njc2ZjA4M2YxODc0MzY2NDgzNzAxMWQ2MDA1ZWFmOGQwMDAzNmVhYzlhNTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZmOWRlMDI2YmJiNDljYTMzZWRiM2Y5OTEyODZiNDdiNDcxOGY5ZDFiYWEzYzUzMTJkZmNiMzZmMTI4YWMwZTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBlNTU0NDk1ZDYxNmNjOWYyNTM1ZWM3OTk5MWNmMDljNmM0NzE5OWMyMDIyNjFlMDI5NzcxYjg2ZGZhNjI4ZmUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ea1cccc800a54ff98372412bbf33aa28",
+      "statement": "The validation artifact records a policy SHA, per-claim annotations, counts for `valid`, `inconclusive`, `invalid`, and `not_checked`, and a shared evidence snapshot; the workflow ignores the checker’s legacy `passed` flag.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/validation.py#L68-L99",
+          "version": "repo-lines-v1:sha256:bc5d1f143bacce46f77f52ea61096c47777e79de1b3741e5cfa19093400e3c56:eyJzZWxlY3RlZExpbmVDb3VudCI6MzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg2ZDM2OTcxY2UyZDgzNzFmNzI0Njc2ZjA4M2YxODc0MzY2NDgzNzAxMWQ2MDA1ZWFmOGQwMDAzNmVhYzlhNTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZmOWRlMDI2YmJiNDljYTMzZWRiM2Y5OTEyODZiNDdiNDcxOGY5ZDFiYWEzYzUzMTJkZmNiMzZmMTI4YWMwZTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBlNTU0NDk1ZDYxNmNjOWYyNTM1ZWM3OTk5MWNmMDljNmM0NzE5OWMyMDIyNjFlMDI5NzcxYjg2ZGZhNjI4ZmUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_7bae713a34c0418483923fc637b1b65b",
+      "statement": "The runtime invariant is that every application ends in `pending_human_review`; even the no-company branch publishes a minimal report with a referral recommendation and a validation stub that marks remaining checks as not checked.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/decision.py#L15-L25",
+          "version": "repo-lines-v1:sha256:247a07045705308f5b8e6fc51b63ab7fc203a0e89c463ffaf010c312bf434ab7:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM5MGZiYjUzYmFiZTJiY2U1OWVhMGFhYmY4NDM5ZWNhM2M5ZDI2MDQwMjQ0M2IyYzRhYTNmYWQ5ZGJmOTNlNDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ1ZTFhMTczZDViMTRhMTM5MTdhYzA4ZDhlMTFiNjViNmQ5MGQ5NTRhZTI0NjRlYmI3ZDE2MzczZTE1NDc5OGUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU4ZjZjNjUzN2Y0YWY4ZGNiZjRhNDNhOGE4ZTE3YTM2YWVkNGJlYjY0YTcwM2FkMWRmNTc5NjUzZWJiMTM2MmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhiOTk4NDIzOWMyYzMyZTgyZGM3MWJlOGIzNTViMWZlMjE0YzYyYmUzNGJiYzRiNjY2ODczYjA4MjBmZGI4NTUifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/workflow/decision.py#L28-L63",
+          "version": "repo-lines-v1:sha256:1afc52b5c81de507b2d2155525469f3ec4e2bfca1ec2298c545e44b314226881:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM3MDBkMTM4ODgxZDQ2OThmZGUwNmY5ZGMxNDUxZTgwNzNlM2YwNGU3ZWRiODJiYmM4N2VkNTYxNmVjN2FlMzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc1ZjM5YzU1OTIwM2Q2YzAyYjU1MGFkOTliZTY2ZTRiNzg2NDdiNzg4NmI1YTlkZjhkNzZlM2JmYmJkMWUwMWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY0OWQ5NTBlYWZiMDYxYzQxYjcyZjQ5ZDg1MzcyM2Q3ODQ2NTI2N2ZmNzA1NThlZTJlODlhMmI4Mjc4YmZkMzQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFkYWJiZWExMGNhZGYyMjQ5Nzk0MjcyN2VkZDA2YzFlYTU4YzA0MWQyYWU1MmFiMjUyZTNhMTk0MTYzMTg5YWQifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/tests/test_graph.py#L554-L568",
+          "version": "repo-lines-v1:sha256:e8b10d96b8ec6169cd19c962a5bec769c7265fc9e15bf1c47c642fe1158e7016:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgxNzBhY2VmODMxMDgxZjlkNTY5ZmJlNTYxM2E0Y2Y5YTc0Mjk3NTk0ZDc3ZDZlYWU1NmQyYTU5ZmIzZjcyZTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3NzM5ZjcwNjQwMGY0NWFjY2U4OTI1YTUxMzQyMTBmMzE5N2E0MmQzMjAxYTBhMDQ4YTVmZTJmMTQxYTBjYWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJhMzNlYzkyZmU3NjViMDRmMDVhOGZmN2E1OTJlZjI2YjhlODViMTEzZWQ2OTg3NmI3ZmUzZDkyOGVkZGRlNGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdhNWNjYzU2NTk2YzdmODRlNDMxMTBlYTNiNThlODQzMmQzOTk2NDNmNzVlZmQ1ODJiOGFjOTQxMzNjOWZmMjQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e9492a712e054badae50234e88a2ae67",
+      "statement": "The live guardrail smoke runner uses synthetic facts only, charges real `ApplyGuardrail` requests, does not deploy anything, and is used to verify the deployed policy path rather than full application approval.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/evals/automated_reasoning/test_live_guardrail.py#L1-L6",
+          "version": "repo-lines-v1:sha256:85eccef29d98b0a7318e79c4798fd4510f2a619eab240457789b2cadddb5d953:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjVjNGM5M2ZiOWNmZDMxODU1M2JjYzJiNjMzZmIyNTI3NzU5Y2ExZjY1ODNlNmE1ZGMxZjhlZWU1NDE3OThkYiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTMwM2VjZGQ0YTRkMTBmMTljNzNmZDQyZmQxMjQzN2ZkMzM1NGE4MjY4MTYwNWRhNTI1NWE5N2EzOTA2OGRiYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOTRmZTJiNzZjOGMwMGZmNGIwODU3NGQ2NzkzOTVkMTRiMTQzMWVhNjJiYjk2YTE0MWMyN2I5MDM1Y2E1ZGRiMiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_7c06178005b54d67a52e4ff679fcad79",
+      "statement": "The graph tests confirm that checkpoint configuration is derived from identity and that the decision stage persists the recommendation and published report as separate artifacts.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/tests/test_graph.py#L33-L37",
+          "version": "repo-lines-v1:sha256:8c7cba8668b1a833f638c31d1c109d7a3380a3f31a8ce9a84d657d7db0e5b882:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMzkxYTVmZTg1MTRhMmRmOTM1OWVkMDQ5ODBhYjdjN2Y5ZTI3NjliZTIxMmNhNDIyMmU2ZWM4MWUzYzAxODQ4MSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDg5M2Y0MGUzNzgxZWI4OTZjODJkMDQ2YTA4MDY3YTExZTM1Y2RmMmYxZGZhZjI2ZmVhOTBiOGRiNjY3NjQxMyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOGU0ZTYyZGZiNDVhYTIwMzg1MjY4NTc4MjUwNGZhYTIwYzEyMDUwNDQxOTUzZDNmZjgzMjUzZGQ4OWVhMGE5OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiY2FjMzlkNTViMWM0MDlhZWU3YzMxOGFlOGZlZTRmMTI5ZWU4MzU5ZWIyNzM2NTc1YmViYjgwNzE3YTUzOTY5ZCJ9"
+        },
+        {
+          "resource": "repo://fionaa/app/tests/test_graph.py#L924-L975",
+          "version": "repo-lines-v1:sha256:010656760eb9b9eb62640cb8789bb2c0c6ff90ae9fb6d32f79de603d7b32538d:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJkOTk0MmRlYjdkYmFiYzExNGIxYzQ4ZDAyZGE0NjM4NmU5YWNhNTE1YTUyZmI3YjNjNDEyZGM2Mjc5MjFiMDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFmMzZlMjU1NWQzZDFkODFkOWMwNDc5NDgxODU5ZDI1MjM1NzgzYzNjN2Q0ODc1ZTYxZTJmMmEzZjM0MmY1YWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVhYjdiMjcyYWI0ZTI1MTc1YjVmZDI0YzEzY2ZlNTYzNDI1MTRjMDI3OTQ2ZjAzYjUzMDVkZjIwMzM3ODc5ZjkifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/tests/test_graph.py#L978-L1015",
+          "version": "repo-lines-v1:sha256:e194632c8e019d89b76d0a378d4dc5b8cc7787d3af72a3abbb0fe2664b142c27:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJkOTk0MmRlYjdkYmFiYzExNGIxYzQ4ZDAyZGE0NjM4NmU5YWNhNTE1YTUyZmI3YjNjNDEyZGM2Mjc5MjFiMDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRmYmQwMDkzMTRiYzI3MDg0MTY3MzRhMDJhZTVmZjM5YTFlNDhhMDUwYmU5MWY0M2IyZmFhOTIwMDJjNjJiZmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImIwMGQ0OTliNzAxOGI0ZjQxMGRmMWVhYjIwN2IzYTliZDRiZjNlZjc2ZDYxZjBiYjA5ZDk0ZTE2NzhkYTU0YzEifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.5.1",
+    "at": "2026-09-19T09:15:01.080Z"
+  }
+}
