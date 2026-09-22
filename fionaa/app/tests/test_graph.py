@@ -371,7 +371,13 @@ async def test_check_companies_house_calls_gateway_and_persists(monkeypatch):
         "grounding_reasons": [],
     }
     assert calls[0]["tools"] == fake_tools
-    assert calls[1]["message_content"] == json.dumps(application)
+    # Includes TODAY'S DATE so the model doesn't misjudge a genuine, recent
+    # Companies House date against its own training-era sense of "now" --
+    # see companies_house.py and COMPANIES_HOUSE_PROMPT's "Trust TODAY'S
+    # DATE" section.
+    assert calls[1]["message_content"] == (
+        f"{json.dumps(application)}\n\nTODAY'S DATE: {date.today().isoformat()}"
+    )
 
 
 @pytest.mark.asyncio
@@ -630,7 +636,8 @@ async def test_check_financial_assessment_persists_and_returns_result(monkeypatc
         f"POLICY CHECK RESULT:\n{json.dumps(policy_check)}\n\n"
         f"ANNUAL ACCOUNTS:\n[]\n\n"
         f"BANK STATEMENTS:\n[]\n\n"
-        f"CROSS-CHECK RESULT:\n[]"
+        f"CROSS-CHECK RESULT:\n[]\n\n"
+        f"TODAY'S DATE: {date.today().isoformat()}"
     )
     assert calls[1]["message_content"] == expected_content
 

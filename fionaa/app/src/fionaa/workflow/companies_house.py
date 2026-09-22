@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+from datetime import date
 from typing import Literal
 from langgraph.runtime import Runtime
 from langgraph.types import Command
@@ -47,10 +48,20 @@ async def check_companies_house(
         response_format=CompaniesHouseResult,
     )
 
+    # Computed fresh per invocation, same reason check_against_policy does
+    # this rather than a module-level constant -- see POLICY_CHECK_PROMPT's
+    # own TODAY'S DATE usage. Without this, the model falls back to its own
+    # training-era sense of "now" and can misjudge a genuine, recent
+    # Companies House date (e.g. this year's incorporation) as anomalous or
+    # synthetic -- see COMPANIES_HOUSE_PROMPT's "Trust TODAY'S DATE" section.
+    today = date.today().isoformat()
+
     try:
         response = await ainvoke_resilient(
             agent,
-            {"messages": [HumanMessage(content=json.dumps(application))]},
+            {"messages": [HumanMessage(
+                content=f"{json.dumps(application)}\n\nTODAY'S DATE: {today}"
+            )]},
             breaker=_BREAKER,
             limiter=_LIMITER,
         )
@@ -119,12 +130,46 @@ async def check_companies_house(
     # constrains companies_house_result.summary, not this raw tool output).
     tool_calls = redact_tool_calls(raw_tool_calls)
 
-    lookup_failed = not grounding.grounded or any(
-        isinstance(message, ToolMessage) and message.name and message.name.startswith("CompaniesHouse___")
+    # Only an error on a *core identity* call invalidates the match -- these
+    # four are what actually establish "this company and this applicant
+    # exist and are linked" (see COMPANIES_HOUSE_PROMPT Step 2). The
+    # remaining CompaniesHouse___* calls (insolvency, charges, filing
+    # history, registered-office-address) are supplementary detail: an
+    # active company with a clean record commonly 404s on e.g.
+    # getCompanyInsolvency (nothing to return), which the Gateway surfaces
+    # as a tool error rather than an empty result -- that is not a reason to
+    # discard an otherwise well-identified match. Previously any
+    # CompaniesHouse___* error forced found=False here with no explanation
+    # surfaced anywhere, silently rejecting genuine, clean identity matches.
+    _CORE_LOOKUP_TOOLS = (
+        "CompaniesHouse___searchCompanies", "CompaniesHouse___getCompanyProfile",
+        "CompaniesHouse___listCompanyOfficers", "CompaniesHouse___listPersonsWithSignificantControl",
+    )
+    core_tool_errored = any(
+        isinstance(message, ToolMessage) and message.name in _CORE_LOOKUP_TOOLS
         and message.status == "error" for message in response["messages"]
-    ) or not any(call["tool"].startswith("CompaniesHouse___") for call in raw_tool_calls)
+    )
+    secondary_tool_errors = sorted({
+        message.name.removeprefix("CompaniesHouse___")
+        for message in response["messages"]
+        if isinstance(message, ToolMessage) and message.name
+        and message.name.startswith("CompaniesHouse___") and message.name not in _CORE_LOOKUP_TOOLS
+        and message.status == "error"
+    })
+
+    lookup_failed = (
+        not grounding.grounded
+        or core_tool_errored
+        or not any(call["tool"].startswith("CompaniesHouse___") for call in raw_tool_calls)
+    )
     if lookup_failed:
         companies_house_result["found"] = False
+    elif secondary_tool_errors:
+        companies_house_result["summary"] = (
+            companies_house_result["summary"]
+            + " [note: the following secondary Companies House checks could not be completed: "
+            + ", ".join(secondary_tool_errors) + "]"
+        )
 
     # save result back to application store
     runtime.context.store.put_json(

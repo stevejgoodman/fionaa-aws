@@ -25,7 +25,12 @@ def _facts(state: ApplicationState, today: date) -> dict:
     annual_accounts = state.get("annual_accounts", [])
     bank_statements = state.get("bank_statements", [])
     companies_house = state.get("companies_house")
-    derived_facts = build_derived_facts(application, annual_accounts, bank_statements, companies_house, today)
+    director_id = state.get("director_id", [])
+    proof_of_address = state.get("proof_of_address", [])
+    derived_facts = build_derived_facts(
+        application, annual_accounts, bank_statements, companies_house, today,
+        director_id=director_id, proof_of_address=proof_of_address,
+    )
     facts = {
         # Precomputed in the Automated Reasoning policy's own variable
         # names (loanAmount, isUKBased, tradingHistoryMonths, etc.) -- AR's

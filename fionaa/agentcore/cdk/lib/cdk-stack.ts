@@ -418,6 +418,38 @@ export class AgentCoreStack extends Stack {
           resources: [checkpointMemory.memoryArn],
         })
       );
+      // AgentCore Memory's CreateEvent (and other data-plane calls) encrypt/
+      // decrypt against the memory's customer-managed key via a Forward
+      // Access Session (FAS) -- the KMS call runs under the *caller's own*
+      // IAM identity forwarded through the service, not the service's own
+      // identity. That means the bare bedrock-agentcore.amazonaws.com
+      // service-principal grant on tenantKey below (added for the S3/logs
+      // side of this key) is the wrong mechanism for this call and doesn't
+      // authorize it -- confirmed live: CreateEvent failed with
+      // "AccessDeniedException: Unable to perform KMS operations" even
+      // though that service-principal statement was present and correct
+      // for its own purpose. Per AWS's own guidance ("Encrypt your Amazon
+      // Bedrock AgentCore Memory"), the fix is to grant the actual calling
+      // principal (dataAccessRole, which is what build_checkpointer() uses)
+      // these KMS actions directly, scoped with kms:ViaService so the grant
+      // can't be used outside an AgentCore Memory call.
+      dataAccessRole.addToPolicy(
+        new iam.PolicyStatement({
+          sid: 'CheckpointMemoryKmsViaService',
+          actions: [
+            'kms:CreateGrant',
+            'kms:Decrypt',
+            'kms:DescribeKey',
+            'kms:GenerateDataKey',
+            'kms:GenerateDataKeyWithoutPlaintext',
+            'kms:ReEncrypt*',
+          ],
+          resources: [tenantKey.keyArn],
+          conditions: {
+            StringEquals: { 'kms:ViaService': `bedrock-agentcore.${this.region}.amazonaws.com` },
+          },
+        })
+      );
 
       // Runtime execution role's only route to customer data: assume + tag-session.
       fionaaEnv.runtime.addToPolicy(
