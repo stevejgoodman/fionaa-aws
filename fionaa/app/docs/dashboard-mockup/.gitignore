@@ -2,5 +2,10 @@
 # never committed. job-dashboard.html is the clean template (placeholder);
 # job-dashboard.rendered.html is the real, injected page actually published
 # as the Artifact -- regenerate both with fetch_run.py + build.py.
-run-data.json
-job-dashboard.rendered.html
+#
+# Globbed rather than the literal default filenames only: ad hoc
+# investigation/debugging sessions save differently-named variants
+# (run-data-<scenario>.json, job-dashboard.<scenario>.rendered.html) that
+# carry the exact same real-data risk and must stay out of git too.
+run-data*.json
+job-dashboard*.rendered.html

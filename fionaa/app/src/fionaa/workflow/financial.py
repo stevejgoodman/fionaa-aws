@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+from datetime import date
 from typing import Any
 from langgraph.runtime import Runtime
 from langchain.agents import create_agent
@@ -54,6 +55,15 @@ async def check_financial_assessment(state: ApplicationState, runtime: Runtime[A
         response_format=FinancialAssessmentResult,
     )
 
+    # Computed fresh per invocation, same reason check_against_policy/
+    # check_companies_house do this rather than a module-level constant.
+    # Without it, a genuine recent date (e.g. a trading start date that
+    # matches this year's real incorporation date) can be misjudged against
+    # the model's own training-era sense of "now" as an impossible/future
+    # date -- see COMPANIES_HOUSE_PROMPT's "Trust TODAY'S DATE" section,
+    # which this node's own prose discrepancies/summary should honour too.
+    today = date.today().isoformat()
+
     response = await agent.ainvoke(
         {
             "messages": [
@@ -63,7 +73,8 @@ async def check_financial_assessment(state: ApplicationState, runtime: Runtime[A
                     f"POLICY CHECK RESULT:\n{json.dumps(policy_check)}\n\n"
                     f"ANNUAL ACCOUNTS:\n{json.dumps(annual_accounts)}\n\n"
                     f"BANK STATEMENTS:\n{json.dumps(bank_statements)}\n\n"
-                    f"CROSS-CHECK RESULT:\n{json.dumps(cross_check_payload)}"
+                    f"CROSS-CHECK RESULT:\n{json.dumps(cross_check_payload)}\n\n"
+                    f"TODAY'S DATE: {today}"
                 )
             ]
         }
