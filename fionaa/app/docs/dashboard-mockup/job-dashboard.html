@@ -254,6 +254,7 @@
   .finding-tag.pass{ color:var(--sage); background:var(--sage-bg); }
   .finding-tag.fail{ color:var(--rust); background:var(--rust-bg); }
   .finding-tag.inconclusive{ color:var(--slate); background:var(--slate-bg); }
+  .finding-tag.na{ color:var(--plum); background:var(--plum-bg); }
   .finding-label{ font-weight:600; color:var(--text); }
   .finding-detail{ color:var(--text-dim); flex:1 1 100%; }
   .finding-source{ flex:1 1 100%; font-family:"IBM Plex Mono", monospace; font-size:10px; color:var(--text-faint); }
@@ -476,17 +477,27 @@
 
   // Renders a list of plain-text findings (documentation_gaps, clause_findings,
   // discrepancies from policy_check/financial_assessment evidence) as cards,
-  // pulling out a leading "<label>: PASS/FAIL/INCONCLUSIVE — <detail>" tag
-  // where the source text has one so it reads as a scan result rather than
-  // an unbroken paragraph.
+  // pulling out a leading "<label>: <verdict> — <detail>" tag where the
+  // source text has one so it reads as a scan result rather than an
+  // unbroken paragraph. Two verdict vocabularies show up in practice:
+  // documentation_gaps/discrepancies use PASS/FAIL/INCONCLUSIVE, but
+  // POLICY_CHECK_PROMPT has clause_findings state each clause as SATISFIED/
+  // NOT SATISFIED/NOT APPLICABLE instead (see e.g. "Personal guarantee
+  // requirement...: NOT APPLICABLE. Loan amount is below the threshold.") --
+  // both are matched here so every finding gets a pill, not just some.
+  // "NOT SATISFIED" is listed before the bare "SATISFIED" alternative so it
+  // isn't matched as a partial "SATISFIED" with a stray leading "NOT ".
   function renderFindingList(items){
     if (!items || !items.length) return `<div class="prose" style="color:var(--text-faint)">None recorded.</div>`;
     return `<ul class="finding-list">` + items.map(raw => {
       const text = escapeHtml(String(raw));
-      const m = text.match(/^(.*?):\s*(PASS|FAIL|INCONCLUSIVE)\b\s*[—\-:]*\s*(.*)$/i);
+      const m = text.match(/^(.*?):\s*(PASS|FAIL|INCONCLUSIVE|NOT SATISFIED|SATISFIED|NOT APPLICABLE)\b\s*[—\-:.]*\s*(.*)$/i);
       if (m){
         const tag = m[2].toUpperCase();
-        const cls = tag === "PASS" ? "pass" : tag === "FAIL" ? "fail" : "inconclusive";
+        const cls = (tag === "PASS" || tag === "SATISFIED") ? "pass"
+          : (tag === "FAIL" || tag === "NOT SATISFIED") ? "fail"
+          : tag === "NOT APPLICABLE" ? "na"
+          : "inconclusive";
         return `<li><span class="finding-tag ${cls}">${tag}</span><span class="finding-label">${m[1]}</span><span class="finding-detail">${m[3]}</span></li>`;
       }
       return `<li><span class="finding-detail">${text}</span></li>`;
