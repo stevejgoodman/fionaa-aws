@@ -172,3 +172,33 @@ def test_no_bank_statements_is_a_known_negative_not_unknown():
     assert facts["bankStatementsMonthsCount"] == 0
     assert facts["hasRecentBankStatements"] is False
     assert "mostRecentStatementAgeDays" not in facts
+
+
+import pytest
+
+
+def _minimal(**application):
+    """Only the fields these facts read; everything else stays unknown."""
+    return build_derived_facts(
+        {"annual_turnover": 180000, **application}, [], [], None, date(2026, 9, 23))
+
+
+@pytest.mark.parametrize("declared,expected", [(True, True), (False, False)])
+def test_vat_and_borrowing_declarations_become_facts(declared, expected):
+    """Both gate a conditional document rule, so a false declaration is as
+    useful as a true one -- it satisfies the rule outright."""
+    facts = _minimal(vat_registered=declared, has_existing_borrowing=declared)
+
+    assert facts["isVATRegistered"] is expected
+    assert facts["hasExistingBorrowing"] is expected
+
+
+def test_undeclared_vat_and_borrowing_stay_unknown_not_false():
+    """Unknown is not no: both fields are optional on the form, and an
+    absent declaration must not be read as "not VAT registered" -- that
+    would discharge the VAT-return requirement for a business that has
+    one."""
+    facts = _minimal()
+
+    assert "isVATRegistered" not in facts
+    assert "hasExistingBorrowing" not in facts

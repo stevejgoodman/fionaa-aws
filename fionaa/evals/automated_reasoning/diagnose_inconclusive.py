@@ -61,6 +61,10 @@ BASE_FACTS = {
     "loanTermMonths": 24,
     "mostRecentStatementAgeDays": 10,
     "tradingHistoryMonths": 3,
+    # Declared on the application form; both false, so neither conditional
+    # document rule needs the document variable behind it.
+    "isVATRegistered": False,
+    "hasExistingBorrowing": False,
 }
 
 LOAN_TYPE = LoanType.unsecured_business_loans
@@ -101,7 +105,14 @@ async def main():
               f"kinds={diagnostics.get('finding_kinds')} "
               f"unbound={diagnostics.get('unbound_variables')} "
               f"not_translated={diagnostics.get('facts_not_translated')}", flush=True)
-    undecided = [row for row in results if row["status"] not in ("valid", "invalid")]
+    # Only the production-path cases gate the exit code. The unscoped_*
+    # rows reproduce the old behaviour on purpose and are expected to stay
+    # undecided; they are the contrast, not a target.
+    undecided = [row["case"] for row in results
+                 if not row["case"].startswith("unscoped_")
+                 and row["status"] not in ("valid", "invalid")]
+    if undecided:
+        print("undecided:", ", ".join(undecided))
     return 1 if undecided else 0
 
 
