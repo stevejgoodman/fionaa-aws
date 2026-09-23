@@ -16,6 +16,13 @@ ar_facts.py. This probe measures two things independently:
 
   scaling/*   How many guard_content facts it takes to trigger
               `tooComplex`, holding the claim fixed. Finds the ceiling.
+  query_scaling/* Whether the premise channel still holds at the fact
+              count production sends (the `tooComplex` seen at 17 was
+              measured with sentences that never became premises at all).
+  correctness/* A claim and its negation against the same facts, both
+              ways round: exactly one of each pair must be valid and the
+              other invalid. A channel that answers "valid" to everything
+              would be worse than the inconclusive results it replaces.
   qualifier/* Whether the facts become real premises under four ways of
               sending them, at a size well under that ceiling:
                 guard_content_blocks  one guard_content block per fact
@@ -81,7 +88,7 @@ def _block(text, qualifier):
     return {"text": {"text": text, "qualifiers": [qualifier]}}
 
 
-def content_for(facts: dict, strategy: str) -> list[dict]:
+def content_for(facts: dict, strategy: str, claim: str = CLAIM) -> list[dict]:
     sentences = [render_fact(name, value) for name, value in sorted(facts.items())]
     if strategy == "guard_content_blocks":
         blocks = [_block(sentence, "guard_content") for sentence in sentences]
@@ -93,13 +100,13 @@ def content_for(facts: dict, strategy: str) -> list[dict]:
         blocks = [_block(" ".join(sentences), "guard_content")]
     else:
         raise ValueError(strategy)
-    return blocks + [_block(CLAIM, "guard_content")]
+    return blocks + [_block(claim, "guard_content")]
 
 
-def run(client, identifier, version, facts, strategy):
+def run(client, identifier, version, facts, strategy, claim=CLAIM):
     response = client.apply_guardrail(
         guardrailIdentifier=identifier, guardrailVersion=str(version),
-        source="OUTPUT", outputScope="FULL", content=content_for(facts, strategy))
+        source="OUTPUT", outputScope="FULL", content=content_for(facts, strategy, claim))
     findings = [
         finding
         for assessment in response.get("assessments", [])
@@ -123,23 +130,44 @@ async def main():
     client = boto3.client("bedrock-runtime")
     identifier, version = binding["guardrail_id"], binding["guardrail_version"]
 
-    cases = [(f"scaling/{size:02d}_facts", dict(FACTS_BY_RELEVANCE[:size]), "guard_content_blocks")
+    cases = [(f"scaling/{size:02d}_facts", dict(FACTS_BY_RELEVANCE[:size]), "guard_content_blocks", CLAIM)
              for size in SCALING_SIZES]
-    cases += [(f"qualifier/{strategy}", CLAIM_SCOPED, strategy)
+    cases += [(f"qualifier/{strategy}", CLAIM_SCOPED, strategy, CLAIM)
               for strategy in ("guard_content_blocks", "query_blocks", "query_single", "guard_single")]
+    # Does the premise channel still hold at the load production actually
+    # sends? `tooComplex` appeared at 17 guard_content facts, but those
+    # became 17 untranslated sentences rather than 17 premises, so the
+    # limit has to be re-measured now that they translate.
+    cases += [(f"query_scaling/{size:02d}_facts", dict(FACTS_BY_RELEVANCE[:size]), "query_single", CLAIM)
+              for size in (10, 13, 17)]
+    # A channel that returns "valid" for everything would be worse than
+    # useless. Each pair asserts a claim and its negation against the same
+    # facts: exactly one must be valid and the other invalid.
+    compliant = {**CLAIM_SCOPED, "tradingHistoryMonths": 24}
+    cases += [
+        ("correctness/shortfall_claims_ineligible", CLAIM_SCOPED, "query_single",
+         "isSubstantivelyEligible is false."),
+        ("correctness/shortfall_claims_eligible", CLAIM_SCOPED, "query_single",
+         "isSubstantivelyEligible is true."),
+        ("correctness/compliant_claims_eligible", compliant, "query_single",
+         "isSubstantivelyEligible is true."),
+        ("correctness/compliant_claims_ineligible", compliant, "query_single",
+         "isSubstantivelyEligible is false."),
+    ]
 
     results = []
-    print(f"{'case':34} {'kinds':22} premises")
-    for name, facts, strategy in cases:
+    print(f"{'case':38} {'kinds':22} premises")
+    for name, facts, strategy, claim in cases:
         try:
-            outcome = await asyncio.to_thread(run, client, identifier, version, facts, strategy)
+            outcome = await asyncio.to_thread(run, client, identifier, version, facts, strategy, claim)
         except Exception as exc:  # a probe: report and keep going
             outcome = {"kinds": [f"error:{type(exc).__name__}"], "premises": [], "diagnostics": {}}
         results.append({"case": name, "strategy": strategy, "fact_count": len(facts),
-                        "facts": facts, "claim": CLAIM, **outcome})
+                        "facts": facts, "claim": claim, **outcome})
         (RESULTS_DIR / "premise-handling-probe.json").write_text(
             json.dumps(results, indent=2, default=str) + "\n")
-        print(f"{name:34} {','.join(outcome['kinds']):22} {outcome['premises']}", flush=True)
+        print(f"{name:38} {','.join(outcome['kinds']):22} "
+              f"premises={len(outcome['premises'])}", flush=True)
     return 0
 
 
