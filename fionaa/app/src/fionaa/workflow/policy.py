@@ -9,6 +9,7 @@ from langchain.agents import create_agent
 from langchain.messages import HumanMessage, ToolMessage
 from fionaa.model.load import load_model
 from fionaa.check_tools import CHECK_TOOLS_POOL
+from fionaa.evidence_checks import build_findings
 from fionaa.policy_loader import load_check_tool_names, load_policy_text
 from fionaa.redaction import redact_tool_calls
 from fionaa.prompts import POLICY_CHECK_PROMPT
@@ -23,7 +24,21 @@ async def check_against_policy(state: ApplicationState, runtime: Runtime[AgentCo
     has the Companies House verdict, plus annual_accounts/bank_statements
     (loaded by load_application) as cross-source evidence for UK-based,
     proof-of-address, and business-structure clauses -- see
-    POLICY_CHECK_PROMPT."""
+    POLICY_CHECK_PROMPT.
+
+    Also runs evidence_checks.build_findings -- the same deterministic
+    check triage.py runs at the end of the graph -- and hands its result to
+    the agent as DOCUMENTATION READINESS. Without this, POLICY_CHECK_PROMPT's
+    "use its checked findings... do not replace checked gaps with your own
+    document counts" instruction had nothing to act on: director_id/
+    proof_of_address are loaded by load_application but never otherwise
+    reach this node's message, so the agent judged them "not provided" from
+    documents it was structurally never shown -- correct by its own blind
+    inputs, but visibly contradicting triage's `satisfied` verdict on the
+    exact same submission (see decision/triage.json vs
+    policy_check/result.json's documentation_gaps for the same
+    application_id). build_findings only reads `state` (documents +
+    application), so it's safe to compute here, before triage ever runs."""
     application = state["application"]
     loan_type = LoanType(application["loan_type"])
     bank_statements = state.get("bank_statements", [])
@@ -52,7 +67,12 @@ async def check_against_policy(state: ApplicationState, runtime: Runtime[AgentCo
 
     # Computed fresh per invocation so it can't go stale in a long-lived
     # process -- same reason validate_final_decision does it.
-    reference_date = date.today().isoformat()
+    today = date.today()
+    reference_date = today.isoformat()
+    readiness = {
+        requirement: finding.model_dump(mode="json")
+        for requirement, finding in build_findings(dict(state), today).items()
+    }
 
     # Explicit cachePoint after POLICY, separate from load_model()'s
     # cache_control (which only ever sees this as one message and would
@@ -75,6 +95,7 @@ async def check_against_policy(state: ApplicationState, runtime: Runtime[AgentCo
                                 f"COMPANIES HOUSE FINDINGS:\n{json.dumps(companies_house)}\n\n"
                                 f"ANNUAL ACCOUNTS:\n{json.dumps(annual_accounts)}\n\n"
                                 f"BANK STATEMENTS:\n{json.dumps(bank_statements)}\n\n"
+                                f"DOCUMENTATION READINESS:\n{json.dumps(readiness)}\n\n"
                                 f"BANK STATEMENT END DATES:\n"
                                 f"{json.dumps([s['end_date'] for s in bank_statements])}\n\n"
                                 f"ASSESSMENT REFERENCE DATE: {reference_date}"
