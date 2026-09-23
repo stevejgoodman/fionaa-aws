@@ -95,10 +95,18 @@ async def _validate_decision(state: ApplicationState, runtime: Runtime[AgentCont
             details.update(status="not_checked", check_status=status)
         annotations.append({**claim, **details})
     counts = Counter(item["status"] for item in annotations)
+    # Union across claims, so a reviewer (and the evals) can see in one
+    # place which policy variables left this run undecided, rather than
+    # reading each claim's diagnostics. Empty when nothing was undecided.
+    unbound = sorted({
+        name for item in annotations
+        for name in item.get("diagnostics", {}).get("unbound_variables", [])
+    })
     return {
         "policy_sha256": results[0]["policy_sha256"],
         "counts": {status: counts[status]
                    for status in ("valid", "inconclusive", "invalid", "not_checked")},
+        "unbound_variables": unbound,
         "evidence": facts,
         "claims": annotations,
     }

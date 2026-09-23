@@ -224,3 +224,25 @@ async def test_unconfigured_full_graph_produces_report_for_human_review(monkeypa
     assert "financial_assessment/result.json" in store.data
     assert "web_search/result.json" in store.data
     assert "decision/proposed.json" in store.data
+
+
+@pytest.mark.asyncio
+async def test_inconclusive_result_names_the_variables_that_left_it_undecided():
+    """An "inconclusive" status alone doesn't say whether a fact is missing
+    or a sent fact was lost in translation -- see ar_findings.py."""
+    response = valid_response()
+    response["assessments"][0]["automatedReasoningPolicy"]["findings"] = [{"satisfiable": {
+        "translation": {"premises": [{"logic": "(= tradingHistoryMonths\n   9)"}]},
+        "claimsTrueScenario": {"statements": [
+            {"logic": "(= tradingHistoryMonths\n   9)"}, {"logic": "hasPersonalGuarantee"}]},
+        "claimsFalseScenario": {"statements": [
+            {"logic": "(= tradingHistoryMonths\n   9)"}, {"logic": "(not hasPersonalGuarantee)"}]},
+    }}]
+
+    result = await checker(response).check(
+        "secured-business-loans", "policy",
+        {"tradingHistoryMonths": 9, "loanAmount": 40000}, "isSubstantivelyEligible is false.")
+
+    assert result["status"] == "inconclusive"
+    assert result["diagnostics"]["unbound_variables"] == ["hasPersonalGuarantee"]
+    assert result["diagnostics"]["facts_not_translated"] == ["loanAmount"]
