@@ -18,6 +18,7 @@ from botocore.config import Config
 from botocore.exceptions import BotoCoreError, ClientError
 
 from fionaa.ar_claims import render_fact
+from fionaa.ar_findings import diagnose
 
 
 def policy_digest(text: str) -> str:
@@ -68,12 +69,20 @@ class PolicyConsistencyChecker:
                     config=Config(connect_timeout=5, read_timeout=60,
                                   retries={"mode": "standard", "total_max_attempts": 2}),
                 )
-            # Every block is guard_content, including the facts -- a
-            # separate query-qualified block was found not to be reliably
-            # used as translation premises by Bedrock's NL-to-logic
-            # translator, unlike guard_content (see ar_claims.py).
+            # Facts are the premises, so they go in query blocks; only the
+            # assertion under test is guard_content. An earlier comment here
+            # claimed query blocks weren't reliably used as premises and sent
+            # the facts as guard_content too -- measured against the live
+            # guardrails on 2026-09-23, that produced *zero* premises at every
+            # size from 1 to 13 facts (see
+            # evals/automated_reasoning/premise-handling-probe.json). The
+            # translator put the facts in the claims instead, so each check
+            # asked whether the facts and the assertion could hold together --
+            # satisfiable, hence "inconclusive" -- rather than whether the
+            # assertion followed from the facts. The same facts sent as query
+            # decide the same claims valid/invalid.
             content = [
-                {"text": {"text": render_fact(name, value), "qualifiers": ["guard_content"]}}
+                {"text": {"text": render_fact(name, value), "qualifiers": ["query"]}}
                 for name, value in sorted(facts.items())
             ]
             content.append({"text": {"text": assertion, "qualifiers": ["guard_content"]}})
@@ -106,5 +115,9 @@ class PolicyConsistencyChecker:
                   else "inconclusive" if passed else "not_validated")
         return {**result, "passed": passed,
                 "status": status,
-                "findings": findings, "usage": response.get("usage", {}),
+                "findings": findings,
+                # Why an undecided check was undecided -- policy variable
+                # names only, never applicant values. See ar_findings.py.
+                "diagnostics": diagnose(facts, findings),
+                "usage": response.get("usage", {}),
                 "request_id": response.get("ResponseMetadata", {}).get("RequestId")}

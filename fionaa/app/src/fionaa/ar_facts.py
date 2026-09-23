@@ -36,6 +36,20 @@ _DIRECTOR_ID_TYPE = {
     "driving_licence": "DirectorIDType_DRIVERS_LICENCE",
 }
 
+# ApplicationFormSchema.collateral_asset_type -> the secured policy's own
+# CollateralAssetType enum. Its NONE/OTHER members are deliberately
+# unmapped: the form only offers the five the policy accepts as security,
+# so there is no declaration that should produce either. An unmapped value
+# yields None (unknown), never CollateralAssetType_OTHER, which the policy
+# would read as a definite statement that the asset is ineligible.
+_COLLATERAL_ASSET_TYPE = {
+    "property": "CollateralAssetType_PROPERTY",
+    "equipment": "CollateralAssetType_EQUIPMENT",
+    "vehicles": "CollateralAssetType_VEHICLES",
+    "invoices": "CollateralAssetType_INVOICES",
+    "intangible_assets": "CollateralAssetType_INTANGIBLE_ASSETS",
+}
+
 
 def _business_type_from_name(name: str) -> str | None:
     name = name.lower()
@@ -156,6 +170,12 @@ def _director_id_facts(director_id: list[dict], application: dict, today: date) 
     return True, None  # satisfied but the matching doc's kind wasn't one of the two AR knows
 
 
+def _was_supplied(documents: list[dict] | None) -> bool | None:
+    """True/False for a document type that was loaded, None for one that
+    wasn't -- see the call sites in build_derived_facts."""
+    return None if documents is None else bool(documents)
+
+
 def build_derived_facts(
     application: dict,
     annual_accounts: list[dict],
@@ -164,14 +184,19 @@ def build_derived_facts(
     today: date,
     director_id: list[dict] | None = None,
     proof_of_address: list[dict] | None = None,
+    vat_returns: list[dict] | None = None,
+    existing_borrowing: list[dict] | None = None,
+    security_assets: list[dict] | None = None,
 ) -> dict:
     """AR-policy-variable-named facts, computed deterministically from
     already-available state -- see module docstring.
 
-    director_id/proof_of_address default to None (treated as "no documents
-    supplied", the same as an empty list) rather than being required
-    positional args -- keeps this backward compatible for any caller that
-    hasn't been updated to pass them."""
+    Every document argument defaults to None (treated as "no documents
+    supplied", the same as an empty list) rather than being a required
+    positional arg -- keeps this backward compatible for any caller that
+    hasn't been updated to pass them. The last three are loaded only for
+    the products whose policy asks for them (see loading.DOCUMENT_SPECS),
+    so they are legitimately absent on the others."""
     # general.md: a confirmed Companies House match is itself proof of both
     # halves of UK-based -- but the absence of a match is only "unconfirmed",
     # not proof of the negative, so only assert these true, never false.
@@ -205,5 +230,52 @@ def build_derived_facts(
         "hasValidDirectorID": has_valid_director_id,
         "directorIDType": director_id_type,
         "annualTurnover": application.get("annual_turnover"),
+        # Declarations, not documents: both are optional bool fields on the
+        # application form, and both gate a conditional document rule --
+        # `(or (not isVATRegistered) hasVATReturns)` and the borrowing
+        # equivalent. A false declaration satisfies its rule outright, so no
+        # VAT return or borrowing statement is required and the document
+        # variable behind it never has to be bound. Undeclared stays None
+        # and is dropped below, same as every other fact here: unknown is
+        # not no. hasVATReturns/hasBorrowingDetails themselves still have no
+        # source -- see ar_claims.KNOWN_UNCOVERED_VARIABLES.
+        "isVATRegistered": application.get("vat_registered"),
+        "hasExistingBorrowing": application.get("has_existing_borrowing"),
+        # Terms of the proposed facility. No document evidences them, so
+        # they come from the applicant's own declaration and stay unknown
+        # when undeclared -- the AR policies treat a missing personal
+        # guarantee or security declaration as unknown, not as "no".
+        "hasPersonalGuarantee": application.get("personal_guarantee_agreed"),
+        "isSecuredFacility": application.get("facility_is_secured"),
+        "collateralAssetType": _COLLATERAL_ASSET_TYPE.get(application.get("collateral_asset_type")),
+        # Whether the supporting document was supplied. These four say
+        # something narrower than the judgement facts above: not "is the
+        # applicant eligible" but "is this document in the submission",
+        # and the store is the complete record of that. An empty list is
+        # therefore a known negative -- the documents were looked for and
+        # weren't there -- while None means they were never looked for,
+        # because this product's policy doesn't ask for them (see
+        # loading.DOCUMENT_SPECS' applies_to) or the caller didn't pass
+        # them. Only the latter is unknown.
+        #
+        # This is what lets a claim be *refuted*. Reporting a withheld
+        # document as unknown leaves "hasRequiredDocuments is true"
+        # inconclusive rather than invalid, so a missing document could
+        # never be proven missing -- measured against the live guardrails,
+        # see evals/automated_reasoning/product-coverage-results.json.
+        # It does not make a document required: the policies' own
+        # conditional rules do that, and `(or (not isVATRegistered)
+        # hasVATReturns)` asks nothing of a business that declared it
+        # isn't VAT registered.
+        #
+        # One security_asset document serves two policies: it is the
+        # secured loan's proof of collateral ownership/valuation, and the
+        # "security/asset details" a secured revolving facility asks for.
+        # Both variables are set from it; each policy declares only its own,
+        # and ar_claims.facts_for_claim drops the one that isn't declared.
+        "hasVATReturns": _was_supplied(vat_returns),
+        "hasBorrowingDetails": _was_supplied(existing_borrowing),
+        "hasProofOfCollateralOwnershipValuation": _was_supplied(security_assets),
+        "hasSecurityAssetDetails": _was_supplied(security_assets),
     }
     return {key: value for key, value in facts.items() if value is not None}
