@@ -1,6 +1,7 @@
 """Business models for applications."""
 from datetime import date
 from enum import Enum
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -16,6 +17,17 @@ class LoanType(str, Enum):
 class ApplicationFormSchema(BaseModel):
     vat_registered: bool | None = Field(default=None, strict=True, description="Explicit declaration of VAT registration; unknown is not no.")
     has_existing_borrowing: bool | None = Field(default=None, strict=True, description="Explicit declaration of existing business borrowing; unknown is not no.")
+    # Terms of the proposed facility, not evidence about the applicant, so
+    # they are declared here rather than extracted from a document. Each
+    # binds an Automated Reasoning variable no document could establish:
+    # whether a personal guarantee has been agreed (required above GBP25,000
+    # on an unsecured loan), whether a revolving facility is secured, and
+    # which kind of asset secures a secured loan. All optional, all
+    # defaulting to unknown -- see ar_facts.py, which never guesses a value
+    # it wasn't given.
+    personal_guarantee_agreed: bool | None = Field(default=None, strict=True, description="Whether a personal guarantee has been agreed for this loan; unknown is not no.")
+    facility_is_secured: bool | None = Field(default=None, strict=True, description="Whether the requested revolving credit facility is secured; unknown is not no.")
+    collateral_asset_type: Literal["property", "equipment", "vehicles", "invoices", "intangible_assets"] | None = Field(default=None, description="The kind of asset offered as security for a secured business loan.")
     applicant_name: str = Field(description="Name of person applying- should be person with sigificant control")
     year_of_birth: str = Field(description="applicant birth year")
     company_name: str = Field(description="Comany registered name")

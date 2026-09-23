@@ -202,3 +202,75 @@ def test_undeclared_vat_and_borrowing_stay_unknown_not_false():
 
     assert "isVATRegistered" not in facts
     assert "hasExistingBorrowing" not in facts
+
+
+@pytest.mark.parametrize("declared,expected", [
+    ("property", "CollateralAssetType_PROPERTY"),
+    ("intangible_assets", "CollateralAssetType_INTANGIBLE_ASSETS"),
+])
+def test_declared_collateral_asset_type_maps_to_the_policy_enum(declared, expected):
+    assert _minimal(collateral_asset_type=declared)["collateralAssetType"] == expected
+
+
+def test_unmapped_collateral_asset_type_is_unknown_not_other():
+    """CollateralAssetType_OTHER would be a definite statement that the
+    asset is ineligible as security. An absent or unrecognised declaration
+    says nothing at all."""
+    assert "collateralAssetType" not in _minimal()
+    assert "collateralAssetType" not in _minimal(collateral_asset_type="racehorse")
+
+
+@pytest.mark.parametrize("declared,expected", [(True, True), (False, False)])
+def test_facility_terms_are_taken_from_the_declaration(declared, expected):
+    facts = _minimal(personal_guarantee_agreed=declared, facility_is_secured=declared)
+
+    assert facts["hasPersonalGuarantee"] is expected
+    assert facts["isSecuredFacility"] is expected
+
+
+def test_undeclared_facility_terms_stay_unknown():
+    facts = _minimal()
+
+    assert "hasPersonalGuarantee" not in facts and "isSecuredFacility" not in facts
+
+
+def test_supporting_documents_bind_their_policy_variables():
+    """One security_asset document serves both policies that ask about
+    collateral: the secured loan's proof of ownership/valuation and a
+    secured revolving facility's security/asset details."""
+    facts = build_derived_facts(
+        {"annual_turnover": 180000}, [], [], None, date(2026, 9, 23),
+        vat_returns=[{"business_name": "Example Ltd"}],
+        existing_borrowing=[{"lender_name": "Example Bank"}],
+        security_assets=[{"asset_type": "property"}],
+    )
+
+    assert facts["hasVATReturns"] is True
+    assert facts["hasBorrowingDetails"] is True
+    assert facts["hasProofOfCollateralOwnershipValuation"] is True
+    assert facts["hasSecurityAssetDetails"] is True
+
+
+def test_a_document_type_that_was_never_loaded_is_unknown():
+    """None means this product's policy doesn't ask for the document, so
+    nothing was looked for -- distinct from looking and finding none."""
+    facts = _minimal()
+
+    for variable in ("hasVATReturns", "hasBorrowingDetails",
+                     "hasProofOfCollateralOwnershipValuation", "hasSecurityAssetDetails"):
+        assert variable not in facts
+
+
+def test_a_document_type_that_was_loaded_and_empty_is_a_known_negative():
+    """The store is the complete record of what was submitted, so "looked
+    for and not there" is knowledge, not absence of it. Reporting it as
+    unknown would leave a missing document unprovable -- the documentation
+    claim could be confirmed but never refuted."""
+    facts = build_derived_facts(
+        {"annual_turnover": 180000}, [], [], None, date(2026, 9, 23),
+        vat_returns=[], existing_borrowing=[], security_assets=[])
+
+    assert facts["hasVATReturns"] is False
+    assert facts["hasBorrowingDetails"] is False
+    assert facts["hasProofOfCollateralOwnershipValuation"] is False
+    assert facts["hasSecurityAssetDetails"] is False

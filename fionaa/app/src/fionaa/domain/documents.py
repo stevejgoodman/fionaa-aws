@@ -111,11 +111,91 @@ class ProofOfAddressSchema(BaseModel):
     issue_date: date = Field(description="The date the document was issued.", title="Issue Date")
 
 
+class VATReturnSchema(BaseModel):
+    """Extracted fields from a filed VAT return.
+
+    Required only of a VAT-registered business (`vat_registered` on the
+    application form): the policies read "VAT returns (if registered)", and
+    the AR rule is `(or (not isVATRegistered) hasVATReturns)` -- a business
+    that declares it isn't registered needs none.
+
+    The VAT registration *number* is deliberately not extracted, for the
+    same reason DirectorIdSchema skips the document number: nothing checks
+    it, and not collecting an identifier beats redacting it later.
+    """
+
+    business_name: str = Field(description="The registered business name the return was "
+                               "filed for.", title="Business Name")
+    period_start: date = Field(description="First day of the VAT period covered.",
+                               title="Period Start")
+    period_end: date = Field(description="Last day of the VAT period covered.",
+                             title="Period End")
+    # Unbounded: a return claiming more input VAT than it owes is a
+    # legitimate refund position, not a validation error -- same reasoning
+    # as AnnualAccountsSchema's profit fields.
+    vat_due: float = Field(description="Net VAT due to (positive) or reclaimable from "
+                           "(negative) HMRC for the period.", title="VAT Due")
+
+
+class ExistingBorrowingSchema(BaseModel):
+    """One existing borrowing facility, as evidenced by a statement or
+    agreement the applicant supplies.
+
+    Required only when the applicant declares existing borrowing
+    (`has_existing_borrowing`) for unsecured loans; the
+    revolving-credit-facility policy requires borrowing details
+    unconditionally -- see its `hasRequiredDocuments` rule, which has no
+    `hasExistingBorrowing` guard.
+    """
+
+    lender_name: str = Field(description="The lender or finance provider.", title="Lender")
+    facility_type: str = Field(description="What kind of borrowing this is, e.g. term loan, "
+                               "overdraft, asset finance, credit card.", title="Facility Type")
+    outstanding_balance: float = Field(ge=0, description="Amount still owed, UK Pounds.",
+                                       title="Outstanding Balance")
+    monthly_repayment: float = Field(ge=0, description="Contractual monthly repayment, UK Pounds.",
+                                     title="Monthly Repayment")
+    as_at_date: date = Field(description="The date the balance was stated.", title="As At Date")
+
+
+class SecurityAssetSchema(BaseModel):
+    """Evidence of an asset offered as security: what it is, what it's
+    worth, and that the applicant owns it.
+
+    Serves two policies from one document type. For secured business loans
+    it evidences `hasProofOfCollateralOwnershipValuation`; for a revolving
+    facility the applicant has declared is secured, it is the "security/
+    asset details" that policy asks for. The asset *type* is not read from
+    here -- that is a declared term of the deal
+    (`collateral_asset_type` on the application form), so an applicant who
+    names an asset but hasn't yet supplied proof is ineligible-pending-
+    documents rather than unknown.
+
+    No recency rule is applied to `valuation_date`. None of the three
+    policies states one, and inventing a staleness threshold here would be
+    making policy rather than checking it.
+    """
+
+    asset_type: Literal["property", "equipment", "vehicles", "invoices",
+                        "intangible_assets"] = Field(
+        description="What kind of asset is offered as security.", title="Asset Type")
+    description: str = Field(description="What the asset is, e.g. freehold warehouse, "
+                             "CNC milling machine.", title="Description")
+    estimated_value: float = Field(ge=0, description="Assessed or estimated value, UK Pounds.",
+                                   title="Estimated Value")
+    valuation_date: date = Field(description="The date of the valuation.", title="Valuation Date")
+    owner_name: str = Field(description="The name the asset is registered to, as printed on the "
+                            "ownership evidence.", title="Owner Name")
+
+
 class DocumentType(str, Enum):
     bank_statement = "bank_statement"
     annual_company_report = "annual_company_report"
     director_id = "director_id"
     proof_of_address = "proof_of_address"
+    vat_return = "vat_return"
+    existing_borrowing = "existing_borrowing"
+    security_asset = "security_asset"
 
     # Descriptions for each value
     def describe(self) -> str:
@@ -133,6 +213,16 @@ class DocumentType(str, Enum):
             "proof_of_address": "A document evidencing the director's residential "
             "address, such as a utility bill, council tax statement or personal bank "
             "statement, showing the addressee's name, the address and an issue date.",
+
+            "vat_return": "A filed VAT return, showing the business name, the VAT "
+            "period it covers and the net VAT due or reclaimable.",
+
+            "existing_borrowing": "A statement or agreement evidencing an existing "
+            "borrowing facility — lender, kind of facility, outstanding balance and "
+            "monthly repayment.",
+
+            "security_asset": "Evidence of an asset offered as security: what it is, "
+            "a valuation, and proof the applicant owns it.",
         }
         return descriptions[self.value]
 
