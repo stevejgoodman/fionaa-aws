@@ -19,6 +19,11 @@ ar_facts.py. This probe measures two things independently:
   query_scaling/* Whether the premise channel still holds at the fact
               count production sends (the `tooComplex` seen at 17 was
               measured with sentences that never became premises at all).
+  approval/*  The approval claim is the conjunction of the other two, so
+              its facts cannot be scoped below their union (13-17 leaves,
+              over the ceiling on every product). Composing it from the
+              two compound values instead needs two premises. The last
+              case is the leaf version, for the contrast.
   correctness/* A claim and its negation against the same facts, both
               ways round: exactly one of each pair must be valid and the
               other invalid. A channel that answers "valid" to everything
@@ -153,6 +158,24 @@ async def main():
          "isSubstantivelyEligible is true."),
         ("correctness/compliant_claims_ineligible", compliant, "query_single",
          "isSubstantivelyEligible is false."),
+    ]
+
+    # The approval claim reaches 13-17 leaf variables on every product --
+    # it is the conjunction of the other two claims, so scoping its facts
+    # cannot get it under the ceiling. It does not need the leaves: its
+    # rule is `approvalMeetsCoveredPolicy = isSubstantivelyEligible AND
+    # hasRequiredDocuments`, and both inputs are separately checked claims
+    # with their own facts. These cases test that two-premise composition
+    # against the 17-leaf version it would replace.
+    approval = "approvalMeetsCoveredPolicy is "
+    cases += [
+        ("approval/composed_refused", {"isSubstantivelyEligible": False, "hasRequiredDocuments": True},
+         "query_single", approval + "false."),
+        ("approval/composed_approved", {"isSubstantivelyEligible": True, "hasRequiredDocuments": True},
+         "query_single", approval + "true."),
+        ("approval/composed_approved_negated", {"isSubstantivelyEligible": True, "hasRequiredDocuments": True},
+         "query_single", approval + "false."),
+        ("approval/all_leaves", dict(FACTS_BY_RELEVANCE), "query_single", approval + "false."),
     ]
 
     results = []
