@@ -15,6 +15,7 @@ from langchain.messages import ToolMessage
 from langgraph.checkpoint.memory import MemorySaver
 
 import fionaa.graph as g
+from fionaa.evidence_checks import build_findings
 from fionaa.workflow import loading, validation
 from fionaa.workflow import policy as policy_stage, companies_house as company_stage, financial as financial_stage, web_search as web_stage, decision as decision_stage
 import fionaa.security as sec
@@ -248,6 +249,17 @@ async def test_check_against_policy_persists_and_returns_result(monkeypatch):
     # Two blocks, not one string -- check_against_policy puts an explicit
     # cachePoint after POLICY so Bedrock caches it independently of the
     # per-application tail (see workflow/policy.py).
+    # DOCUMENTATION READINESS is evidence_checks.build_findings on the same
+    # state -- the same deterministic check triage.py runs at the end of
+    # the graph, computed here too (see workflow/policy.py) so the agent's
+    # documentation_gaps can't contradict triage's verdict on documents it
+    # was never otherwise shown (director_id/proof_of_address especially --
+    # loaded by load_application but not passed to this node any other
+    # way).
+    readiness = {
+        requirement: finding.model_dump(mode="json")
+        for requirement, finding in build_findings(dict(state), date.today()).items()
+    }
     expected_content = [
         {"type": "text", "text": f"POLICY:\n{g.load_policy_text(g.LoanType.unsecured_business_loans)}"},
         {"cachePoint": {"type": "default"}},
@@ -258,12 +270,60 @@ async def test_check_against_policy_persists_and_returns_result(monkeypatch):
                 f"COMPANIES HOUSE FINDINGS:\n{json.dumps(None)}\n\n"
                 f"ANNUAL ACCOUNTS:\n[]\n\n"
                 f"BANK STATEMENTS:\n[]\n\n"
+                f"DOCUMENTATION READINESS:\n{json.dumps(readiness)}\n\n"
                 f"BANK STATEMENT END DATES:\n[]\n\n"
                 f"ASSESSMENT REFERENCE DATE: {date.today().isoformat()}"
             ),
         },
     ]
     assert calls[1]["message_content"] == expected_content
+
+
+@pytest.mark.asyncio
+async def test_check_against_policy_sends_documentation_readiness_matching_triage(monkeypatch):
+    """The real bug this covers: triage.py runs build_findings at the end of
+    the graph and correctly reports director_id/proof_of_address as
+    satisfied once they're supplied, but check_against_policy never passed
+    those documents (or any deterministic readiness verdict) to the agent
+    -- so the agent's own documentation_gaps kept saying "not provided" for
+    a submission triage had already accepted. This asserts the same
+    build_findings result triage would compute is exactly what reaches the
+    agent's message, for a state where every requirement is satisfied."""
+    application = {
+        "loan_type": "unsecured-business-loans", "applicant_name": "Steve Goodman",
+        "year_of_birth": "1972", "company_name": "GoodAI Consulting", "company_address": "Manor Road, Ruislip",
+        "loan_purpose": "working capital", "loan_amount": 20000, "loan_term": 24,
+        "director_first_name": "Steve", "director_surname": "Goodman",
+        "director_residential_address": "12 Manor Road, Ruislip",
+        "trading_start_date": "2026-04-16", "annual_turnover": 250000, "annual_profit": 62000,
+    }
+    state = {
+        "application": application,
+        "director_id": [{"document_kind": "passport", "holder_name": "Steve Goodman", "expiry_date": "2031-04-16"}],
+        "proof_of_address": [{
+            "document_kind": "utility bill", "holder_name": "Steve Goodman",
+            "address": "12 Manor Road, Ruislip", "issue_date": date.today().isoformat(),
+        }],
+    }
+    store = FakeStore()
+    runtime = FakeRuntime(g.AgentContext(store=store, policy_docs=FakePolicyDocs(), tools=[]))
+    calls = []
+
+    for stage in (policy_stage, company_stage, financial_stage, web_stage, decision_stage):
+        monkeypatch.setattr(stage, "create_agent", make_fake_create_agent("passed", calls))
+
+    await g.check_against_policy(state, runtime)
+
+    sent_readiness = json.loads(
+        calls[1]["message_content"][2]["text"].split("DOCUMENTATION READINESS:\n", 1)[1].split("\n\nBANK STATEMENT")[0]
+    )
+    expected_readiness = {
+        requirement: finding.model_dump(mode="json")
+        for requirement, finding in build_findings(dict(state), date.today()).items()
+    }
+    assert sent_readiness == expected_readiness
+    assert sent_readiness["director_id"]["status"] == "satisfied"
+    assert sent_readiness["proof_of_address"]["status"] == "satisfied"
 
 
 @pytest.mark.asyncio
