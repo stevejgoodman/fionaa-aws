@@ -205,5 +205,16 @@ def build_derived_facts(
         "hasValidDirectorID": has_valid_director_id,
         "directorIDType": director_id_type,
         "annualTurnover": application.get("annual_turnover"),
+        # Declarations, not documents: both are optional bool fields on the
+        # application form, and both gate a conditional document rule --
+        # `(or (not isVATRegistered) hasVATReturns)` and the borrowing
+        # equivalent. A false declaration satisfies its rule outright, so no
+        # VAT return or borrowing statement is required and the document
+        # variable behind it never has to be bound. Undeclared stays None
+        # and is dropped below, same as every other fact here: unknown is
+        # not no. hasVATReturns/hasBorrowingDetails themselves still have no
+        # source -- see ar_claims.KNOWN_UNCOVERED_VARIABLES.
+        "isVATRegistered": application.get("vat_registered"),
+        "hasExistingBorrowing": application.get("has_existing_borrowing"),
     }
     return {key: value for key, value in facts.items() if value is not None}

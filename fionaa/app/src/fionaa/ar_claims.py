@@ -45,16 +45,19 @@ _SHARED_LEAF_VARIABLES = frozenset({
 })
 LOAN_TYPE_LEAF_VARIABLES: dict[LoanType, frozenset[str]] = {
     LoanType.unsecured_business_loans: _SHARED_LEAF_VARIABLES | {
-        "hasAccountsOrManagementInformation", "hasProofOfDirectorAddress",
-        "loanAmount", "loanTermMonths", "tradingHistoryMonths",
+        "hasAccountsOrManagementInformation", "hasExistingBorrowing",
+        "hasProofOfDirectorAddress", "isVATRegistered", "loanAmount",
+        "loanTermMonths", "tradingHistoryMonths",
     },
     LoanType.secured_business_loans: _SHARED_LEAF_VARIABLES | {
         "hasAnnualAccounts", "lastAccountingDateWithinPast12Months",
         "loanAmount", "loanTermMonths", "tradingHistoryMonths",
     },
+    # No hasExistingBorrowing here: this policy requires hasBorrowingDetails
+    # unconditionally, so it declares no such variable to gate it.
     LoanType.revolving_credit_facility: _SHARED_LEAF_VARIABLES | {
         "hasAccountsOrManagementInformation", "hasProofOfDirectorAddress",
-        "loanAmount", "tradingHistoryMonths",
+        "isVATRegistered", "loanAmount", "tradingHistoryMonths",
     },
     LoanType.invoice_discounting: _SHARED_LEAF_VARIABLES | {"annualTurnover"},
     LoanType.invoice_factoring: _SHARED_LEAF_VARIABLES | {"annualTurnover"},
@@ -79,15 +82,14 @@ LOAN_TYPE_LEAF_VARIABLES: dict[LoanType, frozenset[str]] = {
 # given check undecided; this list is the static, per-product view.
 KNOWN_UNCOVERED_VARIABLES: dict[LoanType, frozenset[str]] = {
     LoanType.unsecured_business_loans: frozenset({
-        "hasBorrowingDetails", "hasExistingBorrowing", "hasPersonalGuarantee",
-        "hasVATReturns", "isVATRegistered",
+        "hasBorrowingDetails", "hasPersonalGuarantee", "hasVATReturns",
     }),
     LoanType.secured_business_loans: frozenset({
         "collateralAssetType", "hasProofOfCollateralOwnershipValuation",
     }),
     LoanType.revolving_credit_facility: frozenset({
         "hasBorrowingDetails", "hasSecurityAssetDetails", "hasVATReturns",
-        "isSecuredFacility", "isVATRegistered",
+        "isSecuredFacility",
     }),
     LoanType.invoice_discounting: frozenset({
         "advanceRatePercent", "contractTermMonths", "hasAgedDebtReports",
