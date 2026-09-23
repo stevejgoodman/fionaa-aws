@@ -1,10 +1,12 @@
 import json
+import re
 from pathlib import Path
 
 import pytest
 
 from fionaa.ar_claims import (
     APPROVAL_VARIABLE,
+    KNOWN_UNCOVERED_VARIABLES,
     DOCUMENTATION_VARIABLE,
     ELIGIBILITY_VARIABLE,
     LOAN_TYPE_LEAF_VARIABLES,
@@ -101,3 +103,37 @@ def test_leaf_variables_are_actually_declared_by_the_real_ar_policy(loan_type):
 
     assert LOAN_TYPE_LEAF_VARIABLES[loan_type] <= declared
     assert {ELIGIBILITY_VARIABLE, DOCUMENTATION_VARIABLE, APPROVAL_VARIABLE} <= declared
+
+
+def _leaf_variables(definition: dict) -> set[str]:
+    """Variables no rule defines -- the ones the AR engine can only know if
+    they're sent as facts. Everything else (isEligibleBusinessType,
+    loanAmountInRange, personalGuaranteeRequirementMet ...) is defined by a
+    rule of the form `(= <name> <expression>)` and derived by the solver.
+
+    `(=> hasCompaniesHouseMatch ...)` is an implication, not a definition,
+    so hasCompaniesHouseMatch stays a leaf -- hence the anchored match on
+    `(= ` rather than a substring search for the variable name."""
+    declared = {variable["name"] for variable in definition["variables"]}
+    defined = set()
+    for rule in definition["rules"]:
+        match = re.match(r"\(=\s+([A-Za-z_][A-Za-z0-9_]*)\b", rule["expression"].strip())
+        if match and match.group(1) in declared:
+            defined.add(match.group(1))
+    return declared - defined
+
+
+@pytest.mark.parametrize("loan_type", list(LoanType))
+def test_uncovered_leaf_variables_match_the_written_down_gap(loan_type):
+    """The AR fact-coverage gap, asserted exactly rather than described.
+
+    A leaf variable ar_facts.py doesn't compute reaches the engine unbound,
+    and any claim depending on it can then only come back "satisfiable" ->
+    "inconclusive". KNOWN_UNCOVERED_VARIABLES is that gap written down; this
+    fails both ways -- when a policy revision declares a new leaf nobody
+    wired up, and when a fact is added without striking it off the list."""
+    definition = json.loads((AR_POLICY_DIR / DEFINITION_FILE_BY_LOAN_TYPE[loan_type]).read_text())
+
+    uncovered = _leaf_variables(definition) - LOAN_TYPE_LEAF_VARIABLES[loan_type]
+
+    assert uncovered == set(KNOWN_UNCOVERED_VARIABLES[loan_type])

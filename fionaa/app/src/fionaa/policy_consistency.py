@@ -18,6 +18,7 @@ from botocore.config import Config
 from botocore.exceptions import BotoCoreError, ClientError
 
 from fionaa.ar_claims import render_fact
+from fionaa.ar_findings import diagnose
 
 
 def policy_digest(text: str) -> str:
@@ -106,5 +107,9 @@ class PolicyConsistencyChecker:
                   else "inconclusive" if passed else "not_validated")
         return {**result, "passed": passed,
                 "status": status,
-                "findings": findings, "usage": response.get("usage", {}),
+                "findings": findings,
+                # Why an undecided check was undecided -- policy variable
+                # names only, never applicant values. See ar_findings.py.
+                "diagnostics": diagnose(facts, findings),
+                "usage": response.get("usage", {}),
                 "request_id": response.get("ResponseMetadata", {}).get("RequestId")}

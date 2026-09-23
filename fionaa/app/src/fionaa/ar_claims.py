@@ -9,15 +9,13 @@ wording, run after run. See PolicyConsistencyChecker.check() for how these
 are sent, and workflow/validation.py for how they're assembled per run.
 
 LOAN_TYPE_LEAF_VARIABLES only lists what ar_facts.py currently computes.
-Several variables each policy declares aren't derived anywhere yet (e.g.
-unsecured's hasPersonalGuarantee/isVATRegistered/hasVATReturns/
-hasExistingBorrowing/hasBorrowingDetails; secured's collateralAssetType/
-hasSecurityAsset/hasProofOfCollateralOwnershipValuation; revolving's
-isSecuredFacility/hasSecurityAssetDetails; invoice types'
-advanceRatePercent/contractTermMonths/hasAgedDebtReports/etc). That
-expansion is deliberately deferred, incremental work -- this module's
-filter-then-assert mechanism picks new facts up automatically once
-ar_facts.py grows to compute them; it doesn't need to be redesigned.
+Several variables each policy declares aren't derived anywhere yet --
+KNOWN_UNCOVERED_VARIABLES below names every one of them, per loan type,
+and test_ar_claims.py asserts that list is exactly right against the real
+policy definitions. That expansion is deliberately deferred, incremental
+work -- this module's filter-then-assert mechanism picks new facts up
+automatically once ar_facts.py grows to compute them; it doesn't need to
+be redesigned.
 """
 from __future__ import annotations
 
@@ -60,6 +58,48 @@ LOAN_TYPE_LEAF_VARIABLES: dict[LoanType, frozenset[str]] = {
     },
     LoanType.invoice_discounting: _SHARED_LEAF_VARIABLES | {"annualTurnover"},
     LoanType.invoice_factoring: _SHARED_LEAF_VARIABLES | {"annualTurnover"},
+}
+
+
+# Leaf variables each policy declares that ar_facts.py does NOT compute, so
+# they reach the AR engine unbound. The engine is then free to choose their
+# values, and any claim whose truth depends on one can only come back
+# "satisfiable" -- reported as "inconclusive", however clear-cut the
+# application is. This is the deferred expansion the module docstring
+# describes, written down per loan type so the gap is countable rather than
+# prose: test_ar_claims.py derives the same set from the real policy
+# definitions and asserts an exact match, so closing one (or a policy
+# declaring a new one) must be reflected here.
+#
+# A variable is a "leaf" when no rule defines it from other variables --
+# the solver derives the rest (isEligibleBusinessType, loanAmountInRange,
+# personalGuaranteeRequirementMet ...) and they are never sent as facts.
+#
+# At runtime, ar_findings.diagnose() reports which of these actually left a
+# given check undecided; this list is the static, per-product view.
+KNOWN_UNCOVERED_VARIABLES: dict[LoanType, frozenset[str]] = {
+    LoanType.unsecured_business_loans: frozenset({
+        "hasBorrowingDetails", "hasExistingBorrowing", "hasPersonalGuarantee",
+        "hasVATReturns", "isVATRegistered",
+    }),
+    LoanType.secured_business_loans: frozenset({
+        "collateralAssetType", "hasProofOfCollateralOwnershipValuation",
+    }),
+    LoanType.revolving_credit_facility: frozenset({
+        "hasBorrowingDetails", "hasSecurityAssetDetails", "hasVATReturns",
+        "isSecuredFacility", "isVATRegistered",
+    }),
+    LoanType.invoice_discounting: frozenset({
+        "advanceRatePercent", "contractTermMonths", "hasAgedDebtReports",
+        "hasAgreedExitNoticePeriod", "hasBusinessRegistrationDocuments",
+        "hasCreditControlProcedures", "hasCustomerBaseDetails",
+        "hasRecentFinancialStatements",
+    }),
+    LoanType.invoice_factoring: frozenset({
+        "advanceRatePercent", "contractTermMonths", "hasAgedDebtReports",
+        "hasAgreedExitNoticePeriod", "hasBusinessRegistrationDocuments",
+        "hasCustomerBaseDetails", "hasRecentFinancialStatements",
+    }),
 }
 
 
