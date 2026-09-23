@@ -154,11 +154,11 @@
   }
   .stage{
     display:flex; flex-direction:column; align-items:center;
-    width:158px; flex-shrink:0; position:relative;
+    width:180px; flex-shrink:0; position:relative;
     padding-top:6px;
   }
   .stage-connector{
-    position:absolute; top:24px; left:-79px; width:158px; height:2px;
+    position:absolute; top:24px; left:-90px; width:180px; height:2px;
     background:var(--line); z-index:0;
   }
   .stage:first-child .stage-connector{ display:none; }
@@ -200,6 +200,11 @@
   .stage-hint{ font-size:10px; color:var(--text-faint); margin-top:4px; opacity:0; transition:opacity 0.15s; }
   .stage-hit:not(:disabled):hover .stage-hint, .stage-hit.selected .stage-hint{ opacity:1; }
 
+  .check-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+  .check-tabs button[aria-pressed="true"]{border-color:var(--brass);color:var(--brass-ink);}
+  .document-snippets{grid-template-columns:repeat(auto-fit,minmax(240px,1fr));}
+  .document-snippet{padding:12px 0;border-top:1px solid var(--line);}
+  .document-snippet h4{margin:0 0 10px;font-size:12px;color:var(--text-faint);}
   /* ---------- Detail drawer ---------- */
   .detail{
     background:var(--paper); border:1px solid var(--line); border-radius:10px;
@@ -345,6 +350,7 @@
   </div>
 
   <div class="rail-section">
+    <p style="font-size:12px;color:var(--text-faint);margin-bottom:16px">Five workflow stages · Select a stage to explore its supporting checks. Replay follows the recorded processing order.</p>
     <div class="rail-scroll">
       <div class="rail" id="rail"></div>
     </div>
@@ -587,6 +593,7 @@
     stepIndex = 0;
     stageStatus = {};
     openDetail = null;
+    selectedGroup = null;
     stages.forEach(s => stageStatus[s] = "pending");
     verdictWrap.style.display = "none";
     verdictEl.classList.remove("show");
@@ -604,6 +611,7 @@
     clearTimeout(timer);
     stages.forEach(s => stageStatus[s] = ((s === "reject_no_company" && !companiesHouseFound)
       || s === "return_to_applicant") ? "rejected" : "done");
+    selectedGroup = null;
     stepIndex = stages.length;
     openDetail = "synthesize_decision" in STAGE_META && stages.includes("synthesize_decision") ? "synthesize_decision" : stages[stages.length-1];
     statusPill.className = "status-pill " + (RUN.final_decision?.outcome === "rejected" ? "rejected" : "done");
@@ -627,54 +635,54 @@
     return STAGE_META[nodeId].short;
   }
 
+  // Business stages group evidence; replay still follows the actual run order.
+  const WORKFLOW = [
+    {label:"Application & Eligibility", sub:"application details & lending policy", nodes:["load_application", "policy_check"]},
+    {label:"Identity / Business Verification", sub:"registry checks & business research", nodes:["companies_house", "web_search"]},
+    {label:"Financial Data Collection & Verification", sub:"submitted documents & completeness", nodes:["load_application", "triage"]},
+    {label:"Creditworthiness & Affordability", sub:"accounts, statements & repayment capacity", nodes:["financial_assessment"]},
+    {label:"Decision Rationale & Compliance Checks", sub:"recommendation & policy findings", nodes:["synthesize_decision", "policy_check"]},
+  ];
+  let selectedGroup = null;
   function render(){
+    const groups = [...WORKFLOW, ...stages.filter(id => ["reject_no_company", "to_underwriter", "return_to_applicant"].includes(id)).map(id => ({label:STAGE_META[id].label, sub:"outcome", nodes:[id]}))];
     rail.innerHTML = "";
-    stages.forEach((nodeId, i) => {
-      const meta = STAGE_META[nodeId];
-      const status = stageStatus[nodeId] || "pending";
-      const step = stepFor(nodeId);
-      const wrapDiv = document.createElement("div");
-      wrapDiv.className = "stage" + (status === "pending" ? " disabled" : "");
-
-      let connectorClass = "stage-connector";
-      if (i > 0){
-        if (nodeId === "reject_no_company" || nodeId === "financial_assessment"){
-          const taken = (nodeId === "reject_no_company") === !companiesHouseFound;
-          connectorClass += taken ? " branch-taken" : " branch-not-taken";
-        } else if (stageStatus[stages[i-1]] === "done" || stageStatus[stages[i-1]] === "rejected"){
-          connectorClass += " filled";
-        }
-      }
-
-      const clickable = status !== "pending";
-      const selected = openDetail === nodeId;
-      wrapDiv.innerHTML = `
-        <div class="${connectorClass}"></div>
-        <button class="stage-hit ${selected ? "selected" : ""}" data-stage="${nodeId}"
-                ${clickable ? "" : "disabled"} aria-pressed="${selected}"
-                aria-label="${meta.label}${clickable ? " — view inputs and outputs" : ""}">
-          <span class="stage-node ${status}">${iconFor(nodeId, status)}</span>
-          <span class="stage-label">${meta.label}</span>
-          <span class="stage-sub">${meta.sub}</span>
-          <span class="stage-dur">${step && (status==="done"||status==="rejected") ? fmtDuration(step.duration_ms) : " "}</span>
-          <span class="stage-hint">${clickable ? (selected ? "viewing ▾" : "view I/O") : ""}</span>
-        </button>
-      `;
-      rail.appendChild(wrapDiv);
-    });
-
-    // Every completed/rejected stage stays clickable after the run finishes
-    // (or mid-run, for anything already done) -- lets you go back and read
-    // an earlier stage's cards instead of only seeing whatever's currently
-    // playing, which moves too fast to read on its own.
-    rail.querySelectorAll(".stage-hit").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const id = btn.getAttribute("data-stage");
-        openDetail = openDetail === id ? null : id;
-        render();
+    groups.forEach((group, i) => {
+      const nodes = group.nodes.filter(id => ranNodes.has(id));
+      const ready = nodes.filter(id => stageStatus[id] && stageStatus[id] !== "pending");
+      const active = nodes.some(id => stageStatus[id] === "running");
+      const done = nodes.length && nodes.every(id => ["done", "rejected"].includes(stageStatus[id]));
+      const status = active ? "running" : done ? (nodes.includes("reject_no_company") ? "rejected" : "done") : "pending";
+      const selected = selectedGroup === i || (selectedGroup === null && group.nodes.includes(openDetail));
+      const duration = nodes.reduce((total, id) => total + (stepFor(id)?.duration_ms || 0), 0);
+      const el = document.createElement("div"); el.className = "stage";
+      el.innerHTML = `<div class="stage-connector ${done ? "filled" : ""}"></div>
+        <button class="stage-hit ${selected ? "selected" : ""}" ${ready.length ? "" : "disabled"} aria-pressed="${selected}">
+          <span class="stage-node ${status}">${status === "done" ? ICON_CHECK : status === "rejected" ? ICON_CROSS : active ? "" : String(i+1).padStart(2,"0")}</span>
+          <span class="stage-label">${escapeHtml(group.label)}</span>
+          <span class="stage-sub">${escapeHtml(group.sub)}</span>
+          <span class="stage-dur">${done ? fmtDuration(duration) : ready.length ? "Part complete" : " "}</span>
+          <span class="stage-hint">View supporting checks</span>
+        </button>`;
+      el.querySelector("button").addEventListener("click", () => {
+        selectedGroup = i; openDetail = ready[0]; render();
       });
+      rail.appendChild(el);
     });
     renderDetail();
+    if (openDetail) {
+      const group = groups[selectedGroup] || groups.find(g => g.nodes.includes(openDetail));
+      if (group) {
+        const nav = document.createElement("div"); nav.className = "check-tabs";
+        group.nodes.forEach(id => {
+          const btn = document.createElement("button"); btn.textContent = selectedGroup === 2 && id === "load_application" ? "Document snippets" : id === "triage" ? "Document readiness" : STAGE_META[id].label;
+          btn.disabled = !stageStatus[id] || stageStatus[id] === "pending";
+          btn.setAttribute("aria-pressed", String(openDetail === id));
+          btn.addEventListener("click", () => { openDetail = id; render(); }); nav.appendChild(btn);
+        });
+        detailSlot.prepend(nav);
+      }
+    }
   }
 
   function renderDetail(){
@@ -682,11 +690,29 @@
       detailSlot.innerHTML = "";
       return;
     }
-    const meta = STAGE_META[openDetail];
+    const meta = {...STAGE_META[openDetail]};
+    if (selectedGroup === 2 && openDetail === "load_application") meta.label = "Document snippets";
+    if (openDetail === "triage") meta.label = "Document readiness";
     const step = stepFor(openDetail);
     let body = "";
 
-    if (openDetail === "load_application"){
+    if (openDetail === "load_application" && selectedGroup === 2){
+      const docs = step?.state_value || {};
+      const money = value => value == null ? "Not recorded" : fmtMoney(value);
+      const rows = values => values.map(([label, value]) => `<div class="kv"><span class="k">${escapeHtml(label)}</span><span class="v">${escapeHtml(value ?? "Not recorded")}</span></div>`).join("");
+      const section = (title, documents, fields) => `<section class="detail-col"><h3>${title}</h3>${documents.length ? documents.map((doc, index) => `<div class="document-snippet"><h4>${title} ${index + 1}</h4>${rows(fields(doc))}</div>`).join("") : '<p class="prose">No document recorded for this run.</p>'}</section>`;
+      body = `<p class="prose" style="margin-bottom:16px">Brief excerpts from the recorded document data.</p><div class="detail-cols document-snippets">
+        ${section("Annual accounts", docs.annual_accounts || [], d => [["Company", d.company_name], ["Accounting date", d.accounting_year], ["Turnover", money(d.turnover_current_year)], ["Operating profit", money(d.operating_profit_current_year)], ["Net profit", money(d.profit_current_year)]])}
+        ${section("Bank statements", docs.bank_statements || [], d => [["Bank", d.bank_name], ["Account holder", d.account_owner], ["Period", `${d.start_date ?? "Not recorded"} – ${d.end_date ?? "Not recorded"}`], ["Payments in", money(d.payments_in)], ["Payments out", money(d.payments_out)], ["Balance", money(d.balance)]])}
+        ${section("ID document", docs.director_id || [], d => [["Document type", d.document_kind], ["Holder", d.holder_name], ["Expiry date", d.expiry_date]])}
+      </div>`;
+    } else if (openDetail === "triage"){
+      const ev = step?.evidence || step?.state_value?.triage || {};
+      body = `<p class="prose">${escapeHtml(ev.reason || "No readiness result recorded.")}</p>
+        <div class="kv"><span class="k">Next step</span><span class="v">${escapeHtml(ev.route === "underwriter" ? "To underwriter" : ev.route === "return_to_applicant" ? "Back to applicant" : ev.route || "Not recorded")}</span></div>
+        ${(ev.findings || []).map(f => `<section class="document-snippet"><h3>${escapeHtml((f.requirement || "Check").replace(/_/g, " "))} · ${escapeHtml(f.status || "Not recorded")}</h3><p class="prose">${escapeHtml(f.explanation || "")}</p><p class="prose">${escapeHtml((f.evidence_refs || []).join(" · "))}</p>${f.correction ? `<p class="prose"><b>Required correction:</b> ${escapeHtml(f.correction)}</p>` : ""}</section>`).join("")}
+        ${ev.applicant_note ? `<p class="prose">${escapeHtml(ev.applicant_note)}</p>` : ""}`;
+    } else if (openDetail === "load_application"){
       const app = step?.state_value?.application || {};
       const rows = [
         ["Company", app.company_name], ["Company number", app.company_number],
@@ -793,7 +819,7 @@
       </div>
       ${body}
     </div>`;
-    document.getElementById("detail-close").addEventListener("click", () => { openDetail = null; renderDetail(); });
+    document.getElementById("detail-close").addEventListener("click", () => { openDetail = null; selectedGroup = null; render(); });
   }
 
   function showVerdict(){
@@ -841,6 +867,7 @@
     const nodeId = stages[stepIndex];
     const s = stepFor(nodeId);
     stageStatus[nodeId] = "running";
+    selectedGroup = null;
     openDetail = nodeId;
     render();
     const dur = playbackMs(s?.duration_ms);
