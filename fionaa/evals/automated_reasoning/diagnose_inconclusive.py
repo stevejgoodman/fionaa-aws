@@ -7,22 +7,17 @@ sent but never became premises (lost in translation).
 
 The cases are ordered as an experiment, not a test suite:
 
-  shortfall_as_is        the reported failure -- a 3-month trading history
-                         against a 6-month minimum, asserted ineligible.
-                         By the rules alone this should be decidable
-                         without hasPersonalGuarantee, so whatever this
-                         prints is the real cause.
-  shortfall_plus_pg      the same, with hasPersonalGuarantee supplied. If
-                         this one decides and the one above doesn't, the
-                         free variable really was the cause.
-  shortfall_only_trading the single relevant fact and nothing else, to see
-                         whether the other facts are adding translation
-                         noise.
-  docs_as_is /           the documentation claim, without and with the two
-  docs_plus_declarations declarations the application form already has
-                         (isVATRegistered/hasExistingBorrowing). Both
-                         false discharge the conditional document rules,
-                         so the second should decide where the first can't.
+Every case uses the same application: complete and unambiguous apart from
+a 3-month trading history against a 6-month minimum, so each claim has a
+definite right answer.
+
+  *_scoped / composed  what production sends now -- each claim gets only
+                       the facts its own rules reach, as query-qualified
+                       premises, and the approval claim is composed from
+                       the other two claims' subjects. These must decide.
+  unscoped_*           what production sent before: every fact for the
+                       loan type, to every claim. Kept as the contrast;
+                       expected to stay undecided.
 
 Requires AWS credentials for the account that owns the guardrails named in
 runtime-bindings.json, and charges one standalone ApplyGuardrail request
@@ -35,6 +30,13 @@ from pathlib import Path
 
 RESULTS_DIR = Path(__file__).resolve().parent
 POLICY_DIR = RESULTS_DIR.parents[1] / "agentcore" / "automated-reasoning"
+from fionaa.ar_claims import (
+    DOCUMENTATION_VARIABLE,
+    ELIGIBILITY_VARIABLE,
+    approval_premise_facts,
+    facts_for_claim,
+)
+from fionaa.domain.applications import LoanType
 from fionaa.policy_consistency import PolicyConsistencyChecker
 
 PRODUCT = "unsecured-business-loans"
@@ -61,16 +63,26 @@ BASE_FACTS = {
     "tradingHistoryMonths": 3,
 }
 
+LOAN_TYPE = LoanType.unsecured_business_loans
+
+
+def _scoped(claim_variable):
+    return facts_for_claim(LOAN_TYPE, claim_variable, BASE_FACTS)
+
+
+# The first two cases are what production sends now: facts scoped to the
+# claim's own rules, as a query-qualified premise block. The `unscoped_`
+# cases are what it sent before, kept as the contrast -- they are expected
+# to stay undecided.
 CASES = [
-    ("shortfall_as_is", BASE_FACTS, "isSubstantivelyEligible is false."),
-    ("shortfall_plus_pg", {**BASE_FACTS, "hasPersonalGuarantee": True},
-     "isSubstantivelyEligible is false."),
-    ("shortfall_only_trading", {"tradingHistoryMonths": 3},
-     "isSubstantivelyEligible is false."),
-    ("docs_as_is", BASE_FACTS, "hasRequiredDocuments is true."),
-    ("docs_plus_declarations",
-     {**BASE_FACTS, "isVATRegistered": False, "hasExistingBorrowing": False},
-     "hasRequiredDocuments is true."),
+    ("eligibility_scoped", _scoped(ELIGIBILITY_VARIABLE), "isSubstantivelyEligible is false."),
+    ("documentation_scoped", _scoped(DOCUMENTATION_VARIABLE), "hasRequiredDocuments is true."),
+    # Composed from the other two claims' subjects, never from their facts.
+    ("approval_composed",
+     approval_premise_facts({"eligible": "ineligible", "documentation_gaps": []}),
+     "approvalMeetsCoveredPolicy is false."),
+    ("unscoped_eligibility", BASE_FACTS, "isSubstantivelyEligible is false."),
+    ("unscoped_documentation", BASE_FACTS, "hasRequiredDocuments is true."),
 ]
 
 
