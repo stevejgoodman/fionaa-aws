@@ -41,6 +41,14 @@ from. Both are properties of how the request is assembled, so adding further
 derived facts would make the first one worse. That gap remains real and still
 has to be closed, but it is not what is blocking these claims.
 
+Both were fixed the same day. Facts now go in `query` blocks (premises) and
+each claim receives only the variables its own rules reach, with the approval
+claim composed from the other two claims' subjects; the VAT and
+existing-borrowing declarations the form already collects are now derived. On
+a re-run of `diagnose_inconclusive.py` all three claims come back valid. The
+`unscoped_*` cases in that script keep the old behaviour as a contrast and
+still return `tooComplex`.
+
 These results retain their original run dates; moving them does not constitute
 a new live evaluation. Policy definitions, IAM configuration, bindings, source
 snapshots, extraction review and provisioning remain with deployment assets.
