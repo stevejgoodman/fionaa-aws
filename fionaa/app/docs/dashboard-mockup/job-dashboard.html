@@ -418,7 +418,16 @@
   // always respected first; this only kicks in for a lone long line.
   function autoParagraphs(line){
     if (line.length <= 220) return [line];
-    const sentences = line.match(/[^.!?]+[.!?]+(?:\s+|$)/g) || [line];
+    // [^.!?]+ can never consume a "." (it's excluded from the class), so a
+    // decimal point inside a figure like "£833.33" was treated as a
+    // sentence end -- and since nothing follows it but a digit, no match
+    // can ever complete there, so .match(/…/g) silently drops the whole
+    // leading fragment up to and including that "." rather than keeping
+    // it. "(?!\d)" only counts a terminator as real when it isn't
+    // immediately followed by a digit, and the reluctant [\s\S]+? (which,
+    // unlike the old class, CAN cross a "." while scanning for a genuine
+    // terminator) keeps decimals intact instead of splitting on them.
+    const sentences = line.match(/[\s\S]+?(?:[.!?](?!\d)(?:\s+|$)|$)/g) || [line];
     const paras = [];
     let cur = "";
     for (const sent of sentences){
