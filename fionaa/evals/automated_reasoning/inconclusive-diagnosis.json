@@ -1,0 +1,314 @@
+[
+  {
+    "case": "shortfall_as_is",
+    "facts": {
+      "applicantAge": 45,
+      "bankStatementsMonthsCount": 3,
+      "businessType": "BusinessType_LIMITED_COMPANY",
+      "directorIDType": "DirectorIDType_PASSPORT",
+      "hasAccountsOrManagementInformation": true,
+      "hasCompaniesHouseMatch": true,
+      "hasProofOfDirectorAddress": true,
+      "hasRecentBankStatements": true,
+      "hasUKAddress": true,
+      "hasValidDirectorID": true,
+      "isRegisteredInUK": true,
+      "isUKBased": true,
+      "loanAmount": 40000,
+      "loanTermMonths": 24,
+      "mostRecentStatementAgeDays": 10,
+      "tradingHistoryMonths": 3
+    },
+    "claim": "isSubstantivelyEligible is false.",
+    "passed": true,
+    "policy_sha256": "59192d6b3c4bb7a00ce0a4b26deb12633fa8970c4bc761ff2d1023962840c62c",
+    "findings": [
+      {
+        "tooComplex": {}
+      }
+    ],
+    "guardrail_id": "5h5yunnkf895",
+    "guardrail_version": "1",
+    "status": "inconclusive",
+    "diagnostics": {
+      "finding_kinds": [
+        "tooComplex"
+      ],
+      "unbound_variables": [],
+      "facts_not_translated": [],
+      "untranslated_premises": []
+    },
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "8288fdbf-d7fc-45e3-905b-b017252f4b44"
+  },
+  {
+    "case": "shortfall_plus_pg",
+    "facts": {
+      "applicantAge": 45,
+      "bankStatementsMonthsCount": 3,
+      "businessType": "BusinessType_LIMITED_COMPANY",
+      "directorIDType": "DirectorIDType_PASSPORT",
+      "hasAccountsOrManagementInformation": true,
+      "hasCompaniesHouseMatch": true,
+      "hasProofOfDirectorAddress": true,
+      "hasRecentBankStatements": true,
+      "hasUKAddress": true,
+      "hasValidDirectorID": true,
+      "isRegisteredInUK": true,
+      "isUKBased": true,
+      "loanAmount": 40000,
+      "loanTermMonths": 24,
+      "mostRecentStatementAgeDays": 10,
+      "tradingHistoryMonths": 3,
+      "hasPersonalGuarantee": true
+    },
+    "claim": "isSubstantivelyEligible is false.",
+    "passed": true,
+    "policy_sha256": "59192d6b3c4bb7a00ce0a4b26deb12633fa8970c4bc761ff2d1023962840c62c",
+    "findings": [
+      {
+        "tooComplex": {}
+      }
+    ],
+    "guardrail_id": "5h5yunnkf895",
+    "guardrail_version": "1",
+    "status": "inconclusive",
+    "diagnostics": {
+      "finding_kinds": [
+        "tooComplex"
+      ],
+      "unbound_variables": [],
+      "facts_not_translated": [],
+      "untranslated_premises": []
+    },
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "9931a9b9-2cc7-4738-a943-7e41c221358f"
+  },
+  {
+    "case": "shortfall_only_trading",
+    "facts": {
+      "tradingHistoryMonths": 3
+    },
+    "claim": "isSubstantivelyEligible is false.",
+    "passed": true,
+    "policy_sha256": "59192d6b3c4bb7a00ce0a4b26deb12633fa8970c4bc761ff2d1023962840c62c",
+    "findings": [
+      {
+        "satisfiable": {
+          "translation": {
+            "premises": [],
+            "claims": [
+              {
+                "logic": "(= tradingHistoryMonths\n   3)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 3"
+              },
+              {
+                "logic": "(not isSubstantivelyEligible)",
+                "naturalLanguage": "isSubstantivelyEligible is false"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= tradingHistoryMonths\n   3)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 3"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   false)",
+                "naturalLanguage": "isSubstantivelyEligible is false"
+              },
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   false)",
+                "naturalLanguage": "meetsMinimumTradingHistory is false"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   false)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is false"
+              }
+            ]
+          },
+          "claimsFalseScenario": {
+            "statements": [
+              {
+                "logic": "(= tradingHistoryMonths\n   6)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 6"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   true)",
+                "naturalLanguage": "meetsMinimumTradingHistory is true"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "guardrail_id": "5h5yunnkf895",
+    "guardrail_version": "1",
+    "status": "inconclusive",
+    "diagnostics": {
+      "finding_kinds": [
+        "satisfiable"
+      ],
+      "unbound_variables": [
+        "approvalMeetsCoveredPolicy",
+        "isSubstantivelyEligible",
+        "meetsMinimumTradingHistory",
+        "tradingHistoryMonths"
+      ],
+      "facts_not_translated": [
+        "tradingHistoryMonths"
+      ],
+      "untranslated_premises": []
+    },
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "bc059f1f-9c54-40ae-a19d-f3becf48cd0d"
+  },
+  {
+    "case": "docs_as_is",
+    "facts": {
+      "applicantAge": 45,
+      "bankStatementsMonthsCount": 3,
+      "businessType": "BusinessType_LIMITED_COMPANY",
+      "directorIDType": "DirectorIDType_PASSPORT",
+      "hasAccountsOrManagementInformation": true,
+      "hasCompaniesHouseMatch": true,
+      "hasProofOfDirectorAddress": true,
+      "hasRecentBankStatements": true,
+      "hasUKAddress": true,
+      "hasValidDirectorID": true,
+      "isRegisteredInUK": true,
+      "isUKBased": true,
+      "loanAmount": 40000,
+      "loanTermMonths": 24,
+      "mostRecentStatementAgeDays": 10,
+      "tradingHistoryMonths": 3
+    },
+    "claim": "hasRequiredDocuments is true.",
+    "passed": true,
+    "policy_sha256": "59192d6b3c4bb7a00ce0a4b26deb12633fa8970c4bc761ff2d1023962840c62c",
+    "findings": [
+      {
+        "tooComplex": {}
+      }
+    ],
+    "guardrail_id": "5h5yunnkf895",
+    "guardrail_version": "1",
+    "status": "inconclusive",
+    "diagnostics": {
+      "finding_kinds": [
+        "tooComplex"
+      ],
+      "unbound_variables": [],
+      "facts_not_translated": [],
+      "untranslated_premises": []
+    },
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "b8390bfa-935f-488b-96b0-adca8edc0a29"
+  },
+  {
+    "case": "docs_plus_declarations",
+    "facts": {
+      "applicantAge": 45,
+      "bankStatementsMonthsCount": 3,
+      "businessType": "BusinessType_LIMITED_COMPANY",
+      "directorIDType": "DirectorIDType_PASSPORT",
+      "hasAccountsOrManagementInformation": true,
+      "hasCompaniesHouseMatch": true,
+      "hasProofOfDirectorAddress": true,
+      "hasRecentBankStatements": true,
+      "hasUKAddress": true,
+      "hasValidDirectorID": true,
+      "isRegisteredInUK": true,
+      "isUKBased": true,
+      "loanAmount": 40000,
+      "loanTermMonths": 24,
+      "mostRecentStatementAgeDays": 10,
+      "tradingHistoryMonths": 3,
+      "isVATRegistered": false,
+      "hasExistingBorrowing": false
+    },
+    "claim": "hasRequiredDocuments is true.",
+    "passed": true,
+    "policy_sha256": "59192d6b3c4bb7a00ce0a4b26deb12633fa8970c4bc761ff2d1023962840c62c",
+    "findings": [
+      {
+        "tooComplex": {}
+      }
+    ],
+    "guardrail_id": "5h5yunnkf895",
+    "guardrail_version": "1",
+    "status": "inconclusive",
+    "diagnostics": {
+      "finding_kinds": [
+        "tooComplex"
+      ],
+      "unbound_variables": [],
+      "facts_not_translated": [],
+      "untranslated_premises": []
+    },
+    "usage": {
+      "topicPolicyUnits": 0,
+      "contentPolicyUnits": 0,
+      "wordPolicyUnits": 0,
+      "sensitiveInformationPolicyUnits": 0,
+      "sensitiveInformationPolicyFreeUnits": 0,
+      "contextualGroundingPolicyUnits": 0,
+      "contentPolicyImageUnits": 0,
+      "automatedReasoningPolicyUnits": 1,
+      "automatedReasoningPolicies": 1
+    },
+    "request_id": "f8360bf7-1d95-4a15-b8ad-b3573345c6bf"
+  }
+]
