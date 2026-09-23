@@ -7,11 +7,15 @@ from typing import Any
 from langgraph.runtime import Runtime
 from pydantic import BaseModel, ValidationError
 from fionaa.workflow.state import ApplicationState, AgentContext
+from fionaa.domain.applications import LoanType
 from fionaa.domain.documents import (
     AnnualAccountsSchema,
     BankStatementSchema,
     DirectorIdSchema,
+    ExistingBorrowingSchema,
     ProofOfAddressSchema,
+    SecurityAssetSchema,
+    VATReturnSchema,
 )
 from fionaa.storage import ApplicationStore
 
@@ -34,6 +38,15 @@ class DocumentSpec:
     applies_to: Callable[[dict[str, Any]], bool] = lambda application: True
 
 
+def _for_loan_types(*loan_types: LoanType) -> Callable[[dict[str, Any]], bool]:
+    """An `applies_to` that expects this document only for these products.
+
+    An unrecognised or missing loan_type matches nothing, so a malformed
+    application doesn't silently pull in documents no policy asked for."""
+    wanted = {loan_type.value for loan_type in loan_types}
+    return lambda application: application.get("loan_type") in wanted
+
+
 DOCUMENT_SPECS = [
     DocumentSpec("annual_accounts", "input/annual_accounts", AnnualAccountsSchema),
     DocumentSpec("bank_statements", "input/bank_statement", BankStatementSchema),
@@ -41,6 +54,21 @@ DOCUMENT_SPECS = [
     # end of the graph rather than by any assessment node -- see triage.py.
     DocumentSpec("director_id", "input/director_id", DirectorIdSchema),
     DocumentSpec("proof_of_address", "input/proof_of_address", ProofOfAddressSchema),
+    # Product-specific supporting evidence, gated on loan type -- the first
+    # use of DocumentSpec.applies_to. Gated on the product alone, not also
+    # on the applicant's own declaration (vat_registered and the rest): a
+    # document that was supplied is loaded and reported whatever the form
+    # says, and it is the policy's conditional rule, not this loader, that
+    # decides whether one was required.
+    DocumentSpec("vat_returns", "input/vat_return", VATReturnSchema,
+                 _for_loan_types(LoanType.unsecured_business_loans,
+                                 LoanType.revolving_credit_facility)),
+    DocumentSpec("existing_borrowing", "input/existing_borrowing", ExistingBorrowingSchema,
+                 _for_loan_types(LoanType.unsecured_business_loans,
+                                 LoanType.revolving_credit_facility)),
+    DocumentSpec("security_assets", "input/security_asset", SecurityAssetSchema,
+                 _for_loan_types(LoanType.secured_business_loans,
+                                 LoanType.revolving_credit_facility)),
 ]
 
 

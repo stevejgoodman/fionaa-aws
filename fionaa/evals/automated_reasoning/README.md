@@ -9,6 +9,7 @@ AWS_PROFILE=AIOps AWS_DEFAULT_REGION=us-east-1 app/.venv/bin/python evals/automa
 AWS_PROFILE=AIOps AWS_DEFAULT_REGION=us-east-1 app/.venv/bin/python evals/automated_reasoning/test_live_products.py
 AWS_PROFILE=AIOps AWS_DEFAULT_REGION=us-east-1 app/.venv/bin/python evals/automated_reasoning/diagnose_inconclusive.py
 AWS_PROFILE=AIOps AWS_DEFAULT_REGION=us-east-1 app/.venv/bin/python evals/automated_reasoning/probe_premise_handling.py
+AWS_PROFILE=AIOps AWS_DEFAULT_REGION=us-east-1 app/.venv/bin/python evals/automated_reasoning/verify_product_coverage.py
 ```
 
 Execution makes billable AWS calls. Importing the runners does not execute them.
@@ -29,6 +30,13 @@ and write results beside these scripts, independent of the working directory.
   trigger `tooComplex`, and which content qualifier actually turns a fact into
   a premise. Run it before changing how requests are built; its `premises`
   column is the thing to read.
+- `product-coverage-results.json`: written by `verify_product_coverage.py`,
+  which runs all three fully-covered products (unsecured, secured, revolving)
+  through the production path -- build_derived_facts, facts_for_claim, the
+  production checker -- with every conditional requirement switched on, once
+  complete and once with a required document withheld. 18 checks; the
+  withheld runs must come back `invalid`, not `inconclusive`, so the engine
+  is shown able to refuse as well as confirm.
 - `activation-results.json`: recorded deployed-runtime smoke test; the sample
   was referred following a `tooComplex` result, so it does not prove approval.
 

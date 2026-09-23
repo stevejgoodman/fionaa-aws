@@ -34,6 +34,12 @@ def _facts(state: ApplicationState, today: date) -> dict:
     derived_facts = build_derived_facts(
         application, annual_accounts, bank_statements, companies_house, today,
         director_id=director_id, proof_of_address=proof_of_address,
+        # No default: a key load_application never set means this product's
+        # policy doesn't ask for the document, which is "unknown", not
+        # "none supplied". See _was_supplied in ar_facts.
+        vat_returns=state.get("vat_returns"),
+        existing_borrowing=state.get("existing_borrowing"),
+        security_assets=state.get("security_assets"),
     )
     facts = {
         # Precomputed in the Automated Reasoning policy's own variable
