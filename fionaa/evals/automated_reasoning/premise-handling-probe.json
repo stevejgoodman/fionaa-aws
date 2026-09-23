@@ -67,6 +67,10 @@
             {
               "statements": [
                 {
+                  "logic": "(= isSubstantivelyEligible\n   false)",
+                  "naturalLanguage": "isSubstantivelyEligible is false"
+                },
+                {
                   "logic": "(= tradingHistoryMonths\n   0)",
                   "naturalLanguage": "tradingHistoryMonths is equal to 0"
                 }
@@ -149,16 +153,16 @@
                 "naturalLanguage": "tradingHistoryMonths is equal to 3"
               },
               {
-                "logic": "(= meetsMinimumTradingHistory\n   false)",
-                "naturalLanguage": "meetsMinimumTradingHistory is false"
-              },
-              {
                 "logic": "(= hasPersonalGuarantee\n   true)",
                 "naturalLanguage": "hasPersonalGuarantee is true"
               },
               {
                 "logic": "(= approvalMeetsCoveredPolicy\n   false)",
                 "naturalLanguage": "approvalMeetsCoveredPolicy is false"
+              },
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   false)",
+                "naturalLanguage": "meetsMinimumTradingHistory is false"
               }
             ]
           },
@@ -177,16 +181,16 @@
                 "naturalLanguage": "tradingHistoryMonths is equal to 6"
               },
               {
-                "logic": "(= meetsMinimumTradingHistory\n   true)",
-                "naturalLanguage": "meetsMinimumTradingHistory is true"
-              },
-              {
                 "logic": "(= hasPersonalGuarantee\n   false)",
                 "naturalLanguage": "hasPersonalGuarantee is false"
               },
               {
                 "logic": "(= approvalMeetsCoveredPolicy\n   true)",
                 "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   true)",
+                "naturalLanguage": "meetsMinimumTradingHistory is true"
               }
             ]
           }
@@ -271,12 +275,12 @@
                 "naturalLanguage": "loanTermMonths is equal to 24"
               },
               {
-                "logic": "(= isSubstantivelyEligible\n   false)",
-                "naturalLanguage": "isSubstantivelyEligible is false"
-              },
-              {
                 "logic": "(= loanAmount 40000)",
                 "naturalLanguage": "loanAmount is equal to 40000"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   false)",
+                "naturalLanguage": "isSubstantivelyEligible is false"
               },
               {
                 "logic": "(= applicantAge 45)",
@@ -287,12 +291,12 @@
                 "naturalLanguage": "meetsMinimumTradingHistory is false"
               },
               {
-                "logic": "(= approvalMeetsCoveredPolicy\n   false)",
-                "naturalLanguage": "approvalMeetsCoveredPolicy is false"
-              },
-              {
                 "logic": "(= hasPersonalGuarantee\n   true)",
                 "naturalLanguage": "hasPersonalGuarantee is true"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   false)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is false"
               }
             ]
           },
@@ -307,12 +311,12 @@
                 "naturalLanguage": "loanTermMonths is equal to 24"
               },
               {
-                "logic": "(= isSubstantivelyEligible\n   true)",
-                "naturalLanguage": "isSubstantivelyEligible is true"
-              },
-              {
                 "logic": "(= loanAmount 25000)",
                 "naturalLanguage": "loanAmount is equal to 25000"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
               },
               {
                 "logic": "(= applicantAge 45)",
@@ -323,12 +327,12 @@
                 "naturalLanguage": "meetsMinimumTradingHistory is true"
               },
               {
-                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
-                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
-              },
-              {
                 "logic": "(= hasPersonalGuarantee\n   false)",
                 "naturalLanguage": "hasPersonalGuarantee is false"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
               }
             ]
           }
@@ -423,14 +427,6 @@
           "claimsTrueScenario": {
             "statements": [
               {
-                "logic": "(= loanTermMonths 24)",
-                "naturalLanguage": "loanTermMonths is equal to 24"
-              },
-              {
-                "logic": "(= hasPersonalGuarantee\n   true)",
-                "naturalLanguage": "hasPersonalGuarantee is true"
-              },
-              {
                 "logic": "(= tradingHistoryMonths\n   3)",
                 "naturalLanguage": "tradingHistoryMonths is equal to 3"
               },
@@ -439,12 +435,12 @@
                 "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
               },
               {
-                "logic": "(= isUKBased true)",
-                "naturalLanguage": "isUKBased is true"
-              },
-              {
                 "logic": "(= isSubstantivelyEligible\n   false)",
                 "naturalLanguage": "isSubstantivelyEligible is false"
+              },
+              {
+                "logic": "(= hasPersonalGuarantee\n   true)",
+                "naturalLanguage": "hasPersonalGuarantee is true"
               },
               {
                 "logic": "(= loanAmount 40000)",
@@ -453,6 +449,14 @@
               {
                 "logic": "(= applicantAge 45)",
                 "naturalLanguage": "applicantAge is equal to 45"
+              },
+              {
+                "logic": "(= loanTermMonths 24)",
+                "naturalLanguage": "loanTermMonths is equal to 24"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
               },
               {
                 "logic": "(= approvalMeetsCoveredPolicy\n   false)",
@@ -467,14 +471,6 @@
           "claimsFalseScenario": {
             "statements": [
               {
-                "logic": "(= loanTermMonths 24)",
-                "naturalLanguage": "loanTermMonths is equal to 24"
-              },
-              {
-                "logic": "(= hasPersonalGuarantee\n   false)",
-                "naturalLanguage": "hasPersonalGuarantee is false"
-              },
-              {
                 "logic": "(= tradingHistoryMonths\n   6)",
                 "naturalLanguage": "tradingHistoryMonths is equal to 6"
               },
@@ -483,12 +479,12 @@
                 "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
               },
               {
-                "logic": "(= isUKBased true)",
-                "naturalLanguage": "isUKBased is true"
-              },
-              {
                 "logic": "(= isSubstantivelyEligible\n   true)",
                 "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= hasPersonalGuarantee\n   false)",
+                "naturalLanguage": "hasPersonalGuarantee is false"
               },
               {
                 "logic": "(= loanAmount 25000)",
@@ -497,6 +493,14 @@
               {
                 "logic": "(= applicantAge 45)",
                 "naturalLanguage": "applicantAge is equal to 45"
+              },
+              {
+                "logic": "(= loanTermMonths 24)",
+                "naturalLanguage": "loanTermMonths is equal to 24"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
               },
               {
                 "logic": "(= approvalMeetsCoveredPolicy\n   true)",
@@ -618,36 +622,12 @@
           "claimsTrueScenario": {
             "statements": [
               {
-                "logic": "(= hasCompaniesHouseMatch\n   true)",
-                "naturalLanguage": "hasCompaniesHouseMatch is true"
-              },
-              {
-                "logic": "(= tradingHistoryMonths\n   3)",
-                "naturalLanguage": "tradingHistoryMonths is equal to 3"
-              },
-              {
-                "logic": "(= hasUKAddress true)",
-                "naturalLanguage": "hasUKAddress is true"
-              },
-              {
-                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
-                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+                "logic": "(= loanAmount 40000)",
+                "naturalLanguage": "loanAmount is equal to 40000"
               },
               {
                 "logic": "(= applicantAge 45)",
                 "naturalLanguage": "applicantAge is equal to 45"
-              },
-              {
-                "logic": "(= isUKBased true)",
-                "naturalLanguage": "isUKBased is true"
-              },
-              {
-                "logic": "(= isRegisteredInUK\n   true)",
-                "naturalLanguage": "isRegisteredInUK is true"
-              },
-              {
-                "logic": "(= loanAmount 40000)",
-                "naturalLanguage": "loanAmount is equal to 40000"
               },
               {
                 "logic": "(= isSubstantivelyEligible\n   false)",
@@ -662,48 +642,48 @@
                 "naturalLanguage": "loanTermMonths is equal to 24"
               },
               {
-                "logic": "(= approvalMeetsCoveredPolicy\n   false)",
-                "naturalLanguage": "approvalMeetsCoveredPolicy is false"
-              },
-              {
-                "logic": "(= meetsMinimumTradingHistory\n   false)",
-                "naturalLanguage": "meetsMinimumTradingHistory is false"
-              }
-            ]
-          },
-          "claimsFalseScenario": {
-            "statements": [
-              {
-                "logic": "(= hasCompaniesHouseMatch\n   false)",
-                "naturalLanguage": "hasCompaniesHouseMatch is false"
-              },
-              {
-                "logic": "(= tradingHistoryMonths\n   6)",
-                "naturalLanguage": "tradingHistoryMonths is equal to 6"
-              },
-              {
                 "logic": "(= hasUKAddress true)",
                 "naturalLanguage": "hasUKAddress is true"
-              },
-              {
-                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
-                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
-              },
-              {
-                "logic": "(= applicantAge 45)",
-                "naturalLanguage": "applicantAge is equal to 45"
-              },
-              {
-                "logic": "(= isUKBased true)",
-                "naturalLanguage": "isUKBased is true"
               },
               {
                 "logic": "(= isRegisteredInUK\n   true)",
                 "naturalLanguage": "isRegisteredInUK is true"
               },
               {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= tradingHistoryMonths\n   3)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 3"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   true)",
+                "naturalLanguage": "hasCompaniesHouseMatch is true"
+              },
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   false)",
+                "naturalLanguage": "meetsMinimumTradingHistory is false"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   false)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is false"
+              }
+            ]
+          },
+          "claimsFalseScenario": {
+            "statements": [
+              {
                 "logic": "(= loanAmount 25000)",
                 "naturalLanguage": "loanAmount is equal to 25000"
+              },
+              {
+                "logic": "(= applicantAge 45)",
+                "naturalLanguage": "applicantAge is equal to 45"
               },
               {
                 "logic": "(= isSubstantivelyEligible\n   true)",
@@ -718,12 +698,36 @@
                 "naturalLanguage": "loanTermMonths is equal to 24"
               },
               {
-                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
-                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= tradingHistoryMonths\n   6)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 6"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
               },
               {
                 "logic": "(= meetsMinimumTradingHistory\n   true)",
                 "naturalLanguage": "meetsMinimumTradingHistory is true"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
               }
             ]
           }
@@ -856,32 +860,20 @@
           "claimsTrueScenario": {
             "statements": [
               {
-                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
-                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
-              },
-              {
-                "logic": "(= tradingHistoryMonths\n   3)",
-                "naturalLanguage": "tradingHistoryMonths is equal to 3"
-              },
-              {
                 "logic": "(= hasValidDirectorID\n   true)",
                 "naturalLanguage": "hasValidDirectorID is true"
               },
               {
-                "logic": "(= hasUKAddress true)",
-                "naturalLanguage": "hasUKAddress is true"
-              },
-              {
-                "logic": "(= hasRecentBankStatements\n   true)",
-                "naturalLanguage": "hasRecentBankStatements is true"
-              },
-              {
-                "logic": "(= hasPersonalGuarantee\n   true)",
-                "naturalLanguage": "hasPersonalGuarantee is true"
+                "logic": "(= loanTermMonths 24)",
+                "naturalLanguage": "loanTermMonths is equal to 24"
               },
               {
                 "logic": "(= isSubstantivelyEligible\n   false)",
                 "naturalLanguage": "isSubstantivelyEligible is false"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
               },
               {
                 "logic": "(= loanAmount 40000)",
@@ -896,20 +888,32 @@
                 "naturalLanguage": "isUKBased is true"
               },
               {
-                "logic": "(= directorIDType\n   DirectorIDType_PASSPORT)",
-                "naturalLanguage": "directorIDType is equal to DirectorIDType_PASSPORT"
-              },
-              {
-                "logic": "(= isRegisteredInUK\n   true)",
-                "naturalLanguage": "isRegisteredInUK is true"
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
               },
               {
                 "logic": "(= hasCompaniesHouseMatch\n   true)",
                 "naturalLanguage": "hasCompaniesHouseMatch is true"
               },
               {
-                "logic": "(= loanTermMonths 24)",
-                "naturalLanguage": "loanTermMonths is equal to 24"
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= hasPersonalGuarantee\n   true)",
+                "naturalLanguage": "hasPersonalGuarantee is true"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_PASSPORT)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_PASSPORT"
+              },
+              {
+                "logic": "(= tradingHistoryMonths\n   3)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 3"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
               },
               {
                 "logic": "(= meetsMinimumTradingHistory\n   false)",
@@ -924,32 +928,20 @@
           "claimsFalseScenario": {
             "statements": [
               {
-                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
-                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
-              },
-              {
-                "logic": "(= tradingHistoryMonths\n   6)",
-                "naturalLanguage": "tradingHistoryMonths is equal to 6"
-              },
-              {
                 "logic": "(= hasValidDirectorID\n   true)",
                 "naturalLanguage": "hasValidDirectorID is true"
               },
               {
-                "logic": "(= hasUKAddress true)",
-                "naturalLanguage": "hasUKAddress is true"
-              },
-              {
-                "logic": "(= hasRecentBankStatements\n   true)",
-                "naturalLanguage": "hasRecentBankStatements is true"
-              },
-              {
-                "logic": "(= hasPersonalGuarantee\n   false)",
-                "naturalLanguage": "hasPersonalGuarantee is false"
+                "logic": "(= loanTermMonths 24)",
+                "naturalLanguage": "loanTermMonths is equal to 24"
               },
               {
                 "logic": "(= isSubstantivelyEligible\n   true)",
                 "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
               },
               {
                 "logic": "(= loanAmount 25000)",
@@ -964,20 +956,32 @@
                 "naturalLanguage": "isUKBased is true"
               },
               {
-                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
-                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
-              },
-              {
-                "logic": "(= isRegisteredInUK\n   true)",
-                "naturalLanguage": "isRegisteredInUK is true"
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
               },
               {
                 "logic": "(= hasCompaniesHouseMatch\n   false)",
                 "naturalLanguage": "hasCompaniesHouseMatch is false"
               },
               {
-                "logic": "(= loanTermMonths 24)",
-                "naturalLanguage": "loanTermMonths is equal to 24"
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= hasPersonalGuarantee\n   false)",
+                "naturalLanguage": "hasPersonalGuarantee is false"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= tradingHistoryMonths\n   6)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 6"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
               },
               {
                 "logic": "(= meetsMinimumTradingHistory\n   true)",
@@ -1122,20 +1126,8 @@
           "claimsTrueScenario": {
             "statements": [
               {
-                "logic": "(= applicantAge 45)",
-                "naturalLanguage": "applicantAge is equal to 45"
-              },
-              {
                 "logic": "(= isUKBased true)",
                 "naturalLanguage": "isUKBased is true"
-              },
-              {
-                "logic": "(= isSubstantivelyEligible\n   false)",
-                "naturalLanguage": "isSubstantivelyEligible is false"
-              },
-              {
-                "logic": "(= hasPersonalGuarantee\n   true)",
-                "naturalLanguage": "hasPersonalGuarantee is true"
               },
               {
                 "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
@@ -1146,12 +1138,24 @@
                 "naturalLanguage": "tradingHistoryMonths is equal to 3"
               },
               {
+                "logic": "(= loanAmount 40000)",
+                "naturalLanguage": "loanAmount is equal to 40000"
+              },
+              {
+                "logic": "(= hasPersonalGuarantee\n   true)",
+                "naturalLanguage": "hasPersonalGuarantee is true"
+              },
+              {
                 "logic": "(= loanTermMonths 24)",
                 "naturalLanguage": "loanTermMonths is equal to 24"
               },
               {
-                "logic": "(= loanAmount 40000)",
-                "naturalLanguage": "loanAmount is equal to 40000"
+                "logic": "(= applicantAge 45)",
+                "naturalLanguage": "applicantAge is equal to 45"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   false)",
+                "naturalLanguage": "isSubstantivelyEligible is false"
               },
               {
                 "logic": "(= meetsMinimumTradingHistory\n   false)",
@@ -1166,20 +1170,8 @@
           "claimsFalseScenario": {
             "statements": [
               {
-                "logic": "(= applicantAge 45)",
-                "naturalLanguage": "applicantAge is equal to 45"
-              },
-              {
                 "logic": "(= isUKBased true)",
                 "naturalLanguage": "isUKBased is true"
-              },
-              {
-                "logic": "(= isSubstantivelyEligible\n   true)",
-                "naturalLanguage": "isSubstantivelyEligible is true"
-              },
-              {
-                "logic": "(= hasPersonalGuarantee\n   false)",
-                "naturalLanguage": "hasPersonalGuarantee is false"
               },
               {
                 "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
@@ -1190,12 +1182,24 @@
                 "naturalLanguage": "tradingHistoryMonths is equal to 6"
               },
               {
+                "logic": "(= loanAmount 25000)",
+                "naturalLanguage": "loanAmount is equal to 25000"
+              },
+              {
+                "logic": "(= hasPersonalGuarantee\n   false)",
+                "naturalLanguage": "hasPersonalGuarantee is false"
+              },
+              {
                 "logic": "(= loanTermMonths 24)",
                 "naturalLanguage": "loanTermMonths is equal to 24"
               },
               {
-                "logic": "(= loanAmount 25000)",
-                "naturalLanguage": "loanAmount is equal to 25000"
+                "logic": "(= applicantAge 45)",
+                "naturalLanguage": "applicantAge is equal to 45"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
               },
               {
                 "logic": "(= meetsMinimumTradingHistory\n   true)",
@@ -1292,6 +1296,94 @@
           "claimsTrueScenario": {
             "statements": [
               {
+                "logic": "(= loanAmountInRange\n   true)",
+                "naturalLanguage": "loanAmountInRange is true"
+              },
+              {
+                "logic": "(= loanTermMonths 24)",
+                "naturalLanguage": "loanTermMonths is equal to 24"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   false)",
+                "naturalLanguage": "isSubstantivelyEligible is false"
+              },
+              {
+                "logic": "(= hasBorrowingDetails\n   false)",
+                "naturalLanguage": "hasBorrowingDetails is false"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= loanAmount 40000)",
+                "naturalLanguage": "loanAmount is equal to 40000"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= hasAccountsOrManagementInformation\n   true)",
+                "naturalLanguage": "hasAccountsOrManagementInformation is true"
+              },
+              {
+                "logic": "(= hasExistingBorrowing\n   false)",
+                "naturalLanguage": "hasExistingBorrowing is false"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              },
+              {
+                "logic": "(= tradingHistoryMonths\n   3)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 3"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   false)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is false"
+              },
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   false)",
+                "naturalLanguage": "meetsMinimumTradingHistory is false"
+              },
+              {
+                "logic": "(= hasPersonalGuarantee\n   true)",
+                "naturalLanguage": "hasPersonalGuarantee is true"
+              },
+              {
+                "logic": "(= hasProofOfDirectorAddress\n   true)",
+                "naturalLanguage": "hasProofOfDirectorAddress is true"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= isVATRegistered\n   false)",
+                "naturalLanguage": "isVATRegistered is false"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= loanTermInRange true)",
+                "naturalLanguage": "loanTermInRange is true"
+              },
+              {
                 "logic": "(= isRegisteredInUK\n   true)",
                 "naturalLanguage": "isRegisteredInUK is true"
               },
@@ -1300,116 +1392,28 @@
                 "naturalLanguage": "hasVATReturns is false"
               },
               {
-                "logic": "(= hasCompaniesHouseMatch\n   false)",
-                "naturalLanguage": "hasCompaniesHouseMatch is false"
-              },
-              {
-                "logic": "(= meetsMinimumTradingHistory\n   false)",
-                "naturalLanguage": "meetsMinimumTradingHistory is false"
-              },
-              {
-                "logic": "(= loanTermInRange true)",
-                "naturalLanguage": "loanTermInRange is true"
-              },
-              {
                 "logic": "(= personalGuaranteeRequirementMet\n   true)",
                 "naturalLanguage": "personalGuaranteeRequirementMet is true"
-              },
-              {
-                "logic": "(= applicantAge 45)",
-                "naturalLanguage": "applicantAge is equal to 45"
-              },
-              {
-                "logic": "(= isUKBased true)",
-                "naturalLanguage": "isUKBased is true"
-              },
-              {
-                "logic": "(= loanAmountInRange\n   true)",
-                "naturalLanguage": "loanAmountInRange is true"
               },
               {
                 "logic": "(= hasRequiredDocuments\n   true)",
                 "naturalLanguage": "hasRequiredDocuments is true"
               },
               {
-                "logic": "(= hasValidDirectorID\n   true)",
-                "naturalLanguage": "hasValidDirectorID is true"
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
               },
               {
                 "logic": "(= hasUKAddress true)",
                 "naturalLanguage": "hasUKAddress is true"
               },
               {
-                "logic": "(= approvalMeetsCoveredPolicy\n   false)",
-                "naturalLanguage": "approvalMeetsCoveredPolicy is false"
+                "logic": "(= applicantAge 45)",
+                "naturalLanguage": "applicantAge is equal to 45"
               },
               {
-                "logic": "(= loanTermMonths 24)",
-                "naturalLanguage": "loanTermMonths is equal to 24"
-              },
-              {
-                "logic": "(= hasAccountsOrManagementInformation\n   true)",
-                "naturalLanguage": "hasAccountsOrManagementInformation is true"
-              },
-              {
-                "logic": "(= isSubstantivelyEligible\n   false)",
-                "naturalLanguage": "isSubstantivelyEligible is false"
-              },
-              {
-                "logic": "(= hasRecentBankStatements\n   true)",
-                "naturalLanguage": "hasRecentBankStatements is true"
-              },
-              {
-                "logic": "(= isApplicantAgeEligible\n   true)",
-                "naturalLanguage": "isApplicantAgeEligible is true"
-              },
-              {
-                "logic": "(= hasBorrowingDetails\n   false)",
-                "naturalLanguage": "hasBorrowingDetails is false"
-              },
-              {
-                "logic": "(= loanAmount 40000)",
-                "naturalLanguage": "loanAmount is equal to 40000"
-              },
-              {
-                "logic": "(= isEligibleBusinessType\n   true)",
-                "naturalLanguage": "isEligibleBusinessType is true"
-              },
-              {
-                "logic": "(= mostRecentStatementAgeDays\n   0)",
-                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
-              },
-              {
-                "logic": "(= hasExistingBorrowing\n   false)",
-                "naturalLanguage": "hasExistingBorrowing is false"
-              },
-              {
-                "logic": "(= bankStatementsMonthsCount\n   3)",
-                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
-              },
-              {
-                "logic": "(= hasPersonalGuarantee\n   true)",
-                "naturalLanguage": "hasPersonalGuarantee is true"
-              },
-              {
-                "logic": "(= isVATRegistered\n   false)",
-                "naturalLanguage": "isVATRegistered is false"
-              },
-              {
-                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
-                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
-              },
-              {
-                "logic": "(= hasProofOfDirectorAddress\n   true)",
-                "naturalLanguage": "hasProofOfDirectorAddress is true"
-              },
-              {
-                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
-                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
-              },
-              {
-                "logic": "(= tradingHistoryMonths\n   3)",
-                "naturalLanguage": "tradingHistoryMonths is equal to 3"
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
               }
             ]
           },
@@ -1508,124 +1512,124 @@
           "claimsTrueScenario": {
             "statements": [
               {
-                "logic": "(= approvalMeetsCoveredPolicy\n   false)",
-                "naturalLanguage": "approvalMeetsCoveredPolicy is false"
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
               },
               {
                 "logic": "(= loanTermMonths 24)",
                 "naturalLanguage": "loanTermMonths is equal to 24"
               },
               {
-                "logic": "(= isSubstantivelyEligible\n   false)",
-                "naturalLanguage": "isSubstantivelyEligible is false"
-              },
-              {
-                "logic": "(= hasRecentBankStatements\n   true)",
-                "naturalLanguage": "hasRecentBankStatements is true"
+                "logic": "(= hasPersonalGuarantee\n   true)",
+                "naturalLanguage": "hasPersonalGuarantee is true"
               },
               {
                 "logic": "(= isApplicantAgeEligible\n   true)",
                 "naturalLanguage": "isApplicantAgeEligible is true"
               },
               {
-                "logic": "(= hasAccountsOrManagementInformation\n   true)",
-                "naturalLanguage": "hasAccountsOrManagementInformation is true"
+                "logic": "(= loanAmountInRange\n   true)",
+                "naturalLanguage": "loanAmountInRange is true"
               },
               {
-                "logic": "(= hasBorrowingDetails\n   false)",
-                "naturalLanguage": "hasBorrowingDetails is false"
+                "logic": "(= isSubstantivelyEligible\n   false)",
+                "naturalLanguage": "isSubstantivelyEligible is false"
               },
               {
-                "logic": "(= loanAmount 40000)",
-                "naturalLanguage": "loanAmount is equal to 40000"
+                "logic": "(= approvalMeetsCoveredPolicy\n   false)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is false"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
               },
               {
                 "logic": "(= isEligibleBusinessType\n   true)",
                 "naturalLanguage": "isEligibleBusinessType is true"
               },
               {
-                "logic": "(= mostRecentStatementAgeDays\n   0)",
-                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
-              },
-              {
                 "logic": "(= hasExistingBorrowing\n   false)",
                 "naturalLanguage": "hasExistingBorrowing is false"
-              },
-              {
-                "logic": "(= bankStatementsMonthsCount\n   3)",
-                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
-              },
-              {
-                "logic": "(= isVATRegistered\n   false)",
-                "naturalLanguage": "isVATRegistered is false"
-              },
-              {
-                "logic": "(= hasPersonalGuarantee\n   true)",
-                "naturalLanguage": "hasPersonalGuarantee is true"
-              },
-              {
-                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
-                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
-              },
-              {
-                "logic": "(= hasProofOfDirectorAddress\n   true)",
-                "naturalLanguage": "hasProofOfDirectorAddress is true"
-              },
-              {
-                "logic": "(= tradingHistoryMonths\n   3)",
-                "naturalLanguage": "tradingHistoryMonths is equal to 3"
-              },
-              {
-                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
-                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
-              },
-              {
-                "logic": "(= isRegisteredInUK\n   true)",
-                "naturalLanguage": "isRegisteredInUK is true"
-              },
-              {
-                "logic": "(= hasVATReturns false)",
-                "naturalLanguage": "hasVATReturns is false"
-              },
-              {
-                "logic": "(= hasCompaniesHouseMatch\n   false)",
-                "naturalLanguage": "hasCompaniesHouseMatch is false"
-              },
-              {
-                "logic": "(= meetsMinimumTradingHistory\n   false)",
-                "naturalLanguage": "meetsMinimumTradingHistory is false"
-              },
-              {
-                "logic": "(= loanTermInRange true)",
-                "naturalLanguage": "loanTermInRange is true"
-              },
-              {
-                "logic": "(= personalGuaranteeRequirementMet\n   true)",
-                "naturalLanguage": "personalGuaranteeRequirementMet is true"
               },
               {
                 "logic": "(= applicantAge 45)",
                 "naturalLanguage": "applicantAge is equal to 45"
               },
               {
+                "logic": "(= loanAmount 40000)",
+                "naturalLanguage": "loanAmount is equal to 40000"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
                 "logic": "(= isUKBased true)",
                 "naturalLanguage": "isUKBased is true"
               },
               {
-                "logic": "(= loanAmountInRange\n   true)",
-                "naturalLanguage": "loanAmountInRange is true"
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= hasVATReturns false)",
+                "naturalLanguage": "hasVATReturns is false"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= loanTermInRange true)",
+                "naturalLanguage": "loanTermInRange is true"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= tradingHistoryMonths\n   3)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 3"
               },
               {
                 "logic": "(= hasRequiredDocuments\n   true)",
                 "naturalLanguage": "hasRequiredDocuments is true"
               },
               {
-                "logic": "(= hasValidDirectorID\n   true)",
-                "naturalLanguage": "hasValidDirectorID is true"
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
               },
               {
-                "logic": "(= hasUKAddress true)",
-                "naturalLanguage": "hasUKAddress is true"
+                "logic": "(= isVATRegistered\n   false)",
+                "naturalLanguage": "isVATRegistered is false"
+              },
+              {
+                "logic": "(= hasProofOfDirectorAddress\n   true)",
+                "naturalLanguage": "hasProofOfDirectorAddress is true"
+              },
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   false)",
+                "naturalLanguage": "meetsMinimumTradingHistory is false"
+              },
+              {
+                "logic": "(= personalGuaranteeRequirementMet\n   true)",
+                "naturalLanguage": "personalGuaranteeRequirementMet is true"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              },
+              {
+                "logic": "(= hasBorrowingDetails\n   false)",
+                "naturalLanguage": "hasBorrowingDetails is false"
+              },
+              {
+                "logic": "(= hasAccountsOrManagementInformation\n   true)",
+                "naturalLanguage": "hasAccountsOrManagementInformation is true"
               }
             ]
           },
@@ -1720,46 +1724,6 @@
             {
               "translations": [
                 {
-                  "premises": [
-                    {
-                      "logic": "(= applicantAge 45)",
-                      "naturalLanguage": "applicantAge is equal to 45"
-                    },
-                    {
-                      "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
-                      "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
-                    },
-                    {
-                      "logic": "hasPersonalGuarantee",
-                      "naturalLanguage": "hasPersonalGuarantee is true"
-                    },
-                    {
-                      "logic": "isUKBased",
-                      "naturalLanguage": "isUKBased is true"
-                    },
-                    {
-                      "logic": "(= loanAmount 40000.0)",
-                      "naturalLanguage": "loanAmount is equal to 40000.0"
-                    },
-                    {
-                      "logic": "(= loanTermMonths 24)",
-                      "naturalLanguage": "loanTermMonths is equal to 24"
-                    },
-                    {
-                      "logic": "(= tradingHistoryMonths\n   3)",
-                      "naturalLanguage": "tradingHistoryMonths is equal to 3"
-                    }
-                  ],
-                  "claims": [
-                    {
-                      "logic": "(not isSubstantivelyEligible)",
-                      "naturalLanguage": "isSubstantivelyEligible is false"
-                    }
-                  ],
-                  "untranslatedPremises": [],
-                  "untranslatedClaims": []
-                },
-                {
                   "premises": [],
                   "claims": [
                     {
@@ -1789,6 +1753,10 @@
                     {
                       "logic": "(= tradingHistoryMonths\n   3)",
                       "naturalLanguage": "tradingHistoryMonths is equal to 3"
+                    },
+                    {
+                      "logic": "(not isSubstantivelyEligible)",
+                      "naturalLanguage": "isSubstantivelyEligible is false"
                     }
                   ],
                   "untranslatedPremises": [],
@@ -1913,8 +1881,36 @@
           "claimsTrueScenario": {
             "statements": [
               {
-                "logic": "(= bankStatementsMonthsCount\n   3)",
-                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   false)",
+                "naturalLanguage": "meetsMinimumTradingHistory is false"
+              },
+              {
+                "logic": "(= applicantAge 45)",
+                "naturalLanguage": "applicantAge is equal to 45"
+              },
+              {
+                "logic": "(= hasPersonalGuarantee\n   true)",
+                "naturalLanguage": "hasPersonalGuarantee is true"
+              },
+              {
+                "logic": "(= hasProofOfDirectorAddress\n   true)",
+                "naturalLanguage": "hasProofOfDirectorAddress is true"
               },
               {
                 "logic": "(= isVATRegistered\n   false)",
@@ -1925,112 +1921,84 @@
                 "naturalLanguage": "hasCompaniesHouseMatch is true"
               },
               {
-                "logic": "(= hasVATReturns false)",
-                "naturalLanguage": "hasVATReturns is false"
-              },
-              {
-                "logic": "(= mostRecentStatementAgeDays\n   0)",
-                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
-              },
-              {
-                "logic": "(= personalGuaranteeRequirementMet\n   true)",
-                "naturalLanguage": "personalGuaranteeRequirementMet is true"
-              },
-              {
-                "logic": "(= isRegisteredInUK\n   true)",
-                "naturalLanguage": "isRegisteredInUK is true"
-              },
-              {
-                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
-                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
-              },
-              {
-                "logic": "(= meetsMinimumTradingHistory\n   false)",
-                "naturalLanguage": "meetsMinimumTradingHistory is false"
-              },
-              {
-                "logic": "(= hasExistingBorrowing\n   false)",
-                "naturalLanguage": "hasExistingBorrowing is false"
+                "logic": "(= loanTermMonths 24)",
+                "naturalLanguage": "loanTermMonths is equal to 24"
               },
               {
                 "logic": "(= loanTermInRange true)",
                 "naturalLanguage": "loanTermInRange is true"
               },
               {
-                "logic": "(= approvalMeetsCoveredPolicy\n   false)",
-                "naturalLanguage": "approvalMeetsCoveredPolicy is false"
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
               },
               {
-                "logic": "(= hasProofOfDirectorAddress\n   true)",
-                "naturalLanguage": "hasProofOfDirectorAddress is true"
-              },
-              {
-                "logic": "(= tradingHistoryMonths\n   3)",
-                "naturalLanguage": "tradingHistoryMonths is equal to 3"
-              },
-              {
-                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
-                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
-              },
-              {
-                "logic": "(= isSubstantivelyEligible\n   false)",
-                "naturalLanguage": "isSubstantivelyEligible is false"
-              },
-              {
-                "logic": "(= hasPersonalGuarantee\n   true)",
-                "naturalLanguage": "hasPersonalGuarantee is true"
-              },
-              {
-                "logic": "(= isApplicantAgeEligible\n   true)",
-                "naturalLanguage": "isApplicantAgeEligible is true"
+                "logic": "(= hasExistingBorrowing\n   false)",
+                "naturalLanguage": "hasExistingBorrowing is false"
               },
               {
                 "logic": "(= hasRecentBankStatements\n   true)",
                 "naturalLanguage": "hasRecentBankStatements is true"
               },
               {
-                "logic": "(= loanTermMonths 24)",
-                "naturalLanguage": "loanTermMonths is equal to 24"
-              },
-              {
-                "logic": "(= loanAmountInRange\n   true)",
-                "naturalLanguage": "loanAmountInRange is true"
+                "logic": "(= loanAmount 40000)",
+                "naturalLanguage": "loanAmount is equal to 40000"
               },
               {
                 "logic": "(= isEligibleBusinessType\n   true)",
                 "naturalLanguage": "isEligibleBusinessType is true"
               },
               {
-                "logic": "(= isUKBased true)",
-                "naturalLanguage": "isUKBased is true"
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
               },
               {
                 "logic": "(= hasAccountsOrManagementInformation\n   true)",
                 "naturalLanguage": "hasAccountsOrManagementInformation is true"
               },
               {
-                "logic": "(= hasBorrowingDetails\n   false)",
-                "naturalLanguage": "hasBorrowingDetails is false"
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
               },
               {
-                "logic": "(= loanAmount 40000)",
-                "naturalLanguage": "loanAmount is equal to 40000"
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
               },
               {
-                "logic": "(= applicantAge 45)",
-                "naturalLanguage": "applicantAge is equal to 45"
+                "logic": "(= approvalMeetsCoveredPolicy\n   false)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is false"
+              },
+              {
+                "logic": "(= tradingHistoryMonths\n   3)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 3"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
               },
               {
                 "logic": "(= hasValidDirectorID\n   true)",
                 "naturalLanguage": "hasValidDirectorID is true"
               },
               {
-                "logic": "(= hasRequiredDocuments\n   true)",
-                "naturalLanguage": "hasRequiredDocuments is true"
+                "logic": "(= loanAmountInRange\n   true)",
+                "naturalLanguage": "loanAmountInRange is true"
               },
               {
-                "logic": "(= hasUKAddress true)",
-                "naturalLanguage": "hasUKAddress is true"
+                "logic": "(= personalGuaranteeRequirementMet\n   true)",
+                "naturalLanguage": "personalGuaranteeRequirementMet is true"
+              },
+              {
+                "logic": "(= hasBorrowingDetails\n   false)",
+                "naturalLanguage": "hasBorrowingDetails is false"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   false)",
+                "naturalLanguage": "isSubstantivelyEligible is false"
+              },
+              {
+                "logic": "(= hasVATReturns false)",
+                "naturalLanguage": "hasVATReturns is false"
               }
             ]
           },
@@ -2165,26 +2133,6 @@
           "claimsTrueScenario": {
             "statements": [
               {
-                "logic": "(= tradingHistoryMonths\n   3)",
-                "naturalLanguage": "tradingHistoryMonths is equal to 3"
-              },
-              {
-                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
-                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
-              },
-              {
-                "logic": "(= hasExistingBorrowing\n   false)",
-                "naturalLanguage": "hasExistingBorrowing is false"
-              },
-              {
-                "logic": "(= isVATRegistered\n   false)",
-                "naturalLanguage": "isVATRegistered is false"
-              },
-              {
-                "logic": "(= bankStatementsMonthsCount\n   3)",
-                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
-              },
-              {
                 "logic": "(= loanTermInRange true)",
                 "naturalLanguage": "loanTermInRange is true"
               },
@@ -2193,12 +2141,36 @@
                 "naturalLanguage": "hasUKAddress is true"
               },
               {
-                "logic": "(= loanTermMonths 24)",
-                "naturalLanguage": "loanTermMonths is equal to 24"
+                "logic": "(= personalGuaranteeRequirementMet\n   true)",
+                "naturalLanguage": "personalGuaranteeRequirementMet is true"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_PASSPORT)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_PASSPORT"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= isVATRegistered\n   false)",
+                "naturalLanguage": "isVATRegistered is false"
+              },
+              {
+                "logic": "(= hasVATReturns false)",
+                "naturalLanguage": "hasVATReturns is false"
               },
               {
                 "logic": "(= hasCompaniesHouseMatch\n   true)",
                 "naturalLanguage": "hasCompaniesHouseMatch is true"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
               },
               {
                 "logic": "(= isUKBased true)",
@@ -2209,80 +2181,76 @@
                 "naturalLanguage": "loanAmount is equal to 40000"
               },
               {
-                "logic": "(= isRegisteredInUK\n   true)",
-                "naturalLanguage": "isRegisteredInUK is true"
-              },
-              {
-                "logic": "(= isEligibleBusinessType\n   true)",
-                "naturalLanguage": "isEligibleBusinessType is true"
-              },
-              {
-                "logic": "(= loanAmountInRange\n   true)",
-                "naturalLanguage": "loanAmountInRange is true"
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
               },
               {
                 "logic": "(= applicantAge 45)",
                 "naturalLanguage": "applicantAge is equal to 45"
               },
               {
-                "logic": "(= isSubstantivelyEligible\n   false)",
-                "naturalLanguage": "isSubstantivelyEligible is false"
-              },
-              {
-                "logic": "(= hasRecentBankStatements\n   true)",
-                "naturalLanguage": "hasRecentBankStatements is true"
-              },
-              {
-                "logic": "(= hasPersonalGuarantee\n   true)",
-                "naturalLanguage": "hasPersonalGuarantee is true"
-              },
-              {
-                "logic": "(= isApplicantAgeEligible\n   true)",
-                "naturalLanguage": "isApplicantAgeEligible is true"
-              },
-              {
-                "logic": "(= hasValidDirectorID\n   true)",
-                "naturalLanguage": "hasValidDirectorID is true"
-              },
-              {
-                "logic": "(= hasProofOfDirectorAddress\n   true)",
-                "naturalLanguage": "hasProofOfDirectorAddress is true"
-              },
-              {
-                "logic": "(= directorIDType\n   DirectorIDType_PASSPORT)",
-                "naturalLanguage": "directorIDType is equal to DirectorIDType_PASSPORT"
-              },
-              {
-                "logic": "(= hasRequiredDocuments\n   true)",
-                "naturalLanguage": "hasRequiredDocuments is true"
-              },
-              {
                 "logic": "(= approvalMeetsCoveredPolicy\n   false)",
                 "naturalLanguage": "approvalMeetsCoveredPolicy is false"
-              },
-              {
-                "logic": "(= hasVATReturns false)",
-                "naturalLanguage": "hasVATReturns is false"
-              },
-              {
-                "logic": "(= meetsMinimumTradingHistory\n   false)",
-                "naturalLanguage": "meetsMinimumTradingHistory is false"
               },
               {
                 "logic": "(= hasAccountsOrManagementInformation\n   true)",
                 "naturalLanguage": "hasAccountsOrManagementInformation is true"
               },
               {
-                "logic": "(= personalGuaranteeRequirementMet\n   true)",
-                "naturalLanguage": "personalGuaranteeRequirementMet is true"
-              },
-              {
                 "logic": "(= hasBorrowingDetails\n   false)",
                 "naturalLanguage": "hasBorrowingDetails is false"
               },
               {
+                "logic": "(= loanAmountInRange\n   true)",
+                "naturalLanguage": "loanAmountInRange is true"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   false)",
+                "naturalLanguage": "isSubstantivelyEligible is false"
+              },
+              {
+                "logic": "(= hasExistingBorrowing\n   false)",
+                "naturalLanguage": "hasExistingBorrowing is false"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= loanTermMonths 24)",
+                "naturalLanguage": "loanTermMonths is equal to 24"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= tradingHistoryMonths\n   3)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 3"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
                 "logic": "(= mostRecentStatementAgeDays\n   0)",
                 "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              },
+              {
+                "logic": "(= hasProofOfDirectorAddress\n   true)",
+                "naturalLanguage": "hasProofOfDirectorAddress is true"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= hasPersonalGuarantee\n   true)",
+                "naturalLanguage": "hasPersonalGuarantee is true"
+              },
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   false)",
+                "naturalLanguage": "meetsMinimumTradingHistory is false"
               }
             ]
           },
@@ -2423,124 +2391,124 @@
           "claimsTrueScenario": {
             "statements": [
               {
-                "logic": "(= hasValidDirectorID\n   true)",
-                "naturalLanguage": "hasValidDirectorID is true"
-              },
-              {
-                "logic": "(= loanTermMonths 24)",
-                "naturalLanguage": "loanTermMonths is equal to 24"
-              },
-              {
-                "logic": "(= isApplicantAgeEligible\n   true)",
-                "naturalLanguage": "isApplicantAgeEligible is true"
-              },
-              {
-                "logic": "(= isSubstantivelyEligible\n   false)",
-                "naturalLanguage": "isSubstantivelyEligible is false"
-              },
-              {
-                "logic": "(= hasRecentBankStatements\n   true)",
-                "naturalLanguage": "hasRecentBankStatements is true"
-              },
-              {
-                "logic": "(= approvalMeetsCoveredPolicy\n   false)",
-                "naturalLanguage": "approvalMeetsCoveredPolicy is false"
-              },
-              {
-                "logic": "(= hasPersonalGuarantee\n   true)",
-                "naturalLanguage": "hasPersonalGuarantee is true"
-              },
-              {
-                "logic": "(= hasBorrowingDetails\n   false)",
-                "naturalLanguage": "hasBorrowingDetails is false"
-              },
-              {
-                "logic": "(= loanAmount 40000)",
-                "naturalLanguage": "loanAmount is equal to 40000"
-              },
-              {
-                "logic": "(= isUKBased true)",
-                "naturalLanguage": "isUKBased is true"
-              },
-              {
-                "logic": "(= hasAccountsOrManagementInformation\n   true)",
-                "naturalLanguage": "hasAccountsOrManagementInformation is true"
-              },
-              {
-                "logic": "(= applicantAge 45)",
-                "naturalLanguage": "applicantAge is equal to 45"
-              },
-              {
-                "logic": "(= hasUKAddress true)",
-                "naturalLanguage": "hasUKAddress is true"
-              },
-              {
-                "logic": "(= loanAmountInRange\n   true)",
-                "naturalLanguage": "loanAmountInRange is true"
-              },
-              {
-                "logic": "(= hasRequiredDocuments\n   true)",
-                "naturalLanguage": "hasRequiredDocuments is true"
-              },
-              {
-                "logic": "(= hasCompaniesHouseMatch\n   false)",
-                "naturalLanguage": "hasCompaniesHouseMatch is false"
-              },
-              {
-                "logic": "(= bankStatementsMonthsCount\n   3)",
-                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
-              },
-              {
-                "logic": "(= hasVATReturns false)",
-                "naturalLanguage": "hasVATReturns is false"
-              },
-              {
-                "logic": "(= meetsMinimumTradingHistory\n   false)",
-                "naturalLanguage": "meetsMinimumTradingHistory is false"
-              },
-              {
-                "logic": "(= personalGuaranteeRequirementMet\n   true)",
-                "naturalLanguage": "personalGuaranteeRequirementMet is true"
-              },
-              {
-                "logic": "(= isRegisteredInUK\n   true)",
-                "naturalLanguage": "isRegisteredInUK is true"
-              },
-              {
-                "logic": "(= mostRecentStatementAgeDays\n   0)",
-                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
-              },
-              {
-                "logic": "(= hasProofOfDirectorAddress\n   true)",
-                "naturalLanguage": "hasProofOfDirectorAddress is true"
-              },
-              {
-                "logic": "(= isEligibleBusinessType\n   true)",
-                "naturalLanguage": "isEligibleBusinessType is true"
-              },
-              {
-                "logic": "(= hasExistingBorrowing\n   false)",
-                "naturalLanguage": "hasExistingBorrowing is false"
-              },
-              {
-                "logic": "(= loanTermInRange true)",
-                "naturalLanguage": "loanTermInRange is true"
+                "logic": "(= tradingHistoryMonths\n   3)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 3"
               },
               {
                 "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
                 "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
               },
               {
-                "logic": "(= tradingHistoryMonths\n   3)",
-                "naturalLanguage": "tradingHistoryMonths is equal to 3"
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              },
+              {
+                "logic": "(= loanTermInRange true)",
+                "naturalLanguage": "loanTermInRange is true"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   false)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is false"
+              },
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   false)",
+                "naturalLanguage": "meetsMinimumTradingHistory is false"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= isVATRegistered\n   false)",
+                "naturalLanguage": "isVATRegistered is false"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= hasExistingBorrowing\n   false)",
+                "naturalLanguage": "hasExistingBorrowing is false"
               },
               {
                 "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
                 "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
               },
               {
-                "logic": "(= isVATRegistered\n   false)",
-                "naturalLanguage": "isVATRegistered is false"
+                "logic": "(= loanTermMonths 24)",
+                "naturalLanguage": "loanTermMonths is equal to 24"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   false)",
+                "naturalLanguage": "isSubstantivelyEligible is false"
+              },
+              {
+                "logic": "(= hasPersonalGuarantee\n   true)",
+                "naturalLanguage": "hasPersonalGuarantee is true"
+              },
+              {
+                "logic": "(= loanAmount 40000)",
+                "naturalLanguage": "loanAmount is equal to 40000"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= hasProofOfDirectorAddress\n   true)",
+                "naturalLanguage": "hasProofOfDirectorAddress is true"
+              },
+              {
+                "logic": "(= applicantAge 45)",
+                "naturalLanguage": "applicantAge is equal to 45"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= hasAccountsOrManagementInformation\n   true)",
+                "naturalLanguage": "hasAccountsOrManagementInformation is true"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= hasBorrowingDetails\n   false)",
+                "naturalLanguage": "hasBorrowingDetails is false"
+              },
+              {
+                "logic": "(= hasVATReturns false)",
+                "naturalLanguage": "hasVATReturns is false"
+              },
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "(= personalGuaranteeRequirementMet\n   true)",
+                "naturalLanguage": "personalGuaranteeRequirementMet is true"
+              },
+              {
+                "logic": "(= loanAmountInRange\n   true)",
+                "naturalLanguage": "loanAmountInRange is true"
               }
             ]
           },
@@ -2731,124 +2699,124 @@
           "claimsTrueScenario": {
             "statements": [
               {
-                "logic": "(= hasVATReturns false)",
-                "naturalLanguage": "hasVATReturns is false"
-              },
-              {
-                "logic": "(= hasCompaniesHouseMatch\n   false)",
-                "naturalLanguage": "hasCompaniesHouseMatch is false"
-              },
-              {
-                "logic": "(= loanTermInRange true)",
-                "naturalLanguage": "loanTermInRange is true"
-              },
-              {
-                "logic": "(= meetsMinimumTradingHistory\n   true)",
-                "naturalLanguage": "meetsMinimumTradingHistory is true"
-              },
-              {
-                "logic": "(= personalGuaranteeRequirementMet\n   true)",
-                "naturalLanguage": "personalGuaranteeRequirementMet is true"
-              },
-              {
-                "logic": "(= isRegisteredInUK\n   true)",
-                "naturalLanguage": "isRegisteredInUK is true"
-              },
-              {
-                "logic": "(= hasExistingBorrowing\n   false)",
-                "naturalLanguage": "hasExistingBorrowing is false"
-              },
-              {
-                "logic": "(= mostRecentStatementAgeDays\n   0)",
-                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
-              },
-              {
-                "logic": "(= hasProofOfDirectorAddress\n   true)",
-                "naturalLanguage": "hasProofOfDirectorAddress is true"
-              },
-              {
-                "logic": "(= isEligibleBusinessType\n   true)",
-                "naturalLanguage": "isEligibleBusinessType is true"
-              },
-              {
-                "logic": "(= hasRecentBankStatements\n   true)",
-                "naturalLanguage": "hasRecentBankStatements is true"
-              },
-              {
                 "logic": "(= hasPersonalGuarantee\n   true)",
                 "naturalLanguage": "hasPersonalGuarantee is true"
-              },
-              {
-                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
-                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
-              },
-              {
-                "logic": "(= bankStatementsMonthsCount\n   3)",
-                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
-              },
-              {
-                "logic": "(= tradingHistoryMonths\n   24)",
-                "naturalLanguage": "tradingHistoryMonths is equal to 24"
-              },
-              {
-                "logic": "(= isVATRegistered\n   false)",
-                "naturalLanguage": "isVATRegistered is false"
-              },
-              {
-                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
-                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
-              },
-              {
-                "logic": "(= loanTermMonths 24)",
-                "naturalLanguage": "loanTermMonths is equal to 24"
-              },
-              {
-                "logic": "(= hasValidDirectorID\n   true)",
-                "naturalLanguage": "hasValidDirectorID is true"
-              },
-              {
-                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
-                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
-              },
-              {
-                "logic": "(= isSubstantivelyEligible\n   true)",
-                "naturalLanguage": "isSubstantivelyEligible is true"
-              },
-              {
-                "logic": "(= hasBorrowingDetails\n   false)",
-                "naturalLanguage": "hasBorrowingDetails is false"
-              },
-              {
-                "logic": "(= loanAmount 40000)",
-                "naturalLanguage": "loanAmount is equal to 40000"
               },
               {
                 "logic": "(= isApplicantAgeEligible\n   true)",
                 "naturalLanguage": "isApplicantAgeEligible is true"
               },
               {
-                "logic": "(= hasAccountsOrManagementInformation\n   true)",
-                "naturalLanguage": "hasAccountsOrManagementInformation is true"
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
               },
               {
-                "logic": "(= isUKBased true)",
-                "naturalLanguage": "isUKBased is true"
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
               },
               {
-                "logic": "(= applicantAge 45)",
-                "naturalLanguage": "applicantAge is equal to 45"
+                "logic": "(= loanTermMonths 24)",
+                "naturalLanguage": "loanTermMonths is equal to 24"
               },
               {
-                "logic": "(= hasRequiredDocuments\n   true)",
-                "naturalLanguage": "hasRequiredDocuments is true"
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
               },
               {
                 "logic": "(= loanAmountInRange\n   true)",
                 "naturalLanguage": "loanAmountInRange is true"
               },
               {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= hasProofOfDirectorAddress\n   true)",
+                "naturalLanguage": "hasProofOfDirectorAddress is true"
+              },
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   true)",
+                "naturalLanguage": "meetsMinimumTradingHistory is true"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              },
+              {
+                "logic": "(= hasVATReturns false)",
+                "naturalLanguage": "hasVATReturns is false"
+              },
+              {
+                "logic": "(= hasAccountsOrManagementInformation\n   true)",
+                "naturalLanguage": "hasAccountsOrManagementInformation is true"
+              },
+              {
+                "logic": "(= personalGuaranteeRequirementMet\n   true)",
+                "naturalLanguage": "personalGuaranteeRequirementMet is true"
+              },
+              {
+                "logic": "(= hasBorrowingDetails\n   false)",
+                "naturalLanguage": "hasBorrowingDetails is false"
+              },
+              {
+                "logic": "(= isVATRegistered\n   false)",
+                "naturalLanguage": "isVATRegistered is false"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= loanTermInRange true)",
+                "naturalLanguage": "loanTermInRange is true"
+              },
+              {
                 "logic": "(= hasUKAddress true)",
                 "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= tradingHistoryMonths\n   24)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 24"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= applicantAge 45)",
+                "naturalLanguage": "applicantAge is equal to 45"
+              },
+              {
+                "logic": "(= hasExistingBorrowing\n   false)",
+                "naturalLanguage": "hasExistingBorrowing is false"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= loanAmount 40000)",
+                "naturalLanguage": "loanAmount is equal to 40000"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
               }
             ]
           },
@@ -2995,6 +2963,470 @@
             }
           ]
         }
+      }
+    ]
+  },
+  {
+    "case": "approval/composed_refused",
+    "strategy": "query_single",
+    "fact_count": 2,
+    "facts": {
+      "isSubstantivelyEligible": false,
+      "hasRequiredDocuments": true
+    },
+    "claim": "approvalMeetsCoveredPolicy is false.",
+    "kinds": [
+      "valid"
+    ],
+    "premises": [
+      "hasRequiredDocuments",
+      "(not isSubstantivelyEligible)"
+    ],
+    "diagnostics": {
+      "finding_kinds": [
+        "valid"
+      ],
+      "unbound_variables": [],
+      "facts_not_translated": [],
+      "untranslated_premises": []
+    },
+    "findings": [
+      {
+        "valid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "hasRequiredDocuments",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(not isSubstantivelyEligible)",
+                "naturalLanguage": "isSubstantivelyEligible is false"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "(not approvalMeetsCoveredPolicy)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is false"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= isVATRegistered\n   false)",
+                "naturalLanguage": "isVATRegistered is false"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= tradingHistoryMonths\n   6)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 6"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   true)",
+                "naturalLanguage": "meetsMinimumTradingHistory is true"
+              },
+              {
+                "logic": "(= hasProofOfDirectorAddress\n   true)",
+                "naturalLanguage": "hasProofOfDirectorAddress is true"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= loanTermInRange true)",
+                "naturalLanguage": "loanTermInRange is true"
+              },
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= hasExistingBorrowing\n   false)",
+                "naturalLanguage": "hasExistingBorrowing is false"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= loanTermMonths 3)",
+                "naturalLanguage": "loanTermMonths is equal to 3"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "(= loanAmount 25001)",
+                "naturalLanguage": "loanAmount is equal to 25001"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   false)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is false"
+              },
+              {
+                "logic": "(= applicantAge 18)",
+                "naturalLanguage": "applicantAge is equal to 18"
+              },
+              {
+                "logic": "(= hasPersonalGuarantee\n   false)",
+                "naturalLanguage": "hasPersonalGuarantee is false"
+              },
+              {
+                "logic": "(= personalGuaranteeRequirementMet\n   false)",
+                "naturalLanguage": "personalGuaranteeRequirementMet is false"
+              },
+              {
+                "logic": "(= hasAccountsOrManagementInformation\n   true)",
+                "naturalLanguage": "hasAccountsOrManagementInformation is true"
+              },
+              {
+                "logic": "(= hasBorrowingDetails\n   false)",
+                "naturalLanguage": "hasBorrowingDetails is false"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   false)",
+                "naturalLanguage": "isSubstantivelyEligible is false"
+              },
+              {
+                "logic": "(= loanAmountInRange\n   true)",
+                "naturalLanguage": "loanAmountInRange is true"
+              },
+              {
+                "logic": "(= hasVATReturns false)",
+                "naturalLanguage": "hasVATReturns is false"
+              }
+            ]
+          },
+          "supportingRules": [
+            {
+              "identifier": "RBDC420BFF59",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:123456789012:automated-reasoning-policy/8kzm1thspmq8:1"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "case": "approval/composed_approved",
+    "strategy": "query_single",
+    "fact_count": 2,
+    "facts": {
+      "isSubstantivelyEligible": true,
+      "hasRequiredDocuments": true
+    },
+    "claim": "approvalMeetsCoveredPolicy is true.",
+    "kinds": [
+      "valid"
+    ],
+    "premises": [
+      "hasRequiredDocuments",
+      "isSubstantivelyEligible"
+    ],
+    "diagnostics": {
+      "finding_kinds": [
+        "valid"
+      ],
+      "unbound_variables": [],
+      "facts_not_translated": [],
+      "untranslated_premises": []
+    },
+    "findings": [
+      {
+        "valid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "hasRequiredDocuments",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "isSubstantivelyEligible",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "approvalMeetsCoveredPolicy",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "claimsTrueScenario": {
+            "statements": [
+              {
+                "logic": "(= isEligibleBusinessType\n   true)",
+                "naturalLanguage": "isEligibleBusinessType is true"
+              },
+              {
+                "logic": "(= applicantAge 18)",
+                "naturalLanguage": "applicantAge is equal to 18"
+              },
+              {
+                "logic": "(= isUKBased true)",
+                "naturalLanguage": "isUKBased is true"
+              },
+              {
+                "logic": "(= hasProofOfDirectorAddress\n   true)",
+                "naturalLanguage": "hasProofOfDirectorAddress is true"
+              },
+              {
+                "logic": "(= loanAmount 1000)",
+                "naturalLanguage": "loanAmount is equal to 1000"
+              },
+              {
+                "logic": "(= hasPersonalGuarantee\n   false)",
+                "naturalLanguage": "hasPersonalGuarantee is false"
+              },
+              {
+                "logic": "(= meetsMinimumTradingHistory\n   true)",
+                "naturalLanguage": "meetsMinimumTradingHistory is true"
+              },
+              {
+                "logic": "(= hasVATReturns false)",
+                "naturalLanguage": "hasVATReturns is false"
+              },
+              {
+                "logic": "(= hasValidDirectorID\n   true)",
+                "naturalLanguage": "hasValidDirectorID is true"
+              },
+              {
+                "logic": "(= personalGuaranteeRequirementMet\n   true)",
+                "naturalLanguage": "personalGuaranteeRequirementMet is true"
+              },
+              {
+                "logic": "(= hasBorrowingDetails\n   false)",
+                "naturalLanguage": "hasBorrowingDetails is false"
+              },
+              {
+                "logic": "(= hasUKAddress true)",
+                "naturalLanguage": "hasUKAddress is true"
+              },
+              {
+                "logic": "(= isSubstantivelyEligible\n   true)",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              },
+              {
+                "logic": "(= hasRequiredDocuments\n   true)",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "(= loanAmountInRange\n   true)",
+                "naturalLanguage": "loanAmountInRange is true"
+              },
+              {
+                "logic": "(= hasExistingBorrowing\n   false)",
+                "naturalLanguage": "hasExistingBorrowing is false"
+              },
+              {
+                "logic": "(= mostRecentStatementAgeDays\n   0)",
+                "naturalLanguage": "mostRecentStatementAgeDays is equal to 0"
+              },
+              {
+                "logic": "(= businessType\n   BusinessType_LIMITED_COMPANY)",
+                "naturalLanguage": "businessType is equal to BusinessType_LIMITED_COMPANY"
+              },
+              {
+                "logic": "(= tradingHistoryMonths\n   6)",
+                "naturalLanguage": "tradingHistoryMonths is equal to 6"
+              },
+              {
+                "logic": "(= bankStatementsMonthsCount\n   3)",
+                "naturalLanguage": "bankStatementsMonthsCount is equal to 3"
+              },
+              {
+                "logic": "(= hasAccountsOrManagementInformation\n   true)",
+                "naturalLanguage": "hasAccountsOrManagementInformation is true"
+              },
+              {
+                "logic": "(= isRegisteredInUK\n   true)",
+                "naturalLanguage": "isRegisteredInUK is true"
+              },
+              {
+                "logic": "(= approvalMeetsCoveredPolicy\n   true)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is true"
+              },
+              {
+                "logic": "(= isApplicantAgeEligible\n   true)",
+                "naturalLanguage": "isApplicantAgeEligible is true"
+              },
+              {
+                "logic": "(= directorIDType\n   DirectorIDType_DRIVERS_LICENCE)",
+                "naturalLanguage": "directorIDType is equal to DirectorIDType_DRIVERS_LICENCE"
+              },
+              {
+                "logic": "(= hasRecentBankStatements\n   true)",
+                "naturalLanguage": "hasRecentBankStatements is true"
+              },
+              {
+                "logic": "(= isVATRegistered\n   false)",
+                "naturalLanguage": "isVATRegistered is false"
+              },
+              {
+                "logic": "(= hasCompaniesHouseMatch\n   false)",
+                "naturalLanguage": "hasCompaniesHouseMatch is false"
+              },
+              {
+                "logic": "(= loanTermInRange true)",
+                "naturalLanguage": "loanTermInRange is true"
+              },
+              {
+                "logic": "(= loanTermMonths 3)",
+                "naturalLanguage": "loanTermMonths is equal to 3"
+              }
+            ]
+          },
+          "supportingRules": [
+            {
+              "identifier": "RBDC420BFF59",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:123456789012:automated-reasoning-policy/8kzm1thspmq8:1"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "case": "approval/composed_approved_negated",
+    "strategy": "query_single",
+    "fact_count": 2,
+    "facts": {
+      "isSubstantivelyEligible": true,
+      "hasRequiredDocuments": true
+    },
+    "claim": "approvalMeetsCoveredPolicy is false.",
+    "kinds": [
+      "invalid"
+    ],
+    "premises": [
+      "hasRequiredDocuments",
+      "isSubstantivelyEligible"
+    ],
+    "diagnostics": {
+      "finding_kinds": [
+        "invalid"
+      ],
+      "unbound_variables": [],
+      "facts_not_translated": [],
+      "untranslated_premises": []
+    },
+    "findings": [
+      {
+        "invalid": {
+          "translation": {
+            "premises": [
+              {
+                "logic": "hasRequiredDocuments",
+                "naturalLanguage": "hasRequiredDocuments is true"
+              },
+              {
+                "logic": "isSubstantivelyEligible",
+                "naturalLanguage": "isSubstantivelyEligible is true"
+              }
+            ],
+            "claims": [
+              {
+                "logic": "(not approvalMeetsCoveredPolicy)",
+                "naturalLanguage": "approvalMeetsCoveredPolicy is false"
+              }
+            ],
+            "untranslatedPremises": [],
+            "untranslatedClaims": [],
+            "confidence": 1.0
+          },
+          "contradictingRules": [
+            {
+              "identifier": "RBDC420BFF59",
+              "policyVersionArn": "arn:aws:bedrock:us-east-1:123456789012:automated-reasoning-policy/8kzm1thspmq8:1"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "case": "approval/all_leaves",
+    "strategy": "query_single",
+    "fact_count": 17,
+    "facts": {
+      "tradingHistoryMonths": 3,
+      "loanAmount": 40000,
+      "loanTermMonths": 24,
+      "applicantAge": 45,
+      "businessType": "BusinessType_LIMITED_COMPANY",
+      "isUKBased": true,
+      "hasPersonalGuarantee": true,
+      "isRegisteredInUK": true,
+      "hasUKAddress": true,
+      "hasCompaniesHouseMatch": true,
+      "hasValidDirectorID": true,
+      "directorIDType": "DirectorIDType_PASSPORT",
+      "hasRecentBankStatements": true,
+      "bankStatementsMonthsCount": 3,
+      "mostRecentStatementAgeDays": 10,
+      "hasProofOfDirectorAddress": true,
+      "hasAccountsOrManagementInformation": true
+    },
+    "claim": "approvalMeetsCoveredPolicy is false.",
+    "kinds": [
+      "tooComplex"
+    ],
+    "premises": [],
+    "diagnostics": {
+      "finding_kinds": [
+        "tooComplex"
+      ],
+      "unbound_variables": [],
+      "facts_not_translated": [],
+      "untranslated_premises": []
+    },
+    "findings": [
+      {
+        "tooComplex": {}
       }
     ]
   }

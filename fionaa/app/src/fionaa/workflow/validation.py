@@ -9,10 +9,14 @@ from fionaa.policy_loader import load_policy_text
 from fionaa.policy_consistency import PolicyConsistencyChecker
 from fionaa.ar_facts import build_derived_facts
 from fionaa.ar_claims import (
+    APPROVAL_VARIABLE,
+    DOCUMENTATION_VARIABLE,
+    ELIGIBILITY_VARIABLE,
     approval_assertion,
+    approval_premise_facts,
     documentation_assertion,
     eligibility_assertion,
-    leaf_facts_for_loan_type,
+    facts_for_claim,
 )
 from fionaa.domain.applications import LoanType
 from langgraph.runtime import Runtime
@@ -56,18 +60,22 @@ def _claim(source: str, field: str, text: str) -> dict:
     }
 
 
-def _deterministic_claims(policy_check: dict, proposed: dict) -> list[dict]:
+def _deterministic_claims(policy_check: dict, proposed: dict) -> list[tuple[dict, str]]:
     """Code-generated, deterministic AR assertions -- never LLM prose. Each
     entry pairs a source_path (a JSON pointer into decision/result.json, for
-    the dashboard) with one of ar_claims.py's templated sentences. A
-    candidate is omitted (None) when its source field has no clean boolean
-    to assert -- see each ar_claims.py function's docstring."""
+    the dashboard) with one of ar_claims.py's templated sentences, and names
+    the policy variable the assertion is about so its facts can be scoped to
+    that claim alone. A candidate is omitted (None) when its source field has
+    no clean boolean to assert -- see each ar_claims.py function's
+    docstring."""
     candidates = [
-        ("policy_check", "eligible", eligibility_assertion(policy_check)),
-        ("policy_check", "documentation_gaps", documentation_assertion(policy_check)),
-        ("ai_recommendation", "outcome", approval_assertion(proposed)),
+        ("policy_check", "eligible", ELIGIBILITY_VARIABLE, eligibility_assertion(policy_check)),
+        ("policy_check", "documentation_gaps", DOCUMENTATION_VARIABLE,
+         documentation_assertion(policy_check)),
+        ("ai_recommendation", "outcome", APPROVAL_VARIABLE, approval_assertion(proposed)),
     ]
-    return [_claim(source, field, text) for source, field, text in candidates if text is not None]
+    return [(_claim(source, field, text), variable)
+            for source, field, variable, text in candidates if text is not None]
 
 
 async def _validate_decision(state: ApplicationState, runtime: Runtime[AgentContext]) -> dict:
@@ -76,18 +84,34 @@ async def _validate_decision(state: ApplicationState, runtime: Runtime[AgentCont
     source_path is a JSON pointer into decision/result.json. Evidence is the
     shared input snapshot, not a claim that the checker used every source.
     """
-    claims = _deterministic_claims(state["policy_check"], state["proposed_decision"])
+    candidates = _deterministic_claims(state["policy_check"], state["proposed_decision"])
+    claims = [claim for claim, _ in candidates]
     loan_type = LoanType(state["application"]["loan_type"])
     checker = runtime.context.policy_checker or PolicyConsistencyChecker.from_environment()
     policy = load_policy_text(loan_type)
     reference_date = date.today()
     facts = _facts(state, reference_date)
-    leaf_facts = leaf_facts_for_loan_type(loan_type, facts["derived_facts"])
+    # Each claim gets only the facts its own rules reach. Sending a loan
+    # type's whole fact set to every claim exceeded what the AR engine will
+    # solve (17 premises -> "tooComplex"), which left every claim on a
+    # complete application undecidable. The approval claim is composed from
+    # the other two claims' subjects rather than from their combined facts,
+    # which would be larger still -- see ar_claims.approval_premise_facts.
+    claim_facts = [
+        approval_premise_facts(state["policy_check"]) if variable == APPROVAL_VARIABLE
+        else facts_for_claim(loan_type, variable, facts["derived_facts"])
+        for _, variable in candidates
+    ]
     results = await asyncio.gather(*(
-        checker.check(loan_type.value, policy, leaf_facts, item["claim"]["summary"]) for item in claims
+        checker.check(loan_type.value, policy, sent, item["claim"]["summary"])
+        for item, sent in zip(claims, claim_facts)
     ))
     annotations = []
-    for claim, result in zip(claims, results):
+    for claim, sent, result in zip(claims, claim_facts, results):
+        # What this claim was actually given, so a reviewer reading one
+        # annotation doesn't have to reconstruct the scoping to know which
+        # facts the answer rests on.
+        claim = {**claim, "facts_sent": sorted(sent)}
         # The checker's legacy passed flag is not a decision or report gate.
         details = {key: value for key, value in result.items() if key != "passed"}
         status = details["status"]

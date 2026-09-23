@@ -36,9 +36,14 @@ async def test_findings_are_enforced(kind):
     assert result["status"] == {"valid": "valid", "invalid": "invalid"}.get(kind, "inconclusive")
     request = instance.client.apply_guardrail.call_args.kwargs
     assert request["source"] == "OUTPUT"
-    # Every block is guard_content, including the facts -- a separate
-    # query-qualified block wasn't reliably used as translation premises.
-    assert all(block["text"]["qualifiers"] == ["guard_content"] for block in request["content"])
+    # Facts are premises and go in query blocks; only the assertion under
+    # test is guard_content. Sending the facts as guard_content too (what
+    # this test used to assert) made the engine treat them as part of the
+    # claim, so nothing was ever entailed -- see policy_consistency.check
+    # and evals/automated_reasoning/premise-handling-probe.json.
+    assert [block["text"]["qualifiers"] for block in request["content"]] == \
+        [["query"], ["guard_content"]]
+    assert request["content"][0]["text"]["text"] == "loanAmount is 40000."
     assert request["content"][-1]["text"]["text"] == "isSubstantivelyEligible is true."
 
 
@@ -98,9 +103,11 @@ class SequencedFakeChecker:
     def __init__(self, results):
         self.results = list(results)
         self.claims_seen = []
+        self.facts_seen = []
 
     async def check(self, loan_type, policy_text, facts, assertion):
         self.claims_seen.append(assertion)
+        self.facts_seen.append(facts)
         return self.results[len(self.claims_seen) - 1]
 
 
@@ -246,3 +253,59 @@ async def test_inconclusive_result_names_the_variables_that_left_it_undecided():
     assert result["status"] == "inconclusive"
     assert result["diagnostics"]["unbound_variables"] == ["hasPersonalGuarantee"]
     assert result["diagnostics"]["facts_not_translated"] == ["loanAmount"]
+
+
+@pytest.mark.asyncio
+async def test_each_claim_is_sent_only_the_facts_its_own_rules_reach():
+    """The whole fact set went to every claim before, which put the request
+    past what the AR engine will solve. Here the eligibility claim must not
+    receive document facts, nor the documentation claim loan-term facts --
+    and neither may receive `today`, which isn't a policy variable."""
+    store = FakeStore()
+    checker = SequencedFakeChecker([
+        {"status": "valid", "policy_sha256": "digest", "findings": [{"valid": {}}]}
+        for _ in range(3)
+    ])
+    runtime = FakeRuntime(g.AgentContext(store, FakePolicyDocs(), [], checker))
+    state = _decision_state(
+        application={"loan_type": "secured-business-loans", "loan_amount": 40000,
+                     "loan_term": 24, "year_of_birth": "1980", "company_name": "Example Ltd",
+                     "trading_start_date": "2020-01-01"},
+        annual_accounts=[{"accounting_year": "2026-01-31"}],
+        bank_statements=[{"end_date": "2026-09-01"}],
+    )
+
+    await g.validate_final_decision(state, runtime)
+
+    eligibility, documentation, approval = checker.facts_seen
+    assert "loanAmount" in eligibility and "tradingHistoryMonths" in eligibility
+    assert "hasAnnualAccounts" not in eligibility
+    assert "hasAnnualAccounts" in documentation
+    assert "loanAmount" not in documentation and "applicantAge" not in documentation
+    assert not any("today" in sent for sent in checker.facts_seen)
+    # The approval claim is composed from the other two claims' subjects,
+    # not from their combined facts -- its own dependency graph is the
+    # union of theirs, which is more premises than the engine will solve.
+    assert approval == {"isSubstantivelyEligible": True, "hasRequiredDocuments": True}
+    # Each annotation records what it was actually given.
+    validation = store.data["decision/validation.json"]
+    assert validation["claims"][2]["facts_sent"] == ["hasRequiredDocuments", "isSubstantivelyEligible"]
+
+
+@pytest.mark.asyncio
+async def test_approval_claim_drops_the_eligibility_premise_when_the_llm_could_not_tell():
+    """An inconclusive eligibility verdict has no boolean to compose from.
+    One premise and an honestly undecidable check beats a guessed one."""
+    store = FakeStore()
+    checker = SequencedFakeChecker([
+        {"status": "valid", "policy_sha256": "digest", "findings": [{"valid": {}}]}
+        for _ in range(2)
+    ])
+    runtime = FakeRuntime(g.AgentContext(store, FakePolicyDocs(), [], checker))
+    state = _decision_state(policy_check={"eligible": "inconclusive", "documentation_gaps": []})
+
+    await g.validate_final_decision(state, runtime)
+
+    # Eligibility itself is never asserted when inconclusive, so the two
+    # calls are documentation and approval.
+    assert checker.facts_seen[-1] == {"hasRequiredDocuments": True}
