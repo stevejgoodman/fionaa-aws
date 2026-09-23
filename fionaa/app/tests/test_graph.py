@@ -117,6 +117,39 @@ def test_load_application_loads_and_validates_documents():
     assert result["bank_statements"] == [bank_statement_feb, BANK_STATEMENT_JAN]
 
 
+def test_product_specific_documents_are_loaded_only_for_their_loan_types():
+    """VAT returns and borrowing details belong to unsecured loans and
+    revolving facilities; security assets to secured loans and revolving
+    facilities. A secured application must not come back with a
+    vat_returns key at all -- its policy declares no such variable, so an
+    empty list would suggest a requirement that doesn't exist."""
+    vat_return = {"business_name": "Acme Ltd", "period_start": "2026-01-01",
+                  "period_end": "2026-03-31", "vat_due": 4200.0}
+    security_asset = {"asset_type": "property", "description": "Freehold warehouse",
+                      "estimated_value": 750000.0, "valuation_date": "2026-06-01",
+                      "owner_name": "Acme Ltd"}
+    staged = {"input/vat_return_q1.json": vat_return, "input/security_asset_unit4.json": security_asset}
+
+    unsecured = g.load_application({}, FakeRuntime(g.AgentContext(
+        store=FakeStore({"input/application.json": {"loan_type": "unsecured-business-loans"}, **staged}),
+        policy_docs=FakePolicyDocs(), tools=[])))
+    secured = g.load_application({}, FakeRuntime(g.AgentContext(
+        store=FakeStore({"input/application.json": {"loan_type": "secured-business-loans"}, **staged}),
+        policy_docs=FakePolicyDocs(), tools=[])))
+    revolving = g.load_application({}, FakeRuntime(g.AgentContext(
+        store=FakeStore({"input/application.json": {"loan_type": "revolving-credit-facility"}, **staged}),
+        policy_docs=FakePolicyDocs(), tools=[])))
+
+    assert unsecured["vat_returns"] == [vat_return]
+    assert "security_assets" not in unsecured
+    assert secured["security_assets"] == [security_asset]
+    assert "vat_returns" not in secured and "existing_borrowing" not in secured
+    # The only product that asks for all three.
+    assert revolving["vat_returns"] == [vat_return]
+    assert revolving["security_assets"] == [security_asset]
+    assert revolving["existing_borrowing"] == []
+
+
 def test_load_application_skips_document_types_that_dont_apply(monkeypatch):
     """DOCUMENT_SPECS.applies_to lets a future document type gate on the
     application (e.g. loan_type) without load_application itself branching

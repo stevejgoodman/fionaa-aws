@@ -27,6 +27,15 @@ class ApplicationState(TypedDict, total=False):
     # is complete enough to hand to a human underwriter (see triage.py).
     director_id: Annotated[list[dict[str, Any]], _last_write_wins]
     proof_of_address: Annotated[list[dict[str, Any]], _last_write_wins]
+    # Product-specific supporting documents, loaded only for the loan types
+    # whose policy asks for them (see loading.DOCUMENT_SPECS). They bind the
+    # Automated Reasoning document variables those policies declare --
+    # hasVATReturns, hasBorrowingDetails, hasProofOfCollateralOwnership-
+    # Valuation / hasSecurityAssetDetails -- and are not read by any
+    # assessment node.
+    vat_returns: Annotated[list[dict[str, Any]], _last_write_wins]
+    existing_borrowing: Annotated[list[dict[str, Any]], _last_write_wins]
+    security_assets: Annotated[list[dict[str, Any]], _last_write_wins]
     # Documents that were supplied but failed schema validation at load time,
     # as [{"key": ..., "state_key": ...}]. Recorded rather than raised so an
     # unreadable upload routes the applicant back instead of failing the run.
