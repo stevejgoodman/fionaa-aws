@@ -22,9 +22,9 @@
       "authorizerType": "CUSTOM_JWT",
       "authorizerConfiguration": {
         "customJwtAuthorizer": {
-          "discoveryUrl": "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_XXXXXXXXX/.well-known/openid-configuration",
+          "discoveryUrl": "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_QdHqgzqUA/.well-known/openid-configuration",
           "allowedAudience": [
-            "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+            "14dnsnarjq6povfqeisdtvs07a"
           ]
         }
       },

@@ -60,7 +60,7 @@ new Path2BatchEvalStack(app, 'FionaaEvalsPath2Ci', {
   // sha256("fionaa-eval-ci@example.com") -- see EVALS.md Path 2 plan, work item 2.
   evalCustomerId: '17deb75df387eafcea144caa24f896e85216c2622721c6c33c6c1b8cd73eae18',
   // ClaimsAgent-UserPool (agentcore.json's customJwtAuthorizer.discoveryUrl).
-  cognitoUserPoolArn: `arn:aws:cognito-idp:${region}:${account}:userpool/us-east-1_XXXXXXXXX`,
+  cognitoUserPoolArn: `arn:aws:cognito-idp:${region}:${account}:userpool/us-east-1_QdHqgzqUA`,
   evalCredentialsSecretArn: `arn:aws:secretsmanager:${region}:${account}:secret:fionaa/eval-harness-cognito-credentials-8NACSV`,
   // fionaa/agentcore/.cli/deployed-state.json's evaluators -- update if more are added (work item 7).
   evaluatorArns: [
