@@ -1,12 +1,16 @@
 ---
 type: concept
-title: Identity, IAM scoping, and storage safety
-description: Verified JWT claims are turned into a scoped customer identity, then into short-lived STS credentials and prefix-limited S3/KMS access. Missing data fails closed as an expected absence, while AccessDenied is treated as a security-relevant event.
+title: Security and Storage Boundary
+description: Runtime configuration supplies the bucket, KMS key, and role ARNs that shape customer identity, scoped STS credentials, and prefix-limited S3 access. The code fails closed when required settings are missing or malformed.
 tags: [security, identity, iam, sts, s3, kms, storage]
 verified:
   - by: openwiki/0.5.1
-    at: 2026-09-19T09:15:01.080Z
+    at: 2026-09-24T15:24:05.146Z
 sources:
+  - id: openwiki-source-49e31541d82486920ebe587b
+    resource: repo://fionaa/app/fionaa_iam_policies.md
+  - id: openwiki-source-ee1287af284d9ff40046f6bc
+    resource: repo://fionaa/app/README.md
   - id: openwiki-source-9eb04c804856ca9205525a5e
     resource: repo://fionaa/app/src/fionaa/config.py
   - id: openwiki-source-74c47affc51385d1ab7d047d
@@ -17,30 +21,55 @@ sources:
     resource: repo://fionaa/app/tests/test_security.py
   - id: openwiki-source-6e7c52a9ce6fc78a35911714
     resource: repo://fionaa/app/tests/test_storage.py
-generated: { by: "openwiki/0.5.1", at: "2026-09-19T09:15:01.080Z" }
+generated: { by: "openwiki/0.5.1", at: "2026-09-24T15:24:05.146Z" }
 ---
 
-# Identity, IAM scoping, and storage safety
+# Security and Storage Boundary
 
-This page documents the trust boundary that keeps customer data isolated in FIONAA. The system does not accept a caller-provided customer identity. Instead, it derives a `customer_id` from verified JWT claims on the request context, uses that identity to assume a short-lived AWS role with session tags, and then constrains all application storage access to the matching S3 prefix and KMS encryption context.
+This page describes the trust boundary that constrains customer data access in FIONAA. The system derives a customer-scoped identity from verified request claims, exchanges that identity for short-lived STS credentials, and uses those credentials only to reach the customer-owned S3 prefix and matching KMS encryption context.
 
-The core rule is simple: identity comes from verified inbound auth, not from request payloads. Storage access is then shaped by that derived identity, not by ad hoc caller input.
+The important rule is that the application never accepts a caller-supplied customer identity. Identity comes from verified runtime context, storage access is limited by that derived identity, and the code that touches S3 is intentionally narrow.
 
-## Identity derivation
+## Runtime configuration supplies the storage boundary
 
-`identity_from_request_context` reads the inbound `Authorization` bearer token from the AgentCore request context and decodes the JWT without verifying the signature in-process. That is intentional: the runtime authorizer is expected to validate the token before the request reaches this code, so the handler consumes already-verified claims instead of duplicating signature verification logic.
+`RuntimeSettings.from_environment()` reads the deployment settings that define the boundary:
 
-The function rejects malformed or incomplete inputs rather than guessing:
+- `FIONAA_APPLICATIONS_BUCKET`
+- `FIONAA_POLICY_DOCS_BUCKET`
+- `FIONAA_KMS_KEY_ARN`
+- `FIONAA_DATA_ACCESS_ROLE_ARN`
+- `FIONAA_CHECKPOINT_MEMORY_ID`
+
+`required_env()` treats missing or blank values as configuration errors and raises `ValueError`. That means the app does not guess at buckets, keys, or roles; it fails closed during startup or construction when the deployment has not provided a usable boundary.
+
+The configuration layer is intentionally explicit. `security.py` and `storage.py` can also accept injected bucket, key, and role values, but their fallback behavior is still environment-driven and still validated by `required_env()`.
+
+## Customer identity is derived, normalized, and tag-safe
+
+`identity_from_request_context()` reads the inbound `Authorization` bearer token from the runtime request context and decodes the JWT without verifying the signature in-process. That is deliberate: the runtime authorizer is expected to have already validated the token before the request reaches application code.
+
+The function rejects incomplete input instead of inferring anything:
 
 - missing `Authorization` header raises `ValueError`
 - missing email claim raises `ValueError`
-- the email claim is read from `email` or `custom:email`
+- the email claim is accepted from `email` or `custom:email`
 
-`customer_id` is derived locally as `sha256(lowercased, trimmed email)`. This normalization ensures the same user maps to the same storage prefix even if the email casing or surrounding whitespace differs. It also keeps the raw email out of session tags and object keys.
+`customer_id` is derived locally as `sha256(lowercased, trimmed email)`. Normalization keeps the same user mapped to the same storage prefix even when the email casing or whitespace changes, and it keeps the raw email out of session tags and object keys.
 
-`CustomerIdentity` validates both `customer_id` and `application_id` against the STS-safe tag character set before either value can be used downstream. That fails fast on malformed inputs instead of propagating dangerous strings into IAM tags or S3 keys.
+`CustomerIdentity` also validates `customer_id` and `application_id` against the STS session-tag character set before either value can be used downstream. Unsafe values fail immediately rather than being propagated into IAM tags or S3 keys.
 
-## Request flow and trust boundary
+## Scoped STS credentials are the coarse IAM boundary
+
+`scoped_boto_session()` assumes the data-access role named by `FIONAA_DATA_ACCESS_ROLE_ARN` and wraps the returned credentials in `DeferredRefreshableCredentials`.
+
+The STS request includes:
+
+- a `RoleSessionName` that embeds the customer and application identifiers for traceability
+- session tags for `customer_id` and `application_id`
+- `TransitiveTagKeys=["customer_id"]` so the customer tag survives onward role chaining
+- `DurationSeconds=3600`
+
+This is the coarse access boundary. The runtime execution role only needs permission to assume the data-access role; it does not need direct S3 access to customer application data. If the identity or tags are wrong, the downstream role assumption or object access should fail rather than widening access.
 
 ```mermaid
 sequenceDiagram
@@ -64,28 +93,13 @@ sequenceDiagram
 
 The request path starts with verified identity, turns that into scoped credentials, and only then touches customer storage.
 
-## STS scoping is the coarse access boundary
+## S3 access is prefix-scoped to the derived identity
 
-`scoped_boto_session` calls STS `AssumeRole` against `FIONAA_DATA_ACCESS_ROLE_ARN` and wraps the result in `DeferredRefreshableCredentials`.
-
-The STS call uses:
-
-- `RoleSessionName` that includes the customer and application identifiers for traceability
-- session tags for `customer_id` and `application_id`
-- `TransitiveTagKeys=["customer_id"]` so the customer tag survives any onward role chaining
-- `DurationSeconds=3600`
-
-This is the coarse boundary for customer-data access. The execution role only needs permission to assume the data-access role; it does not need direct S3 permissions on customer application data. If the session tags or identity inputs are wrong, the downstream role assumption or object access should fail rather than widening access.
-
-`DeferredRefreshableCredentials` matters operationally because long-running workflows can transparently re-assume the role when the hour-long session expires.
-
-## Storage is prefix-scoped to the derived identity
-
-`ApplicationStore` is the only storage module that reads or writes customer application objects. It builds every key from the stored `CustomerIdentity`, never from caller input, and uses the prefix shape:
+`ApplicationStore` is the only module that reads or writes customer application objects. It builds every key from the stored `CustomerIdentity`, never from caller input, and uses the prefix shape:
 
 `<customer_id>/<application_id>`
 
-JSON documents, generated results, and application PDFs all live beneath that prefix. `list_keys` returns keys relative to the store prefix, which keeps callers inside the same identity boundary instead of exposing raw bucket paths.
+JSON documents, generated results, and application PDFs all live beneath that prefix. `list_keys()` returns keys relative to the store prefix, which keeps callers inside the same identity boundary instead of exposing raw bucket paths.
 
 Write behavior enforces the same boundary at KMS:
 
@@ -93,25 +107,33 @@ Write behavior enforces the same boundary at KMS:
 - `SSEKMSKeyId` from `FIONAA_KMS_KEY_ARN`
 - `SSEKMSEncryptionContext` containing `{"customer_id": <derived customer id>}` encoded as base64 JSON
 
-That encryption context is not optional decoration. It must match the KMS grant condition tied to the data-access role, so decryption depends on the same customer identity that shaped the S3 key. The implementation treats that as part of the security model.
+That encryption context is part of the security model, not decoration. It must match the KMS grant condition tied to the data-access role, so decryption depends on the same customer identity that shaped the S3 key.
 
-## Failure handling: what is expected absence, and what is a security event
+## Failure handling distinguishes absence from security violations
 
-The storage layer distinguishes ordinary missing data from potentially dangerous access failures.
+The storage layer treats ordinary missing data differently from potentially dangerous access failures.
 
 - missing S3 objects map to `None`
 - `AccessDenied` is logged as a security-relevant event and re-raised
 - other S3 errors are re-raised
 
-This distinction matters. A missing object is expected when a document has not been uploaded yet. `AccessDenied`, by contrast, may mean either a misconfigured tag/session or a real isolation violation. In both cases, the system must fail closed and surface the problem.
+A missing object is expected when a document has not been uploaded yet. `AccessDenied`, by contrast, may indicate a misconfigured tag/session or a real isolation violation. In both cases, the system fails closed and surfaces the problem.
 
-## Shared policy documents are a separate bucket
+## Shared policy documents live in a separate bucket
 
 `PolicyDocStore` is intentionally separate from `ApplicationStore`. It reads from `FIONAA_POLICY_DOCS_BUCKET`, which contains shared, read-only policy documents rather than per-customer records. The application-data bucket remains prefix-isolated per customer and application, while the policy bucket has no customer prefix condition because its contents are meant to be shared reference material.
 
-## Invariants to preserve
+## What code is allowed to touch S3
 
-The important invariants are:
+The storage boundary is intentionally small:
+
+- `ApplicationStore` handles customer application objects
+- `PolicyDocStore` handles shared policy documents
+- `security.py` only prepares the scoped identity and STS session used by storage
+
+No other code path should reach customer S3 data directly. That keeps the identity boundary, the prefix boundary, and the encryption-context boundary aligned in one place.
+
+## Invariants to preserve
 
 1. identity is derived from verified JWT claims, not from user-supplied request data
 2. `customer_id` is normalized, hashed, and safe for STS session tags
@@ -121,20 +143,22 @@ The important invariants are:
 6. missing objects are treated as expected absence
 7. `AccessDenied` is surfaced, not hidden
 8. shared policy documents are read from a separate bucket
+9. required runtime settings must exist and be valid before storage access can succeed
 
 When any of those assumptions fail, the code should fail closed.
 
 ## Focused tests
 
-The unit tests cover the security invariants that matter most:
+The unit tests cover the boundary conditions that matter most:
 
 - email hashing normalizes case and whitespace
 - unsafe identity and tag values are rejected
 - identity is derived from the verified JWT claims
 - missing authorization and missing email claim raise `ValueError`
 - application S3 keys are scoped to the identity prefix
-- `put_json` writes the expected KMS encryption context
-- `list_keys` stays within the application prefix
+- `put_json()` writes the expected KMS encryption context
+- `list_keys()` stays within the application prefix
 - `PolicyDocStore` reads from the shared policy bucket
+- missing required environment variables raise `ValueError`
 
 Together, those tests confirm that identity flows from verified auth into STS scoping and then into S3 and KMS enforcement without crossing customer boundaries.

@@ -1,11 +1,11 @@
 ---
 type: architecture concept
 title: Runtime entrypoint and invocation assembly
-description: How an AgentCore request becomes a customer-scoped graph invocation with verified identity, scoped AWS credentials, checkpointing, fresh gateway tools, and S3-backed result URIs.
-tags: [agentcore, runtime, invocation-flow, identity, checkpointing, gateway, s3]
+description: How an AgentCore request becomes a customer-scoped LangGraph run with verified identity, scoped storage, checkpointing, fresh gateway tools, and model execution.
+tags: [agentcore, runtime, invocation-flow, identity, checkpointing, gateway, model, storage]
 verified:
   - by: openwiki/0.5.1
-    at: 2026-09-19T09:15:01.080Z
+    at: 2026-09-24T15:24:05.146Z
 sources:
   - id: openwiki-source-9eb04c804856ca9205525a5e
     resource: repo://fionaa/app/src/fionaa/config.py
@@ -17,18 +17,29 @@ sources:
     resource: repo://fionaa/app/src/fionaa/integrations/checkpointing.py
   - id: openwiki-source-3a7b26ef394512a7b079de22
     resource: repo://fionaa/app/src/fionaa/main.py
+  - id: openwiki-source-f783d23234485dd246671e8b
+    resource: repo://fionaa/app/src/fionaa/model/load.py
   - id: openwiki-source-74c47affc51385d1ab7d047d
     resource: repo://fionaa/app/src/fionaa/security.py
   - id: openwiki-source-b9c3c412f0aa12c5173315cd
     resource: repo://fionaa/app/src/fionaa/storage.py
-generated: { by: "openwiki/0.5.1", at: "2026-09-19T09:15:01.080Z" }
+generated: { by: "openwiki/0.5.1", at: "2026-09-24T15:24:05.146Z" }
 ---
 
 # Runtime entrypoint and invocation assembly
 
-The runtime entrypoint is the boundary where an AgentCore invocation becomes a configured LangGraph run. Its job is to derive trusted identity from the request context, assemble per-invocation dependencies with customer scope, execute the graph with checkpointing, and return stable S3 URIs for the evidence artifacts.
+The runtime entrypoint is the boundary where a Bedrock AgentCore request becomes a configured LangGraph invocation. Its job is to derive trusted identity from the request context, assemble per-invocation dependencies with customer scope, execute the graph with checkpointing, and return stable S3 URIs for the evidence artifacts.
 
-This page documents request-time dependency assembly, not package layout or node internals. For node-by-node workflow behavior, see [Graph workflow and node responsibilities](/openwiki/architecture/graph-workflow.md).
+This page documents request-time dependency assembly, not package layout or node internals. For node-by-node workflow behavior, see [Graph workflow and stage sequencing](/openwiki/architecture/graph-workflow.md).
+
+## What is per invocation and what is module level
+
+The runtime keeps a strict split between objects created for one request and objects created when the module is imported:
+
+- **Per invocation**: `RuntimeSettings`, `CustomerIdentity`, the scoped boto3 session, the checkpointer, the graph binding, gateway tools, `checkpoint_config`, `AgentContext`, and the `graph.ainvoke(...)` call.
+- **Module level**: the `BedrockAgentCoreApp` instance, telemetry instrumentation, and imported helper functions and classes.
+
+That split matters because customer scope, bearer tokens, and checkpoint namespace must be derived fresh for each request, while module-level setup should remain free of customer-specific state.
 
 ## Trust boundary
 
@@ -54,7 +65,7 @@ That boundary prevents ambient credentials or payload fields from choosing custo
 7. Build checkpoint config from verified identity.
 8. Assemble `AgentContext` with the scoped `ApplicationStore`, the shared `PolicyDocStore`, the fresh tools, the loaded model, and the policy checker.
 9. Invoke the graph with empty initial state and the runtime context.
-10. Return a compact response containing the `application_id`, the decision outcome, and artifact URIs rooted at the verified identity.
+10. Return a compact response containing the `application_id`, the decision outcome, the route, and artifact URIs rooted at the verified identity.
 
 ```mermaid
 sequenceDiagram
@@ -66,6 +77,7 @@ sequenceDiagram
     participant Graph as graph.py
     participant Gateway as gateway.py
     participant Store as storage.py
+    participant Model as model.load
 
     Runtime->>Main: invoke(payload, context)
     Main->>Settings: from_environment()
@@ -83,6 +95,8 @@ sequenceDiagram
     Main->>Graph: checkpoint_config(identity)
     Main->>Store: ApplicationStore(identity, session, bucket, kms_key_arn)
     Main->>Store: PolicyDocStore(session, bucket)
+    Main->>Model: load_model()
+    Model-->>Main: Bedrock Runnable
     Main->>Graph: ainvoke({}, config, context=agent_context)
     Graph-->>Main: final state
     Main-->>Runtime: application_id plus evidence URIs
@@ -161,6 +175,7 @@ The entrypoint enforces a few important operational invariants:
 - payload content is used only as the application lookup key,
 - checkpointing uses the scoped session,
 - gateway tools are loaded per invocation,
+- the model is loaded per invocation,
 - durable evidence lives under the identity-derived S3 prefix.
 
 Failures usually surface before graph execution:
@@ -179,9 +194,10 @@ Most runtime changes happen by changing the collaborators assembled by the entry
 
 - adjust settings loading in `config.py`,
 - change identity or session-tag rules in `security.py`,
-- alter the graph topology or checkpoint wiring in `graph.py`,
-- change storage layout in `storage.py`, or
-- modify gateway exposure in `gateway.py`.
+- alter checkpoint wiring in `integrations/checkpointing.py`,
+- change storage layout in `storage.py`,
+- modify gateway exposure in `gateway.py`, or
+- change model selection and guardrail wiring in `model/load.py`.
 
 When extending the runtime, preserve the trust split between verified identity and caller payload. Any new customer-scoped collaborator should be derived from the verified identity, and any persistent output should continue to live under the identity-derived S3 prefix.
 

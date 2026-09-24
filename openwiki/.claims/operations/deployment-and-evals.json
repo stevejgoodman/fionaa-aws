@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:880d4061b0cf3b5070b15656c05463910576dd1ef08d42159c466c92b18c4179",
+  "pageVersion": "sha256:f5a4fd98afd682370e28325432663c86dbb161b852c7ce559cf44b4e48dd03d5",
   "claims": [
     {
       "id": "claim_991e9ff272ea494c916aacdf26410e20",
@@ -9,64 +9,6 @@
         {
           "resource": "repo://fionaa/README.md#L32-L46",
           "version": "repo-lines-v1:sha256:f755d4a736a2c64f6141117e7b0c73e43199f68696ee1b2b4c9ffccaac4761b1:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhhMDhiNDZmNTcyODRhYzM5YjZmZWY2MTQ2ZDk1YzQ5MzIyNDE4MWNiZDNiYTU1ZjhjNmU4MjFkNTI4YTIxMTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ3YzA2YzU2MWQ1YzMyNzM0MzY4NTI2OGE0NmIzMzkxZjM5OThlZWU4OTBkMmJlNTFmMGQyMWNjNGE1M2FlNmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU5Mjc0YzA0ZjhmMWFkMmFlYjdlNTEyMjllNGYxYzJkMjllOWExYWIxM2RmOTk4MzkzMzI3ZTczZWY2ZjY3ZTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRjZGNkN2VkMjVjOGFkOWI0NzA4ODE3MzE5N2NmNjhlNzNiOGU2NWNkN2E3YzZmYzA2MTg2MjYwMWZiYjNiZGEifQ"
-        }
-      ]
-    },
-    {
-      "id": "claim_7f69e1c3613142e0bb6d84085847e072",
-      "statement": "The repository keeps its CI evaluation infrastructure in a separate `ci-infra/` CDK app rather than in the AgentCore runtime stack, which preserves a boundary between CI permissions and runtime deployment.",
-      "evidence": [
-        {
-          "resource": "repo://ci-infra/package.json#L1-L23",
-          "version": "repo-lines-v1:sha256:95e16988a55ca1a942398efa8d78e2d7718a98c7f84e9062fe1a6e62cc5ee758:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE2ZmIwOGZkYTFhY2I5NTdiNjExNmJkMzc4MTFhMWZlNDFhMDE2MTFjMDYzMWVkYmY3ODZkNjg4OWEyN2E1NWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
-        },
-        {
-          "resource": "repo://fionaa/agentcore/EVALS.md#L163-L174",
-          "version": "repo-lines-v1:sha256:bd545846927fd4a1461a08c3865edf51bc1ed8c56dc1cb58987135fbdb2fafd7:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE1NGRiYjk5N2NhY2ZiNTQwYjE2NDJmMDRhMDQ2YzU1NjMyNjY3ZjIxZWFlOGQ3Y2FjYjgxN2M4NDNmNDIwNGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI1MTFlMzY0MWYxZmM1ZDEwNjNiYmQzZDM2MmFjOGViMTcwYzZjYmE3Y2RhMTM1MzJlMmE4YmEyNTRmNzc4ODgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM3NjVjZWJmMjc5NDUwODQ2M2YxODdkZTEwYTk4MTFkYzM4OGU1ODA2Y2M2N2RjNTIwNjE0NWUzOTIxYjVjYjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFjM2I1NDBjM2Q0NmQxMWM4YTZlNWNiYmRlMWI0OWNlNDc2MGFmNGRiYjFjMDg1OGRkZTAyMjdlODlmYWRlODgifQ"
-        },
-        {
-          "resource": "repo://fionaa/agentcore/EVALS.md#L246-L260",
-          "version": "repo-lines-v1:sha256:8bfccb71456ef12f61179726a4ec6eb1be53643c8fbfd0dddb732a012a544473:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJmYjdlODk4YjY0ZDllMmI0MTYxYWM4MTNkNWQ5MGQ1YmUzZThjNTg2Mjg3ZTdiNjdkMTExMDc1NWIwODE4ZWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk3ZTBiYTY2ODUwMTdhMDY5MDA4YzNmNjBlNjRmYmJjZTU2N2RjNzYxMGU2ZGIyYTZjMTYzYjE0ZDIwZTc1YjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg2YTVkMGMzYWEyZWY3NGQ4OGRjZTJmY2IzMDc2MTdlYjUyNzdlYjY2NDdhNTM2Y2MxMGUwNDg5YjlkMTZiM2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU5ZTI2MTM1ZDdkMDMwZGI3YmQwN2ViYmVlMjRjMDg2YTMxOTg5NTZhMmI3Y2QzZjgzMjdmY2NhMjc4N2UyMDUifQ"
-        }
-      ]
-    },
-    {
-      "id": "claim_92d14d3b1d7240a580a6643d1ea77024",
-      "statement": "Path 1 is the DeepEval node-level harness in `fionaa/evals/node/`; it evaluates `graph.py` node logic directly instead of invoking the deployed runtime.",
-      "evidence": [
-        {
-          "resource": "repo://fionaa/evals/node/README.md#L1-L24",
-          "version": "repo-lines-v1:sha256:f82d46fccb44e92dce4f03d042f2af122f8099a616c0c1a9175fd7f01d134914:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwMGE4YTBhZjI2ODNkODQzNDYxMzM3NDg2NDA2YThkMzYxZTBmNmNlN2YyZTVlYzJjM2FhMDI5OGIwZmYzOWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA4Nzc1OTNhMTU5ZTJjZWZlNWI5MWE1NDU2MmYxOGNlYzM2MDY1NWY3MTgwYjFlZWE2ZWVjZDcyMDYyMjkyYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRlYzkwNjg1NjgxYjQxYzI2ZjQ3Yzg1M2RmYzljM2EzMjFhMGI0NDg2MWRmNTE3ZjZkMzQwNDdkZjcyNjVlNTQifQ"
-        },
-        {
-          "resource": "repo://fionaa/evals/node/test_companies_house.py#L45-L50",
-          "version": "repo-lines-v1:sha256:64f3d0b6b3be7e8b5f4d3874921ab2c002d4e2e6a020acdf048cb88d842591f0:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODE4ZjYwOTY0ODlkYWFjODc2NjViM2FkOGRlMjg3ODAwNmFjNmI5ZWZhMmEyODM5MDUwODA4YzdkMDE2MTJhOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNTljNTY2OTE1NWFkZjA1Mzc1M2E4OWZiYTNlYjY1YWZkNjg2NmMyNDBjOTUyNjUxMzk2YTIwZjJiMWMwMzFmZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODc3ZTdiMDY3NDBlOTExZTY2YzRjYTgzMTYwN2FiZGM3YWJkNTQzYzk0OTRkMDVhNjMwODUzYTdmNzNmMDNkMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjRmOTdlMDA0OGQ2YTUwMTRjNTUwOTk0MTg4YTJiNjI0MWQxNGIxYjQzZjIyNDNhMzQwMjI1NzljMzkwYjg0YyJ9"
-        },
-        {
-          "resource": "repo://fionaa/evals/node/test_policy_check.py#L51-L60",
-          "version": "repo-lines-v1:sha256:f9fc3fe135119904973d5a904e71505f351171ab78918d842455b2ab8a03bbf2:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIxNGUyNGIwNDcyMjM1ZDE1NjY4ZDFhNjhhMDk3ODJhYjc4MjY4MTYzZmEyYjBmN2ZkMjdjZTMzZTc2OTIxOTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhZmJhMDUyN2MzOTUzYzRiNmUwZTViNTczOWJhODM2MTJmODA1M2JjZGM5NDY2NzMwMTkzY2QxZDU5MGI0MDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFkMjU2YmNmNjE0ZWY5ZjI1NGY2MGNhNDUwYTNkZmM0ZGVhZDQ2YTA3MzQwMzYzODRjNjY3MWRkYjUxNDE5OGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBlNTcxNzI4YWI5MWEwMmM1NWYwNjQ5ZDBlMzUwYzliOTAyYWYzMjQ1OTY3ZDkxOWQxMzU4NWI3YWJlYzEwYzIifQ"
-        },
-        {
-          "resource": "repo://fionaa/evals/node/test_web_search.py#L61-L70",
-          "version": "repo-lines-v1:sha256:4ef86f91f2304293338b868505245f4574d6c11956f9b243f3f419443ff16fd2:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1OTlhNmRlNTAwODU2MWU1ZmI3ZGYxN2I0ZDY3NzBhNmYyY2ExYzZmMDFhNzAyMTUxMzk2ZmE0MjFmMDczZTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2YjA0NDkxNDY5NzIyZTgzNjNhOTRlNDA0NDUzOGUwMTNhMmEyMTdlMzZiMWU1NjhiYTYwYWNiN2I0YzhmMmUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM1MzA5NTc5NjIxNDY3MWQ2MzBjMjkxMjY2NzIwZWJlZTYwOTRiZjEwMTUxMDk1Mjg5M2VkNTZlMzI3NTFkNGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEyYjVkMTFmOGY4YTExZGQ2MDA4ZGQ4ZTE3NjU1NGM0MzNkY2ZhOGE5ZTMyZTZjNTE2ZmZhOTg5YTIzNGUzM2YifQ"
-        }
-      ]
-    },
-    {
-      "id": "claim_609476cb78874a858b90294f04a478ea",
-      "statement": "Path 1 scenarios use real Bedrock and real Gateway tools, but the harness rebuilds or calls node logic directly so it can inspect tool evidence that the node would otherwise discard.",
-      "evidence": [
-        {
-          "resource": "repo://fionaa/evals/node/README.md#L20-L24",
-          "version": "repo-lines-v1:sha256:ff374bf0388bbb3bdc7d27b1730b52873ae23342c3bc1b4f083debf5f7ecc68b:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZmU0MDBkNjg2ODZkMmE4ZTdlODBkMjQyZDQ3OGRmY2FiMWE0ZGI4NzkyMzRiYjdlMjVmMDk1NTdiNjkzYzZlMyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDg3NzU5M2ExNTllMmNlZmU1YjkxYTU0NTYyZjE4Y2VjMzYwNjU1ZjcxODBiMWVlYTZlZWNkNzIwNjIyOTJhNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNWVjOWY3YzM0MmQwZDM1MjA2OTUyYTQ5YjIxMzY5YjljMWRiY2QwYTc4NDg1YmRiYzJmNTI5ZDM1YWM4NmY4OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNGVjOTA2ODU2ODFiNDFjMjZmNDdjODUzZGZjOWMzYTMyMWEwYjQ0ODYxZGY1MTdmNmQzNDA0N2RmNzI2NWU1NCJ9"
-        },
-        {
-          "resource": "repo://fionaa/evals/node/test_companies_house.py#L45-L50",
-          "version": "repo-lines-v1:sha256:64f3d0b6b3be7e8b5f4d3874921ab2c002d4e2e6a020acdf048cb88d842591f0:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODE4ZjYwOTY0ODlkYWFjODc2NjViM2FkOGRlMjg3ODAwNmFjNmI5ZWZhMmEyODM5MDUwODA4YzdkMDE2MTJhOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNTljNTY2OTE1NWFkZjA1Mzc1M2E4OWZiYTNlYjY1YWZkNjg2NmMyNDBjOTUyNjUxMzk2YTIwZjJiMWMwMzFmZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODc3ZTdiMDY3NDBlOTExZTY2YzRjYTgzMTYwN2FiZGM3YWJkNTQzYzk0OTRkMDVhNjMwODUzYTdmNzNmMDNkMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjRmOTdlMDA0OGQ2YTUwMTRjNTUwOTk0MTg4YTJiNjI0MWQxNGIxYjQzZjIyNDNhMzQwMjI1NzljMzkwYjg0YyJ9"
-        },
-        {
-          "resource": "repo://fionaa/evals/node/test_web_search.py#L61-L70",
-          "version": "repo-lines-v1:sha256:4ef86f91f2304293338b868505245f4574d6c11956f9b243f3f419443ff16fd2:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1OTlhNmRlNTAwODU2MWU1ZmI3ZGYxN2I0ZDY3NzBhNmYyY2ExYzZmMDFhNzAyMTUxMzk2ZmE0MjFmMDczZTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2YjA0NDkxNDY5NzIyZTgzNjNhOTRlNDA0NDUzOGUwMTNhMmEyMTdlMzZiMWU1NjhiYTYwYWNiN2I0YzhmMmUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM1MzA5NTc5NjIxNDY3MWQ2MzBjMjkxMjY2NzIwZWJlZTYwOTRiZjEwMTUxMDk1Mjg5M2VkNTZlMzI3NTFkNGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEyYjVkMTFmOGY4YTExZGQ2MDA4ZGQ4ZTE3NjU1NGM0MzNkY2ZhOGE5ZTMyZTZjNTE2ZmZhOTg5YTIzNGUzM2YifQ"
         }
       ]
     },
@@ -153,10 +95,144 @@
           "version": "repo-lines-v1:sha256:5b1ab29bbedb8a0885adc65a88b411fe078d5925e538326ec5030d0cc2abd66f:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzJhNTEyM2QyNWExYTQ1MzA4MDBlYzdmMmNmZjY2YzI4MmM1ZjIyZTY0MTAzZDZlOTgyNTQ3M2I2NWY0YjUyNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNTI1N2RiZDYwZmI2NTkyZjg3YTkyZmZkYmU4NjQxNTIxYjVmMTk1ZmQwNDAzZDhiZjU4MWRiM2MyZDQ3YTYwMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDRhYmM0NmY3NTIyNzI0ZTY1MmQwNjM2MzI0MmYyN2NlZjg4NDEwNzRlM2E4MGU4YWQzZmJmYjNmOTVmYmVhNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjljYTgzNjJiMzk5MzE5OGY5MGQ2OTZiZjk5ZWMxZDQ1YjEzNjU4OWE4ZDc0YzJlODRmNzI5ODcyYmEyNzZlZiJ9"
         }
       ]
+    },
+    {
+      "id": "claim_d023da09db0145aabc05729239a74607",
+      "statement": "The node-level DeepEval harness in `fionaa/evals/node/` calls graph nodes directly, rebuilds agent calls for `companies_house` and `web_search` so tool messages stay visible, and runs `check_against_policy` directly for policy checks.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/evals/node/README.md#L1-L18",
+          "version": "repo-lines-v1:sha256:987a1c0005ff01cae5eb9eaf089c02d6901b29ea4c26bd67b12805e839100d99:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwMGE4YTBhZjI2ODNkODQzNDYxMzM3NDg2NDA2YThkMzYxZTBmNmNlN2YyZTVlYzJjM2FhMDI5OGIwZmYzOWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE1NmE5N2U1NTZiYTE2N2Q2MmVlYWNlOGFlYzY2ZmE2MTZlOGM2OTM3ZWQ2Y2QyMzlkZTRiNzI1NDg1ZWQyNDIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVjMTQ4ZTNlMDlmNGVhZDM5ZDY3YTZiZjk1Y2IxMWQ1MzMxYzM0ZjgyMzZhY2U2ZjliMTFjOTExMDE0MTlmZmQifQ"
+        },
+        {
+          "resource": "repo://fionaa/evals/node/test_companies_house.py#L45-L50",
+          "version": "repo-lines-v1:sha256:64f3d0b6b3be7e8b5f4d3874921ab2c002d4e2e6a020acdf048cb88d842591f0:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODE4ZjYwOTY0ODlkYWFjODc2NjViM2FkOGRlMjg3ODAwNmFjNmI5ZWZhMmEyODM5MDUwODA4YzdkMDE2MTJhOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNTljNTY2OTE1NWFkZjA1Mzc1M2E4OWZiYTNlYjY1YWZkNjg2NmMyNDBjOTUyNjUxMzk2YTIwZjJiMWMwMzFmZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODc3ZTdiMDY3NDBlOTExZTY2YzRjYTgzMTYwN2FiZGM3YWJkNTQzYzk0OTRkMDVhNjMwODUzYTdmNzNmMDNkMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjRmOTdlMDA0OGQ2YTUwMTRjNTUwOTk0MTg4YTJiNjI0MWQxNGIxYjQzZjIyNDNhMzQwMjI1NzljMzkwYjg0YyJ9"
+        },
+        {
+          "resource": "repo://fionaa/evals/node/test_policy_check.py#L51-L60",
+          "version": "repo-lines-v1:sha256:f9fc3fe135119904973d5a904e71505f351171ab78918d842455b2ab8a03bbf2:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIxNGUyNGIwNDcyMjM1ZDE1NjY4ZDFhNjhhMDk3ODJhYjc4MjY4MTYzZmEyYjBmN2ZkMjdjZTMzZTc2OTIxOTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhZmJhMDUyN2MzOTUzYzRiNmUwZTViNTczOWJhODM2MTJmODA1M2JjZGM5NDY2NzMwMTkzY2QxZDU5MGI0MDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFkMjU2YmNmNjE0ZWY5ZjI1NGY2MGNhNDUwYTNkZmM0ZGVhZDQ2YTA3MzQwMzYzODRjNjY3MWRkYjUxNDE5OGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBlNTcxNzI4YWI5MWEwMmM1NWYwNjQ5ZDBlMzUwYzliOTAyYWYzMjQ1OTY3ZDkxOWQxMzU4NWI3YWJlYzEwYzIifQ"
+        },
+        {
+          "resource": "repo://fionaa/evals/node/test_web_search.py#L1-L30",
+          "version": "repo-lines-v1:sha256:2b611791c6fc699590997b2fc85e1e49d0d4eb6a117d5c7daa292af60196be05:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIwMTBkYjk3MGQ2ZTVkYjJlNThhYzJlNmE3Y2QyOTdmM2JjOWQ2MDUyMWEyM2E2ZDY1ZmU4MDhiN2E2MDk0Y2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzMDNlY2RkNGE0ZDEwZjE5YzczZmQ0MmZkMTI0MzdmZDMzNTRhODI2ODE2MDVkYTUyNTVhOTdhMzkwNjhkYmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU1YjZlODcwNmI0MzA0N2YyYTZkYjY3ZjEzMjYzODU5NTYwNGU2N2YzNjk2Njg3NmNlMDE1OGYwMDUzZTZiZDEifQ"
+        },
+        {
+          "resource": "repo://fionaa/evals/node/test_web_search.py#L87-L136",
+          "version": "repo-lines-v1:sha256:99429e8cf2e313e3774e16f3c8043e42bc535615cc3d8a6ff9bc94855cd1317c:eyJzZWxlY3RlZExpbmVDb3VudCI6NTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYwNTQ3NWY4MmRjOTA1NmZmNzk3MTY5M2IzZDlkYTY1ODFiODlkNzE1ODRkYjlhNDQxYTZiM2FkOGIxMDIwNWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0MjM2YTZmNWFkMTcyZmMxMTgxNDQ1MzQwZmRkMTU1ZDljMWY0ZGZiNTRjZTVlZmI4YzIxYzk1NjYwNWEyMmUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjYzRhN2QxY2M3OTZhYmEzZTQ2NzIzMzI3ZjUxN2U5ZjgxMTk4MmQyNTBmMDcwMjk4NmU0YjU3NjRhZDk1ODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d8f4fec9fdf2487eb16ca1fcce89fedd",
+      "statement": "Path 1 scenarios use real Bedrock and Gateway tools, but the harness scores them by inspecting the direct node output and recovered `ToolMessage`s rather than invoking the deployed runtime.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/evals/node/README.md#L20-L24",
+          "version": "repo-lines-v1:sha256:ff374bf0388bbb3bdc7d27b1730b52873ae23342c3bc1b4f083debf5f7ecc68b:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZmU0MDBkNjg2ODZkMmE4ZTdlODBkMjQyZDQ3OGRmY2FiMWE0ZGI4NzkyMzRiYjdlMjVmMDk1NTdiNjkzYzZlMyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDg3NzU5M2ExNTllMmNlZmU1YjkxYTU0NTYyZjE4Y2VjMzYwNjU1ZjcxODBiMWVlYTZlZWNkNzIwNjIyOTJhNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNWVjOWY3YzM0MmQwZDM1MjA2OTUyYTQ5YjIxMzY5YjljMWRiY2QwYTc4NDg1YmRiYzJmNTI5ZDM1YWM4NmY4OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNGVjOTA2ODU2ODFiNDFjMjZmNDdjODUzZGZjOWMzYTMyMWEwYjQ0ODYxZGY1MTdmNmQzNDA0N2RmNzI2NWU1NCJ9"
+        },
+        {
+          "resource": "repo://fionaa/evals/node/test_companies_house.py#L45-L50",
+          "version": "repo-lines-v1:sha256:64f3d0b6b3be7e8b5f4d3874921ab2c002d4e2e6a020acdf048cb88d842591f0:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODE4ZjYwOTY0ODlkYWFjODc2NjViM2FkOGRlMjg3ODAwNmFjNmI5ZWZhMmEyODM5MDUwODA4YzdkMDE2MTJhOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNTljNTY2OTE1NWFkZjA1Mzc1M2E4OWZiYTNlYjY1YWZkNjg2NmMyNDBjOTUyNjUxMzk2YTIwZjJiMWMwMzFmZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODc3ZTdiMDY3NDBlOTExZTY2YzRjYTgzMTYwN2FiZGM3YWJkNTQzYzk0OTRkMDVhNjMwODUzYTdmNzNmMDNkMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjRmOTdlMDA0OGQ2YTUwMTRjNTUwOTk0MTg4YTJiNjI0MWQxNGIxYjQzZjIyNDNhMzQwMjI1NzljMzkwYjg0YyJ9"
+        },
+        {
+          "resource": "repo://fionaa/evals/node/test_web_search.py#L87-L136",
+          "version": "repo-lines-v1:sha256:99429e8cf2e313e3774e16f3c8043e42bc535615cc3d8a6ff9bc94855cd1317c:eyJzZWxlY3RlZExpbmVDb3VudCI6NTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYwNTQ3NWY4MmRjOTA1NmZmNzk3MTY5M2IzZDlkYTY1ODFiODlkNzE1ODRkYjlhNDQxYTZiM2FkOGIxMDIwNWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0MjM2YTZmNWFkMTcyZmMxMTgxNDQ1MzQwZmRkMTU1ZDljMWY0ZGZiNTRjZTVlZmI4YzIxYzk1NjYwNWEyMmUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjYzRhN2QxY2M3OTZhYmEzZTQ2NzIzMzI3ZjUxN2U5ZjgxMTk4MmQyNTBmMDcwMjk4NmU0YjU3NjRhZDk1ODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b929ae4655ea4b22af81003e727e0ce2",
+      "statement": "The Path 2 staging runner filters the dataset to `fullapp-` scenarios, stages `application.json` and optional supporting documents into a disposable S3 prefix, then invokes the deployed runtime with a JWT `IdToken` and runtime session header.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/evals/runtime/eval_path2_stage_and_invoke.py#L1-L38",
+          "version": "repo-lines-v1:sha256:c9edf28a46f13a9960351c93401f91459ad3473aa52e65a1bc1ca6f986c8ba44:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI0NDlhMzk4MDEyN2JiYTBmMzViMGZiOTkwYjIwMTBiNmYyNzk3ZGRmOWY2OTkxZDQ3ZGU3OTI5MmFkNzI2MjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjIzOWEyM2MzYWZlOGFmY2RkNWIzNDYwYjNkMjc4YzlmMjFkM2I5MmQ0NDA1M2Q4ZGI4ODkyODdmNzVlOWIwOTgifQ"
+        },
+        {
+          "resource": "repo://fionaa/evals/runtime/eval_path2_stage_and_invoke.py#L111-L167",
+          "version": "repo-lines-v1:sha256:ebe1ad221b106868441dce1157c190796a173f75a17a6e9853f14a015e489a2e:eyJzZWxlY3RlZExpbmVDb3VudCI6NTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3ODE4MmMyNTMwNTk3ODgzMDY3ZTYxYjE0YjAyMGY5NDQ0YzA1NzYwNWZmNDE3MmU0NGY2MTVlNWExYzJmYjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc2YjM2NTQ4YWNjMjU5M2E4ZTVkMzFiYzdlMDJjZGUwYzcxNTIxNTA4OWU3YjNhMmM4YmVlOThmOWRlZGM4MzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQyODU4MTY5YzJmZmMwZmU1M2IzMzhmZjFiNmJhZWNiNDljMTg3NGU2NGYyOTM3MGU5Y2RmNDI3ZGFjMDcxYjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ2ODRkMDAxOGMyZmM4YjI0Njg1YjBlOGNjMGI2MDkyZGMwM2Q0MDNhMGE0NjE4YzM1NTA5YzA0MDM1NjQ1ODIifQ"
+        },
+        {
+          "resource": "repo://fionaa/evals/runtime/eval_path2_stage_and_invoke.py#L213-L231",
+          "version": "repo-lines-v1:sha256:f5b041b61b29abd9016eee53c564f2e4d2149eec9c142192e8cf009c51bea8e5:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjllZTFhNDE4NjQzNzViY2QyYmFlODExZGI2ZDY1YjI5MGM2ZDU0NWM1MThiNjFhNmI0ZWY3ZjE4YzUwYWRjMGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRmZWUxMjQ1NDE3NWQxN2FkYjNlZjY1ZjBjMTFkZWUxY2JlZGU1N2FmMGQ3MGY0OGZhNjdlYWE1NWJiN2NiMjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA5NjNkZmM5YzJiY2QwNDM2Y2NmMGFkOGExYmQwNDYwZGEzNDQ3ZjYyMzU1MDI1YmI4NDkzNjhiZjlmNzgzNmQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI5YTUwOGExZGMxY2NlNzIzMzY3OGU2Y2ExODZhYmQ4YmU0M2E0OTNhMjgxOGUwYjgwMmFiNGFjZGRhNTU4NzAifQ"
+        },
+        {
+          "resource": "repo://fionaa/evals/runtime/eval_path2_stage_and_invoke.py#L91-L107",
+          "version": "repo-lines-v1:sha256:e3ae6076b5b960ba127cdd52833a6e1374fc0495c691055a592e3312065d0dd3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRhMDliYWFjYzgwMGU3NjU2M2E0ZDM2ZDNmNThiYTQ0ZmQzYzJmM2FhYTBhMzg3YzVlMDk5ODMyNmZlNjljNTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZkNTM1YjE4MGVjN2RlYzM2OTI2ODEzYjBhNjJkZWY0ZjVmMWIyMjBkMWYwMzIwZmJlYzUzMGJhNzlmODBlZGMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI5ZWUxOTMyODRlODJmYjc2YWY0ZjRmNTgzZTQzZjA1MDdiNWYxMzJiMTY0ZTZkMzUyM2JhZmI5NGMwYzdiMWUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQyODU4MTY5YzJmZmMwZmU1M2IzMzhmZjFiNmJhZWNiNDljMTg3NGU2NGYyOTM3MGU5Y2RmNDI3ZGFjMDcxYjUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_7435e14ffdf246c49c8f490adcb58510",
+      "statement": "Path 2 only includes scenarios that are complete enough for the full graph, because the deployed runtime expects `{\"application_id\": ...}` plus a verified JWT and loads application data from S3 instead of accepting a chat-style dataset payload.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/evals/runtime/eval_path2_stage_and_invoke.py#L213-L231",
+          "version": "repo-lines-v1:sha256:f5b041b61b29abd9016eee53c564f2e4d2149eec9c142192e8cf009c51bea8e5:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjllZTFhNDE4NjQzNzViY2QyYmFlODExZGI2ZDY1YjI5MGM2ZDU0NWM1MThiNjFhNmI0ZWY3ZjE4YzUwYWRjMGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRmZWUxMjQ1NDE3NWQxN2FkYjNlZjY1ZjBjMTFkZWUxY2JlZGU1N2FmMGQ3MGY0OGZhNjdlYWE1NWJiN2NiMjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA5NjNkZmM5YzJiY2QwNDM2Y2NmMGFkOGExYmQwNDYwZGEzNDQ3ZjYyMzU1MDI1YmI4NDkzNjhiZjlmNzgzNmQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI5YTUwOGExZGMxY2NlNzIzMzY3OGU2Y2ExODZhYmQ4YmU0M2E0OTNhMjgxOGUwYjgwMmFiNGFjZGRhNTU4NzAifQ"
+        },
+        {
+          "resource": "repo://fionaa/evals/runtime/eval_path2_stage_and_invoke.py#L39-L45",
+          "version": "repo-lines-v1:sha256:5b1ab29bbedb8a0885adc65a88b411fe078d5925e538326ec5030d0cc2abd66f:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzJhNTEyM2QyNWExYTQ1MzA4MDBlYzdmMmNmZjY2YzI4MmM1ZjIyZTY0MTAzZDZlOTgyNTQ3M2I2NWY0YjUyNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNTI1N2RiZDYwZmI2NTkyZjg3YTkyZmZkYmU4NjQxNTIxYjVmMTk1ZmQwNDAzZDhiZjU4MWRiM2MyZDQ3YTYwMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDRhYmM0NmY3NTIyNzI0ZTY1MmQwNjM2MzI0MmYyN2NlZjg4NDEwNzRlM2E4MGU4YWQzZmJmYjNmOTVmYmVhNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjljYTgzNjJiMzk5MzE5OGY5MGQ2OTZiZjk5ZWMxZDQ1YjEzNjU4OWE4ZDc0YzJlODRmNzI5ODcyYmEyNzZlZiJ9"
+        },
+        {
+          "resource": "repo://fionaa/evals/runtime/eval_path2_stage_and_invoke.py#L8-L18",
+          "version": "repo-lines-v1:sha256:d533c286a0834079a8401480799bfdebfe883a9b2fc96d772a1e131432dffedd:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwNjY0ZDczODQyYzRiOTBkMjE4NzA5NzcxNzM4ZWI2OThkNGE4MmJkNjExNmEwNjNmNDBlODIwODM2ZDYzMWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg3ZWRkYWFmZTBmNmIzOThkNWI2ODA0NDAxMWY0YThlYzNkNmU5MjY2NjNmYzg2YTA4N2Q2M2VkOGYxZDMyZTIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRhYWJkNTg2NjA1MmU2MzJlY2RmMTVmODk4ZWNlODI3Yjc0Zjk1NmU2ZThkMDE5NTdkNDNhMTk0OTI5MDViMWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg5YTc2MTBmNWQ0ODVkOWJhODlmYjAyMDgyNGM4NThmOTIwMWRmMmM0NGE3NmE3MTQ4Y2UxNmNkZjRhMTEzYjEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_fc9f5f40d2114258a5f44d39ddeda16b",
+      "statement": "The deployed runtime's Automated Reasoning path is separate from the offline smoke tests: the runtime config carries versioned policies, guardrails, bindings, and IAM permissions, while `evals/automated_reasoning/` stores synthetic-fact smoke runners and their recorded JSON results beside the scripts.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/agentcore/automated-reasoning/README.md#L1-L20",
+          "version": "repo-lines-v1:sha256:7642b6520c863fda9543f6976c7b82c41b27181603a304edc1c963f43b745103:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRjYTdiNzVkMWFkZGRjNmZmNWY4YzNkYmE3N2NmMDlhY2UyZjg4YjZjZmY1MWExMGM5Mjg5N2UyMTdjZGZhN2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU4MTc5ZDBjNTYxZThjYzQzNTg4Mzc3NTU3MGVjZmU5OGQ0M2E0MmFmODJhYmU1NjgyN2FiN2YwOWM0ZGNkNzEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRmMzJkNTdmYzc3ZTJlOTcwZGI5NWIxODM4NTQwOTc1ZTVmZDRhYmRhYjJmMGVjZDc3MDIyMGIxMTJkY2I4ZDMifQ"
+        },
+        {
+          "resource": "repo://fionaa/evals/automated_reasoning/README.md#L1-L18",
+          "version": "repo-lines-v1:sha256:866e6b8413f29d2a40175cb01d8c9b63ec0d1d7bb1047eb3f591775deb5400f4:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU0NTE4NTZiOTA0MmVkZjlkMGVmNDcyN2Q3ZTEzZjcxOGYzYTAzYTBhZjFmOWJiMjdlMDEwMTRlZmRmZDBlZmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjViOTE4YTM5OTk0NjY4ODJhNTZjODYzZDlkNThjOTliZTJjZmQyNGNjMTlhZDEzMDE2ZWJjZWE1NGVmZTNiYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRkOGExNjUxY2MyMmI4ZTRmNGRmZWIyMWMyYWM5MTI5Y2FlNWNmYWQwZmVjZjQ3Y2EwZTExZWM5YWRlMmVjZTkifQ"
+        },
+        {
+          "resource": "repo://fionaa/evals/automated_reasoning/README.md#L20-L41",
+          "version": "repo-lines-v1:sha256:5d5864997181391b9adfb9175b80fcf6efc57066156a3045e90ffa31579b7ede:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAwYzJhZTY5MzllMWM3NmNjOTY1OWQzZmY4YmNmZWI5MjVkYjQyNTkwMGE2ZTVhYWRhODNhNGM1ZTEzYmM1ODkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhNjY0MDhmZGE3YmNiZDk4NTI0NDQ2NmMwMDFkOTRiYWFkYjE0YTkxZGI0NzhiMGI0ZTg2OWM2NDQ1MGFmNjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjljNmQ1ODY5ZmNlMTBiNjE0NWUzNmMyNzI0NmU4YTRhMGIxNzRkZTE0NjRkYjRlMDc0OWFkMWU2YzM2OGYyZjciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNhNGNlMjk4Y2EzNzA5MTdjZTliMTI3NDNmMWViNTE3OWZkMTJmOGVjNTY4ZGFhZGMyNDY2ZmJkOTM3ZjFhNDgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c462f5c18fed4b56b4627e50d1b2e7ef",
+      "statement": "The Path 2 CI workflow is a production-facing gate on `master` that deploys the project, stages full-application inputs, invokes the runtime, builds ground truth, runs batch evaluation, and then applies a gate check.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/evals-path2-batch-eval.yml#L1-L22",
+          "version": "repo-lines-v1:sha256:45f7334fd84cfcdf8047828c337f358fd5209c915740edaf8234ea4c45ef97e2:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc0ODBjNDk4OTMyNGRlNWFkNTI2NThmOTlkY2YyNDhmNDhhZGUzYTc2OTg5Y2Q3M2U3MmU4Yzk5NTUwYjg4MDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE2ODMxODlmMzA4NDEwZmVjNDY0MTU5MDA1MzQyYjA2MmM3MmEzNjFmZmE1NGU0MTliY2E2YWQ3ZmI0ZjAwNTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdkZjYxZjM0NDgyZTc4ZmQzMjAxMzQxOGJhNWNkNDgzZWJiYjUzMTA5YWI0ZDg5MDA0MjFmZjg5ODBlMTVhMGQifQ"
+        },
+        {
+          "resource": "repo://.github/workflows/evals-path2-batch-eval.yml#L44-L88",
+          "version": "repo-lines-v1:sha256:ae14ee4d56a4bdb4b0ca95ec2de80281d927d017e54359fca2a422a51af4b4e3:eyJzZWxlY3RlZExpbmVDb3VudCI6NDUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ5ZWNlZGMxOGVjYWYxZGFmOWU3YmVmYjlmZDc5ZTJjM2NmMTU1OTllNTNlNzljZGJkOTAxZWU2ZTJjOTc5ZDIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVkOWQ2OTMxMjQ2NGZkZTYxN2VmMWI1YmNjN2Q0NDUzNzA1MTFlY2JiN2ZlNzQ2YTJlMjEwMjM5NmVlNzc5ZTIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjczNzJmZTdjMGM0Y2NlYWRiZDFjMzA2Y2M2Njg3YTRjZTAxNWIwOTRkOTVkN2FmY2VjZmYzZDY1ZjkzMmY5ZTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFmNjUxMjY3ZDUwNmVmNWQ4OTM2ZTRiMGU1MmEzYTA3OGEzYjU3MTg0NjMyM2M3ODFiZDY0ZGRlYjhhMGYwOTgifQ"
+        },
+        {
+          "resource": "repo://.github/workflows/evals-path2-batch-eval.yml#L89-L156",
+          "version": "repo-lines-v1:sha256:62356a82a7604e4b33ccaaf8850492041720a23c74831ad5f774bfb61f41c543:eyJzZWxlY3RlZExpbmVDb3VudCI6NjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhhMjRjOGZiOWM1MzE1ZTlhNDc0ZjE4YmM1MjBmOWE0NDA4MDVmYmIxNDljNjMxMTQ5NDBlY2M0NDQ1MjhmMDMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjMwMzE2MDIzNzYyMWM2OTZiZDdmNTA1ZTk2ZmM3NmNjMmM2ZDkzMjk2NmI5YTgyYmYxZWE0Yjk5YWU4YjZmZGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU2ZWQ1NzA3MDEzZTkwY2YyNmM5MTJmYjc5NDM1Yjc1OGIzNjFiNmRhNDFkZDQ4NmJlMTNmYjNlYzYwNzA5NjkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ea0b072d7b4b4559b0a6f37d23c51fc1",
+      "statement": "`agentcore deploy` can repackage and redeploy the live runtime even when application code is unchanged, so maintainers should treat deployment as a potentially state-changing operation and verify the diff first.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/agentcore/EVALS.md#L199-L207",
+          "version": "repo-lines-v1:sha256:9af33cd048a50e3156be37ef6ebb9a4b7b7a75372d0d2625b1cebab99d6d5615:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMTA4OGE0YmIyNDQyMTE1ZGI1ODI0ZmY2OWE2ZmVjM2NhMDBjY2Q1ZGYzNzQyYjk5ZDM0ODYwNWFlNjEyNDczZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNjMwZmU0MzFmN2RjMmIyYTlhZGMyN2FkM2MyZDkyOWJiNzkwZTAzMTZmYzZlYjE3ODE5ZWY2NDM0NTY1MzRmZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOTJkNzFhY2ZkM2UzNTEyOWEyMThkMGU5ZjRjNWRjNjA3OTJmODUyYjc2YWYwODM5YThkYjQzNjJmMDExMTkxZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiM2JlODk3MmMzZDc5MTU4ZDlkZGUwYzU2ZjNiMzdmYjA3NzIwNDBlMTM2NGYxMTY5Yjk2MWFmMjc2NzU0M2E0MSJ9"
+        },
+        {
+          "resource": "repo://fionaa/app/README.md#L140-L150",
+          "version": "repo-lines-v1:sha256:fe2f4b270950465f7e55930bee86b7da72f29983865e47e5a1db872aae3c3248:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRmZjFjMGIxMzZhNWZiNzQ1N2NhY2JjODVlMWJmYzJhNzAyZjE4ZWE3MDljMDZkMzQ1ODg0Yjg4MjU2ZmE4ZjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxMGI5YmUyZjczMDNmODg0ZDkyNjQxZGJlZjUxZWVjZDQxNTY1MDZlMmE4YWVkMDRhNmU2YzYwNDUyMGIzMDUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM4Y2Q1Njc1OTQ2N2U5OTU0NWNmNjVmNTRmM2Y4NDIyN2JkMTM0NjE0ZTE5MWYxNjg5M2JmZmE5ZGI2YmNlOWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk4ZDE0NjE0ODA3Zjk3ZTlkZGMxZTkwZmRhOWY2OGFkMzNjMTAzNTk4MjgzOThkNDI1YmFhYzlhMTc4MmU4MjgifQ"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.5.1",
-    "at": "2026-09-15T10:28:44.889Z"
+    "at": "2026-09-24T15:24:05.146Z"
   }
 }
