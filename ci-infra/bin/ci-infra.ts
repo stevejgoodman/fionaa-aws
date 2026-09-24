@@ -5,8 +5,16 @@ import { Path2BatchEvalStack } from '../lib/path2-batch-eval-stack';
 
 const app = new App();
 
-const account = '123456789012';
-const region = 'us-east-1'; // matches metrics.py's _JUDGE_MODEL region and model/load.py's inference profile
+// Sourced from the deploying environment's AWS credentials (the `cdk` CLI
+// populates these automatically via STS before synth) rather than hardcoded,
+// so the account ID isn't a literal in this public repo.
+const account = process.env.CDK_DEFAULT_ACCOUNT;
+const region = process.env.CDK_DEFAULT_REGION ?? 'us-east-1'; // matches metrics.py's _JUDGE_MODEL region and model/load.py's inference profile
+if (!account) {
+  throw new Error(
+    'CDK_DEFAULT_ACCOUNT is not set -- run via `cdk`/`agentcore deploy` with AWS credentials configured (e.g. AWS_PROFILE=AIOps), which populates it automatically.'
+  );
+}
 
 new GitHubOidcStack(app, 'FionaaGitHubOidcCi', {
   env: { account, region },
@@ -35,8 +43,7 @@ new GitHubOidcStack(app, 'FionaaGitHubOidcCi', {
     'arn:aws:bedrock:us-east-2::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0',
     'arn:aws:bedrock:us-west-2::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0',
   ],
-  gatewayClientSecretArn:
-    'arn:aws:secretsmanager:us-east-1:123456789012:secret:fionaa/agentcore-gateway-client-secret-ZuXvPz',
+  gatewayClientSecretArn: `arn:aws:secretsmanager:${region}:${account}:secret:fionaa/agentcore-gateway-client-secret-ZuXvPz`,
 });
 
 new Path2BatchEvalStack(app, 'FionaaEvalsPath2Ci', {
@@ -54,18 +61,17 @@ new Path2BatchEvalStack(app, 'FionaaEvalsPath2Ci', {
   evalCustomerId: '17deb75df387eafcea144caa24f896e85216c2622721c6c33c6c1b8cd73eae18',
   // ClaimsAgent-UserPool (agentcore.json's customJwtAuthorizer.discoveryUrl).
   cognitoUserPoolArn: `arn:aws:cognito-idp:${region}:${account}:userpool/us-east-1_XXXXXXXXX`,
-  evalCredentialsSecretArn:
-    'arn:aws:secretsmanager:us-east-1:123456789012:secret:fionaa/eval-harness-cognito-credentials-8NACSV',
+  evalCredentialsSecretArn: `arn:aws:secretsmanager:${region}:${account}:secret:fionaa/eval-harness-cognito-credentials-8NACSV`,
   // fionaa/agentcore/.cli/deployed-state.json's evaluators -- update if more are added (work item 7).
   evaluatorArns: [
-    'arn:aws:bedrock-agentcore:us-east-1:123456789012:evaluator/fionaa_fionaa_injection_resistance-d95t9A3x47',
-    'arn:aws:bedrock-agentcore:us-east-1:123456789012:evaluator/fionaa_fionaa_companies_house_correctness-GnF38v4Rr7',
+    `arn:aws:bedrock-agentcore:${region}:${account}:evaluator/fionaa_fionaa_injection_resistance-d95t9A3x47`,
+    `arn:aws:bedrock-agentcore:${region}:${account}:evaluator/fionaa_fionaa_companies_house_correctness-GnF38v4Rr7`,
   ],
   // From `aws cloudformation describe-stacks --stack-name CDKToolkit` --
   // this account's bootstrap uses the default "hnb659fds" qualifier.
   cdkBootstrapQualifier: 'hnb659fds',
   agentCoreStackName: 'AgentCore-fionaa-default',
-  datasetArn: 'arn:aws:bedrock-agentcore:us-east-1:123456789012:dataset/fionaa_fionaa_eval_dataset-MBsNVJBQmZ',
+  datasetArn: `arn:aws:bedrock-agentcore:${region}:${account}:dataset/fionaa_fionaa_eval_dataset-MBsNVJBQmZ`,
   // Runtime log group name: /aws/bedrock-agentcore/runtimes/<runtimeId>-<endpoint>.
   runtimeLogGroupArn: `arn:aws:logs:${region}:${account}:log-group:/aws/bedrock-agentcore/runtimes/fionaa_fionaa-xjO2ci9fd3-DEFAULT:*`,
   // Custom evaluators' judge model -- see evaluators/companies_house_correctness.json

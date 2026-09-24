@@ -525,7 +525,7 @@ export class AgentCoreStack extends Stack {
       const gatewaySecret = secretsmanager.Secret.fromSecretCompleteArn(
         this,
         'FionaaGatewayClientSecret',
-        'arn:aws:secretsmanager:us-east-1:123456789012:secret:fionaa/agentcore-gateway-client-secret-ZuXvPz'
+        `arn:aws:secretsmanager:${this.region}:${this.account}:secret:fionaa/agentcore-gateway-client-secret-ZuXvPz`
       );
       gatewaySecret.grantRead(fionaaEnv.runtime.role);
 
@@ -535,7 +535,7 @@ export class AgentCoreStack extends Stack {
       );
       fionaaEnv.runtime.addEnvironmentVariable(
         'AGENTCORE_GATEWAY_TOKEN_ENDPOINT',
-        'https://claims-agent-123456789012.auth.us-east-1.amazoncognito.com/oauth2/token'
+        `https://claims-agent-${this.account}.auth.us-east-1.amazoncognito.com/oauth2/token`
       );
       fionaaEnv.runtime.addEnvironmentVariable('AGENTCORE_GATEWAY_OAUTH_SCOPES', 'agentcore/invoke');
       fionaaEnv.runtime.addEnvironmentVariable('AGENTCORE_GATEWAY_CLIENT_ID', 'qcqj6bgve5u8c2bg1qkiobsps');
