@@ -46,8 +46,21 @@ that companies_house will never find).
 
 Usage:
     cd fionaa/agentcore
-    AWS_PROFILE=AIOps ../app/.venv/bin/python3 ../evals/runtime/eval_path2_stage_and_invoke.py \\
+    AWS_PROFILE=AIOps \\
+    FIONAA_EVAL_BUCKET=... FIONAA_EVAL_KMS_KEY_ARN=... \\
+    FIONAA_EVAL_COGNITO_USER_POOL_ID=... FIONAA_EVAL_COGNITO_CLIENT_ID=... \\
+    ../app/.venv/bin/python3 ../evals/runtime/eval_path2_stage_and_invoke.py \\
         --output .cli/path2-session-map.json
+
+Required environment variables (identifiers scoped to this AWS account --
+not committed since this repo is public):
+    FIONAA_EVAL_BUCKET               applications S3 bucket name
+    FIONAA_EVAL_KMS_KEY_ARN           KMS key ARN used to encrypt staged data
+    FIONAA_EVAL_COGNITO_USER_POOL_ID  Cognito user pool ID for the eval user
+    FIONAA_EVAL_COGNITO_CLIENT_ID     Cognito app client ID for the eval user
+In CI these are set from repository secrets (see
+.github/workflows/evals-path2-batch-eval.yml); locally, export them or put
+them in a gitignored .env and source it before running.
 """
 
 from __future__ import annotations
@@ -55,6 +68,7 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import os
 import time
 import urllib.parse
 import uuid
@@ -65,17 +79,24 @@ import boto3
 import httpx
 
 REGION = "us-east-1"
-ACCOUNT = "123456789012"
 
-APPLICATIONS_BUCKET = "fionaa-6655-assets"
-KMS_KEY_ARN = f"arn:aws:kms:{REGION}:{ACCOUNT}:key/ad0bef90-102a-4cd0-8dcf-9d6744c52743"
+
+def _require_env(name: str) -> str:
+    value = os.environ.get(name)
+    if not value:
+        raise SystemExit(f"missing required environment variable: {name} (see this script's module docstring)")
+    return value
+
+
+APPLICATIONS_BUCKET = _require_env("FIONAA_EVAL_BUCKET")
+KMS_KEY_ARN = _require_env("FIONAA_EVAL_KMS_KEY_ARN")
 
 # sha256("fionaa-eval-ci@example.com") -- see EVALS.md Path 2 plan, work item 2.
 EVAL_CUSTOMER_ID = "17deb75df387eafcea144caa24f896e85216c2622721c6c33c6c1b8cd73eae18"
 EVAL_CREDENTIALS_SECRET_ID = "fionaa/eval-harness-cognito-credentials"
 
-COGNITO_USER_POOL_ID = "us-east-1_XXXXXXXXX"
-COGNITO_CLIENT_ID = "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+COGNITO_USER_POOL_ID = _require_env("FIONAA_EVAL_COGNITO_USER_POOL_ID")
+COGNITO_CLIENT_ID = _require_env("FIONAA_EVAL_COGNITO_CLIENT_ID")
 
 DATASET_PATH = Path(__file__).resolve().parents[1] / "datasets" / "fionaa_eval_dataset.jsonl"
 DEPLOYED_STATE_PATH = Path(__file__).resolve().parents[2] / "agentcore" / ".cli" / "deployed-state.json"

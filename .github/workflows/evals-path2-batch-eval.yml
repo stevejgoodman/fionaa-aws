@@ -115,6 +115,11 @@ jobs:
 
       - name: Stage applications + invoke the real Runtime
         working-directory: fionaa/agentcore
+        env:
+          FIONAA_EVAL_BUCKET: ${{ secrets.FIONAA_EVAL_BUCKET }}
+          FIONAA_EVAL_KMS_KEY_ARN: ${{ secrets.FIONAA_EVAL_KMS_KEY_ARN }}
+          FIONAA_EVAL_COGNITO_USER_POOL_ID: ${{ secrets.FIONAA_EVAL_COGNITO_USER_POOL_ID }}
+          FIONAA_EVAL_COGNITO_CLIENT_ID: ${{ secrets.FIONAA_EVAL_COGNITO_CLIENT_ID }}
         run: |
           ../app/.venv/bin/python3 ../evals/runtime/eval_path2_stage_and_invoke.py \
             --output .cli/path2-session-map.json
