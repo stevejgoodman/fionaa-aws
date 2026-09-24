@@ -1,0 +1,3 @@
+[submodule "fionaa/evals/datasets"]
+	path = fionaa/evals/datasets
+	url = https://github.com/stevejgoodman/fionaa-eval-data.git
