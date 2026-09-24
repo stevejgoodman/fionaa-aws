@@ -1,11 +1,11 @@
 ---
 type: orientation
 title: Quickstart
-description: Top-level routing hub for the repo; start here to reach the runtime entrypoints, graph wiring, security boundaries, deployment and eval operations, and unit tests that own implementation detail.
+description: Top-level routing hub for FIONAA; start here to reach the runtime entrypoint, graph workflow, security and storage boundary, deployment operations, and the test suites that protect safe changes.
 tags: [quickstart, orientation, runtime, graph, security, operations, testing]
 verified:
   - by: openwiki/0.5.1
-    at: 2026-09-19T09:15:01.080Z
+    at: 2026-09-24T15:24:05.146Z
 sources:
   - id: openwiki-source-727d393caa888d84d0bc425e
     resource: repo://fionaa/agentcore/agentcore.json
@@ -15,65 +15,56 @@ sources:
     resource: repo://fionaa/app/main.py
   - id: openwiki-source-ee1287af284d9ff40046f6bc
     resource: repo://fionaa/app/README.md
+  - id: openwiki-source-dd6d4e61f051b0cdaa563f25
+    resource: repo://fionaa/app/src/fionaa/graph.py
   - id: openwiki-source-3a7b26ef394512a7b079de22
     resource: repo://fionaa/app/src/fionaa/main.py
   - id: openwiki-source-a24b0d2f77ec96563c6e37e0
     resource: repo://fionaa/README.md
-generated: { by: "openwiki/0.5.1", at: "2026-09-19T09:15:01.080Z" }
+generated: { by: "openwiki/0.5.1", at: "2026-09-24T15:24:05.146Z" }
 ---
 
 # Quickstart
 
-This page is the repository’s orientation layer. It does not explain every subsystem in detail; instead, it helps you get from the top-level entrypoints to the page that owns the implementation you want to change.
+Use this page as the first stop when you are trying to change FIONAA safely. It does not explain every subsystem; it routes you to the page that owns the implementation detail.
 
-## Recommended reading order
+## Start with the shortest useful path
 
-Follow this path when you are new to the repo or about to make a change:
+1. **Runtime entrypoint** — see `/openwiki/architecture/runtime-entrypoint.md` to understand how a Bedrock AgentCore invocation assembles settings, identity, storage, checkpointing, gateway tools, model access, and graph execution.
+2. **Graph topology** — see `/openwiki/architecture/graph-workflow.md` to understand node order, conditional routing, terminal paths, and where checkpointed state versus published artifacts are written.
+3. **Domain and persistence concepts** — see `/openwiki/concepts/domain-model.md` and `/openwiki/concepts/persistence-and-artifacts.md` for the state schema, structured outputs, document loading, evidence files, and published decision artifacts.
+4. **Security and storage** — see `/openwiki/concepts/security-and-storage.md` for verified identity, scoped credentials, and the S3 boundary that isolates customer data.
+5. **Operations and evals** — see `/openwiki/operations/deployment-and-evals.md` for deployment, runtime setup, and the evaluation entrypoints used in this repo.
+6. **Tests** — see `/openwiki/testing/unit-tests.md` and `/openwiki/testing/deepeval-and-path2-evals.md` for the fast regression suites and the runtime/evaluation checks that validate behavior end to end.
 
-1. **Runtime entrypoints** — understand how the app is launched.
-2. **Graph wiring and state** — understand how requests move through the workflow.
-3. **Domain and persistence concepts** — understand the data and artifact shapes the workflow carries.
-4. **Security and storage** — understand identity, IAM scope, and cross-customer isolation.
-5. **AgentCore integration** — understand how the runtime connects to tools, models, and gateway services.
-6. **Operations** — understand deployment and evaluation entrypoints.
-7. **Unit tests** — understand the fast checks that protect the boundaries above.
+## Route by change type
 
-## Route map
+If you know what you are changing, follow this routing map:
 
-| Area | Start here | Why it matters |
+| Change area | Start here | Then follow to |
 | --- | --- | --- |
-| Runtime bootstrap | `/openwiki/architecture/runtime-entrypoint.md` | Explains the package entrypoint, invocation assembly, and how one AgentCore request becomes scoped dependencies and a graph run. |
-| Graph workflow | `/openwiki/architecture/graph-workflow.md` | Explains node order, branching, checkpoints, and terminal paths. |
-| Domain and state | `/openwiki/concepts/domain-model.md` | Defines the shared models and checkpointed state that cross workflow boundaries. |
-| Persistence and artifacts | `/openwiki/concepts/persistence-and-artifacts.md` | Explains where application data, evidence, and outputs are stored and discovered. |
-| Security and storage | `/openwiki/concepts/security-and-storage.md` | Explains verified identity, scoped credentials, and storage isolation. |
-| AgentCore integrations | `/openwiki/integrations/agentcore-runtime-and-gateway.md` | Explains the runtime, gateway, and model-loading boundary. |
-| Deployment and evals | `/openwiki/operations/deployment-and-evals.md` | Explains configuration, deployment, and evaluation workflows. |
-| Unit tests | `/openwiki/testing/unit-tests.md` | Explains the focused tests that guard the runtime and workflow invariants. |
+| Launching the app or composing runtime dependencies | `/openwiki/architecture/runtime-entrypoint.md` | `/openwiki/architecture/graph-workflow.md` and `/openwiki/concepts/security-and-storage.md` |
+| Graph nodes, branching, or state transitions | `/openwiki/architecture/graph-workflow.md` | `/openwiki/concepts/domain-model.md` and `/openwiki/concepts/persistence-and-artifacts.md` |
+| Identity, IAM, or storage isolation | `/openwiki/concepts/security-and-storage.md` | `/openwiki/concepts/persistence-and-artifacts.md` |
+| Published reports, evidence, or decision artifacts | `/openwiki/concepts/persistence-and-artifacts.md` | `/openwiki/workflows/human-review-publication.md` |
+| Loan decision logic and branch outcomes | `/openwiki/workflows/loan-assessment-branching.md` | `/openwiki/concepts/domain-model.md` and `/openwiki/architecture/graph-workflow.md` |
+| Human-review publication and validation annotations | `/openwiki/workflows/human-review-publication.md` | `/openwiki/concepts/persistence-and-artifacts.md` and `/openwiki/testing/deepeval-and-path2-evals.md` |
+| Deployment, runtime configuration, or eval execution | `/openwiki/operations/deployment-and-evals.md` | `/openwiki/integrations/agentcore-runtime-and-gateway.md` |
+| Fast regression checks or fixture behavior | `/openwiki/testing/unit-tests.md` | `/openwiki/testing/deepeval-and-path2-evals.md` |
 
-## What to use for what
+## What each major entrypoint is for
 
-Use the quickstart to decide where to look next:
-
-- If you are editing `app/main.py` or `app/src/fionaa/main.py`, go to the runtime entrypoint page first.
-- If you are changing `app/src/fionaa/graph.py` or any node transition, go to the graph workflow page first.
-- If you are touching `app/src/fionaa/security.py`, `app/src/fionaa/storage.py`, or customer scoping, go to the security and storage page first.
-- If you are changing `agentcore/agentcore.json`, deployment settings, or eval registration, go to the operations page first.
-- If you are validating behavior, go to the unit-test page before widening the change.
-
-## Entry points to keep distinct
-
-The repo uses three different layers that should not be conflated:
+The repository keeps the bootstrap, the installed package entrypoint, and the deployment configuration separate:
 
 - `app/main.py` is the source-archive bootstrap used by AgentCore packaging.
-- `app/src/fionaa/main.py` is the installed package’s runtime entrypoint.
-- `agentcore/agentcore.json` is the deployment/runtime configuration that tells AgentCore which entrypoint to run and how to register related resources.
+- `app/src/fionaa/main.py` is the installed package runtime entrypoint.
+- `agentcore/agentcore.json` is the deployment configuration that tells AgentCore what to run.
 
-Keep that separation in mind when you read the rest of the wiki: the quickstart points you to the owning page, but it does not duplicate the implementation details that belong there.
+For ordinary changes, read the architecture and concept pages above instead of tracing every file in the source tree. The quickstart is only a navigator.
 
-## Minimal local flow
+## Local sanity check
 
-For a quick local sanity check, the repository README points to the standard AgentCore development commands:
+The repository README points to the standard local flow:
 
 ```bash
 source /fionaa/app/fionaa/.venv/bin/activate
@@ -81,17 +72,17 @@ agentcore dev
 agentcore invoke --dev "What can you do"
 ```
 
-Those commands start the local runtime and then invoke it. For deployment and evaluation workflows, use the dedicated operations page instead of extending this page inline.
+Use the operations page for deployment and evaluation workflows, and use the testing pages when you need to confirm that a change preserves behavior.
 
-## Change triage
+## Safe-change checklist
 
-When you are deciding where a change belongs, use this rule of thumb:
+Before editing code, pick the owning page:
 
-- **Runtime assembly**: follow the runtime entrypoint page.
-- **Node sequencing or branching**: follow the graph workflow page.
-- **Identity, storage, or customer isolation**: follow the security and storage page.
-- **Model, gateway, or tool loading**: follow the integrations page.
-- **Deployment, datasets, evaluators, or runtime evals**: follow the operations page.
-- **Fast regression checks and fixtures**: follow the unit-test page.
+- **Runtime composition or credentials**: architecture/runtime-entrypoint first.
+- **Workflow control flow**: architecture/graph-workflow first.
+- **Data model or artifact format**: concepts/domain-model and concepts/persistence-and-artifacts first.
+- **Identity or S3 isolation**: concepts/security-and-storage first.
+- **Deploy or evaluate**: operations/deployment-and-evals first.
+- **Validate behavior**: testing/unit-tests and testing/deepeval-and-path2-evals first.
 
-This page stays intentionally short so it can remain the first stop in the documentation tree.
+If you still need more detail after this page, follow the linked page hierarchy rather than reading source files directly.

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:29a20ea578b44c56317862b97b30cd1053fab49e7f281d9c1124b71bef587b88",
+  "pageVersion": "sha256:9ddccdc98f95d0fc9844b40eb06e745ce5d85cde7613c1261dfe280d572af824",
   "claims": [
     {
       "id": "claim_a1345221f0484b31835aab80b1e21b43",
@@ -117,10 +117,148 @@
           "version": "repo-lines-v1:sha256:e7b56dba829a4e530800b0ad8d38be3576013a12a253bc6b33d34e892c3fa435:eyJzZWxlY3RlZExpbmVDb3VudCI6NDgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJlMDcwNzI2NDdiYTNiMGY3YTg1YzNhMTZhYjhkODVhN2VlNDY2MDlkZTNiYWFjNmU1YjAyNDc4Y2E0MzFkOGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI2YTZjMWE0MmMyNjdjMjAxMTQwZTliODcyNTllYjlmZjZhYjZhYTRjZjY5NjZlMDVkMjdmNjllMjg0YmI1YjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZhM2NmNTE5MjM1NGY3MTYxNWFjNTEwMzRiM2U5N2MyMGVkYTk5NjQzZmNhZjViYmU2ZDQxYWQ1OWJkMTIxNjciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU4NTBjZWI4MGYzMWMyMDRhZWU3ZjcxMmFkN2ZkNzVmMDQ0YTgwYThmZGVlYWRmZjYzZTBkYWY2ZTIxOGM4MzkifQ"
         }
       ]
+    },
+    {
+      "id": "claim_a84a18d9c8c6441bb4ee21454280bbb5",
+      "statement": "The runtime entrypoint is `invoke` in `main.py`, and each invocation assembles runtime settings, verified identity, scoped credentials, checkpointing, gateway tools, the model, storage, and policy checking before calling `graph.ainvoke(...)` with an empty initial state and runtime context.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/config.py#L13-L27",
+          "version": "repo-lines-v1:sha256:48048f77d04b8a9850391b404b9044e80a69ac44e07126752868bdd659415d4c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2OWExMzk3NWMyNTZlYzgzMjBlMjAxNjA4M2M5NmRmNjM3Y2EzZDM1YmViZGUyMzE0YmVlM2E0NzExYjU2Y2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBlNzZjNGI3MGM2ZTM5Y2ViMTY4MmQ5NDA1ODRjYmNlOWMyOTBmOWFiMzBkY2FlYzZlYWQ5MDJjZTljYmJkZWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI5ZWUxOTMyODRlODJmYjc2YWY0ZjRmNTgzZTQzZjA1MDdiNWYxMzJiMTY0ZTZkMzUyM2JhZmI5NGMwYzdiMWUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/gateway.py#L64-L79",
+          "version": "repo-lines-v1:sha256:2bc332fae4cae3e3849bbaacf679d942069300c6045adaac66beae6e360d06b1:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE1YWRlN2E2MTVlNWI3YzRmYzkxYjM1YWIwMGM3NGQ3MjNmMGZhOWY5M2EwNjA2NTQ3YjU2ZDg0YTZlYTc5ZTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYxZDFkYzE1Yjc5NzQ5NjA1YmY3Nzc0NGUwODcxZDIxYTdjMTI1MGU2MDQ0ODI2M2I1MjY2OWYwNjU5ZjJmMWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgxN2E1MDcwMTQ3MzY1NzQwM2JkMjdjZmVjMzZkYmE3NTE2YzQzMmQ5ZTU1NWIzMjYxZjMxZDc4N2ZiZjA1NTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/integrations/checkpointing.py#L10-L49",
+          "version": "repo-lines-v1:sha256:6165f613c5bdab76baef5b54fc43f04ae303240f1964ee1bbc7e71e9cf57e540:eyJzZWxlY3RlZExpbmVDb3VudCI6NDAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlkNTk1MTUwZWQzMDQyYWVmNjljZDMxMWFhZDEyOGQwNGZkZmFjMzI3MmM3NThmZjY4ZTI5MGJmZGI1ZmZiYTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU1M2U3ZDhiYmZhN2Q0NTFjNjFjMWRiZTM1NmY3NDQyNTUwMGJhNzlkZGJhYjI0M2Q4NjA1OGFiNTVmNDRkMjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ2Y2NhODJmZDcyZWI0MDNiNzBiYzI3MmIwYzM0MDg3MGQ2Y2Y2OWUyMTQ1ZmZhNTk3M2EwOTJkZGI2NDI4MmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/main.py#L18-L55",
+          "version": "repo-lines-v1:sha256:0127e71627eba0e2b47126153623028ce1a7e502bc864f2feb2263daa22ba5f5:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2OGNjNTJmMDYwY2ZhZTUxMmNiZDY0MzczZThhZWRmNzkyNTY3Y2JkZDQyMGIzMDYyMzg4M2FmOTQ1MzFkZjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY1NDM1MWJmYWM4OTk4NDMzOTIxZTQyNjY4YTRiOTg1YTIyYjllZmIyODBhY2Q4NGYyYzc1Njc0ZDZjZDhjNWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUxNmUwYjYyNTU1ZDhmMjc2NmZhMjcyNGZlODBmMThkYWUxN2U3Nzc0NTZmMTdlOGI1MzA0YWE3OGMwMGJhNTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjgzMjE2ZWRmOGQ1MjcyYzM1ZGNlZjlmYzAxN2RjMWMwMWNkYjgxZDE4YzczNTgyZDAzN2YyZTAwZTJmN2JjNzEifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/model/load.py#L27-L65",
+          "version": "repo-lines-v1:sha256:a68b0313e68681f5191c8f31ae65a3897f1dbd2cc9874145c8907274bd971c92:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM1ZjA3NWVkYzE1MzEwNGQwYTRhMzZhN2QzZDZlZDU5YTczZjc0MzAyZDYzOWI5Yzk2Y2VjODhkMzNjZjU2ZDAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU0OGVkYTc3OGViOGIxMTU5ZjQ4MjFiZmVhMGExNjE3MGY5ZWU0MTBiYWY0NGVkOGI5ZjhmYzNkNDQ3MGE0NjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIzYTYwNDIzYzQyYjRhOTMxMDZlNmE5OTFjYzdlZjVlZjBhOTllMWMwMGVhMGU4ZDA4MjM5MTMwZWRlNjY3NGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/security.py#L73-L140",
+          "version": "repo-lines-v1:sha256:d719d3d9e2114c02c479bcbb3b5b0f61ad03373367c26ab45850270214068f67:eyJzZWxlY3RlZExpbmVDb3VudCI6NjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhjMjNhZGM4YzA5MDYzN2Y0OTNkMDRhNWVmOWEzN2RkOTNhYzY4NmQ5ZDQyNWE2MjNmNzA0NWNlYTk5NTgyZjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRjYzYwNTkzMGQ2YTZmMWE0YmQ2Y2I3ZDg3NjI5MmUwOTdiYjc3OWJhN2VlZTY3ZDQxMGNhYjcxNTY3MDI3MTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ4YmIxMGQ1NDI2ZmNhYTVhZDYxYjk3MzJhMzdiY2JiNjg2ZTIyMGNmM2E2ZTVkZGZjZmMyYWE5ZjI3OGVhM2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/storage.py#L26-L107",
+          "version": "repo-lines-v1:sha256:5591a801d38b17c349be76f66c31159da1e8596760284f85bcfd6cf83cc346f5:eyJzZWxlY3RlZExpbmVDb3VudCI6ODIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJlMDcwNzI2NDdiYTNiMGY3YTg1YzNhMTZhYjhkODVhN2VlNDY2MDlkZTNiYWFjNmU1YjAyNDc4Y2E0MzFkOGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZlN2Y0MTM1N2Q1NzQwODI5NGNjZjE4ODY0ODcyNjJkMzJjNTAxODNlNzRhOWRkM2Q4MjE4MmRhYTdiMmYzNjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZhM2NmNTE5MjM1NGY3MTYxNWFjNTEwMzRiM2U5N2MyMGVkYTk5NjQzZmNhZjViYmU2ZDQxYWQ1OWJkMTIxNjciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f9e8ec26bd574a8199e151a05dc98906",
+      "statement": "`identity_from_request_context` derives `customer_id` from the verified JWT email claim on the request context and rejects missing Authorization or email claims, while `CustomerIdentity` validates both `customer_id` and `application_id` for STS-safe values.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/security.py#L41-L97",
+          "version": "repo-lines-v1:sha256:4ae1a7afbcf5cb86cf51a9c6acb184e75caf441d1946e2446d78e801cb2c712f:eyJzZWxlY3RlZExpbmVDb3VudCI6NTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2OWExMzk3NWMyNTZlYzgzMjBlMjAxNjA4M2M5NmRmNjM3Y2EzZDM1YmViZGUyMzE0YmVlM2E0NzExYjU2Y2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU4ODg0YjA3MWNmZjUyOGRjYzllOTU5NDQwYzYzMjllNWQ0MzU2NTBhODA0N2NmOGE3ZDc0OTYzMGQ0OWE1Y2MiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY4OGU3OTgyMjhmZWM1ZDQyOTRkOGY4NzAyMzdmM2ExNTkzYzJjYmViYmFmOTQ5ZTBhMTVkN2ZiODFjYzA4MzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUyNWQ4OTdmZjA3ZGQxZmRiNmE4Zjg3Y2JjNzY0N2RlYWE0ZmRkMGQ4OWU2YmViNmU0MTY3MTBiNzYyODNkNGQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b69cd914fe0a4f74b99b70c3bc681b48",
+      "statement": "`scoped_boto_session` assumes `FionaaDataAccessRole` with `customer_id` and `application_id` session tags and returns `DeferredRefreshableCredentials`, so long-running runs can re-assume the role transparently.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/security.py#L100-L140",
+          "version": "repo-lines-v1:sha256:af7a50ed165c840e3ec9b5d3a672e52375b91226ae0d48d693f10c63f324a22c:eyJzZWxlY3RlZExpbmVDb3VudCI6NDEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIwMWE1ZWFhMDQyZjI2N2M0MTc5NDEwOGZjZjcxMGJiMDIyNDMwNDg1NjJjY2Y5ZWIzMjgyOTA1NWE5NGUwNmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRjYzYwNTkzMGQ2YTZmMWE0YmQ2Y2I3ZDg3NjI5MmUwOTdiYjc3OWJhN2VlZTY3ZDQxMGNhYjcxNTY3MDI3MTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRiYTZhZDlhMjVlZDlmNWUxZDM3Y2I2Njg2YTFiM2ZjYjE1M2U0ODIzM2I3YmFhNGU2YzEzODQ2YzNmZjIwODYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_758b9da5649e49e3a5c0808dd9a57541",
+      "statement": "`build_checkpointer` constructs `AgentCoreMemorySaver` from the scoped session credentials and `checkpoint_config(identity)` maps verified identity to `actor_id` and `thread_id`, keeping checkpoint scope out of the payload.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/integrations/checkpointing.py#L10-L49",
+          "version": "repo-lines-v1:sha256:6165f613c5bdab76baef5b54fc43f04ae303240f1964ee1bbc7e71e9cf57e540:eyJzZWxlY3RlZExpbmVDb3VudCI6NDAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlkNTk1MTUwZWQzMDQyYWVmNjljZDMxMWFhZDEyOGQwNGZkZmFjMzI3MmM3NThmZjY4ZTI5MGJmZGI1ZmZiYTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU1M2U3ZDhiYmZhN2Q0NTFjNjFjMWRiZTM1NmY3NDQyNTUwMGJhNzlkZGJhYjI0M2Q4NjA1OGFiNTVmNDRkMjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ2Y2NhODJmZDcyZWI0MDNiNzBiYzI3MmIwYzM0MDg3MGQ2Y2Y2OWUyMTQ1ZmZhNTk3M2EwOTJkZGI2NDI4MmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3f1d246264c144ce99344e34cd48aa83",
+      "statement": "Gateway tools are loaded fresh for each invocation: `load_gateway_tools()` fetches a short-lived OAuth access token, creates a `MultiServerMCPClient` for `AGENTCORE_GATEWAY_URL`, and returns the tools instead of caching them at module load.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/gateway.py#L20-L79",
+          "version": "repo-lines-v1:sha256:ef364734b768085311f2155c881867348f7a74d3ec9104b427e4536653f446da:eyJzZWxlY3RlZExpbmVDb3VudCI6NjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU0ZjBiOTlhZDM4NGI0MzQ4MTQwNWUyNzE5Yzc0YWQzNGViMjE5YTdlZjdlNzMwMTgxYmU5NDQ3NmVmM2RjOTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYxZDFkYzE1Yjc5NzQ5NjA1YmY3Nzc0NGUwODcxZDIxYTdjMTI1MGU2MDQ0ODI2M2I1MjY2OWYwNjU5ZjJmMWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI2YjA5MWJkY2FlOGQxNDYwMDM2M2Y5YTAyZGNmNzdkNDg5NzdmZWM1Nzc2YjQzNGRlOWQ5Y2E2YTY4ZTc3ZDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/main.py#L37-L40",
+          "version": "repo-lines-v1:sha256:764528cbe1742a87e5a813814f550cf046ba7f3c576ed4be236d2fccc768c03b:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjdkMjg4MWNmZTc3OGFhMjBlZjBiNjQ5MWMwOWZjNDFmMGZhMDU2ZTE1M2UyZWZkZjUwNDQ0OWY5MGNlZmI2NSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDNmYjhmOGJjNDFiNWNmYjdlZTIyNGU3YWY2YjZhMjM5YjhjODMwYjNjODUxNTgxYzE2ODA2YzAwOWJlNzFjNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzMzNTcxZjBlODUwOTEwZWMzYzE3NWRlNGI2YzIwODVmZGU2NThiM2JkZTA0ZjRmNWU3MzM4ZmUxMzE4OTA4NCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_adfb8bb463f5427aa67b8c2cc9b24b9a",
+      "statement": "`RuntimeSettings.from_environment()` requires the applications bucket, policy-doc bucket, KMS key ARN, data-access role ARN, and checkpoint memory ID, so missing configuration fails before graph execution begins.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/config.py#L6-L27",
+          "version": "repo-lines-v1:sha256:f8922b22bd7357bc68a9195cbe9281dc0013688a4002d4f7dd2659ca4ccfc745:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZlNWE4NmIxMmRhZjYwZmZlOTJhMjAzZDgzYjJkNzljOWEyNjYyMDk2Y2Y4ZjE4NjZlZDA3ZDUxZmUwOWY3YzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBlNzZjNGI3MGM2ZTM5Y2ViMTY4MmQ5NDA1ODRjYmNlOWMyOTBmOWFiMzBkY2FlYzZlYWQ5MDJjZTljYmJkZWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNjM2QxYWYzNDhhZTgyYjQzMjBhMmQ5NzcyZGNiYjI4OThiMzgzNjA4ZmMxOWE2OWYzNjNmZTQ5ZDlhMDA0NmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/main.py#L28-L35",
+          "version": "repo-lines-v1:sha256:fe4dde4f721ba1193958d44f4155c04d3cd1977d2750669ff69763002978fc31:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODQwNjkxOWQ4YmU0ZWFjNjA4ZDZiN2FjYjFkNWQ2OTQ0YjI0Mzk4MmVlZmRhYWJhNTQ3ZjBiOGQwZWEyYmFkZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWRlYWYwMjY2M2E1ZDMyZjkzYTNjYWY0ODQzZjliZGMyZGJiNjkwODEwM2MxNGNlZjk2MWQ4NjQ5MjQ4YTEwMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMjk1NTQ4YjQyYzZkMzY4YmVhM2Q3ODU1ZGE1MDEwNDBmOGRjN2U0NmFmYmYwMzM0YWVkOTNhMWM1NzI1NzFmZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNjRkYWExZTdiNjM2NmJjYjBlZWMyYjdiNWE5YTE5ZGZkZWEwNmZmOWU4Yjc1YTg5YTA0NWFiZWVjMGZkNTA5NCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_78811d93c60441f5949fb23e6caaef56",
+      "statement": "`ApplicationStore` derives every S3 key from the verified `CustomerIdentity` prefix, and write operations apply KMS encryption with an encryption context containing the derived `customer_id`.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/storage.py#L26-L73",
+          "version": "repo-lines-v1:sha256:e7b56dba829a4e530800b0ad8d38be3576013a12a253bc6b33d34e892c3fa435:eyJzZWxlY3RlZExpbmVDb3VudCI6NDgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJlMDcwNzI2NDdiYTNiMGY3YTg1YzNhMTZhYjhkODVhN2VlNDY2MDlkZTNiYWFjNmU1YjAyNDc4Y2E0MzFkOGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI2YTZjMWE0MmMyNjdjMjAxMTQwZTliODcyNTllYjlmZjZhYjZhYTRjZjY5NjZlMDVkMjdmNjllMjg0YmI1YjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZhM2NmNTE5MjM1NGY3MTYxNWFjNTEwMzRiM2U5N2MyMGVkYTk5NjQzZmNhZjViYmU2ZDQxYWQ1OWJkMTIxNjciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU4NTBjZWI4MGYzMWMyMDRhZWU3ZjcxMmFkN2ZkNzVmMDQ0YTgwYThmZGVlYWRmZjYzZTBkYWY2ZTIxOGM4MzkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_152558f0b0284f278e8e58942f493985",
+      "statement": "The runtime returns a compact result object with the `application_id`, `outcome`, `route`, fixed decision and triage URIs, a handoff URI derived from the route, and optional stage URIs for any stage present in the final graph state.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/main.py#L55-L73",
+          "version": "repo-lines-v1:sha256:0afa7846d90f5036bc4630f40baee12d874463f6d64914a07f5cdae03a1b182f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY1NDM1MWJmYWM4OTk4NDMzOTIxZTQyNjY4YTRiOTg1YTIyYjllZmIyODBhY2Q4NGYyYzc1Njc0ZDZjZDhjNWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhMTFjMDU2N2QwYTVmOWU5YjEzNWY2NWNkMjUzNzJkZmQ2Mjg3NzVmN2MxZWQyNTNmOGJhZDQyZGQyZDY2NjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJiNjAyN2M3NTRlZTZlMGY1MDc5NmQ5NmRjODBkNjhiZDJlMmY1NzFjYmZkMGUwMjQ4OTMwNjE1YWRlNjAyZTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNkNDEzNDBjYzIzOWExNTljZTliNjAyMmU5ZjYzMjI4MzJlMmVhZDc2Y2FlOWU0NzU0ZDIxMGViOGZiNmQ1ZTgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0819a2040d90426a8c5c10d193ff7bd5",
+      "statement": "The runtime’s main operational invariants are that verified identity determines customer scope, payload data is only used as the application lookup key, checkpointing uses the scoped session, gateway tools are loaded per invocation, the model is loaded per invocation, and durable evidence lives under the identity-derived S3 prefix.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/gateway.py#L64-L79",
+          "version": "repo-lines-v1:sha256:2bc332fae4cae3e3849bbaacf679d942069300c6045adaac66beae6e360d06b1:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE1YWRlN2E2MTVlNWI3YzRmYzkxYjM1YWIwMGM3NGQ3MjNmMGZhOWY5M2EwNjA2NTQ3YjU2ZDg0YTZlYTc5ZTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYxZDFkYzE1Yjc5NzQ5NjA1YmY3Nzc0NGUwODcxZDIxYTdjMTI1MGU2MDQ0ODI2M2I1MjY2OWYwNjU5ZjJmMWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgxN2E1MDcwMTQ3MzY1NzQwM2JkMjdjZmVjMzZkYmE3NTE2YzQzMmQ5ZTU1NWIzMjYxZjMxZDc4N2ZiZjA1NTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/main.py#L28-L73",
+          "version": "repo-lines-v1:sha256:8c2847a1fd4059c9f0b38f180a5173045ca91a5b516dcfa3f3a2434b17eb1cc0:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg0MDY5MTlkOGJlNGVhYzYwOGQ2YjdhY2IxZDVkNjk0NGIyNDM5ODJlZWZkYWFiYTU0N2YwYjhkMGVhMmJhZGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhMTFjMDU2N2QwYTVmOWU5YjEzNWY2NWNkMjUzNzJkZmQ2Mjg3NzVmN2MxZWQyNTNmOGJhZDQyZGQyZDY2NjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI5NTU0OGI0MmM2ZDM2OGJlYTNkNzg1NWRhNTAxMDQwZjhkYzdlNDZhZmJmMDMzNGFlZDkzYTFjNTcyNTcxZmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNkNDEzNDBjYzIzOWExNTljZTliNjAyMmU5ZjYzMjI4MzJlMmVhZDc2Y2FlOWU0NzU0ZDIxMGViOGZiNmQ1ZTgifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/model/load.py#L27-L65",
+          "version": "repo-lines-v1:sha256:a68b0313e68681f5191c8f31ae65a3897f1dbd2cc9874145c8907274bd971c92:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM1ZjA3NWVkYzE1MzEwNGQwYTRhMzZhN2QzZDZlZDU5YTczZjc0MzAyZDYzOWI5Yzk2Y2VjODhkMzNjZjU2ZDAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU0OGVkYTc3OGViOGIxMTU5ZjQ4MjFiZmVhMGExNjE3MGY5ZWU0MTBiYWY0NGVkOGI5ZjhmYzNkNDQ3MGE0NjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIzYTYwNDIzYzQyYjRhOTMxMDZlNmE5OTFjYzdlZjVlZjBhOTllMWMwMGVhMGU4ZDA4MjM5MTMwZWRlNjY3NGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/security.py#L73-L140",
+          "version": "repo-lines-v1:sha256:d719d3d9e2114c02c479bcbb3b5b0f61ad03373367c26ab45850270214068f67:eyJzZWxlY3RlZExpbmVDb3VudCI6NjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhjMjNhZGM4YzA5MDYzN2Y0OTNkMDRhNWVmOWEzN2RkOTNhYzY4NmQ5ZDQyNWE2MjNmNzA0NWNlYTk5NTgyZjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRjYzYwNTkzMGQ2YTZmMWE0YmQ2Y2I3ZDg3NjI5MmUwOTdiYjc3OWJhN2VlZTY3ZDQxMGNhYjcxNTY3MDI3MTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ4YmIxMGQ1NDI2ZmNhYTVhZDYxYjk3MzJhMzdiY2JiNjg2ZTIyMGNmM2E2ZTVkZGZjZmMyYWE5ZjI3OGVhM2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/storage.py#L26-L107",
+          "version": "repo-lines-v1:sha256:5591a801d38b17c349be76f66c31159da1e8596760284f85bcfd6cf83cc346f5:eyJzZWxlY3RlZExpbmVDb3VudCI6ODIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJlMDcwNzI2NDdiYTNiMGY3YTg1YzNhMTZhYjhkODVhN2VlNDY2MDlkZTNiYWFjNmU1YjAyNDc4Y2E0MzFkOGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZlN2Y0MTM1N2Q1NzQwODI5NGNjZjE4ODY0ODcyNjJkMzJjNTAxODNlNzRhOWRkM2Q4MjE4MmRhYTdiMmYzNjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZhM2NmNTE5MjM1NGY3MTYxNWFjNTEwMzRiM2U5N2MyMGVkYTk5NjQzZmNhZjViYmU2ZDQxYWQ1OWJkMTIxNjciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.5.1",
-    "at": "2026-09-19T09:15:01.080Z"
+    "at": "2026-09-24T15:24:05.146Z"
   }
 }

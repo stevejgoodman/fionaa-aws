@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:592e981d069192afe5c3581dd86de94b9f2b4d7f6cd8aa96a7ec33ab71941876",
+  "pageVersion": "sha256:e2ef138d0a60eb80e2f43e8b79c35fe2aed0613fb8dbd42dcbdabe1759f4ee56",
   "claims": [
     {
       "id": "claim_51db5ae0c4f64108bf9d496532a34789",
@@ -227,10 +227,188 @@
           "version": "repo-lines-v1:sha256:48048f77d04b8a9850391b404b9044e80a69ac44e07126752868bdd659415d4c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2OWExMzk3NWMyNTZlYzgzMjBlMjAxNjA4M2M5NmRmNjM3Y2EzZDM1YmViZGUyMzE0YmVlM2E0NzExYjU2Y2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBlNzZjNGI3MGM2ZTM5Y2ViMTY4MmQ5NDA1ODRjYmNlOWMyOTBmOWFiMzBkY2FlYzZlYWQ5MDJjZTljYmJkZWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI5ZWUxOTMyODRlODJmYjc2YWY0ZjRmNTgzZTQzZjA1MDdiNWYxMzJiMTY0ZTZkMzUyM2JhZmI5NGMwYzdiMWUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         }
       ]
+    },
+    {
+      "id": "claim_cb276e479d42483a9d67f50c8aa927e9",
+      "statement": "Runtime settings supply the applications bucket, policy-docs bucket, KMS key ARN, data-access role ARN, and checkpoint memory ID, and missing or blank required values raise ValueError via required_env().",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/README.md#L123-L129",
+          "version": "repo-lines-v1:sha256:29743c8e8cfa877aeca976d11a9af31d855e793f1e9ca658e40dcf567369030d:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjcyZjU0YjkzYjMzNzY4NmJlODk0M2I5NmZiMmIzMWEzYzZiM2FjNzAyMThhMDkyNWY1MTUwY2U3YWYwYThjOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNmU5YWNmNmE1ZWIzZDI3NzFmMTJiY2VlZDY4NWVlNmQ3MTBkMWVhMDQzNDg5ZTdiOWIwZDYwZjc2MjVmMGYzZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTk4MTBmYjFkZTJjMDViZTYzZjRkMzE3OTc0YTdhNjFiMDNiNzA0MjZjM2UxNzBkMjA4NTA2ZmY3NzkxZmI5NyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNGQyNmFmZTc1YjM5OGNmYWY3NjRkMWFiZTFlYTI5ZDY3Zjg1NmJiNDgwOGVkZWFiNGYwZjE5MzI1ZjFjYTc5YiJ9"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/config.py#L1-L27",
+          "version": "repo-lines-v1:sha256:a5fd95a761147e5b0b1c8d13319712dd36eaadf294cba0a21b1ca514b2f43e9c:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFjYjliYzQ5ZDA0NjIzNTRhMzcyZGYyODA1ZjFhNmI3YTUxMTcyOTAzMzg5OTUzOGIyZWJkNDMxNzIzZDRkNjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBlNzZjNGI3MGM2ZTM5Y2ViMTY4MmQ5NDA1ODRjYmNlOWMyOTBmOWFiMzBkY2FlYzZlYWQ5MDJjZTljYmJkZWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ec5f15bbb452443389f04ee175b5aedb",
+      "statement": "Identity is derived from the runtime request context's Authorization bearer token, which is decoded without in-process signature verification; missing authorization or missing email claims raise ValueError.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/README.md#L70-L89",
+          "version": "repo-lines-v1:sha256:22262bdfc50e89fa8ac7dddca23a00340847acbfbf5e0f0dadd1b4426ac98c78:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg5OWYyYjNlMDM4NzUxODYzNTFmYTRhOThmYjU5MmY0OWRjM2FhY2RlOTg5ZmVhZjYwODg2ZjEwNzRkMDgyODciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwOGIyNDFjYTU1MTdlN2I2MThjYjBkOWIzOGJiY2YxMDYyZjAwNmUzNjI5NTE0NTliNGQxODY2NDMxMDVjYWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhkN2M2OTJlNTNkMzE5MDJkYjEzNmNhYzNiOTcxODY1YTlmZTJkY2ExNGJlMThjZWM1MzY1MGQyYmNlNzZmMjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlhZDg2YmU5MDcyZDYwODM2NjRiNjNjMTg4NjBkZDY2OTUxZDM2OGFjZWVlMjQ1ZDA3NGRkNDFhNzg3MmZiMjMifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/security.py#L73-L97",
+          "version": "repo-lines-v1:sha256:2df3fe61d316c2712bec401b8b38b333a69cb5c152ec8ad7c7b1d54f3959fc3f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhjMjNhZGM4YzA5MDYzN2Y0OTNkMDRhNWVmOWEzN2RkOTNhYzY4NmQ5ZDQyNWE2MjNmNzA0NWNlYTk5NTgyZjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU4ODg0YjA3MWNmZjUyOGRjYzllOTU5NDQwYzYzMjllNWQ0MzU2NTBhODA0N2NmOGE3ZDc0OTYzMGQ0OWE1Y2MiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ4YmIxMGQ1NDI2ZmNhYTVhZDYxYjk3MzJhMzdiY2JiNjg2ZTIyMGNmM2E2ZTVkZGZjZmMyYWE5ZjI3OGVhM2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUyNWQ4OTdmZjA3ZGQxZmRiNmE4Zjg3Y2JjNzY0N2RlYWE0ZmRkMGQ4OWU2YmViNmU0MTY3MTBiNzYyODNkNGQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a71a495259be4f308601c5732335d497",
+      "statement": "CustomerIdentity validates customer_id and application_id against the STS-safe tag character set before the values can be used in tags or keys.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/security.py#L41-L63",
+          "version": "repo-lines-v1:sha256:e3956ce6b7f7c1b45927624127afc4fe547d41c21d2ad757700f601d99bec83b:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2OWExMzk3NWMyNTZlYzgzMjBlMjAxNjA4M2M5NmRmNjM3Y2EzZDM1YmViZGUyMzE0YmVlM2E0NzExYjU2Y2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY4OGU3OTgyMjhmZWM1ZDQyOTRkOGY4NzAyMzdmM2ExNTkzYzJjYmViYmFmOTQ5ZTBhMTVkN2ZiODFjYzA4MzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRmNDE3NDQzNTg2ZjI3MWIyYTg3YjJiYjgxYzM3NGNjYmRhOWJiZGYyODRkNTg1NjA3MTYxYmY5NWJhMTQ1MjIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_1fd06553814243bdb2a800cd09adef4e",
+      "statement": "customer_id is derived as sha256(lowercased, trimmed email), so casing and surrounding whitespace do not change the storage identity and the raw email is not used as the S3/session-tag value.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/security.py#L65-L70",
+          "version": "repo-lines-v1:sha256:7c72f4b0a8510e520afc56cb0e80b148f042b31e114a991045307ef3f96eb9a9:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjFlNDVhZDA0YTBjZmQ4MDAyOTllNTgxNmM0NDdjNGY4OTI4NTYxZGViZDMyNTZhZmVlNzRlMmYxMDdhYTNhZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZWJlN2Y1OWQ1YjJkYzg2NDQ4ZDliMjQzZDI1MWQ1ZDY1N2ZiM2Y1NmU0ZDMyN2E2M2E5NzBmMDlhYjA4YWM1MiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYmQyZTViNjEyMWU0MDljZWU3YTViMDIyMjNiMDZiNGE3NmFkNTQyNzQ3YjhjZDFjOWQ2NWNhOGRjZTI3MDVmZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZDMwNDYyOWI3MzljNTg4MmIzZDhjODU4MWJhNTVhZjRiMzk1YTBjZDRhNjUyZjdkY2VlNjZkNWZhOGRiZDliZiJ9"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/security.py#L84-L97",
+          "version": "repo-lines-v1:sha256:e2a417f37ff2794a842e8b69c939bfd3ab6a9e734730b8fa93e4a75e01cc1be8:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRkNDI5YmZjYTk0MDM5Mjk3YTI1MWQyYTZmYzczMWQwMGUwY2Q0NTA1MGY3ZjgyODZjMTQ0Yjg2ZmQ4NTAzNzYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU4ODg0YjA3MWNmZjUyOGRjYzllOTU5NDQwYzYzMjllNWQ0MzU2NTBhODA0N2NmOGE3ZDc0OTYzMGQ0OWE1Y2MiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIwZWMwMmQyNDkwMTZlOTQ3MTA0Y2U0ODUzZmYyOTJmMzdkODU3NTE4YTE1YzAyYzQyMGRhNzg2MmJhMTYyYzgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUyNWQ4OTdmZjA3ZGQxZmRiNmE4Zjg3Y2JjNzY0N2RlYWE0ZmRkMGQ4OWU2YmViNmU0MTY3MTBiNzYyODNkNGQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_842d1e2008c74e63851e17c65c7658a3",
+      "statement": "scoped_boto_session assumes the data-access role from FIONAA_DATA_ACCESS_ROLE_ARN, tags the STS session with customer_id and application_id, marks customer_id transitive, and uses DeferredRefreshableCredentials with a one-hour session duration.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa_iam_policies.md#L9-L70",
+          "version": "repo-lines-v1:sha256:440f6a9f50eb5cb1f913ffdb5f458ce51e826beebbd1eb09ce07be0e6559f312:eyJzZWxlY3RlZExpbmVDb3VudCI6NjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRiY2EwYjY0YWJkZDY4ZDVjNmFkNjY5YTE3NzFlM2ZjNDdiM2Y5ZTE2NzlmYjdkYzU2YTllOGU3N2MwOWQ4N2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwMWYyZWMxNzU5M2MxMDU0ZWI0NjM2N2Q4NDUzZWYyNGExNzNjZTk2YjcxMTdkOTFmOWE2OGQ0NGZlZjhiMDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRjMWRhYmYyMThkMzkxMGIxMDg5MjAzOWVlMzQ4ZWE4ZGFiMDJkM2VmNGM5ZDk2NTA3MjhiZWQzZmUzOTk0MDUifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/security.py#L100-L140",
+          "version": "repo-lines-v1:sha256:af7a50ed165c840e3ec9b5d3a672e52375b91226ae0d48d693f10c63f324a22c:eyJzZWxlY3RlZExpbmVDb3VudCI6NDEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIwMWE1ZWFhMDQyZjI2N2M0MTc5NDEwOGZjZjcxMGJiMDIyNDMwNDg1NjJjY2Y5ZWIzMjgyOTA1NWE5NGUwNmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRjYzYwNTkzMGQ2YTZmMWE0YmQ2Y2I3ZDg3NjI5MmUwOTdiYjc3OWJhN2VlZTY3ZDQxMGNhYjcxNTY3MDI3MTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRiYTZhZDlhMjVlZDlmNWUxZDM3Y2I2Njg2YTFiM2ZjYjE1M2U0ODIzM2I3YmFhNGU2YzEzODQ2YzNmZjIwODYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_33be23e36cc447d08a4abf53cbb64c92",
+      "statement": "The runtime execution role is intended to have no direct S3 access to the applications bucket; it reaches customer data only by assuming the data-access role.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/README.md#L68-L89",
+          "version": "repo-lines-v1:sha256:0038bf8676ec437f29f3c1246f75f5dd64959cdb17af573844280460999fc193:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI5Y2E4ODRjODE3YmQwZjgyM2I2ZjE4NDdmZjUzMWFhM2JlZGNjNDU1N2JiODAwMTNjZTc0NjFjZjUzZjNhMGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwOGIyNDFjYTU1MTdlN2I2MThjYjBkOWIzOGJiY2YxMDYyZjAwNmUzNjI5NTE0NTliNGQxODY2NDMxMDVjYWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYxZDI4Y2I4NjExYWUxMjRjM2YxOThmZGU4NDZkYjU0Yzc5NmEwYTIyNTI4OTg3NDI0NDYyOGI0NTNlODM1NWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlhZDg2YmU5MDcyZDYwODM2NjRiNjNjMTg4NjBkZDY2OTUxZDM2OGFjZWVlMjQ1ZDA3NGRkNDFhNzg3MmZiMjMifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/fionaa_iam_policies.md#L9-L35",
+          "version": "repo-lines-v1:sha256:202b1b56aacb54f3f6990413ac1b7d29b567f76f94c7cbe9e8ab2a89d8ad8014:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRiY2EwYjY0YWJkZDY4ZDVjNmFkNjY5YTE3NzFlM2ZjNDdiM2Y5ZTE2NzlmYjdkYzU2YTllOGU3N2MwOWQ4N2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlkNzNkNzE3N2I0MzJiMmM4YjE4ZGM2N2Y4NzZhZTQzZjVhYzZmZThkMDU4Nzk2ZWE5YmM4MTJlM2YxMmYwOTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwMWYyZWMxNzU5M2MxMDU0ZWI0NjM2N2Q4NDUzZWYyNGExNzNjZTk2YjcxMTdkOTFmOWE2OGQ0NGZlZjhiMDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAwMWYyZWMxNzU5M2MxMDU0ZWI0NjM2N2Q4NDUzZWYyNGExNzNjZTk2YjcxMTdkOTFmOWE2OGQ0NGZlZjhiMDEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e853854b34df4656a120d623f880f4d0",
+      "statement": "ApplicationStore is the only storage module that reads or writes customer application objects, and it builds keys from the stored CustomerIdentity prefix <customer_id>/<application_id>.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/README.md#L91-L129",
+          "version": "repo-lines-v1:sha256:781d395649bf30c724a66919ea53e796dba0b2383f6655d37e8fab4960039e2c:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc1MjkwNTFkZjg0NmNkN2RlMTFhZGM2ZWRhZDY2OTg0YjU1YzQ5YTlmOGY0YzRjZjQwMzg2MTkxYWY1MmZlNGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZlOWFjZjZhNWViM2QyNzcxZjEyYmNlZWQ2ODVlZTZkNzEwZDFlYTA0MzQ4OWU3YjliMGQ2MGY3NjI1ZjBmM2YiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUzMTBjNzFjYWRkNDYwZTM4ZjdiMTYzZTZlODM5Yzk0ZmUyM2RlYmJhNjg3MWQ0MTM2OTExMGI2MWMxNWFlOTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRkMjZhZmU3NWIzOThjZmFmNzY0ZDFhYmUxZWEyOWQ2N2Y4NTZiYjQ4MDhlZGVhYjRmMGYxOTMyNWYxY2E3OWIifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/storage.py#L26-L38",
+          "version": "repo-lines-v1:sha256:f10bd7853daab1a6052a6e114503f13c541e3b3243fa0ebc371f24afb38a23d0:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJlMDcwNzI2NDdiYTNiMGY3YTg1YzNhMTZhYjhkODVhN2VlNDY2MDlkZTNiYWFjNmU1YjAyNDc4Y2E0MzFkOGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZhM2NmNTE5MjM1NGY3MTYxNWFjNTEwMzRiM2U5N2MyMGVkYTk5NjQzZmNhZjViYmU2ZDQxYWQ1OWJkMTIxNjciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc4ZWFlZGIxZDJmNjk4OTczOWEyMTU0OGExNjc0NjEwZWY4NzM0NWQzY2YxOTU0YWFhODM1MDVhNDkwMmQ2ZjQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_4f4e43bb82974e64b22e16bdc2f5e10b",
+      "statement": "ApplicationStore.get_json returns None for missing objects, but logs and re-raises AccessDenied and re-raises other S3 errors.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/storage.py#L39-L53",
+          "version": "repo-lines-v1:sha256:7830b9083912f65811cfa6f90d7260984229d0bd014de539d144a7f427a7ab33:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0ODE1OTc2YmU3Mzc1OGNjMmU0MjM2NGM2YzUyYmM0OWQxZDYwNzAzYjczYmFiODZlNzljNjhjYTQ5ZTY4Y2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEwNGFlNjE2MzY1MzU5Yjg4MjhlYjljOTE2ZDM1ZDU2NzU5ZmMzNzA3OGQyNzlhOGEwZmExYjlhNGU3NDQyZjEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFmZDg0ODgwMTdmNmZmYmY3MDY0MGNmZmYyN2NlMDc0MzFjMDBlMzYxYTA0OTYwZmQ4ZTU0OGEyZjViYjAxYTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg1Yzg4NjJjZTI3NTA5MGVmN2I1NGJiYTZiNGZmY2RiNGY3YTE5ODIwY2I1NzFmNWJkMDczZGRmZDY1OTFjY2IifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_6267991b911a417baaf2505cafa51beb",
+      "statement": "ApplicationStore.put_json writes customer data with aws:kms encryption, the configured KMS key ARN, and a base64-encoded encryption context containing the derived customer_id.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa_iam_policies.md#L73-L124",
+          "version": "repo-lines-v1:sha256:cec05fd649e4b26c733545442847a5462d1503f95d7a7b23ef7f9c6e6f2f55ac:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY1YzNkZDk5MzQyMWI5Njg5ZjlhODA5YTc5OTY3ZjRiMTFjMDMxYjM0NzQ5MGUzNzcxNDRjNWU1NjBjZTYwNmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY5OGJmODA4Yjk0ZGJmM2RiNDkxN2VlOGU4NzI4NGEyYWM4M2UzMzNjMDIxMTNmNjk5ZmZiZWM1Yjc1YjQxYjEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwMWYyZWMxNzU5M2MxMDU0ZWI0NjM2N2Q4NDUzZWYyNGExNzNjZTk2YjcxMTdkOTFmOWE2OGQ0NGZlZjhiMDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAwMWYyZWMxNzU5M2MxMDU0ZWI0NjM2N2Q4NDUzZWYyNGExNzNjZTk2YjcxMTdkOTFmOWE2OGQ0NGZlZjhiMDEifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/storage.py#L55-L73",
+          "version": "repo-lines-v1:sha256:1a7834381caa9e2939373c82058b77851b17d8271742554cbf4f602db6c02409:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNmMjIyYWU0NmVhZjBjZmZjZjE3MTYyNzFmNmEzN2I3YWI5N2NjNzllOTY0ZjU2YmExYzljYmMwMmY2ZjRjMTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI2YTZjMWE0MmMyNjdjMjAxMTQwZTliODcyNTllYjlmZjZhYjZhYTRjZjY5NjZlMDVkMjdmNjllMjg0YmI1YjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQwYjRkODYzNWM2ZDdhNTFjYmViMmUxOGU2NjFkYjViYjgzYjVkMjA4NWFmMjZmMmFiODc5ZmU4MDZhNzFhNjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU4NTBjZWI4MGYzMWMyMDRhZWU3ZjcxMmFkN2ZkNzVmMDQ0YTgwYThmZGVlYWRmZjYzZTBkYWY2ZTIxOGM4MzkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2e61dc2c66f04b868c8d3d75d2d99e48",
+      "statement": "ApplicationStore.list_keys returns keys relative to the application prefix instead of raw bucket paths, and get_document_bytes stores large blobs under the same enforced prefix.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/src/fionaa/storage.py#L75-L95",
+          "version": "repo-lines-v1:sha256:af91ee802edb47a30465e6b3718637deac40d3965dda66d3f2ceb3f308ca0153:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2NzQzMDY5NzY4ODMwNTc1YzgzOTVmZDA5NTJkM2RjMzI5NzEyNDU4ZjRiZDQzN2U4ODRlN2Y5NWVlZTc4NDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY4OWQ5MWJiNTgyMjY3Zjk3MTZkNTM2MzQ0NDlhNmY1ZDhhMWQzZGE5YjdiYzIzOWUzNGNkNzdiOWIwOGQwYzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ1YjRiZjA2YmM2ZWYwZTEzZDkxMzNjMjIxYTY4NjIyZGE1NzBhNWM2OWVmYjY4MzM4YTNhOWJjYjAzN2UyMjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZmNjVhMWEwMmE2MWYwNGVjYjAyNjJkMThmYTJiNDZjNjFlNDMyMmRkMmU2MDAwNWJiZDc3OWNlZGM2ZmEzNWMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_97ec488b34364cdfad3f4d4d3bd41398",
+      "statement": "PolicyDocStore is intentionally separate from ApplicationStore and reads shared, read-only policy documents from FIONAA_POLICY_DOCS_BUCKET without customer prefix scoping.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/README.md#L108-L110",
+          "version": "repo-lines-v1:sha256:f97cf47fd6fb8a05d093613dec9efc63ba65404d43abbce09ba2dab17be17983:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDhhMGNhMDRiZWJmMDE3MGU4NjRhZDY4ZjY1MGIxOWFhMDcwMWFlNGNiM2ExZTc4ZTQyZjgyNzhmODAzNTE4NSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFhZTcwNTdkY2FiZTg5ZjE0MmNiNTg5OTExMTFhZjBlMDNlMTNjMDhiOTgyMjBhMjQ4OTJiN2MwOGViYTNhZSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZDg5ZjBlNDhmNGU1YjkxZTY5YjFmOTViODBmMzNiYTkwNTRlYjY4MDUxNGNmYzc4NWZjMjYzZjcxZDZkNzc0ZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMWU0NmU2NDJkYWJmNTAxZjJlMDM0ODYzZWM1ZmM4YWUwMDg4OWJlMjEwNTQ3NTUwODA3MGFjOTZkZGY5NGQ3OSJ9"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/storage.py#L98-L107",
+          "version": "repo-lines-v1:sha256:0db8bcec0edfe032d4fd434de114815eab9bd4252c4f2b3b0fa2a417e3e16b76:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE5MzY1ZGVjMjRhYmU4N2RjYjg1ZjNkYTgxMWQ2MGFmZTg3ZDI3NTAwNzZjNDk1YjZjYWI2OTk3NWIzY2QzOWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZlN2Y0MTM1N2Q1NzQwODI5NGNjZjE4ODY0ODcyNjJkMzJjNTAxODNlNzRhOWRkM2Q4MjE4MmRhYTdiMmYzNjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgzZWZjZjJlZjQ2OTI3ODI5YTg2YjUxOTM4MzEyMmE1MTVhODM1ZjY1ZTk1NzY2MTMzOTdhZThkNjE1ODBhYTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_12ee639325714de2a4f5a0e0abb83371",
+      "statement": "Storage access is expected to fail closed when the identity, session tags, or KMS context do not match the policy boundary, with AccessDenied surfaced as a security-relevant event.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/fionaa_iam_policies.md#L39-L124",
+          "version": "repo-lines-v1:sha256:f77aa61922c95d1bc973541a27b13bd0d86ac2f039411a6eff25f4e139271c6c:eyJzZWxlY3RlZExpbmVDb3VudCI6ODYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ1MjJmODdmNzQ3ZDdiZjExNGZiM2ZmMGU2NGQxOGFhZGJmOWFhZWUxMjhjOTEwYTA2MzA5MTY3MzMwMGRjNzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY5OGJmODA4Yjk0ZGJmM2RiNDkxN2VlOGU4NzI4NGEyYWM4M2UzMzNjMDIxMTNmNjk5ZmZiZWM1Yjc1YjQxYjEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwMWYyZWMxNzU5M2MxMDU0ZWI0NjM2N2Q4NDUzZWYyNGExNzNjZTk2YjcxMTdkOTFmOWE2OGQ0NGZlZjhiMDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAwMWYyZWMxNzU5M2MxMDU0ZWI0NjM2N2Q4NDUzZWYyNGExNzNjZTk2YjcxMTdkOTFmOWE2OGQ0NGZlZjhiMDEifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/storage.py#L47-L52",
+          "version": "repo-lines-v1:sha256:a32c8738af8c0c922eeeaca917db7b834234d75b96e460db138befe5b86dfaaa:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTdhODFmZTkxNjI2YTAxZmYwYTk3M2E0ZjE3NjQzNTEzNTRkZDMwNmZmYTUyYjQ3MjFiZWMzZTg2MmM0ODM4MiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjI5YzUyNDQzNGMwMDlhYWYwZDdmZTllMmZmZTcyMmIxNzBjZjhlYjFjOGMxNTc1ZTRlM2JkNTFlOTI2YzcxYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMTJiMmI2MjQ5YjE5NGEwZmVhNWRmNjE2NTk4ZGYzMTdmNjlmYWU5NmE2M2RlMWEyYjJhMWI5ZWFjZmZjYWNkYSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNzgxMjA2ZGVhMzlmYmQ2NjFhMGI5MzQ0ZGQzYTk0MWQ3NWJmOWUxNGNiYTQwM2UwZTFmMjliZGE2OWJiNzJjOSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_f98825ac0c074f91b6d278ee0a6220f3",
+      "statement": "Focused tests cover email normalization, unsafe identity rejection, JWT-derived identity, missing authorization and email claims, prefix-scoped S3 keys, KMS encryption context, shared policy-bucket access, and configuration validation.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/README.md#L137-L139",
+          "version": "repo-lines-v1:sha256:38cd56759467e99545cf65f54f3f84227bd134614e191f16893bffa9db6bce9c:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNGEyY2M0ZmEyYmUyNTBjYjM2NWU1NGQwOTEzMjgwYzE1MDg0NWVmN2QxMDU0Y2MyZGU4YjZkNTlhOTA4YmY4NSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNGU0YWQ3YWYyODVlOGU1YWI2ODI2OWQ4MjlmYTI5ZWE2ZDg1YjhjYzc1Y2RjOTY3MmMzN2Y3YjU1Y2Q1OTViZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYmYzNzU4Mjg1OTY0MjQwMWY5OTA5NjE2ZTczNmQzMzYyMjZhOThlNGVhNzUwMjhjNDA5MmZmODFiOGE1ZDRlZiJ9"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/config.py#L6-L27",
+          "version": "repo-lines-v1:sha256:f8922b22bd7357bc68a9195cbe9281dc0013688a4002d4f7dd2659ca4ccfc745:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZlNWE4NmIxMmRhZjYwZmZlOTJhMjAzZDgzYjJkNzljOWEyNjYyMDk2Y2Y4ZjE4NjZlZDA3ZDUxZmUwOWY3YzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBlNzZjNGI3MGM2ZTM5Y2ViMTY4MmQ5NDA1ODRjYmNlOWMyOTBmOWFiMzBkY2FlYzZlYWQ5MDJjZTljYmJkZWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNjM2QxYWYzNDhhZTgyYjQzMjBhMmQ5NzcyZGNiYjI4OThiMzgzNjA4ZmMxOWE2OWYzNjNmZTQ5ZDlhMDA0NmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/security.py#L65-L97",
+          "version": "repo-lines-v1:sha256:75cd6a7af591914200ff64c24645859ec7c273de63f4b83a3235e8f22886020a:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIxZTQ1YWQwNGEwY2ZkODAwMjk5ZTU4MTZjNDQ3YzRmODkyODU2MWRlYmQzMjU2YWZlZTc0ZTJmMTA3YWEzYWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU4ODg0YjA3MWNmZjUyOGRjYzllOTU5NDQwYzYzMjllNWQ0MzU2NTBhODA0N2NmOGE3ZDc0OTYzMGQ0OWE1Y2MiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJkMmU1YjYxMjFlNDA5Y2VlN2E1YjAyMjIzYjA2YjRhNzZhZDU0Mjc0N2I4Y2QxYzlkNjVjYThkY2UyNzA1ZmQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUyNWQ4OTdmZjA3ZGQxZmRiNmE4Zjg3Y2JjNzY0N2RlYWE0ZmRkMGQ4OWU2YmViNmU0MTY3MTBiNzYyODNkNGQifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/storage.py#L39-L107",
+          "version": "repo-lines-v1:sha256:49b0e5b1edb2b116763e693b030ca7b40e84f857b79bf2d267d141f3db9ea481:eyJzZWxlY3RlZExpbmVDb3VudCI6NjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0ODE1OTc2YmU3Mzc1OGNjMmU0MjM2NGM2YzUyYmM0OWQxZDYwNzAzYjczYmFiODZlNzljNjhjYTQ5ZTY4Y2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZlN2Y0MTM1N2Q1NzQwODI5NGNjZjE4ODY0ODcyNjJkMzJjNTAxODNlNzRhOWRkM2Q4MjE4MmRhYTdiMmYzNjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFmZDg0ODgwMTdmNmZmYmY3MDY0MGNmZmYyN2NlMDc0MzFjMDBlMzYxYTA0OTYwZmQ4ZTU0OGEyZjViYjAxYTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.5.1",
-    "at": "2026-09-19T09:15:01.080Z"
+    "at": "2026-09-24T15:24:05.146Z"
   }
 }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:ee7cddd923226aab6f9a67ec406cb317feb3708d280737a4fabaddcb68a18294",
+  "pageVersion": "sha256:d203b02e2fb05fc5503c0800b61f7a24cc977f1f91c2074206a25de885c845e3",
   "claims": [
     {
       "id": "claim_a4cb215951a844b4b2bf82f4457d387d",
@@ -83,10 +83,52 @@
           "version": "repo-lines-v1:sha256:680a6d7910fb9fa001b2638ff0938f839b5295946bd73aa8e556fe6e873c680d:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA0NGViM2NlYWExMDU2YjE0ZjE0YmVkOTQyOGIzZDE0ZTZkYmE4OThjNzkzNzdkOGJlZWZkZTRkMjg1MjVlMjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE1NmIxM2M2ODViZWQ3MjYwMzc2NDkyM2JmMGJkZDBlNTYwZTZmNTRmNTZjNmFlMGRhMGM3NTdkNzNjZGYzYmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRkNzVmZGI5ODE0MDc3M2MxNzE3NWVkODIwODBkYjMzZGEwNWQ1OTA2NDk3NDNlM2QzNzI3ZDk0NmMwZGQ1YzQifQ"
         }
       ]
+    },
+    {
+      "id": "claim_5da3a46169d54d85902559da719f772b",
+      "statement": "Quickstart is an orientation hub that routes readers to the runtime entrypoint, graph workflow, security and storage boundary, deployment operations, and testing pages instead of duplicating subsystem details.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/README.md#L91-L106",
+          "version": "repo-lines-v1:sha256:9114e112902ce18d68cda5eb6c8e125ed09aa3cef4322315ce372c5ccba90a63:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc1MjkwNTFkZjg0NmNkN2RlMTFhZGM2ZWRhZDY2OTg0YjU1YzQ5YTlmOGY0YzRjZjQwMzg2MTkxYWY1MmZlNGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUwZWFjNzRmMGNmMjI5YjE3YzZjYjM3NTAyMDljYTg3ZTBiYzg2MGJmMjhkNmYwZjYyNWE2MzY3NGNkNzcxM2MiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUzMTBjNzFjYWRkNDYwZTM4ZjdiMTYzZTZlODM5Yzk0ZmUyM2RlYmJhNjg3MWQ0MTM2OTExMGI2MWMxNWFlOTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlmNDcwZGQxN2M3MTMyZjAyY2E0YTkzNmVmMDljMGU1OTFmZWFhMWMwNzcyMTlmZWUyMTRkNGUxYTE4MWNiNzQifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/graph.py#L27-L90",
+          "version": "repo-lines-v1:sha256:fc1832e87e4d4860d7c46ab2507d5da7dc5823c64f6193595b7914bc9281c0af:eyJzZWxlY3RlZExpbmVDb3VudCI6NjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU1MWZlN2QzMGE2OTczYzM1ZDA0ZTJmMWU2MTY0ZjNiM2I0YjlkZjUxYjIwNzBhNWM0MTgxZWFjYmYzOTRhMjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUyMGQyOTMyMjI4MDBlYzEzNmM4MWM3MGVlNjkzZjQyMzc5NmRjMjJmZTg1Y2YyYTE5ZTkyMTg1NGVkYWFhMGMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ1ZTBmOTM2Yjc3YWU4NzM3YzgwYmFiNTA3MDZiZWMzYTlmYjJjYjI0NmI2MDdlMGQ5YzU4YTJiOTc0MWUzOWUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI2YjdiOGQ1Y2I1NWI0YzZlMWFlOTc4ZTUyMTg5MWJiM2JmZTA2YzAyODlkNjdhNWUyNzEzYTlmZjNiMjQyYTYifQ"
+        },
+        {
+          "resource": "repo://fionaa/app/src/fionaa/main.py#L18-L53",
+          "version": "repo-lines-v1:sha256:7e643ee476349718b8a497756d3c84581744144275440bdc5f05d7441b9837bd:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2OGNjNTJmMDYwY2ZhZTUxMmNiZDY0MzczZThhZWRmNzkyNTY3Y2JkZDQyMGIzMDYyMzg4M2FmOTQ1MzFkZjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3MzUxZTZiNGQyNTAwNTE1YWNjZmIwOGM3ZjM1Mjc5N2ZiMTIxYTMxOGU4ZmNkNTBhNDNhYTU4YzUwNjA4ZjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUxNmUwYjYyNTU1ZDhmMjc2NmZhMjcyNGZlODBmMThkYWUxN2U3Nzc0NTZmMTdlOGI1MzA0YWE3OGMwMGJhNTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc3MGU0YjkyOWFiZjRjN2U3NjI1YWZjMzM5ZWQwMzhiNDQ0ZDU3MGU4N2Q2Yzk3NTM0ZDc0NTA0OWI4ZGVhY2YifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_06868489cae44ea9958a9a571f8fbd92",
+      "statement": "The repo distinguishes the source-archive bootstrap in `app/main.py`, the installed package runtime entrypoint in `app/src/fionaa/main.py`, and the deployment configuration in `agentcore/agentcore.json`.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/README.md#L146-L150",
+          "version": "repo-lines-v1:sha256:36a34a31bec0133e68ae0bce4d3238becc4bd96bb7827febe8876a83d445d907:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYmZlMDUyNDI1M2I3NmM3OTc0OThjYWU0ZTQzYTI0M2NkNWQ4MDU0MjQ5MmU1ZTg3ZTcxMWU0MTA0OTljYTYwMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDEwYjliZTJmNzMwM2Y4ODRkOTI2NDFkYmVmNTFlZWNkNDE1NjUwNmUyYThhZWQwNGE2ZTZjNjA0NTIwYjMwNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDhhZjdlZjVjNzYyMDNmNTNlODljYmViNDFhNmY5MjMyZTNhYmQzOGMwMzZhNDdhMGI1MDllYmMyN2NiYmRlZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOThkMTQ2MTQ4MDdmOTdlOWRkYzFlOTBmZGE5ZjY4YWQzM2MxMDM1OTgyODM5OGQ0MjViYWFjOWExNzgyZTgyOCJ9"
+        },
+        {
+          "resource": "repo://fionaa/app/README.md#L5-L12",
+          "version": "repo-lines-v1:sha256:e2d33d5cabef3fd9b259351d568de17e0c769a692cb70402ebb21a73fcac2147:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDVmODAzMjE3NmFjZmFmMzQ1OGUyODIyZGRlNzY4MzA5YmFhZTdhOThkZTMwNjQxOWM5ZWQwNDY2NmU1ZjExMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZWUyODdkNDhkYjIzZjM3Y2ZjMjI3NGVkZTEyOGQ0NDZiMjkzMDU3MWM2OGVlNmE1NzAwNjI1Y2IwMDM5NmMxZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOGM3NjI3MGFjYzFlYTc2ZjA4ZTZkYTQ4NjBkZDgwMWE1YjllNTkzMDQyYTEyNDBlNDY2NWU0NGE2YmJkNTU5YiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjYzNjYwYmFmNTAyZTk5ZWI5N2NlYzY5YmE0YTY5NjQ3OGYwZTdmNjk1NDExZGM3YTdmMjk3M2VmYjc2Yzc3NyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_95a3d9a509b04bd0a83e9bf9b271cd03",
+      "statement": "The documented local sanity check is to activate the venv, run `agentcore dev`, and then invoke the agent with `agentcore invoke --dev \"What can you do\"`.",
+      "evidence": [
+        {
+          "resource": "repo://fionaa/app/README.md#L22-L32",
+          "version": "repo-lines-v1:sha256:8ab95a95fc4f670abc25715ea93c64915a11237d6ba75c7c3300e901f22b84c1:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU3YTIxYzljZjI4NDcwOGRiMjkwYmEzNjc3ZTQzN2JjZTQ0NGFjZmVmYjVjZjljYjhlM2M1Yjg2NTEyMTA3NjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE1OWI2YmEzYzJhNWJlMmMwNDEzNGUyZmY3ZDE5MTY5M2JiMDRkODQ0NDZiOGYyNjIzNzdjZGEwNGFhY2JhZTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcyY2JmNjk3ODZjMmFhZTZlYmI1ODVlZWEwNmNiYTQzYTYyZDgzNjcwYmVkODk0ZGVjOWE2NTZmYzQ4OTMyNTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ2ZjZjN2QxZjhiMWJkMjcyNjFkNDM0NDU4ODcxMjk4MzEyZDk5NDA1MTE1MWYyMTFjNGU3NzZhN2ZkNGE0NGEifQ"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.5.1",
-    "at": "2026-09-19T09:15:01.080Z"
+    "at": "2026-09-24T15:24:05.146Z"
   }
 }

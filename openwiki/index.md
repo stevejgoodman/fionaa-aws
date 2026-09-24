@@ -4,7 +4,7 @@ okf_version: "0.2"
 
 # Files
 
-- [Quickstart](quickstart.md) - Top-level routing hub for the repo; start here to reach the runtime entrypoints, graph wiring, security boundaries, deployment and eval operations, and unit tests that own implementation detail.
+- [Quickstart](quickstart.md) - Top-level routing hub for FIONAA; start here to reach the runtime entrypoint, graph workflow, security and storage boundary, deployment operations, and the test suites that protect safe changes.
 
 # Directories
 

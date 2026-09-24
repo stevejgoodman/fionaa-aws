@@ -13,9 +13,6 @@ sources:
   - id: openwiki-source-390e0e1580d7800bafd263bc
     resource: repo://fionaa/evals/automated_reasoning/test_live_guardrail.py
 generated: { by: "openwiki/0.5.1", at: "2026-09-19T09:15:01.080Z" }
-verified:
-  - by: openwiki/0.5.1
-    at: 2026-09-19T09:15:01.080Z
 ---
 
 # Human-review publication and validation workflow
