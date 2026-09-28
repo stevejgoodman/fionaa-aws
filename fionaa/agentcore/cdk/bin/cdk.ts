@@ -1,7 +1,12 @@
 #!/usr/bin/env node
 import { AgentCoreStack, type HarnessConfig } from '../lib/cdk-stack';
 import { SecurityFoundationsStack } from '../lib/security-foundations-stack';
-import { ConfigIO, HarnessSpecSchema, type AwsDeploymentTarget } from '@aws/agentcore-cdk';
+import {
+  readAgentCoreProject,
+  AgentCoreProjectSpecSchema,
+  HarnessSpecSchema,
+  type AwsDeploymentTarget,
+} from '@aws/agentcore-cdk';
 import { App, type Environment } from 'aws-cdk-lib';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -22,12 +27,15 @@ function toStackName(projectName: string, targetName: string): string {
 }
 
 async function main() {
-  // Config root is parent of cdk/ directory. The CLI sets process.cwd() to agentcore/cdk/.
-  const configRoot = path.resolve(process.cwd(), '..');
-  const configIO = new ConfigIO({ baseDir: configRoot });
+  // readAgentCoreProject walks up from cwd (the CLI sets it to agentcore/cdk/) to find
+  // agentcore/agentcore.json, and reads aws-targets.json + .cli/deployed-state.json
+  // alongside it. Replaces the old ConfigIO class (removed in @aws/agentcore-cdk 1.0).
+  const project = readAgentCoreProject();
+  const { configRoot, projectRoot, targets, deployedState } = project;
 
-  const spec = await configIO.readProjectSpec();
-  const targets = await configIO.readAWSDeploymentTargets();
+  // agentCoreJson is intentionally untyped by readAgentCoreProject (it doesn't assume a
+  // schema version); validate it ourselves against the v2 spec schema.
+  const spec = AgentCoreProjectSpecSchema.parse(project.agentCoreJson);
 
   // The vended CDK project compiles against the published @aws/agentcore-cdk
   // schema type, which may lag the CLI's own AgentCoreProjectSpec (e.g. payments,
@@ -35,31 +43,45 @@ async function main() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const specAny = spec as any;
 
-  // Extract MCP configuration from project spec.
-  // Gateway fields are stored in agentcore.json but may not yet be on the
-  const mcpSpec = specAny.agentCoreGateways?.length
-    ? {
-        agentCoreGateways: specAny.agentCoreGateways,
-        mcpRuntimeTools: specAny.mcpRuntimeTools,
-        unassignedTargets: specAny.unassignedTargets,
-      }
-    : undefined;
-
-  // Read deployed state for credential ARNs (populated by pre-deploy identity setup)
-  let deployedState: Record<string, unknown> | undefined;
-  try {
-    deployedState = JSON.parse(fs.readFileSync(path.join(configRoot, '.cli', 'deployed-state.json'), 'utf8'));
-  } catch {
-    // Deployed state may not exist on first deploy
-  }
+  // Gateways: AgentCoreApplication now creates these itself from spec.agentCoreGateways
+  // (@aws/agentcore-cdk 1.0 removed the separate AgentCoreMcp construct/mcpSpec this app
+  // used to build by hand) — nothing to extract here anymore.
 
   if (targets.length === 0) {
     throw new Error('No deployment targets configured. Please define targets in agentcore/aws-targets.json');
   }
 
-  // Read harness configs: the full validated spec drives the CFN resource; the
-  // role-scoped fields drive the IAM role + container build.
-  const projectRoot = path.resolve(configRoot, '..');
+  // Per-account IAM Identity Center (SSO) role ARN for local-dev access to
+  // FionaaDataAccessRole (see cdk-stack.ts's localDevRoleArn). Optional file --
+  // an account with no entry here just gets no local-dev grant.
+  let localDevRolesByAccount: Record<string, string> = {};
+  try {
+    localDevRolesByAccount = JSON.parse(fs.readFileSync(path.join(configRoot, 'local-dev-roles.json'), 'utf8'));
+  } catch {
+    // File may not exist -- local-dev access is opt-in per account.
+  }
+
+  // Per-account Cognito app client for AgentCore Gateway access (see cdk-stack.ts's
+  // gatewayClient). Each account needs its own entry -- cdk-stack.ts throws at synth
+  // time for a target account with none, rather than deploying a Runtime that can
+  // never call the Gateway.
+  let gatewayClientsByAccount: Record<string, { clientId: string; secretArn: string }> = {};
+  try {
+    gatewayClientsByAccount = JSON.parse(fs.readFileSync(path.join(configRoot, 'gateway-credentials.json'), 'utf8'));
+  } catch {
+    // File may not exist yet during early bootstrapping.
+  }
+
+  // Existing S3 bucket to reuse per account (see cdk-stack.ts's existingApplicationsBucketName).
+  // An account with no entry gets its own fresh bucket instead of sharing prod's.
+  let applicationsBucketOverridesByAccount: Record<string, string> = {};
+  try {
+    applicationsBucketOverridesByAccount = JSON.parse(
+      fs.readFileSync(path.join(configRoot, 'applications-bucket-overrides.json'), 'utf8')
+    );
+  } catch {
+    // File may not exist -- every account then gets its own bucket.
+  }
 
   // Read non-S3 KB connector-config files and pass their parsed contents to the
   // L3 verbatim. The L3 does not read files; it expects the parsed
@@ -96,9 +118,11 @@ async function main() {
       harnessConfigs.push({
         name: entry.name,
         executionRoleArn: harnessSpec.executionRoleArn,
-        // Only an `existing` memory ref carries a name to wire IAM against; managed memory is
-        // owned by the harness (no sibling) and disabled has none — both resolve to undefined.
-        memoryName: harnessSpec.memory?.mode === 'existing' ? harnessSpec.memory.name : undefined,
+        // @aws/agentcore-cdk 1.0 replaced memoryName (an `existing`-mode memory ref, used to
+        // scope IAM against a named sibling memory) with managedMemory: AgentCoreApplication
+        // now resolves an `existing` ref's IAM itself from harnessSpec below; this role only
+        // needs to know whether the harness's OWN runtime role talks to harness-managed memory.
+        managedMemory: harnessSpec.memory?.mode === 'managed',
         containerUri: harnessSpec.containerUri,
         hasDockerfile: !!harnessSpec.dockerfile,
         dockerfile: harnessSpec.dockerfile,
@@ -123,28 +147,40 @@ async function main() {
   const app = new App();
 
   // Account/region-level security foundations (CloudTrail, Inspector, cost
-  // alarms/budgets, Macie) are singletons, not per-AgentCore-target
-  // resources -- deploy once per distinct (account, region), not once per
-  // entry in aws-targets.json. Today there's exactly one target; if more are
-  // ever added in different accounts/regions, dedupe by `${account}/${region}`
-  // here before instantiating another SecurityFoundationsStack.
-  const firstTarget = targets[0];
-  new SecurityFoundationsStack(app, `AgentCore-${sanitize(spec.name)}-security-foundations`, {
-    env: toEnvironment(firstTarget),
-    description: `Account-level security foundations (CloudTrail, Inspector, Bedrock cost/consumption alarms, Macie) for ${spec.name}`,
-    notificationEmail: process.env.FIONAA_SECURITY_ALERTS_EMAIL,
-  });
+  // alarms/budgets, Macie) are singletons, not per-AgentCore-target resources --
+  // deploy once per distinct (account, region), not once per entry in
+  // aws-targets.json. Now that dev (046451669835) and prod (492646066653) are
+  // separate accounts, dedupe by `${account}/${region}` so each account gets
+  // its own copy instead of only the first target's account getting one.
+  const seenAccountRegions = new Set<string>();
+  for (const target of targets) {
+    const key = `${target.account}/${target.region}`;
+    if (seenAccountRegions.has(key)) continue;
+    const isFirstAccountRegion = seenAccountRegions.size === 0;
+    seenAccountRegions.add(key);
+    // The first (account, region) keeps the original unsuffixed stack name --
+    // that's prod's already-deployed stack (targets[0] is "default"/492646066653
+    // in aws-targets.json), and renaming it would orphan it exactly like the
+    // AgentCoreStack risk documented in multi-account-dev-prod.md. Every
+    // additional account (dev, and any future ones) gets its own suffixed stack.
+    const stackName = isFirstAccountRegion
+      ? `AgentCore-${sanitize(spec.name)}-security-foundations`
+      : `AgentCore-${sanitize(spec.name)}-security-foundations-${sanitize(target.name)}`;
+    new SecurityFoundationsStack(app, stackName, {
+      env: toEnvironment(target),
+      description: `Account-level security foundations (CloudTrail, Inspector, Bedrock cost/consumption alarms, Macie) for ${spec.name}`,
+      notificationEmail: process.env.FIONAA_SECURITY_ALERTS_EMAIL,
+    });
+  }
 
   for (const target of targets) {
     const env = toEnvironment(target);
     const stackName = toStackName(spec.name, target.name);
 
-    // Extract credentials from deployed state for this target
-    const targetState = (deployedState as Record<string, unknown>)?.targets as
-      Record<string, Record<string, unknown>> | undefined;
-    const targetResources = targetState?.[target.name]?.resources as Record<string, unknown> | undefined;
-    const credentials = targetResources?.credentials as
-      Record<string, { credentialProviderArn: string; clientSecretArn?: string }> | undefined;
+    // Extract credentials from deployed state for this target. readAgentCoreProject
+    // validates deployed-state.json against DeployedStateSchema, so this is typed
+    // end-to-end now instead of the manual JSON.parse + cast chain ConfigIO needed.
+    const credentials = deployedState?.targets[target.name]?.resources?.credentials;
 
     // Payment credential provider ARNs live in the same credentials map as identity credentials
     const paymentCredentials = credentials;
@@ -187,11 +223,14 @@ async function main() {
 
     new AgentCoreStack(app, stackName, {
       spec,
-      mcpSpec,
+      projectRoot,
       credentials,
       connectorParametersByFile,
       harnesses: harnessConfigs.length > 0 ? harnessConfigs : undefined,
       paymentSpec,
+      localDevRoleArn: localDevRolesByAccount[target.account],
+      gatewayClient: gatewayClientsByAccount[target.account],
+      existingApplicationsBucketName: applicationsBucketOverridesByAccount[target.account],
       env,
       description: `AgentCore stack for ${spec.name} deployed to ${target.name} (${target.region})`,
       tags: {

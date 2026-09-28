@@ -1,14 +1,12 @@
 import {
   AgentCoreApplication,
-  AgentCoreMcp,
   AgentCorePaymentManager,
   AgentCorePaymentConnector,
   type AgentCoreProjectSpec,
-  type AgentCoreMcpSpec,
   type CustomJWTAuthorizerConfig,
   type HarnessDeploymentConfig,
 } from '@aws/agentcore-cdk';
-import { CfnOutput, Duration, RemovalPolicy, Stack, type StackProps } from 'aws-cdk-lib';
+import { Annotations, CfnOutput, Duration, RemovalPolicy, Stack, type StackProps } from 'aws-cdk-lib';
 import * as bedrock from 'aws-cdk-lib/aws-bedrock';
 import * as bedrockagentcore from 'aws-cdk-lib/aws-bedrockagentcore';
 import * as logs from 'aws-cdk-lib/aws-logs';
@@ -52,9 +50,10 @@ export interface AgentCoreStackProps extends StackProps {
    */
   spec: AgentCoreProjectSpec;
   /**
-   * The MCP specification containing gateways and servers.
+   * Absolute path of the project root (the directory containing `agentcore/`). Required by
+   * @aws/agentcore-cdk 1.0's AgentCoreApplication to resolve every relative path in the spec.
    */
-  mcpSpec?: AgentCoreMcpSpec;
+  projectRoot: string;
   /**
    * Credential provider ARNs from deployed state, keyed by credential name.
    */
@@ -72,6 +71,28 @@ export interface AgentCoreStackProps extends StackProps {
    * Payment specifications with resolved credential provider ARNs.
    */
   paymentSpec?: PaymentSpec[];
+  /**
+   * IAM Identity Center (SSO) role ARN allowed to assume FionaaDataAccessRole locally
+   * (`agentcore dev`), for this stack's account. Each account has its own SSO permission-set
+   * role ARN (the hash suffix is account-specific, not shared) — see
+   * agentcore/local-dev-roles.json. Omit for an account with no local-dev grant configured.
+   */
+  localDevRoleArn?: string;
+  /**
+   * This account's own AgentCore Gateway OAuth client, for reaching the shared
+   * claimsagent-claimsgateway Gateway (owned by a separate stack, always in the
+   * Gateway-owner account -- see agentcore/gateway-credentials.json). Each account gets its
+   * own Cognito app client + Secrets Manager secret so a credential leak in one account
+   * can't be used against another. Required for any account whose Runtime calls the Gateway.
+   */
+  gatewayClient?: { clientId: string; secretArn: string };
+  /**
+   * Name of an existing S3 bucket to reuse for application data + loan policy documents
+   * (prod's case, sourced from agentcore/applications-bucket-overrides.json). Omit to have
+   * this stack create its own bucket instead of reusing prod's -- see the reasoning at
+   * the FionaaApplicationsBucket construct below.
+   */
+  existingApplicationsBucketName?: string;
 }
 
 function toCdkId(name: string): string {
@@ -85,11 +106,11 @@ function toCdkId(name: string): string {
  * would surface env vars they cannot consume and would dilute least-privilege
  * IAM grants for runtimes that never call ProcessPayment.
  */
-function isPaymentEligibleAgent(agent: { entrypoint?: string; protocol?: string }): boolean {
-  if (agent.protocol && agent.protocol !== 'HTTP') {
+function isPaymentEligibleAgent(spec: { entrypoint?: string; protocol?: string }): boolean {
+  if (spec.protocol && spec.protocol !== 'HTTP') {
     return false;
   }
-  const entrypoint = typeof agent.entrypoint === 'string' ? agent.entrypoint : '';
+  const entrypoint = typeof spec.entrypoint === 'string' ? spec.entrypoint : '';
   const entrypointFile = entrypoint.split(':')[0] ?? '';
   return entrypointFile.endsWith('.py');
 }
@@ -107,11 +128,24 @@ export class AgentCoreStack extends Stack {
   constructor(scope: Construct, id: string, props: AgentCoreStackProps) {
     super(scope, id, props);
 
-    const { spec, mcpSpec, credentials, harnesses, connectorParametersByFile, paymentSpec } = props;
+    const {
+      spec,
+      projectRoot,
+      credentials,
+      harnesses,
+      connectorParametersByFile,
+      paymentSpec,
+      localDevRoleArn,
+      gatewayClient,
+      existingApplicationsBucketName,
+    } = props;
 
-    // Create AgentCoreApplication with all agents and harness roles
+    // Create AgentCoreApplication with all agents, harness roles, and — as of
+    // @aws/agentcore-cdk 1.0 — gateways too (the spec's agentCoreGateways entries are
+    // synthesized internally; the separate AgentCoreMcp construct this stack used to
+    // instantiate by hand no longer exists).
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const appProps: Record<string, unknown> = { spec };
+    const appProps: Record<string, unknown> = { spec, projectRoot };
     if (harnesses?.length) {
       appProps.harnesses = harnesses;
     }
@@ -123,34 +157,38 @@ export class AgentCoreStack extends Stack {
     }
     this.application = new AgentCoreApplication(this, 'Application', appProps as any);
 
-    // Create AgentCoreMcp if there are gateways configured
-    if (mcpSpec?.agentCoreGateways && mcpSpec.agentCoreGateways.length > 0) {
-      new AgentCoreMcp(this, 'Mcp', {
-        projectName: spec.name,
-        mcpSpec,
-        agentCoreApplication: this.application,
-        credentials,
-        projectTags: spec.tags,
-      });
-    }
-
     // Fionaa per-customer data isolation: FionaaDataAccessRole, tenant KMS key,
     // and the checkpoint memory's IAM/env wiring. See
     // app/fionaa/fionaa_iam_policies.md for the design this implements, and
     // app/fionaa/fionaa_scoped_agent.py for the code that consumes these env vars.
-    const fionaaEnv = this.application.environments.get('fionaa');
+    const fionaaEnv = this.application.runtimeEnvironments.get('fionaa');
     const checkpointMemory = this.application.memories.get('FionaaCheckpoint');
     if (fionaaEnv && checkpointMemory) {
-      // Reuses the existing bucket already holding real policy-doc content
-      // (see stevetesting.ipynb's S3 smoke test) rather than standing up a
-      // fresh, empty one.
-      const applicationsBucket = s3.Bucket.fromBucketName(this, 'FionaaApplicationsBucket', 'fionaa-6655-assets');
-
       const tenantKey = new kms.Key(this, 'FionaaTenantKey', {
         description: 'Encrypts customer application data in the Fionaa applications bucket',
         alias: 'fionaa-tenant-key',
         enableKeyRotation: true,
       });
+
+      // Prod reuses its existing bucket (already holding real policy-doc content --
+      // see stevetesting.ipynb's S3 smoke test), which has no bucket policy, so it's
+      // only ever reachable from its own account. Every other account (dev, and any
+      // future one with no override here) gets its own bucket instead of silently
+      // sharing prod's physical bucket with zero cross-account grant -- which is
+      // what happened before this was parameterized: dev's stack referenced this
+      // same literal bucket name and could neither read nor write to it at all.
+      const applicationsBucket = existingApplicationsBucketName
+        ? s3.Bucket.fromBucketName(this, 'FionaaApplicationsBucket', existingApplicationsBucketName)
+        : new s3.Bucket(this, 'FionaaApplicationsBucket', {
+            encryption: s3.BucketEncryption.KMS,
+            encryptionKey: tenantKey,
+            blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+            enforceSSL: true,
+            // This account's data is disposable by design (see multi-account-dev-prod.md)
+            // -- destroying the bucket on stack teardown, not orphaning it, is the point.
+            removalPolicy: RemovalPolicy.DESTROY,
+            autoDeleteObjects: true,
+          });
 
       // Let the AgentCore Memory service encrypt/decrypt checkpoint data at
       // rest with this account's own key rather than a service-owned one
@@ -283,6 +321,22 @@ export class AgentCoreStack extends Stack {
       // the same reasoning applied to S3 evidence/dashboard redaction).
       // IAM enforcement (denying model calls that omit this guardrail) is a
       // deliberate follow-up, not done here -- see EVALS.md.
+      // Referenced again below for IAM: STANDARD-tier cross-region guardrail invocation
+      // actually routes through this profile, so bedrock:ApplyGuardrail must be granted
+      // on the profile ARN as well as the guardrail's own ARN -- discovered live (a dev
+      // invocation's contextual-grounding check silently failed with AccessDeniedException
+      // on this exact profile ARN, caught by the app's own fallback path rather than
+      // crashing, so it never surfaced as a hard error). Granting only the guardrail ARN
+      // was the original policy; this account and prod share the same runtime role code,
+      // so prod has almost certainly been silently failing the same grounding check on
+      // every invocation, not just dev.
+      const guardrailProfileArn = `arn:aws:bedrock:${this.region}:${this.account}:guardrail-profile/us.guardrail.v1:0`;
+      // The IAM grant needs a wildcard region, not `guardrailProfileArn`'s single region:
+      // "us." cross-region routing can dispatch a single ApplyGuardrail call to any US
+      // region in the profile (confirmed live -- one dev invocation routed through
+      // us-east-1, the very next one through us-east-2, each denied separately until
+      // this covered every region).
+      const guardrailProfileArnForAnyRegion = `arn:aws:bedrock:*:${this.account}:guardrail-profile/us.guardrail.v1:0`;
       const guardrail = new bedrock.CfnGuardrail(this, 'FionaaGuardrail', {
         name: 'fionaa-guardrail',
         description: 'Prompt-attack/content filtering + non-business-PII masking for the fionaa loan agent',
@@ -290,7 +344,7 @@ export class AgentCoreStack extends Stack {
         blockedOutputsMessaging: 'This response could not be processed.',
         // STANDARD content-filter tier requires cross-Region inference.
         crossRegionConfig: {
-          guardrailProfileArn: `arn:aws:bedrock:${this.region}:${this.account}:guardrail-profile/us.guardrail.v1:0`,
+          guardrailProfileArn,
         },
         contentPolicyConfig: {
           // STANDARD tier adds prompt-leakage detection on top of the
@@ -364,6 +418,29 @@ export class AgentCoreStack extends Stack {
           },
         })
       );
+
+      // Lets a developer running `agentcore dev` locally (under this account's SSO
+      // role, not the deployed runtime's own execution role) assume this role the
+      // same way the runtime does -- same tag conditions apply, so a local session
+      // still can't smuggle extra tags or omit customer_id. The SSO permission-set
+      // role ARN's hash suffix is account-specific (confirmed: prod and dev have
+      // different hashes despite the same permission-set name), so this is passed
+      // in per-account from agentcore/local-dev-roles.json rather than hardcoded --
+      // omitted entirely for an account with no entry there.
+      if (localDevRoleArn) {
+        dataAccessRole.assumeRolePolicy?.addStatements(
+          new iam.PolicyStatement({
+            sid: 'LocalDevOnly',
+            effect: iam.Effect.ALLOW,
+            principals: [new iam.ArnPrincipal(localDevRoleArn)],
+            actions: ['sts:AssumeRole', 'sts:TagSession'],
+            conditions: {
+              StringLike: { 'aws:RequestTag/customer_id': '?*' },
+              'ForAllValues:StringEquals': { 'aws:TagKeys': ['customer_id', 'application_id'] },
+            },
+          })
+        );
+      }
 
       dataAccessRole.addToPolicy(
         new iam.PolicyStatement({
@@ -514,32 +591,57 @@ export class AgentCoreStack extends Stack {
         new iam.PolicyStatement({
           sid: 'ApplyFionaaGuardrail',
           actions: ['bedrock:ApplyGuardrail'],
-          resources: [guardrail.attrGuardrailArn],
+          resources: [guardrail.attrGuardrailArn, guardrailProfileArnForAnyRegion],
         })
       );
 
-      // AgentCore Gateway — reused from the existing ClaimsAgent stack rather
-      // than standing up a new one. The client secret is a real credential:
-      // it's resolved from Secrets Manager at call time (see
+      // AgentCore Gateway — reused from the existing ClaimsAgent stack rather than
+      // standing up a new one. It lives permanently in the Gateway-owner account
+      // (492646066653, the same account as prod today) regardless of which account THIS
+      // stack is deploying into -- so the Gateway URL and the Cognito token endpoint's
+      // host are fixed literals, never templated off `this.account`/`this.region`.
+      // Previously this used `${this.account}` for both the token endpoint and the
+      // client-secret ARN, which happened to be correct only because prod was the only
+      // account that existed; deploying to any other account silently pointed at
+      // Cognito/Secrets Manager resources that don't exist there.
+      //
+      // Each account gets its OWN Cognito app client + its own Secrets Manager secret
+      // (via the `gatewayClient` prop, sourced from agentcore/gateway-credentials.json)
+      // rather than sharing prod's credential, so a leak in one account can't be used
+      // to call the Gateway as another. The client secret is a real credential: it's
+      // resolved from Secrets Manager at call time (see
       // fionaa_scoped_agent._gateway_client_secret), never a plain env var.
-      const gatewaySecret = secretsmanager.Secret.fromSecretCompleteArn(
-        this,
-        'FionaaGatewayClientSecret',
-        `arn:aws:secretsmanager:${this.region}:${this.account}:secret:fionaa/agentcore-gateway-client-secret-ZuXvPz`
-      );
-      gatewaySecret.grantRead(fionaaEnv.runtime.role);
+      // Annotations.addError (not throw) so a missing credential for THIS account
+      // fails only this stack's deploy, rather than throwing during construction and
+      // crashing the whole `App`/process before app.synth() runs -- which would take
+      // every other target's stack down with it (see bin/cdk.ts's single per-process
+      // loop over all of aws-targets.json).
+      if (!gatewayClient) {
+        Annotations.of(this).addError(
+          `No Gateway OAuth client configured for account ${this.account} in agentcore/gateway-credentials.json ` +
+            '-- the Fionaa runtime cannot call claimsagent-claimsgateway (Companies House, web search, ' +
+            'location tools) without one. Create a Cognito app client scoped to this account and add it there.'
+        );
+      } else {
+        const gatewaySecret = secretsmanager.Secret.fromSecretCompleteArn(
+          this,
+          'FionaaGatewayClientSecret',
+          gatewayClient.secretArn
+        );
+        gatewaySecret.grantRead(fionaaEnv.runtime.role);
 
-      fionaaEnv.runtime.addEnvironmentVariable(
-        'AGENTCORE_GATEWAY_URL',
-        'https://claimsagent-claimsgateway-glrrsnaalt.gateway.bedrock-agentcore.us-east-1.amazonaws.com/mcp'
-      );
-      fionaaEnv.runtime.addEnvironmentVariable(
-        'AGENTCORE_GATEWAY_TOKEN_ENDPOINT',
-        `https://claims-agent-${this.account}.auth.us-east-1.amazoncognito.com/oauth2/token`
-      );
-      fionaaEnv.runtime.addEnvironmentVariable('AGENTCORE_GATEWAY_OAUTH_SCOPES', 'agentcore/invoke');
-      fionaaEnv.runtime.addEnvironmentVariable('AGENTCORE_GATEWAY_CLIENT_ID', 'qcqj6bgve5u8c2bg1qkiobsps');
-      fionaaEnv.runtime.addEnvironmentVariable('AGENTCORE_GATEWAY_CLIENT_SECRET_ARN', gatewaySecret.secretArn);
+        fionaaEnv.runtime.addEnvironmentVariable(
+          'AGENTCORE_GATEWAY_URL',
+          'https://claimsagent-claimsgateway-glrrsnaalt.gateway.bedrock-agentcore.us-east-1.amazonaws.com/mcp'
+        );
+        fionaaEnv.runtime.addEnvironmentVariable(
+          'AGENTCORE_GATEWAY_TOKEN_ENDPOINT',
+          'https://claims-agent-492646066653.auth.us-east-1.amazoncognito.com/oauth2/token'
+        );
+        fionaaEnv.runtime.addEnvironmentVariable('AGENTCORE_GATEWAY_OAUTH_SCOPES', 'agentcore/invoke');
+        fionaaEnv.runtime.addEnvironmentVariable('AGENTCORE_GATEWAY_CLIENT_ID', gatewayClient.clientId);
+        fionaaEnv.runtime.addEnvironmentVariable('AGENTCORE_GATEWAY_CLIENT_SECRET_ARN', gatewaySecret.secretArn);
+      }
 
       // AgentCore Gateway Lambda target: "is this the same area?" tool, backing
       // the check_companies_house node's address-equivalence check (Ruislip vs
@@ -620,8 +722,8 @@ export class AgentCoreStack extends Stack {
         // See isPaymentEligibleAgent — non-Python or non-HTTP runtimes have no shim that
         // can consume these env vars, and giving them sts:AssumeRole on the
         // ProcessPaymentRole would broaden the privilege surface unnecessarily.
-        for (const env of this.application.environments.values()) {
-          if (!isPaymentEligibleAgent(env.agent)) {
+        for (const env of this.application.runtimeEnvironments.values()) {
+          if (!isPaymentEligibleAgent(env.spec)) {
             continue;
           }
           env.runtime.addEnvironmentVariable(`${prefix}_MANAGER_ARN`, manager.paymentManagerArn);
@@ -690,8 +792,8 @@ export class AgentCoreStack extends Stack {
 
           // Wire first connector's ID as env var (eligible agents only)
           if (connector === payment.connectors[0]) {
-            for (const env of this.application.environments.values()) {
-              if (!isPaymentEligibleAgent(env.agent)) continue;
+            for (const env of this.application.runtimeEnvironments.values()) {
+              if (!isPaymentEligibleAgent(env.spec)) continue;
               env.runtime.addEnvironmentVariable(`${prefix}_CONNECTOR_ID`, conn.paymentConnectorId);
             }
           }

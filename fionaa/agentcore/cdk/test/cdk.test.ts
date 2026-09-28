@@ -5,9 +5,10 @@ import { AgentCoreStack } from '../lib/cdk-stack';
 test('AgentCoreStack synthesizes with empty spec', () => {
   const app = new cdk.App();
   const stack = new AgentCoreStack(app, 'TestStack', {
+    projectRoot: '/tmp/testproject',
     spec: {
       name: 'testproject',
-      version: 1,
+      version: 2,
       managedBy: 'CDK' as const,
       runtimes: [],
       memories: [],
@@ -18,9 +19,6 @@ test('AgentCoreStack synthesizes with empty spec', () => {
       policyEngines: [],
       payments: [],
       agentCoreGateways: [],
-      mcpRuntimeTools: [],
-      unassignedTargets: [],
-      datasets: [],
       knowledgeBases: [],
     },
   });

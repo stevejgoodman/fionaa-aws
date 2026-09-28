@@ -23,8 +23,8 @@
     "typescript": "~5.9.3"
   },
   "dependencies": {
-    "@aws/agentcore-cdk": "0.1.0-alpha.53",
-    "aws-cdk-lib": "~2.261.0",
+    "@aws/agentcore-cdk": "1.0.0-rc.2",
+    "aws-cdk-lib": "~2.271.0",
     "constructs": "~10.7.0"
   }
 }

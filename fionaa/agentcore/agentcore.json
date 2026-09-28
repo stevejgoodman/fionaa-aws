@@ -1,7 +1,6 @@
 {
-  "$schema": "https://schema.agentcore.aws.dev/v1/agentcore.json",
   "name": "fionaa",
-  "version": 1,
+  "version": 2,
   "managedBy": "CDK",
   "tags": {
     "agentcore:created-by": "agentcore-cli",
@@ -97,19 +96,6 @@
   "agentCoreGateways": [],
   "policyEngines": [],
   "configBundles": [],
-  "abTests": [],
   "harnesses": [],
-  "datasets": [
-    {
-      "name": "fionaa_eval_dataset",
-      "schemaType": "AGENTCORE_EVALUATION_PREDEFINED_V1",
-      "description": "Offline regression eval scenarios for the fionaa loan-application graph (policy check, Companies House verification, web search, security scope)",
-      "config": {
-        "managed": {
-          "location": "../evals/datasets/fionaa_eval_dataset.jsonl"
-        }
-      }
-    }
-  ],
   "payments": []
 }
