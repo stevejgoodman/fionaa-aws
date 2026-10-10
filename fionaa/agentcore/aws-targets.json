@@ -1,7 +1,14 @@
 [
   {
     "name": "default",
+    "description": "Prod. Kept as \"default\" (not renamed to \"prod\") to avoid orphaning the live stack -- see multi-account-dev-prod.md.",
     "account": "492646066653",
+    "region": "us-east-1"
+  },
+  {
+    "name": "dev",
+    "description": "Dev account for testing risky/breaking changes (e.g. the @aws/agentcore-cdk 1.0 upgrade) before they reach prod.",
+    "account": "046451669835",
     "region": "us-east-1"
   }
 ]
